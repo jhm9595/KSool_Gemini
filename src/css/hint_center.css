@@ -36,6 +36,35 @@
   white-space: nowrap;
 }
 
+.bb-all-solved-card {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 78, 59, 0.25) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 12px;
+  padding: 12px 14px;
+  text-align: center;
+  margin: 6px 0 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bb-all-solved-title {
+  color: #34d399;
+  font-size: 0.88rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.bb-all-solved-desc {
+  color: #cbd5e1;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
 .pill-guide {
   background: rgba(30, 41, 59, 0.85);
   border: 1px dashed #64748b;

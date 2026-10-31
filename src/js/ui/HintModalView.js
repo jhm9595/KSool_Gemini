@@ -470,7 +470,7 @@ class HintModalView {
     } else {
       // [B] 베이스볼 모두 클리어 완료! (황금비율 Up/Down 추리 화면)
       this.ratioProvider.ensureUnitRatiosAutoSolved(this.activeRecipeId);
-      if (needsRatioGame) {
+      if (needsRatioGame && !isAllRatiosSolved) {
         if (this.selectedUpDownSlotOrder === null) {
           const firstRatioSlot = items.find(it => Number(it.ratio) > 1 && !hintState.solvedRatios[String(it.slot_order)]) ||
                                  items.find(it => Number(it.ratio) > 1) ||
@@ -487,7 +487,7 @@ class HintModalView {
         const target = det || base;
         const isUnitRatio = Number(it.ratio) === 1;
         const solvedVal = hintState.solvedRatios[String(it.slot_order)];
-        const isSelected = !isUnitRatio && Number(this.selectedUpDownSlotOrder) === Number(it.slot_order);
+        const isSelected = !isUnitRatio && !isAllRatiosSolved && Number(this.selectedUpDownSlotOrder) === Number(it.slot_order);
         const detailBadge = det ? `<span class="slot-detail-tag">특산</span>` : '';
 
         // 비율이 1인 재료는 숫자 배지를 표시하지 않음 (2 이상이거나 미해결 ? 상태일 때만 표시)
@@ -498,7 +498,7 @@ class HintModalView {
 
         return `
           <div class="pot-slot filled sug-slot-card hint-ratio-slot ${isSelected ? 'active-ratio-slot' : ''} ${solvedVal ? 'solved-ratio-slot' : ''}"
-               ${!isUnitRatio ? `data-updown-slot="${it.slot_order}" title="클릭하여 비율 Up/Down 추리하기"` : `style="cursor:default;"`}>
+               ${(!isUnitRatio && !isAllRatiosSolved) ? `data-updown-slot="${it.slot_order}" title="클릭하여 비율 Up/Down 추리하기"` : `style="cursor:default;"`}>
             ${detailBadge}
             <span class="slot-emoji">${target ? target.emoji : '🍶'}</span>
             <span class="slot-name">${target ? this.brandResolver.resolveName(target) : ''}</span>
@@ -508,22 +508,21 @@ class HintModalView {
       }).join('');
 
       let upDownDrawerHtml = '';
-      if (needsRatioGame && this.selectedUpDownSlotOrder !== null) {
+      if (needsRatioGame && !isAllRatiosSolved && this.selectedUpDownSlotOrder !== null) {
         const selectedItem = items.find(it => Number(it.slot_order) === Number(this.selectedUpDownSlotOrder)) || items[0];
         const solvedVal = hintState.solvedRatios[String(selectedItem.slot_order)];
+        const isCurrentSlotSolved = Boolean(solvedVal);
 
         const numpadHtml = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => `
-          <button class="num-btn ${Number(solvedVal) === num ? 'correct-num' : ''}" data-updown-num="${num}">${num}</button>
+          <button class="num-btn ${Number(solvedVal) === num ? 'correct-num' : ''}"
+                  data-updown-num="${num}"
+                  ${isCurrentSlotSolved ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>
+            ${num}
+          </button>
         `).join('');
 
         let resultRowHtml = '';
-        if (isAllRatiosSolved) {
-          resultRowHtml = `
-            <div class="bb-history-row updown-score-row" id="updown-score-container">
-              <span class="bb-score-pills"><span class="pill-all-solved animate-pop">🎉 정답! 황금비율 완성</span></span>
-            </div>
-          `;
-        } else if (this.lastUpDownResult) {
+        if (this.lastUpDownResult) {
           const st = this.lastUpDownResult.status;
           const cls = st === 'UP' ? 'pill-up' : (st === 'DOWN' ? 'pill-down' : 'pill-correct');
           const text = st === 'UP' ? 'Up' : (st === 'DOWN' ? 'Down' : `✨ 정답! (비율: ${this.lastUpDownResult.answer || solvedVal})`);
@@ -554,6 +553,13 @@ class HintModalView {
         `;
       }
 
+      const allSolvedBannerHtml = isAllRatiosSolved ? `
+        <div class="bb-all-solved-card animate-pop">
+          <div class="bb-all-solved-title">🎉 모든 재료의 황금비율 완성!</div>
+          <div class="bb-all-solved-desc">모든 재료와 비율을 완벽히 알아냈습니다. 아래 버튼을 눌러 주조실에 자동 세팅해보세요!</div>
+        </div>
+      ` : '';
+
       const goToBrewBtnHtml = isAllRatiosSolved ? `
         <button class="mix-btn bb-go-brew-btn" id="bb-go-brew-btn">
           ⚗️ 주조실로 가기 (자동 세팅)
@@ -563,6 +569,7 @@ class HintModalView {
       mainSectionHtml = `
         <div class="hint-section-box">
           <div class="baseball-slots">${solvedSlotsHtml}</div>
+          ${allSolvedBannerHtml}
           ${goToBrewBtnHtml}
         </div>
         ${upDownDrawerHtml}
@@ -1021,6 +1028,18 @@ class HintModalView {
           }
 
           if (isAllSolved) {
+            // 모든 비율을 맞춘 상태이므로 즉시 모든 숫자 패드 버튼 비활성화
+            container.querySelectorAll('[data-updown-num]').forEach(b => {
+              b.disabled = true;
+              b.style.pointerEvents = 'none';
+              if (Number(b.getAttribute('data-updown-num')) === num) {
+                b.classList.add('correct-num');
+                b.style.opacity = '1';
+              } else {
+                b.style.opacity = '0.35';
+              }
+            });
+
             const checkBoxes = container.querySelectorAll('.stage-check-box');
             if (checkBoxes && checkBoxes[2]) {
               checkBoxes[2].classList.remove('active-stage');
@@ -1029,8 +1048,12 @@ class HintModalView {
             }
             setTimeout(() => {
               this.render();
-            }, 600);
+            }, 500);
           } else {
+            // 정답 번호 버튼 강조
+            container.querySelectorAll('[data-updown-num]').forEach(b => {
+              b.classList.toggle('correct-num', Number(b.getAttribute('data-updown-num')) === num);
+            });
             // 아직 미해결된 다음 비율 슬롯으로 자동 이동
             const nextUnsolved = items.find(it => Number(it.ratio) > 1 && !hintState.solvedRatios[String(it.slot_order)]);
             if (nextUnsolved) {
@@ -1065,7 +1088,11 @@ class HintModalView {
     const solvedVal = hintState.solvedRatios[String(this.selectedUpDownSlotOrder)];
     container.querySelectorAll('[data-updown-num]').forEach(btn => {
       const n = Number(btn.getAttribute('data-updown-num'));
-      btn.classList.toggle('correct-num', Boolean(solvedVal && Number(solvedVal) === n));
+      const isCorrect = Boolean(solvedVal && Number(solvedVal) === n);
+      btn.classList.toggle('correct-num', isCorrect);
+      btn.disabled = Boolean(solvedVal);
+      btn.style.opacity = solvedVal ? (isCorrect ? '1' : '0.4') : '1';
+      btn.style.cursor = solvedVal ? 'not-allowed' : 'pointer';
     });
 
     const recipe = this.recipeBook.getRecipe(this.activeRecipeId);
