@@ -808,75 +808,53 @@
 }
 
 /* ==========================================================================
-   ③ 표면장력 소주잔 채우기 전용 스타일 (미니멀 서스펜스형)
+   ③ 표면장력 소주잔 채우기 전용 스타일 (극강 미니멀 화면 터치형)
    ========================================================================== */
 .surface-minimal-box {
-  justify-content: space-between;
-  height: 100%;
-  padding-bottom: 8px;
+  justify-content: center !important;
+  align-items: center !important;
+  height: 100% !important;
+  width: 100% !important;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  position: relative;
+  transition: background 0.2s ease;
 }
 
-.surface-controls-wrap {
-  width: 100%;
-  max-width: 380px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.surface-minimal-hint {
-  text-align: center;
-  font-size: 0.8rem;
-  color: #94a3b8;
-  padding: 4px 8px;
+.surface-minimal-box.pouring {
+  background: radial-gradient(circle at 50% 50%, rgba(2, 132, 199, 0.22) 0%, transparent 70%);
 }
 
 .glass-canvas-wrap {
   position: relative;
-  width: 280px;
-  height: 330px;
-  margin: 6px auto;
+  width: min(320px, 86vw);
+  height: min(410px, 75vh);
+  margin: auto;
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none; /* 부모인 surface-minimal-box로 터치 이벤트 전달 */
+}
+
+#tension-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.75));
 }
 
 .tension-spill-fx.active {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.4) 0%, transparent 70%);
+  inset: -20px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.5) 0%, transparent 70%);
   animation: spillWave 0.6s infinite alternate;
 }
 
 @keyframes spillWave {
   0% { opacity: 0.3; transform: scale(0.95); }
   100% { opacity: 0.9; transform: scale(1.1); }
-}
-
-.party-hold-pour-btn {
-  width: 100%;
-  min-height: 64px;
-  background: linear-gradient(135deg, #0284c7, #2563eb);
-  border: 2px solid #38bdf8;
-  border-radius: 14px;
-  color: #ffffff;
-  font-size: 1.12rem;
-  font-weight: 900;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: pointer;
-  box-shadow: 0 4px 18px rgba(2, 132, 199, 0.4);
-  transition: all 0.15s ease;
-}
-
-.party-hold-pour-btn.pouring {
-  background: linear-gradient(135deg, #f59e0b, #ea580c);
-  border-color: #fde047;
-  transform: scale(0.96);
-  box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
 }
 
 /* ==========================================================================
