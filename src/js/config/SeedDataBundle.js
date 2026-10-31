@@ -39,7 +39,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "category_id": "ETC",
-      "name": "기타",
+      "name": "감미료",
       "emoji": "🍯",
       "order": 7
     },
@@ -63,9 +63,7 @@ window.KSool.SeedDataBundle = {
         "title": "🍾 주류 냉장고에서 소주 종류를 골라주세요",
         "subtitle": "일반 레시피는 [일반 소주]로, 특산 명주는 브랜드 소주로 빚을 수 있습니다.",
         "default_label": "일반 희석식 소주 (기본)"
-      },
-      "is_starter": false,
-      "unlocked_by_recipe_id": 5
+      }
     },
     {
       "ingredient_id": 102,
@@ -79,9 +77,7 @@ window.KSool.SeedDataBundle = {
         "title": "🍺 생맥주 탭 & 브루어리 쇼케이스",
         "subtitle": "원하는 라거 맥주 탭을 선택하세요.",
         "default_label": "일반 라거 맥주 (기본)"
-      },
-      "is_starter": false,
-      "unlocked_by_recipe_id": 4
+      }
     },
     {
       "ingredient_id": 103,
@@ -91,9 +87,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍷",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 57
+      "picker_config": null
     },
     {
       "ingredient_id": 104,
@@ -103,9 +97,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🟢",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 20
+      "picker_config": null
     },
     {
       "ingredient_id": 105,
@@ -115,9 +107,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍶",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 26
+      "picker_config": null
     },
     {
       "ingredient_id": 201,
@@ -127,9 +117,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🧊",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 11
+      "picker_config": null
     },
     {
       "ingredient_id": 202,
@@ -139,9 +127,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "💧",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 203,
@@ -151,9 +137,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🔥",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 204,
@@ -163,9 +147,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🫧",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 12
+      "picker_config": null
     },
     {
       "ingredient_id": 205,
@@ -175,9 +157,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🌬️",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 206,
@@ -187,9 +167,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "❄️",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 301,
@@ -199,9 +177,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍋",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 302,
@@ -211,9 +187,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍈",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 303,
@@ -223,9 +197,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🥭",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 304,
@@ -235,9 +207,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍏",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 305,
@@ -247,9 +217,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍅",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 306,
@@ -259,9 +227,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍎",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 307,
@@ -271,9 +237,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍓",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 308,
@@ -283,9 +247,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🫘",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 309,
@@ -295,9 +257,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍐",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 310,
@@ -307,9 +267,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍌",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 311,
@@ -319,9 +277,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍊",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 312,
@@ -331,9 +287,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍈",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 313,
@@ -343,9 +297,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🫐",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 401,
@@ -355,9 +307,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🥛",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 501,
@@ -367,9 +317,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🌾",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 502,
@@ -383,9 +331,7 @@ window.KSool.SeedDataBundle = {
         "title": "🗺️ 대한민국 팔도 명품 쌀 산지 선택",
         "subtitle": "지도 위의 산지 핀을 눌러 특산 쌀을 고르거나 [일반 쌀]을 선택하세요.",
         "default_label": "일반 햅쌀 (기본)"
-      },
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      }
     },
     {
       "ingredient_id": 503,
@@ -395,9 +341,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🥣",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 601,
@@ -407,9 +351,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🫖",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 602,
@@ -419,9 +361,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "⚡",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 603,
@@ -431,9 +371,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🎽",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 604,
@@ -443,9 +381,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🫧",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 15
+      "picker_config": null
     },
     {
       "ingredient_id": 605,
@@ -455,9 +391,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🩵",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 606,
@@ -467,9 +401,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🥤",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 607,
@@ -479,9 +411,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🥤",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 608,
@@ -491,9 +421,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍅",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 22
+      "picker_config": null
     },
     {
       "ingredient_id": 609,
@@ -503,9 +431,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍫",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 29
+      "picker_config": null
     },
     {
       "ingredient_id": 610,
@@ -515,9 +441,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍓",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 34
+      "picker_config": null
     },
     {
       "ingredient_id": 611,
@@ -527,9 +451,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍌",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 35
+      "picker_config": null
     },
     {
       "ingredient_id": 612,
@@ -539,9 +461,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🌾",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 613,
@@ -551,9 +471,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍑",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 614,
@@ -563,9 +481,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍐",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 615,
@@ -575,9 +491,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍍",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 616,
@@ -587,9 +501,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍼",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 617,
@@ -599,9 +511,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🌺",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 618,
@@ -611,9 +521,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍸",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 52
+      "picker_config": null
     },
     {
       "ingredient_id": 619,
@@ -623,9 +531,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍋",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 53
+      "picker_config": null
     },
     {
       "ingredient_id": 701,
@@ -635,9 +541,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍬",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "picker_config": null
     },
     {
       "ingredient_id": 702,
@@ -647,9 +551,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍞",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 25
+      "picker_config": null
     },
     {
       "ingredient_id": 703,
@@ -659,9 +561,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍯",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 36
+      "picker_config": null
     },
     {
       "ingredient_id": 704,
@@ -671,9 +571,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🫙",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 37
+      "picker_config": null
     },
     {
       "ingredient_id": 801,
@@ -683,9 +581,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍭",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 23
+      "picker_config": null
     },
     {
       "ingredient_id": 802,
@@ -695,9 +591,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍫",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 28
+      "picker_config": null
     },
     {
       "ingredient_id": 803,
@@ -707,9 +601,7 @@ window.KSool.SeedDataBundle = {
       "is_licensed": false,
       "emoji": "🍧",
       "picker_component": "NONE",
-      "picker_config": null,
-      "is_starter": false,
-      "unlocked_by_recipe_id": 32
+      "picker_config": null
     }
   ],
   "ingredients_detail": [

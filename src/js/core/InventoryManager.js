@@ -32,18 +32,19 @@ class InventoryManager {
       }
     }
 
-    // 2. 리프단 기초 재료(is_starter === true)만 기본 해금 등록 (이전 로컬스토리지 잔여 데이터 오염 방지)
-    for (const [id, ing] of this.recipeBook.baseIngredients.entries()) {
-      if (ing.is_starter && !ing.unlocked_by_recipe_id) {
+    // 2. 하드코딩 없이 레시피 그래프(DAG)를 데이터 기반으로 분석하여
+    //    어떤 레시피의 결과물도 아닌 '순수 리프(Leaf) 재료'를 자동으로 기본 해금 등록
+    for (const [id] of this.recipeBook.baseIngredients.entries()) {
+      if (this.recipeBook.isLeafIngredient(id)) {
         this.unlockedIngredientIds.add(Number(id));
       }
     }
 
-    // 3. 실제로 해금한 레시피(unlockedRecipeIds)를 통해서만 비-리프 재료 해금 동기화
+    // 3. 실제로 해금한 레시피(unlockedRecipeIds)를 통해서만 비-리프(조합형) 재료 해금 동기화
     for (const rId of this.unlockedRecipeIds) {
-      const rec = this.recipeBook.getRecipe(rId);
-      if (rec && rec.unlocks_ingredient_id) {
-        this.unlockedIngredientIds.add(Number(rec.unlocks_ingredient_id));
+      const unlockedIng = this.recipeBook.getUnlockedIngredientByRecipe(rId);
+      if (unlockedIng) {
+        this.unlockedIngredientIds.add(Number(unlockedIng.ingredient_id));
       }
     }
 
@@ -81,14 +82,14 @@ class InventoryManager {
     const isNew = !this.unlockedRecipeIds.has(rId);
     this.unlockedRecipeIds.add(rId);
 
-    const recipe = this.recipeBook.getRecipe(rId);
+    const unlockedIng = this.recipeBook.getUnlockedIngredientByRecipe(rId);
     let newlyUnlockedIngredient = null;
 
-    if (recipe && recipe.unlocks_ingredient_id) {
-      const ingId = Number(recipe.unlocks_ingredient_id);
+    if (unlockedIng) {
+      const ingId = Number(unlockedIng.ingredient_id);
       if (!this.unlockedIngredientIds.has(ingId)) {
         this.unlockedIngredientIds.add(ingId);
-        newlyUnlockedIngredient = this.recipeBook.getBaseIngredient(ingId);
+        newlyUnlockedIngredient = unlockedIng;
       }
     }
 

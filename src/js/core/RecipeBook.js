@@ -9,6 +9,9 @@ class RecipeBook {
     this.recipes = new Map();
     this.recipeItemsByRecipeId = new Map();
     this.externalHintsByRecipeId = new Map();
+    // 데이터 기반 레시피 의존성 그래프 (DAG): 하드코딩 없이 리프(기초) 재료 자동 판별용
+    this.producerRecipesByIngId = new Map();
+    this.unlockedIngIdByRecipeId = new Map();
   }
 
   load(bundleData, customPromotedRecipes = []) {
@@ -19,6 +22,8 @@ class RecipeBook {
     this.recipes.clear();
     this.recipeItemsByRecipeId.clear();
     this.externalHintsByRecipeId.clear();
+    this.producerRecipesByIngId.clear();
+    this.unlockedIngIdByRecipeId.clear();
 
     (bundleData.ingredients_base || []).forEach(ing => {
       this.baseIngredients.set(Number(ing.ingredient_id), ing);
@@ -61,6 +66,53 @@ class RecipeBook {
       if (!this.externalHintsByRecipeId.has(rId)) this.externalHintsByRecipeId.set(rId, []);
       this.externalHintsByRecipeId.get(rId).push(h);
     });
+
+    this._buildIngredientDependencyGraph();
+  }
+
+  /**
+   * 하드코딩된 플래그(is_starter 등)에 의존하지 않고,
+   * 전체 레시피와 재료 데이터를 교차 분석하여 어떤 레시피로 만들어지는 재료(Non-Leaf)인지,
+   * 아니면 어떤 레시피의 결과물도 아닌 순수 기초 리프 재료(Leaf Starter)인지 동적으로 계산합니다.
+   */
+  _buildIngredientDependencyGraph() {
+    this.producerRecipesByIngId.clear();
+    this.unlockedIngIdByRecipeId.clear();
+
+    for (const [ingId, ing] of this.baseIngredients.entries()) {
+      const producers = [];
+      for (const [rId, rec] of this.recipes.entries()) {
+        const matchesExplicitId = Number(rec.unlocks_ingredient_id) === Number(ingId);
+        const matchesName =
+          rec.display_name === ing.display_name ||
+          rec.real_name === ing.real_name ||
+          rec.display_name === ing.real_name ||
+          rec.real_name === ing.display_name;
+
+        if (matchesExplicitId || matchesName) {
+          producers.push(Number(rId));
+          this.unlockedIngIdByRecipeId.set(Number(rId), Number(ingId));
+          rec.unlocks_ingredient_id = Number(ingId);
+        }
+      }
+      this.producerRecipesByIngId.set(Number(ingId), producers);
+    }
+  }
+
+  /**
+   * 해당 대표 재료가 어떤 레시피로도 조합되지 않는 '순수 리프(기초) 재료'인지 데이터 기반으로 반환합니다.
+   */
+  isLeafIngredient(ingredientId) {
+    const producers = this.producerRecipesByIngId.get(Number(ingredientId));
+    return !producers || producers.length === 0;
+  }
+
+  /**
+   * 특정 레시피를 완성했을 때 해금되는 대표 재료가 있다면 반환합니다.
+   */
+  getUnlockedIngredientByRecipe(recipeId) {
+    const ingId = this.unlockedIngIdByRecipeId.get(Number(recipeId));
+    return ingId ? this.getBaseIngredient(ingId) : null;
   }
 
   getBaseIngredient(id) {

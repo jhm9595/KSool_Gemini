@@ -181,15 +181,10 @@
 
 .cat-filter-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
-  overflow-x: auto;
   padding-bottom: 4px;
   flex-shrink: 0;
-  scrollbar-width: none;
-}
-
-.cat-filter-bar::-webkit-scrollbar {
-  display: none;
 }
 
 .cat-chip {
