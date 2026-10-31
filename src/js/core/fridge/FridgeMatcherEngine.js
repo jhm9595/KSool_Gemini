@@ -64,7 +64,8 @@ class FridgeMatcherEngine {
       items.forEach(it => usedInDrinkIds.add(Number(it.ingredient_id)));
     }
 
-    if (this.isOnline() && this.suggestionService) {
+    // 도감 100% 달성으로 [조합추천] 탭이 열린 상태일 때만 조합추천 재료도 함께 포함
+    if (this.isOnline() && this.suggestionService && this.inventory.isSuggestionTabUnlocked()) {
       for (const sug of this.suggestionService.getActiveSuggestions()) {
         (sug.items || []).forEach(it => usedInDrinkIds.add(Number(it.ingredient_id)));
       }
@@ -138,8 +139,8 @@ class FridgeMatcherEngine {
       }
     }
 
-    // 2. 온라인 상태일 때, 조합추천(유저가 해금한 재료들로만 구성된 추천) 중 선택한 재료가 들어간 항목 함께 노출
-    if (this.isOnline() && this.suggestionService) {
+    // 2. 도감 100% 해금으로 [조합추천] 탭이 열렸고 온라인 상태일 때만 조합추천 항목 함께 노출
+    if (this.isOnline() && this.suggestionService && this.inventory.isSuggestionTabUnlocked()) {
       const activeSuggestions = this.suggestionService.getActiveSuggestions();
       for (const sug of activeSuggestions) {
         if (!sug.items || sug.items.length === 0) continue;

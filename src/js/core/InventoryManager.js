@@ -11,6 +11,12 @@ class InventoryManager {
     this.unlockedImageRecipeIds = new Set(); // 미니게임 클리어로 그림(아이콘)만 선해금된 레시피 ID 집합
     this.hintProgressByRecipe = {}; // recipeId -> { stageCleared: [bool, bool, bool], solvedRatios: { ingId: ratio } }
     this.promotedCustomRecipes = [];
+    this.craftFailCount = 0; // 주조실 조합 실패 횟수 (10회 이상 시 도감·힌트 탭 오픈)
+    this.shownTabIntros = {
+      collection: false,
+      fridge: false,
+      suggestions: false
+    };
     this.unlockAllSandboxMode = false; // 모든 재료 즉시 실험해보기 토글용
   }
 
@@ -18,6 +24,12 @@ class InventoryManager {
     this.unlockedRecipeIds.clear();
     this.unlockedIngredientIds.clear();
     this.unlockedImageRecipeIds.clear();
+    this.craftFailCount = 0;
+    this.shownTabIntros = {
+      collection: false,
+      fridge: false,
+      suggestions: false
+    };
 
     // 1. 저장된 상태 복원 (해금한 레시피 목록 기준)
     const saved = this.storage.loadState();
@@ -34,6 +46,16 @@ class InventoryManager {
       }
       if (Array.isArray(saved.promotedCustomRecipes)) {
         this.promotedCustomRecipes = saved.promotedCustomRecipes;
+      }
+      if (typeof saved.craftFailCount === 'number') {
+        this.craftFailCount = saved.craftFailCount;
+      }
+      if (saved.shownTabIntros && typeof saved.shownTabIntros === 'object') {
+        this.shownTabIntros = {
+          collection: Boolean(saved.shownTabIntros.collection),
+          fridge: Boolean(saved.shownTabIntros.fridge),
+          suggestions: Boolean(saved.shownTabIntros.suggestions)
+        };
       }
     }
 
@@ -135,6 +157,43 @@ class InventoryManager {
     return this.hintProgressByRecipe[key];
   }
 
+  recordCraftFailure() {
+    this.craftFailCount = (this.craftFailCount || 0) + 1;
+    this.save();
+    return this.craftFailCount;
+  }
+
+  getUnlockProgressRatio() {
+    const total = this.recipeBook.getAllRecipes().length;
+    if (total === 0) return 0;
+    return this.unlockedRecipeIds.size / total;
+  }
+
+  isCollectionTabUnlocked() {
+    return Boolean(this.unlockAllSandboxMode || this.craftFailCount >= 10 || this.shownTabIntros.collection);
+  }
+
+  isFridgeTabUnlocked() {
+    return Boolean(this.unlockAllSandboxMode || this.getUnlockProgressRatio() >= 0.5 || this.shownTabIntros.fridge);
+  }
+
+  isSuggestionTabUnlocked() {
+    const total = this.recipeBook.getAllRecipes().length;
+    return Boolean(
+      this.unlockAllSandboxMode ||
+      (total > 0 && this.unlockedRecipeIds.size >= total) ||
+      this.shownTabIntros.suggestions
+    );
+  }
+
+  isTabUnlocked(tabKey) {
+    if (tabKey === 'brew') return true;
+    if (tabKey === 'collection') return this.isCollectionTabUnlocked();
+    if (tabKey === 'fridge') return this.isFridgeTabUnlocked();
+    if (tabKey === 'suggestions') return this.isSuggestionTabUnlocked();
+    return false;
+  }
+
   save() {
     this.storage.saveState({
       userLevel: this.userLevel,
@@ -142,7 +201,9 @@ class InventoryManager {
       unlockedIngredientIds: Array.from(this.unlockedIngredientIds),
       unlockedImageRecipeIds: Array.from(this.unlockedImageRecipeIds),
       hintProgressByRecipe: this.hintProgressByRecipe,
-      promotedCustomRecipes: this.promotedCustomRecipes
+      promotedCustomRecipes: this.promotedCustomRecipes,
+      craftFailCount: this.craftFailCount,
+      shownTabIntros: this.shownTabIntros
     });
   }
 }

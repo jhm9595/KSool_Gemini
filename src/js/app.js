@@ -80,6 +80,7 @@ class KSoolApp {
     this.currentTab = 'brew';
     this.selectedIngCategory = 'NATURE';
     this.selectedRecipeCategory = '전체';
+    this.pendingTabIntroQueue = [];
   }
 
   async init() {
@@ -124,11 +125,143 @@ class KSoolApp {
   }
 
   renderAll() {
+    this.renderTabBar();
     this.renderHeader();
     this.renderBrewView();
     this.renderCollectionView();
     this.fridgeRecommenderView.render();
     this.suggestionBoardView.render();
+  }
+
+  switchTab(target) {
+    if (!this.inventory.isTabUnlocked(target)) return;
+    this.currentTab = target;
+    document.querySelectorAll('[data-tab-target]').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-tab-target') === target);
+    });
+    document.querySelectorAll('.view').forEach(v => {
+      v.classList.toggle('active', v.id === `view-${target}`);
+    });
+    this.renderAll();
+  }
+
+  renderTabBar() {
+    if (!this.inventory.isTabUnlocked(this.currentTab)) {
+      this.currentTab = 'brew';
+    }
+
+    document.querySelectorAll('[data-tab-target]').forEach(btn => {
+      const target = btn.getAttribute('data-tab-target');
+      const isVisible = this.inventory.isTabUnlocked(target);
+      btn.style.display = isVisible ? '' : 'none';
+      btn.classList.toggle('active', target === this.currentTab);
+    });
+
+    document.querySelectorAll('.view').forEach(v => {
+      v.classList.toggle('active', v.id === `view-${this.currentTab}`);
+    });
+  }
+
+  _checkProgressiveTabUnlocks() {
+    if (this.inventory.unlockAllSandboxMode) return;
+
+    if (!this.inventory.shownTabIntros.collection && this.inventory.craftFailCount >= 10) {
+      this.inventory.shownTabIntros.collection = true;
+      this.inventory.save();
+      this.pendingTabIntroQueue.push('collection');
+    }
+
+    if (!this.inventory.shownTabIntros.fridge && this.inventory.getUnlockProgressRatio() >= 0.5) {
+      this.inventory.shownTabIntros.fridge = true;
+      this.inventory.save();
+      this.pendingTabIntroQueue.push('fridge');
+    }
+
+    const totalRecipes = this.recipeBook.getAllRecipes().length;
+    if (
+      !this.inventory.shownTabIntros.suggestions &&
+      totalRecipes > 0 &&
+      this.inventory.unlockedRecipeIds.size >= totalRecipes
+    ) {
+      this.inventory.shownTabIntros.suggestions = true;
+      this.inventory.save();
+      this.pendingTabIntroQueue.push('suggestions');
+    }
+  }
+
+  _showNextPendingTabIntro() {
+    if (this.pendingTabIntroQueue.length === 0) return;
+    const tabKey = this.pendingTabIntroQueue.shift();
+    const modal = document.getElementById('tab-intro-modal');
+    const content = document.getElementById('tab-intro-content');
+    if (!modal || !content) return;
+
+    const introMeta = {
+      collection: {
+        emoji: '📜',
+        badge: '신규 탭 해금 (조합 10회 실패)',
+        title: '[도감·힌트] 탭이 열렸습니다!',
+        desc: '황금비율 조합이 만만치 않으시죠? 이제 하단의 <b>[📜 도감·힌트]</b> 탭에서 지금 당장 해금할 수 있는 미해금 비전서 목록을 확인하고, <b>⚾ 베이스볼 추리</b>와 <b>🎮 그림 해금 미니게임</b>에 도전해보세요!',
+        btnLabel: '📜 도감·힌트 보러가기'
+      },
+      fridge: {
+        emoji: '🧊',
+        badge: '신규 탭 해금 (도감 50% 달성)',
+        title: '[냉장고를 부탁해] 탭이 열렸습니다!',
+        desc: '도감의 절반(50%) 이상을 정복하셨군요! 이제 <b>[🧊 냉장고를 부탁해]</b> 탭에서 내 냉장고 속 재료를 선택하면, 내가 해금한 술 조합 중 재료가 가장 많이 일치하는 꿀조합을 추천받고 <b>🎲 랜덤 추첨</b>도 돌릴 수 있습니다!',
+        btnLabel: '🧊 냉장고를 부탁해 가기'
+      },
+      suggestions: {
+        emoji: '👍',
+        badge: '최종 탭 해금 (도감 100% 마스터)',
+        title: '[조합추천] 탭이 열렸습니다!',
+        desc: '모든 공식 레시피(100%)를 마스터하셨습니다! 이제 이 게임에 아직 없는 나만의 비법 레시피를 <b>[👍 조합추천]</b> 탭에 등록해 투표를 나누고, <b>[🧊 냉장고를 부탁해]</b>에서도 유저들의 조합추천 레시피를 함께 만나보세요!',
+        btnLabel: '👍 조합추천 보러가기'
+      }
+    }[tabKey];
+
+    if (!introMeta) return;
+
+    content.innerHTML = `
+      <div style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px;">
+        <span class="diff-badge diff-NORMAL" style="position:static; font-size:0.7rem; padding:3px 10px;">
+          🎉 ${introMeta.badge}
+        </span>
+        <div style="font-size:3.3rem;">${introMeta.emoji}</div>
+        <div style="font-size:1.18rem; font-weight:900; color:#f8fafc;">
+          ${introMeta.title}
+        </div>
+        <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.55; background:#0f172a; border:1px solid #334155; border-radius:12px; padding:12px;">
+          ${introMeta.desc}
+        </div>
+        <div style="display:flex; gap:8px; width:100%; margin-top:4px;">
+          <button class="mix-btn" id="tab-intro-go-btn" style="flex:1;">${introMeta.btnLabel}</button>
+          <button class="clear-pot-btn" id="tab-intro-close-btn">닫기</button>
+        </div>
+      </div>
+    `;
+
+    modal.classList.add('active');
+    this.audio.playSuccess();
+
+    const goBtn = content.querySelector('#tab-intro-go-btn');
+    if (goBtn) {
+      goBtn.onclick = () => {
+        modal.classList.remove('active');
+        this.audio.playTap();
+        this.switchTab(tabKey);
+        this._showNextPendingTabIntro();
+      };
+    }
+
+    const closeBtn = content.querySelector('#tab-intro-close-btn');
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        modal.classList.remove('active');
+        this.audio.playTap();
+        this._showNextPendingTabIntro();
+      };
+    }
   }
 
   /**
@@ -557,12 +690,16 @@ class KSoolApp {
         return `${target.emoji}${this.brandResolver.resolveName(target)}(${s.count})`;
       }).join(' + ');
 
+      const failGuideText = this.inventory.isCollectionTabUnlocked()
+        ? '비율이나 재료 조합이 맞지 않습니다! [도감·힌트] 탭에서 미해금 술을 눌러 숫자야구 & 미니게임 힌트를 확인해보세요.'
+        : `비율이나 재료 조합이 맞지 않습니다! 다른 재료나 비율을 시도해보세요. (조합 실패 ${this.inventory.craftFailCount} / 10회 시 힌트 탭 해금)`;
+
       content.innerHTML = `
         <div style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px;">
           <div style="font-size:3.2rem;">🧪</div>
           <div style="font-size:1.15rem; font-weight:900; color:#fca5a5;">괴식 폭탄주 (조합 실패)</div>
           <div style="font-size:0.8rem; color:#94a3b8; line-height:1.45;">
-            비율이나 재료 조합이 맞지 않습니다! 도감에서 미해금 술을 눌러 숫자야구 & Up/Down 힌트를 확인해보세요.
+            ${failGuideText}
           </div>
           <div style="width:100%; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; font-size:0.75rem; color:#cbd5e1;">
             시도한 조합: ${triedStr}
@@ -574,7 +711,12 @@ class KSoolApp {
 
     modal.classList.add('active');
     const closeBtn = content.querySelector('#result-close-btn');
-    if (closeBtn) closeBtn.onclick = () => modal.classList.remove('active');
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        modal.classList.remove('active');
+        this._showNextPendingTabIntro();
+      };
+    }
   }
 
   _bindGlobalEvents() {
@@ -582,17 +724,8 @@ class KSoolApp {
     document.querySelectorAll('[data-tab-target]').forEach(btn => {
       btn.onclick = () => {
         const target = btn.getAttribute('data-tab-target');
-        this.currentTab = target;
         this.audio.playTap();
-
-        document.querySelectorAll('[data-tab-target]').forEach(b => {
-          b.classList.toggle('active', b.getAttribute('data-tab-target') === target);
-        });
-        document.querySelectorAll('.view').forEach(v => {
-          v.classList.toggle('active', v.id === `view-${target}`);
-        });
-
-        this.renderAll();
+        this.switchTab(target);
       };
     });
 
@@ -605,6 +738,10 @@ class KSoolApp {
           alert(res.message);
           return;
         }
+        if (!res.isSuccess) {
+          this.inventory.recordCraftFailure();
+        }
+        this._checkProgressiveTabUnlocks();
         this.renderAll();
         this.showCraftResultModal(res);
       };
@@ -660,6 +797,9 @@ class KSoolApp {
           this.craftingPot.clear();
           this.inventory.unlockAllSandboxMode = false;
           this.inventory.userLevel = 1;
+          this.inventory.craftFailCount = 0;
+          this.inventory.shownTabIntros = { collection: false, fridge: false, suggestions: false };
+          this.pendingTabIntroQueue = [];
           this.inventory.unlockedImageRecipeIds.clear();
           this.inventory.hintProgressByRecipe = {};
           this.inventory.promotedCustomRecipes = [];

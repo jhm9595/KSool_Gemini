@@ -67,10 +67,11 @@ class FridgeRecommenderView {
 
     const unlockedAlcoholMatches = this.fridgeEngine.findCraftableFromFridge();
     const selectedCount = eligibleIngs.filter(ing => this.fridgeEngine.isSelected(ing.ingredient_id)).length;
+    const isSugUnlocked = this.inventory.isSuggestionTabUnlocked();
 
     const matchesHtml = unlockedAlcoholMatches.length === 0
       ? `<div style="text-align:center; padding:18px 10px; font-size:0.78rem; color:#94a3b8; line-height:1.5;">
-           선택한 냉장고 재료가 들어간 <b>해금된 술 조합</b> 및 <b>조합추천</b>이 없습니다.<br/>
+           선택한 냉장고 재료가 들어간 <b>해금된 술 조합</b>${isSugUnlocked ? ' 및 <b>조합추천</b>' : ''}이 없습니다.<br/>
            (위에서 냉장고 재료를 1개 이상 선택해보세요!)
          </div>`
       : unlockedAlcoholMatches.map(entry => {
