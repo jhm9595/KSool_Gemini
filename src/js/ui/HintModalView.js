@@ -174,15 +174,13 @@ class HintModalView {
       const optionsHtml = options.map(opt => {
         const isPicked = this.currentGuessSlots.some(s => s && String(s.token) === String(opt.token));
         return `
-          <div class="ing-card bb-ing-card ${isPicked ? 'in-pot' : ''}"
-               data-bb-token="${opt.token}"
-               data-bb-emoji="${opt.emoji}"
-               data-bb-name="${opt.name}"
-               data-bb-label="${opt.label}">
-            <span class="ing-emoji">${opt.emoji}</span>
-            <span class="ing-name">${opt.name}</span>
-            ${isPicked ? '<span class="slot-count-badge">✓</span>' : ''}
-          </div>
+          <button class="bb-option-btn ${isPicked ? 'picked' : ''}"
+                  data-bb-token="${opt.token}"
+                  data-bb-emoji="${opt.emoji}"
+                  data-bb-name="${opt.name}"
+                  data-bb-label="${opt.label}">
+            ${opt.label}
+          </button>
         `;
       }).join('');
 
@@ -214,7 +212,7 @@ class HintModalView {
           <div class="baseball-slots">${slotsHtml}</div>
           ${stage2CatBarHtml}
           <div class="bb-options-row">
-            <div class="bb-options-pool bb-grid-pool">${optionsHtml}</div>
+            <div class="bb-options-pool">${optionsHtml}</div>
             <button class="bb-submit-icon-btn" id="bb-submit-btn" title="판정하기" ${canSubmit ? '' : 'disabled'}>
               ⚾
             </button>
