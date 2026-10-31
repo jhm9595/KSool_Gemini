@@ -15,6 +15,7 @@ class KSoolApp {
     this.ratioProvider = new window.KSool.UpDownRatioGameProvider(this.recipeBook, this.inventory);
     this.pickerRegistry = new window.KSool.DetailPickerRegistry(this.brandResolver, this.inventory, this.audio);
     this.suggestionService = new window.KSool.SuggestionService(this.recipeBook, this.inventory, this.brandResolver);
+    this.fridgeEngine = new window.KSool.FridgeMatcherEngine(this.recipeBook, this.inventory);
 
     this.alchemyEngine = new window.KSool.AlchemyEngine({
       config: this.config,
@@ -44,10 +45,27 @@ class KSoolApp {
       onRecipePromoted: (newRecipe) => {
         this.renderHeader();
         this.renderCollectionView();
+        this.fridgeRecommenderView.render();
         this.showCraftResultModal({
           isSuccess: true,
           recipe: newRecipe,
           isNewDiscovery: true,
+          newlyUnlockedIngredient: null
+        });
+      }
+    });
+
+    this.fridgeRecommenderView = new window.KSool.FridgeRecommenderView({
+      recipeBook: this.recipeBook,
+      inventory: this.inventory,
+      fridgeEngine: this.fridgeEngine,
+      brandResolver: this.brandResolver,
+      audio: this.audio,
+      onShowRecipeDetail: (recipe) => {
+        this.showCraftResultModal({
+          isSuccess: true,
+          recipe,
+          isNewDiscovery: false,
           newlyUnlockedIngredient: null
         });
       }
@@ -63,6 +81,7 @@ class KSoolApp {
     this.inventory.init();
     this.recipeBook.load(bundleData, this.inventory.promotedCustomRecipes);
     this.suggestionService.init();
+    this.fridgeEngine.init();
 
     this._bindGlobalEvents();
     this.renderAll();
@@ -96,6 +115,7 @@ class KSoolApp {
     this.renderHeader();
     this.renderBrewView();
     this.renderCollectionView();
+    this.fridgeRecommenderView.render();
     this.suggestionBoardView.render();
   }
 

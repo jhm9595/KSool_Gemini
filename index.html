@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="./src/css/brew.css">
   <link rel="stylesheet" href="./src/css/pickers/picker_common.css">
   <link rel="stylesheet" href="./src/css/hint_center.css">
+  <link rel="stylesheet" href="./src/css/fridge_recommender.css">
   <link rel="stylesheet" href="./src/css/suggestion_board.css">
 </head>
 <body>
@@ -40,11 +41,12 @@
     </div>
   </header>
 
-  <!-- 3단 메인 탭 네비게이션 -->
+  <!-- 4단 메인 탭 네비게이션 -->
   <nav class="tab-bar">
     <button class="tab-btn active" data-tab-target="brew">⚗️ 주조실</button>
-    <button class="tab-btn" data-tab-target="collection">📜 도감 & 힌트</button>
-    <button class="tab-btn" data-tab-target="suggestions">👍 조합 추천</button>
+    <button class="tab-btn" data-tab-target="collection">📜 도감·힌트</button>
+    <button class="tab-btn" data-tab-target="fridge">🧊 냉장고추천</button>
+    <button class="tab-btn" data-tab-target="suggestions">👍 조합추천</button>
   </nav>
 
   <!-- [탭 1] 주조실 (Crafting View) -->
@@ -82,7 +84,10 @@
     <div id="sool-grid" class="sool-grid"></div>
   </section>
 
-  <!-- [탭 3] 초간단 조합 추천 & 관리자 '딸깍' 뷰 -->
+  <!-- [탭 3] 내 냉장고 술 조합 추천기 & 랜덤 고르기 뷰 -->
+  <section id="view-fridge" class="view"></section>
+
+  <!-- [탭 4] 초간단 조합 추천 & 관리자 '딸깍' 뷰 -->
   <section id="view-suggestions" class="view"></section>
 
   <!-- [모달 1] 대표 재료별 전용 상세 재료 선택 모달 (팔도 지도 / 소주 쇼케이스 등) -->
@@ -112,10 +117,12 @@
 <script src="./src/js/core/hint/FeedbackHintStrategy.js"></script>
 <script src="./src/js/core/hint/BaseballHintEngine.js"></script>
 <script src="./src/js/core/hint/RatioHintProvider.js"></script>
+<script src="./src/js/core/fridge/FridgeMatcherEngine.js"></script>
 <script src="./src/js/core/suggestion/SuggestionService.js"></script>
 <script src="./src/js/core/AlchemyEngine.js"></script>
 <script src="./src/js/ui/pickers/DetailPickerRegistry.js"></script>
 <script src="./src/js/ui/HintModalView.js"></script>
+<script src="./src/js/ui/FridgeRecommenderView.js"></script>
 <script src="./src/js/ui/SuggestionBoardView.js"></script>
 <script src="./src/js/app.js"></script>
 </body>
