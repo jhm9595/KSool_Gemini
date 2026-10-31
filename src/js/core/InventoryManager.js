@@ -14,22 +14,15 @@ class InventoryManager {
   }
 
   init() {
-    // 1. 기본 스타터 재료 등록
-    for (const [id, ing] of this.recipeBook.baseIngredients.entries()) {
-      if (ing.is_starter) {
-        this.unlockedIngredientIds.add(id);
-      }
-    }
+    this.unlockedRecipeIds.clear();
+    this.unlockedIngredientIds.clear();
 
-    // 2. 저장된 상태 복원
+    // 1. 저장된 상태 복원 (해금한 레시피 목록 기준)
     const saved = this.storage.loadState();
     if (saved) {
       if (typeof saved.userLevel === 'number') this.userLevel = saved.userLevel;
       if (Array.isArray(saved.unlockedRecipeIds)) {
         saved.unlockedRecipeIds.forEach(id => this.unlockedRecipeIds.add(Number(id)));
-      }
-      if (Array.isArray(saved.unlockedIngredientIds)) {
-        saved.unlockedIngredientIds.forEach(id => this.unlockedIngredientIds.add(Number(id)));
       }
       if (saved.hintProgressByRecipe && typeof saved.hintProgressByRecipe === 'object') {
         this.hintProgressByRecipe = saved.hintProgressByRecipe;
@@ -39,7 +32,14 @@ class InventoryManager {
       }
     }
 
-    // 해금된 레시피가 해금시키는 하위 재료 동기화 보장
+    // 2. 리프단 기초 재료(is_starter === true)만 기본 해금 등록 (이전 로컬스토리지 잔여 데이터 오염 방지)
+    for (const [id, ing] of this.recipeBook.baseIngredients.entries()) {
+      if (ing.is_starter && !ing.unlocked_by_recipe_id) {
+        this.unlockedIngredientIds.add(Number(id));
+      }
+    }
+
+    // 3. 실제로 해금한 레시피(unlockedRecipeIds)를 통해서만 비-리프 재료 해금 동기화
     for (const rId of this.unlockedRecipeIds) {
       const rec = this.recipeBook.getRecipe(rId);
       if (rec && rec.unlocks_ingredient_id) {

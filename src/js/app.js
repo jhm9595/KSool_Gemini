@@ -139,24 +139,24 @@ class KSoolApp {
     if (licenseBtn) {
       licenseBtn.classList.toggle('active', this.config.globalLicenseOverride);
       licenseBtn.textContent = this.config.globalLicenseOverride
-        ? '🏷️ 명칭: 실제 상표명(제휴)'
-        : '🎭 명칭: 패러디 가짜명';
+        ? '🏷️ 실제명(제휴)'
+        : '🎭 패러디명';
     }
 
     const slotBtn = document.getElementById('toggle-slots-btn');
     if (slotBtn) {
       slotBtn.classList.toggle('active', this.config.unlimitedSlotsMode);
       slotBtn.textContent = this.config.unlimitedSlotsMode
-        ? '♾️ 슬롯: 무제한 확장됨'
-        : `📦 슬롯: 초안 ${this.config.maxUniqueSlots}칸`;
+        ? '♾️ 무제한슬롯'
+        : `📦 슬롯:${this.config.maxUniqueSlots}칸`;
     }
 
     const sandboxBtn = document.getElementById('toggle-sandbox-btn');
     if (sandboxBtn) {
       sandboxBtn.classList.toggle('active', this.inventory.unlockAllSandboxMode);
       sandboxBtn.textContent = this.inventory.unlockAllSandboxMode
-        ? '🔓 재료: 전체 해금중'
-        : '🌱 재료: 연쇄 해금';
+        ? '🔓 전체해금중'
+        : '🌱 연쇄해금';
     }
   }
 
@@ -593,6 +593,27 @@ class KSoolApp {
         this.inventory.unlockAllSandboxMode = !this.inventory.unlockAllSandboxMode;
         this.audio.playTap();
         this.renderAll();
+      };
+    }
+
+    // 상단 4: 진행도 초기화 버튼
+    const resetBtn = document.getElementById('reset-progress-btn');
+    if (resetBtn) {
+      resetBtn.onclick = () => {
+        if (confirm('모든 해금 기록을 초기 상태로 리셋할까요?')) {
+          this.storage.clearState();
+          this.craftingPot.clear();
+          this.inventory.unlockAllSandboxMode = false;
+          this.inventory.userLevel = 1;
+          this.inventory.hintProgressByRecipe = {};
+          this.inventory.promotedCustomRecipes = [];
+          this.inventory.init();
+          this.inventory.save();
+          this.fridgeEngine.clearAll();
+          this.selectedIngCategory = 'NATURE';
+          this.audio.playTap();
+          this.renderAll();
+        }
       };
     }
 
