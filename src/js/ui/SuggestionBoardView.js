@@ -28,22 +28,38 @@ class SuggestionBoardView {
           const det = this.recipeBook.getDetailIngredient(s.detailId);
           const base = this.recipeBook.getBaseIngredient(s.baseId);
           const target = det || base;
-          return `<span class="sug-ing-pill">${target.emoji} ${this.brandResolver.resolveName(target)} <span class="sug-ratio-sub">${s.count}</span></span>`;
-        }).join('<span class="sug-plus">+</span>')
+          const detailBadge = det ? `<span class="slot-detail-tag">특산</span>` : '';
+          return `
+            <div class="pot-slot filled sug-slot-card">
+              ${detailBadge}
+              <span class="slot-emoji">${target ? target.emoji : '🍶'}</span>
+              <span class="slot-name">${this.brandResolver.resolveName(target)}</span>
+              <span class="slot-count-badge">${s.count}</span>
+            </div>
+          `;
+        }).join('')
       : '<span style="font-size:0.76rem; color:#94a3b8;">주조실 가마솥에 재료를 2종류 이상 담으면 그대로 추천에 올릴 수 있습니다.</span>';
 
     const list = this.suggestionService.getActiveSuggestions();
     const rowsHtml = list.length === 0
       ? '<div style="text-align:center; padding:30px; color:#64748b; font-size:0.82rem;">대기 중인 추천 조합이 없습니다.</div>'
       : list.map(sug => {
-          const pillsHtml = sug.items.map(it => {
+          const slotsHtml = sug.items.map(it => {
             const det = this.recipeBook.getDetailIngredient(it.detail_id);
             const base = this.recipeBook.getBaseIngredient(it.ingredient_id);
             const target = det || base;
             const name = target ? this.brandResolver.resolveName(target) : `재료#${it.ingredient_id}`;
             const emoji = target ? target.emoji : '🍶';
-            return `<span class="sug-ing-pill">${emoji} ${name} <span class="sug-ratio-sub">${it.ratio}</span></span>`;
-          }).join('<span class="sug-plus">+</span>');
+            const detailBadge = det ? `<span class="slot-detail-tag">특산</span>` : '';
+            return `
+              <div class="pot-slot filled sug-slot-card">
+                ${detailBadge}
+                <span class="slot-emoji">${emoji}</span>
+                <span class="slot-name">${name}</span>
+                <span class="slot-count-badge">${it.ratio}</span>
+              </div>
+            `;
+          }).join('');
 
           const myVote = this.suggestionService.userVotes[sug.suggestion_key];
           const adminBtnHtml = this.config.isAdminMode
@@ -52,7 +68,7 @@ class SuggestionBoardView {
 
           return `
             <div class="suggestion-row-card">
-              <div class="suggestion-items-wrap">${pillsHtml}</div>
+              <div class="suggestion-items-wrap">${slotsHtml}</div>
               <div class="suggestion-actions-wrap">
                 <button class="vote-btn up ${myVote === 'UP' ? 'voted' : ''}" data-vote-up="${sug.suggestion_key}">
                   👍 ${sug.upvotes}

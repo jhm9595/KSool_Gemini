@@ -7,11 +7,16 @@ window.KSool = window.KSool || {};
  * - 유저가 이미 해금한 재료 및 해금한 술 조합 레시피만 대상으로 작동합니다.
  */
 class FridgeMatcherEngine {
-  constructor(recipeBook, inventoryManager) {
+  constructor(recipeBook, inventoryManager, suggestionService = null) {
     this.recipeBook = recipeBook;
     this.inventory = inventoryManager;
+    this.suggestionService = suggestionService;
     this.STORAGE_KEY = 'ksool_alchemy_v2_my_fridge';
     this.selectedFridgeIngIds = new Set();
+  }
+
+  isOnline() {
+    return typeof navigator === 'undefined' ? true : navigator.onLine !== false;
   }
 
   init() {
@@ -49,8 +54,7 @@ class FridgeMatcherEngine {
   }
 
   /**
-   * 실제 술 조합에 사용되는 재료들 중 유저가 해금한 재료 목록만 반환합니다.
-   * ('불', '공기', '눈', '누룩' 같은 비냉장고 기초 원소 제외)
+   * 실제 술 조합 및 온라인 조합추천에 사용되는 재료들 중 유저가 해금한 재료 목록만 반환합니다.
    */
   getEligibleFridgeIngredients() {
     const usedInDrinkIds = new Set();
@@ -58,6 +62,12 @@ class FridgeMatcherEngine {
       if (!this.isRealAlcoholDrinkRecipe(recipe)) continue;
       const items = this.recipeBook.getRecipeItems(recipe.recipe_id);
       items.forEach(it => usedInDrinkIds.add(Number(it.ingredient_id)));
+    }
+
+    if (this.isOnline() && this.suggestionService) {
+      for (const sug of this.suggestionService.getActiveSuggestions()) {
+        (sug.items || []).forEach(it => usedInDrinkIds.add(Number(it.ingredient_id)));
+      }
     }
 
     return Array.from(this.recipeBook.baseIngredients.values()).filter(
@@ -96,12 +106,15 @@ class FridgeMatcherEngine {
   }
 
   /**
-   * 오직 유저가 해금한 '실제 술 조합 레시피' 중에서만
-   * 선택한 냉장고 재료들로 만들 수 있는 술 목록을 반환합니다. (재료 합성식 제외)
+   * 선택한 냉장고 재료가 들어간 '해금된 공식 술 조합' 및 (온라인 연결 시) '조합추천' 목록을
+   * 최대한 재료가 많이 맞아 있는 순서(matchedCount 내림차순 -> 일치율 내림차순)로 반환합니다.
    */
   findCraftableFromFridge() {
-    const unlockedAlcoholRecipes = [];
+    if (this.selectedFridgeIngIds.size === 0) return [];
 
+    const results = [];
+
+    // 1. 유저가 해금한 정식 술 조합 레시피 중 선택한 냉장고 재료가 포함된 항목
     for (const rId of this.inventory.unlockedRecipeIds) {
       const recipe = this.recipeBook.getRecipe(rId);
       if (!this.isRealAlcoholDrinkRecipe(recipe)) continue;
@@ -109,16 +122,64 @@ class FridgeMatcherEngine {
       const reqItems = this.recipeBook.getRecipeItems(recipe.recipe_id);
       if (reqItems.length === 0) continue;
 
-      const canMakeWithFridge = reqItems.every(item =>
-        this.isSelected(item.ingredient_id)
-      );
-
-      if (canMakeWithFridge) {
-        unlockedAlcoholRecipes.push(recipe);
+      const matchedCount = reqItems.filter(item => this.isSelected(item.ingredient_id)).length;
+      if (matchedCount > 0) {
+        const totalCount = reqItems.length;
+        results.push({
+          entryType: 'OFFICIAL',
+          entryKey: `REC_${recipe.recipe_id}`,
+          recipe,
+          items: reqItems,
+          matchedCount,
+          totalCount,
+          isFullMatch: matchedCount === totalCount,
+          matchRatio: matchedCount / totalCount
+        });
       }
     }
 
-    return unlockedAlcoholRecipes;
+    // 2. 온라인 상태일 때, 조합추천(유저가 해금한 재료들로만 구성된 추천) 중 선택한 재료가 들어간 항목 함께 노출
+    if (this.isOnline() && this.suggestionService) {
+      const activeSuggestions = this.suggestionService.getActiveSuggestions();
+      for (const sug of activeSuggestions) {
+        if (!sug.items || sug.items.length === 0) continue;
+        const matchedCount = sug.items.filter(it => this.isSelected(it.ingredient_id)).length;
+        if (matchedCount > 0) {
+          const totalCount = sug.items.length;
+          results.push({
+            entryType: 'SUGGESTION',
+            entryKey: `SUG_${sug.suggestion_key}`,
+            suggestion: sug,
+            items: sug.items.map((it, idx) => ({
+              slot_order: idx + 1,
+              ingredient_id: Number(it.ingredient_id),
+              detail_ingredient_id: it.detail_id ? Number(it.detail_id) : null,
+              ratio: Number(it.ratio)
+            })),
+            matchedCount,
+            totalCount,
+            isFullMatch: matchedCount === totalCount,
+            matchRatio: matchedCount / totalCount
+          });
+        }
+      }
+    }
+
+    // 3. 최대한 재료가 많이 맞아 있는 순서대로 정렬 (matchedCount 내림차순 -> 일치율 내림차순)
+    results.sort((a, b) => {
+      if (b.matchedCount !== a.matchedCount) {
+        return b.matchedCount - a.matchedCount;
+      }
+      if (b.matchRatio !== a.matchRatio) {
+        return b.matchRatio - a.matchRatio;
+      }
+      if (a.entryType !== b.entryType) {
+        return a.entryType === 'OFFICIAL' ? -1 : 1;
+      }
+      return 0;
+    });
+
+    return results;
   }
 
   /**

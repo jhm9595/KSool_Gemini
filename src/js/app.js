@@ -15,7 +15,7 @@ class KSoolApp {
     this.ratioProvider = new window.KSool.UpDownRatioGameProvider(this.recipeBook, this.inventory);
     this.pickerRegistry = new window.KSool.DetailPickerRegistry(this.brandResolver, this.inventory, this.audio);
     this.suggestionService = new window.KSool.SuggestionService(this.recipeBook, this.inventory, this.brandResolver);
-    this.fridgeEngine = new window.KSool.FridgeMatcherEngine(this.recipeBook, this.inventory);
+    this.fridgeEngine = new window.KSool.FridgeMatcherEngine(this.recipeBook, this.inventory, this.suggestionService);
 
     this.alchemyEngine = new window.KSool.AlchemyEngine({
       config: this.config,

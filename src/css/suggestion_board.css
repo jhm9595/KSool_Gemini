@@ -54,73 +54,62 @@
   padding-bottom: 16px;
 }
 
-/* 초간단 한 줄 카드: [재료 아이콘+비율] ── [👍] [👎] [⚡적용] */
+/* 주조실 슬롯 카드와 동일한 UI + 가장 오른쪽 끝 위/아래 👍👎 배치 */
 .suggestion-row-card {
   background: #1e293b;
   border: 1px solid #334155;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 10px 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .suggestion-items-wrap {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 8px;
   flex: 1;
 }
 
-.sug-ing-pill {
-  background: #0f172a;
-  border: 1px solid #475569;
-  border-radius: 8px;
-  padding: 4px 8px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: #f8fafc;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+.pot-slot.sug-slot-card {
+  width: 74px;
+  min-width: 70px;
+  height: 68px;
+  cursor: default;
+  flex-shrink: 0;
 }
 
-.sug-ratio-sub {
-  background: #f59e0b;
-  color: #0b1120;
-  font-size: 0.65rem;
-  font-weight: 900;
-  padding: 0 4px;
-  border-radius: 4px;
-}
-
-.sug-plus {
-  color: #64748b;
-  font-size: 0.75rem;
-  font-weight: 900;
+.pot-slot.sug-slot-card:active {
+  transform: none;
 }
 
 .suggestion-actions-wrap {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
   gap: 6px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .vote-btn {
   background: #0f172a;
   border: 1px solid #334155;
   color: #e2e8f0;
-  padding: 6px 9px;
+  padding: 5px 10px;
   border-radius: 8px;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 800;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+  min-width: 58px;
+  gap: 6px;
 }
 
 .vote-btn.up:hover, .vote-btn.up.voted {
