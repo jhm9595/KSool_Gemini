@@ -243,17 +243,17 @@ class KSoolApp {
         badge: '특산·브랜드 재료 해금',
         title: '대표재료의 상세 재료가 해금되었습니다!',
         desc: `
-          <div style="font-size:0.84rem; color:#fde047; font-weight:800; margin-bottom:8px;">
-            🌾 이천 임금님쌀 · 🍾 제주 화산암반 21 등 명품 상세 재료 등장!
+          <div style="font-size:0.95rem; color:#fde047; font-weight:800; margin-bottom:8px;">
+            ✨ 상세 재료 등장!
           </div>
           <div class="detail-guide-demo-box">
-            <div class="demo-callout-card">
-              <span class="demo-picker-highlight">🗺️팔도지도 ▾</span>
-              <span style="font-size:1.6rem;">🌾</span>
-              <span style="font-size:0.75rem; font-weight:800; color:#f1f5f9;">쌀</span>
+            <div class="demo-ing-card-preview">
+              <button type="button" class="demo-picker-live-btn">🗺️팔도지도 ▾</button>
+              <span class="demo-ing-emoji">🌾</span>
+              <span class="demo-ing-name">쌀</span>
             </div>
             <div class="demo-callout-arrow-wrap">
-              <span class="demo-arrow">👈</span>
+              <span class="demo-arrow">👉</span>
               <div class="demo-arrow-text">
                 재료 카드 <b>오른쪽 위 버튼</b>을 누르면<br/>
                 상세 재료를 고를 수 있습니다!
