@@ -215,120 +215,123 @@ class UpAndDownGame {
 
   _getBottleCapSvg() {
     const isExploded = this.isFinished;
-    const teeth = Array.from({ length: 24 }).map((_, i) => {
-      const angle = i * 15;
-      const isAlt = i % 2 === 0;
-      return `<rect x="76.5" y="1" width="7" height="13" rx="2" fill="${isAlt ? '#15803d' : '#14532d'}" stroke="#86efac" stroke-width="0.8" transform="rotate(${angle} 80 80)"/>`;
-    }).join('');
 
     return `
-      <svg class="soju-cap-svg-realistic" viewBox="0 0 160 160" width="100%" height="100%">
+      <svg class="soju-cap-svg-realistic" viewBox="0 0 200 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <radialGradient id="soju-cap-lacquer" cx="36%" cy="32%" r="68%">
+          <!-- 뚜껑 메탈 그라데이션 (CapFlick과 100% 동일한 소주 캡 래커) -->
+          <radialGradient id="cap-metal-grad-updown" cx="50%" cy="40%" r="55%">
             <stop offset="0%" stop-color="#4ade80"/>
-            <stop offset="28%" stop-color="#22c55e"/>
-            <stop offset="60%" stop-color="#16a34a"/>
-            <stop offset="85%" stop-color="#15803d"/>
+            <stop offset="35%" stop-color="#16a34a"/>
+            <stop offset="70%" stop-color="#15803d"/>
             <stop offset="100%" stop-color="#052e16"/>
           </radialGradient>
-          <radialGradient id="soju-cap-exploded" cx="36%" cy="32%" r="68%">
+          <radialGradient id="cap-exploded-grad-updown" cx="50%" cy="40%" r="55%">
             <stop offset="0%" stop-color="#fca5a5"/>
             <stop offset="30%" stop-color="#ef4444"/>
             <stop offset="70%" stop-color="#b91c1c"/>
             <stop offset="100%" stop-color="#450a0a"/>
           </radialGradient>
-          <linearGradient id="soju-aluminum-rim" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#f8fafc"/>
-            <stop offset="35%" stop-color="#94a3b8"/>
-            <stop offset="70%" stop-color="#cbd5e1"/>
-            <stop offset="100%" stop-color="#475569"/>
-          </linearGradient>
-          <linearGradient id="soju-specular-arc" x1="0.2" y1="0" x2="0.8" y2="1">
-            <stop offset="0%" stop-color="rgba(255,255,255,0.7)"/>
-            <stop offset="35%" stop-color="rgba(255,255,255,0.18)"/>
-            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-          </linearGradient>
         </defs>
 
-        <!-- 1. 알루미늄 톱니 주름 (24 fluted crimps) -->
-        <g class="soju-fluted-teeth">
-          ${teeth}
+        <!-- 1. 초록 메탈 병뚜껑 (CapFlick과 동일한 28 fluted crimp 림 및 원형 돔 레이어) -->
+        <g class="soju-cap-main-group">
+          <!-- 외곽 주름 톱니 (fluted rim 28개 엣지) -->
+          <circle cx="100" cy="106" r="76" fill="#14532d"/>
+          <circle cx="100" cy="106" r="73" fill="#16a34a" stroke="#86efac" stroke-width="2"/>
+          <!-- 캡 돔 본체 -->
+          <circle cx="100" cy="106" r="68" fill="${isExploded ? 'url(#cap-exploded-grad-updown)' : 'url(#cap-metal-grad-updown)'}" stroke="#22c55e" stroke-width="3"/>
+          <!-- 캡 내부 메탈 음각 링 2겹 -->
+          <circle cx="100" cy="106" r="54" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="2.5"/>
+          <circle cx="100" cy="106" r="38" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="2"/>
+          <circle cx="100" cy="106" r="24" fill="rgba(21,128,61,0.5)" stroke="rgba(134,239,172,0.4)" stroke-width="1.5"/>
         </g>
 
-        <!-- 2. 은색/금속 엣지 롤온 베벨 링 -->
-        <circle cx="80" cy="80" r="70" fill="url(#soju-aluminum-rim)" stroke="#14532d" stroke-width="1.2"/>
-        
-        <!-- 3. 메탈릭 그린 래커 돔 본체 -->
-        <circle cx="80" cy="80" r="66" fill="${isExploded ? 'url(#soju-cap-exploded)' : 'url(#soju-cap-lacquer)'}" stroke="#22c55e" stroke-width="2"/>
+        <!-- 2. 꼬다리가 뜯겨나간 자국 (CapFlick에서 꼬다리가 뚝 끊어진 브래킷 조인트 스텀프) -->
+        <g class="soju-cap-broken-stump">
+          <path d="M92 39 L108 39 L105 31 L95 31 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
+          <!-- 끊어진 알루미늄 단면 은색 팁 -->
+          <circle cx="100" cy="30" r="2.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
+        </g>
 
-        <!-- 4. 금속 곡면 초승달 하이라이트 반사광 -->
-        <path d="M 28 62 A 58 58 0 0 1 132 62 A 54 44 0 0 0 28 62 Z" fill="url(#soju-specular-arc)"/>
-
-        <!-- 5. 엠보싱 메탈 음각 링 2겹 -->
-        <circle cx="80" cy="80" r="48" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="2.2"/>
-        <circle cx="80" cy="80" r="46" fill="none" stroke="rgba(0,0,0,0.38)" stroke-width="1.5"/>
-        <circle cx="80" cy="80" r="42" fill="none" stroke="rgba(134,239,172,0.3)" stroke-width="1"/>
-
-        <!-- 6. 중앙 시크릿 숫자 / 로고 텍스트 -->
-        <text x="80" y="58" text-anchor="middle" font-size="8.5" font-weight="900" fill="#dcfce7" letter-spacing="1.2">
-          K-SOOL
-        </text>
-        <text x="80" y="92" text-anchor="middle" font-size="34" font-weight="900" fill="#ffffff" 
-              style="text-shadow: 0 2px 8px rgba(0,0,0,0.85);">
-          ${this.isFinished ? this.secretNumber : '?'}
-        </text>
-        <text x="80" y="113" text-anchor="middle" font-size="10" fill="#fde047">
-          ★
-        </text>
+        <!-- 3. 병뚜껑 중심 숫자 / 물음표 -->
+        <g class="soju-cap-center-content">
+          <text x="100" y="106" text-anchor="middle" dominant-baseline="central" class="soju-cap-center-num">
+            ${this.isFinished ? this.secretNumber : '?'}
+          </text>
+        </g>
       </svg>
     `;
   }
 
   _renderStation(isTop = false) {
     const flipClass = isTop ? 'top-station' : 'bottom-station';
-    return `
-      <div class="updown-player-station ${flipClass}">
-        <!-- 상단: UP/DOWN 상태 및 입력 디스플레이 -->
-        <div class="station-meta-row">
-          <div class="updown-status-pair">
-            <div class="updown-badge-row up">
-              <span class="badge-num">${this.lastUpVal}</span>
-              <span class="badge-txt">UP</span>
-            </div>
-            <div class="updown-badge-row down">
-              <span class="badge-num">${this.lastDownVal}</span>
-              <span class="badge-txt">DOWN</span>
-            </div>
-          </div>
-          <div class="party-number-display ${!this.inputVal ? 'placeholder' : ''}">
-            ${this.inputVal || '· ·'}
-          </div>
+
+    // 3x4 스마트폰 다이얼 패드 (New / 확인 텍스트 버튼)
+    const numpadHtml = `
+      <div class="party-numpad-grid compact">
+        <button type="button" class="party-num-key" data-digit="1">1</button>
+        <button type="button" class="party-num-key" data-digit="2">2</button>
+        <button type="button" class="party-num-key" data-digit="3">3</button>
+
+        <button type="button" class="party-num-key" data-digit="4">4</button>
+        <button type="button" class="party-num-key" data-digit="5">5</button>
+        <button type="button" class="party-num-key" data-digit="6">6</button>
+
+        <button type="button" class="party-num-key" data-digit="7">7</button>
+        <button type="button" class="party-num-key" data-digit="8">8</button>
+        <button type="button" class="party-num-key" data-digit="9">9</button>
+
+        <button type="button" class="party-key-action restart btn-updown-restart" title="새 게임 시작">
+          New
+        </button>
+        <button type="button" class="party-num-key" data-digit="0">0</button>
+        <button type="button" class="party-key-action submit btn-updown-submit" title="숫자 확인">
+          확인
+        </button>
+      </div>
+    `;
+
+    // 내가 누른 숫자 표시창 (가운데 중앙정렬)
+    const displayHtml = `
+      <div class="party-number-display ${!this.inputVal ? 'placeholder' : ''}">
+        ${this.inputVal || '· ·'}
+      </div>
+    `;
+
+    // 병뚜껑과 패드 사이: 대칭 UP/DOWN 큼지막한 상태 표시 (세로줄 맞춤, 중앙정렬)
+    const statusHtml = `
+      <div class="updown-status-col">
+        <div class="updown-status-line up">
+          <span class="status-num">${this.lastUpVal}</span>
+          <span class="status-label">UP</span>
         </div>
-
-        <!-- 3x4 스마트폰 다이얼 패드 -->
-        <div class="party-numpad-grid compact">
-          <button type="button" class="party-num-key" data-digit="1">1</button>
-          <button type="button" class="party-num-key" data-digit="2">2</button>
-          <button type="button" class="party-num-key" data-digit="3">3</button>
-
-          <button type="button" class="party-num-key" data-digit="4">4</button>
-          <button type="button" class="party-num-key" data-digit="5">5</button>
-          <button type="button" class="party-num-key" data-digit="6">6</button>
-
-          <button type="button" class="party-num-key" data-digit="7">7</button>
-          <button type="button" class="party-num-key" data-digit="8">8</button>
-          <button type="button" class="party-num-key" data-digit="9">9</button>
-
-          <button type="button" class="party-key-action restart btn-updown-restart" title="새 게임 시작">
-            🔄
-          </button>
-          <button type="button" class="party-num-key" data-digit="0">0</button>
-          <button type="button" class="party-key-action submit btn-updown-submit" title="숫자 확인">
-            ✅
-          </button>
+        <div class="updown-status-line down">
+          <span class="status-num">${this.lastDownVal}</span>
+          <span class="status-label">DOWN</span>
         </div>
       </div>
     `;
+
+    if (isTop) {
+      // 상단(180도 회전): 로컬 상단(패드) -> 디스플레이 -> 로컬 하단(UP/DOWN: 병뚜껑 인접)
+      return `
+        <div class="updown-player-station top-station">
+          ${numpadHtml}
+          ${displayHtml}
+          ${statusHtml}
+        </div>
+      `;
+    } else {
+      // 하단(정방향): 로컬 상단(UP/DOWN: 병뚜껑 인접) -> 디스플레이 -> 로컬 하단(패드)
+      return `
+        <div class="updown-player-station bottom-station">
+          ${statusHtml}
+          ${displayHtml}
+          ${numpadHtml}
+        </div>
+      `;
+    }
   }
 
   render() {
