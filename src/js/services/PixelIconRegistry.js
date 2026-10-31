@@ -1129,7 +1129,21 @@
   "rec_kahlua_milk": "rec_kahlua_milk",
   "조선 깔루아 밀크": "rec_kahlua_milk",
   "rec_83": "rec_kahlua_milk",
-  "깔루아밀크": "rec_kahlua_milk"
+  "깔루아밀크": "rec_kahlua_milk",
+  // [상세 재료 13종 도트 스프라이트 매핑]
+  "이천 임금님쌀": "rice",
+  "철원 두루미쌀": "rice",
+  "김제 황금지평선쌀": "rice",
+  "해남 땅끝해풍쌀": "rice",
+  "상주 낙동강삼백쌀": "rice",
+  "참방울 후레쉬": "soju",
+  "두꺼비 이즈백": "soju",
+  "처음부터 부드럽게": "soju",
+  "부산 파도소주": "soju",
+  "제주 화산암반 21": "soju",
+  "카아스 프레시": "beer",
+  "청정라거 테라피": "beer",
+  "더블숙성 켈리포니아": "beer"
 };
 
   const PixelIconRegistry = {
