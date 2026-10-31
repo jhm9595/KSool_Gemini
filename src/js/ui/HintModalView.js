@@ -77,6 +77,8 @@ class HintModalView {
     const extHints = this.recipeBook.getExternalHints(this.activeRecipeId);
     const hasExtHint = extHints && extHints.length > 0;
     const isImageUnlocked = this.inventory.isRecipeImageUnlocked(this.activeRecipeId);
+    const resolvedName = this.brandResolver.resolveName(recipe);
+    const targetBadgeHtml = `<span style="color:#60a5fa; font-weight:900; font-size:0.78rem;">${recipe.formatted_number || ''}</span> <span style="color:#fde047; font-weight:900; font-size:0.84rem;">${resolvedName}</span>`;
 
     // =========================================================================
     // [모드 1] 진입 선택 화면 (⚾ 베이스볼 / 🎮 그림 해금 미니게임 / 📺 외부 힌트)
@@ -110,7 +112,6 @@ class HintModalView {
         </div>
       ` : '';
 
-      const resolvedName = this.brandResolver.resolveName(recipe);
       const lightHintHtml = recipe.unlock_hint ? `
         <div style="background:rgba(15,23,42,0.85); border:1px solid #334155; border-radius:10px; padding:10px 12px; font-size:0.75rem; color:#cbd5e1; line-height:1.45;">
           <span style="color:#fde047; font-weight:800; margin-right:4px;">💡 힌트:</span>${recipe.unlock_hint}
@@ -119,7 +120,7 @@ class HintModalView {
 
       container.innerHTML = `
         <div class="hint-top-header">
-          <div class="modal-title">🕵️ ${recipe.formatted_number || ''} ${resolvedName} 추리</div>
+          <div class="modal-title">🕵️ ${targetBadgeHtml} 추리</div>
           <button class="modal-close-x" id="hint-close-btn">✕</button>
         </div>
 
@@ -525,12 +526,16 @@ class HintModalView {
 
     container.innerHTML = `
       <div class="hint-top-header">
-        <div style="display:flex; align-items:center; gap:6px;">
+        <div style="display:flex; align-items:center; gap:6px; min-width:0;">
           <button class="hint-back-choice-btn" id="hint-back-choice-btn" title="선택 화면으로">←</button>
-          <div class="modal-title">⚾ 베이스볼 게임</div>
+          <div class="modal-title" style="display:flex; align-items:center; gap:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            <span>⚾ 베이스볼</span>
+            <span style="color:#475569;">·</span>
+            ${targetBadgeHtml}
+          </div>
           <button class="bb-help-btn ${this.showHelpGuide ? 'active' : ''}" id="bb-help-toggle-btn" title="베이스볼 게임 설명 보기">?</button>
         </div>
-        <div style="display:flex; align-items:center; gap:8px;">
+        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
           <div class="stage-checkboxes" title="1:유형 -> 2:대표 -> 3:상세">${checkboxesHtml}</div>
           <button class="modal-close-x" id="hint-close-btn">✕</button>
         </div>
