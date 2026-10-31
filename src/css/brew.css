@@ -622,7 +622,7 @@
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 14px 6px 10px 6px;
+  padding: 10px 6px 9px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -634,7 +634,7 @@
 }
 
 .ing-card.has-picker {
-  padding-top: 24px;
+  padding-top: 20px;
 }
 
 .ing-card:hover {
@@ -790,6 +790,10 @@
 
 .ing-emoji {
   font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .ing-name {
@@ -798,6 +802,11 @@
   color: #f1f5f9;
   text-align: center;
   word-break: keep-all;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.25;
 }
 
 /* 도감 뷰 */
