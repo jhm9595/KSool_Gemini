@@ -72,7 +72,7 @@ class KSoolApp {
     });
 
     this.currentTab = 'brew';
-    this.selectedIngCategory = 'BASIC';
+    this.selectedIngCategory = 'NATURE';
     this.selectedRecipeCategory = '전체';
   }
 
@@ -232,10 +232,18 @@ class KSoolApp {
 
     const allBase = Array.from(this.recipeBook.baseIngredients.values());
 
-    // 해금된 재료가 1개 이상 존재하는 재료 유형(Category)만 노출 (미해금 재료 유형 숨김)
+    // 해금된 재료가 1개 이상 존재하는 재료 유형(Category)만 노출 (미해금 재료 유형 탭 자체 숨김)
     const visibleCategories = this.recipeBook.categories.filter(c =>
       allBase.some(ing => ing.category_id === c.category_id && this.inventory.isIngredientAvailable(ing.ingredient_id))
     );
+
+    if (
+      this.selectedIngCategory !== 'ALL' &&
+      !visibleCategories.some(c => c.category_id === this.selectedIngCategory) &&
+      visibleCategories.length > 0
+    ) {
+      this.selectedIngCategory = visibleCategories[0].category_id;
+    }
 
     const catChips = visibleCategories.map(c => `
       <button class="cat-chip ${this.selectedIngCategory === c.category_id ? 'active' : ''}" data-ing-cat="${c.category_id}">

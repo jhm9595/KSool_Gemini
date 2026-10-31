@@ -33,15 +33,15 @@
   },
   {
     "ingredient_id": 103,
-    "category_id": "BASIC",
+    "category_id": "ALCOHOL",
     "display_name": "복분자주",
     "real_name": "복분자주",
     "is_licensed": false,
     "emoji": "🍷",
     "picker_component": "NONE",
     "picker_config": null,
-    "is_starter": true,
-    "unlocked_by_recipe_id": null
+    "is_starter": false,
+    "unlocked_by_recipe_id": 57
   },
   {
     "ingredient_id": 104,
@@ -81,7 +81,7 @@
   },
   {
     "ingredient_id": 202,
-    "category_id": "BASIC",
+    "category_id": "NATURE",
     "display_name": "물",
     "real_name": "물",
     "is_licensed": false,
@@ -93,7 +93,7 @@
   },
   {
     "ingredient_id": 203,
-    "category_id": "BASIC",
+    "category_id": "NATURE",
     "display_name": "불",
     "real_name": "불",
     "is_licensed": false,
@@ -117,7 +117,7 @@
   },
   {
     "ingredient_id": 205,
-    "category_id": "BASIC",
+    "category_id": "NATURE",
     "display_name": "공기",
     "real_name": "공기",
     "is_licensed": false,
@@ -129,7 +129,7 @@
   },
   {
     "ingredient_id": 206,
-    "category_id": "BASIC",
+    "category_id": "NATURE",
     "display_name": "눈",
     "real_name": "눈",
     "is_licensed": false,
@@ -284,8 +284,20 @@
     "unlocked_by_recipe_id": null
   },
   {
+    "ingredient_id": 313,
+    "category_id": "FRUIT",
+    "display_name": "복분자",
+    "real_name": "복분자",
+    "is_licensed": false,
+    "emoji": "🫐",
+    "picker_component": "NONE",
+    "picker_config": null,
+    "is_starter": true,
+    "unlocked_by_recipe_id": null
+  },
+  {
     "ingredient_id": 401,
-    "category_id": "BASIC",
+    "category_id": "DAIRY",
     "display_name": "우유",
     "real_name": "우유",
     "is_licensed": false,
@@ -297,7 +309,7 @@
   },
   {
     "ingredient_id": 501,
-    "category_id": "BASIC",
+    "category_id": "GRAIN",
     "display_name": "맥(보리)",
     "real_name": "맥",
     "is_licensed": false,
@@ -309,7 +321,7 @@
   },
   {
     "ingredient_id": 502,
-    "category_id": "BASIC",
+    "category_id": "GRAIN",
     "display_name": "쌀",
     "real_name": "쌀",
     "is_licensed": false,
@@ -325,7 +337,7 @@
   },
   {
     "ingredient_id": 503,
-    "category_id": "BASIC",
+    "category_id": "GRAIN",
     "display_name": "미숫가루",
     "real_name": "미숫가루",
     "is_licensed": false,
@@ -565,7 +577,7 @@
   },
   {
     "ingredient_id": 701,
-    "category_id": "BASIC",
+    "category_id": "ETC",
     "display_name": "설탕",
     "real_name": "설탕",
     "is_licensed": false,

@@ -726,5 +726,18 @@
     "category": "특산명주",
     "unlocks_ingredient_id": null,
     "description": "[상세재료 필수] 주류 냉장고의 '제주 화산암반 21(1)'에 토닉워터(2), 얼음(1)을 더한 제주 감성 칵테일!"
+  },
+  {
+    "recipe_id": 57,
+    "display_name": "복분자주",
+    "real_name": "복분자주",
+    "is_licensed": false,
+    "difficulty": "EASY",
+    "required_level": 1,
+    "requires_detail_ingredient": false,
+    "emoji": "🍷",
+    "category": "기초합성",
+    "unlocks_ingredient_id": 103,
+    "description": "탐스러운 복분자 열매에 소주와 설탕을 더해 발효·숙성시킨 진한 자주빛 전통 과실주! 복소사 조합의 재료로 해금됩니다."
   }
 ]

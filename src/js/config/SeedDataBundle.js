@@ -2,58 +2,52 @@ window.KSool = window.KSool || {};
 window.KSool.SeedDataBundle = {
   "categories": [
     {
-      "category_id": "BASIC",
-      "name": "기초재료",
-      "emoji": "🌱",
-      "order": 1
-    },
-    {
       "category_id": "ALCOHOL",
       "name": "주류",
       "emoji": "🍶",
-      "order": 2
+      "order": 1
     },
     {
       "category_id": "NATURE",
       "name": "자연",
       "emoji": "💧",
-      "order": 3
+      "order": 2
     },
     {
       "category_id": "FRUIT",
       "name": "과일",
       "emoji": "🍋",
-      "order": 4
+      "order": 3
     },
     {
       "category_id": "DAIRY",
       "name": "유제품",
       "emoji": "🥛",
-      "order": 5
+      "order": 4
     },
     {
       "category_id": "GRAIN",
       "name": "곡물",
       "emoji": "🌾",
-      "order": 6
+      "order": 5
     },
     {
       "category_id": "DRINK",
       "name": "음료",
       "emoji": "🥤",
-      "order": 7
+      "order": 6
     },
     {
       "category_id": "ETC",
       "name": "기타",
       "emoji": "🍯",
-      "order": 8
+      "order": 7
     },
     {
       "category_id": "DESSERT",
       "name": "디저트",
       "emoji": "🍦",
-      "order": 9
+      "order": 8
     }
   ],
   "ingredients_base": [
@@ -91,15 +85,15 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 103,
-      "category_id": "BASIC",
+      "category_id": "ALCOHOL",
       "display_name": "복분자주",
       "real_name": "복분자주",
       "is_licensed": false,
       "emoji": "🍷",
       "picker_component": "NONE",
       "picker_config": null,
-      "is_starter": true,
-      "unlocked_by_recipe_id": null
+      "is_starter": false,
+      "unlocked_by_recipe_id": 57
     },
     {
       "ingredient_id": 104,
@@ -139,7 +133,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 202,
-      "category_id": "BASIC",
+      "category_id": "NATURE",
       "display_name": "물",
       "real_name": "물",
       "is_licensed": false,
@@ -151,7 +145,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 203,
-      "category_id": "BASIC",
+      "category_id": "NATURE",
       "display_name": "불",
       "real_name": "불",
       "is_licensed": false,
@@ -175,7 +169,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 205,
-      "category_id": "BASIC",
+      "category_id": "NATURE",
       "display_name": "공기",
       "real_name": "공기",
       "is_licensed": false,
@@ -187,7 +181,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 206,
-      "category_id": "BASIC",
+      "category_id": "NATURE",
       "display_name": "눈",
       "real_name": "눈",
       "is_licensed": false,
@@ -342,8 +336,20 @@ window.KSool.SeedDataBundle = {
       "unlocked_by_recipe_id": null
     },
     {
+      "ingredient_id": 313,
+      "category_id": "FRUIT",
+      "display_name": "복분자",
+      "real_name": "복분자",
+      "is_licensed": false,
+      "emoji": "🫐",
+      "picker_component": "NONE",
+      "picker_config": null,
+      "is_starter": true,
+      "unlocked_by_recipe_id": null
+    },
+    {
       "ingredient_id": 401,
-      "category_id": "BASIC",
+      "category_id": "DAIRY",
       "display_name": "우유",
       "real_name": "우유",
       "is_licensed": false,
@@ -355,7 +361,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 501,
-      "category_id": "BASIC",
+      "category_id": "GRAIN",
       "display_name": "맥(보리)",
       "real_name": "맥",
       "is_licensed": false,
@@ -367,7 +373,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 502,
-      "category_id": "BASIC",
+      "category_id": "GRAIN",
       "display_name": "쌀",
       "real_name": "쌀",
       "is_licensed": false,
@@ -383,7 +389,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 503,
-      "category_id": "BASIC",
+      "category_id": "GRAIN",
       "display_name": "미숫가루",
       "real_name": "미숫가루",
       "is_licensed": false,
@@ -623,7 +629,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 701,
-      "category_id": "BASIC",
+      "category_id": "ETC",
       "display_name": "설탕",
       "real_name": "설탕",
       "is_licensed": false,
@@ -1654,6 +1660,19 @@ window.KSool.SeedDataBundle = {
       "category": "특산명주",
       "unlocks_ingredient_id": null,
       "description": "[상세재료 필수] 주류 냉장고의 '제주 화산암반 21(1)'에 토닉워터(2), 얼음(1)을 더한 제주 감성 칵테일!"
+    },
+    {
+      "recipe_id": 57,
+      "display_name": "복분자주",
+      "real_name": "복분자주",
+      "is_licensed": false,
+      "difficulty": "EASY",
+      "required_level": 1,
+      "requires_detail_ingredient": false,
+      "emoji": "🍷",
+      "category": "기초합성",
+      "unlocks_ingredient_id": 103,
+      "description": "탐스러운 복분자 열매에 소주와 설탕을 더해 발효·숙성시킨 진한 자주빛 전통 과실주! 복소사 조합의 재료로 해금됩니다."
     }
   ],
   "recipe_ingredients": [
@@ -2758,6 +2777,30 @@ window.KSool.SeedDataBundle = {
       "recipe_id": 56,
       "slot_order": 3,
       "ingredient_id": 201,
+      "detail_ingredient_id": null,
+      "ratio": 1
+    },
+    {
+      "id": 139,
+      "recipe_id": 57,
+      "slot_order": 1,
+      "ingredient_id": 313,
+      "detail_ingredient_id": null,
+      "ratio": 1
+    },
+    {
+      "id": 140,
+      "recipe_id": 57,
+      "slot_order": 2,
+      "ingredient_id": 101,
+      "detail_ingredient_id": null,
+      "ratio": 1
+    },
+    {
+      "id": 141,
+      "recipe_id": 57,
+      "slot_order": 3,
+      "ingredient_id": 701,
       "detail_ingredient_id": null,
       "ratio": 1
     }

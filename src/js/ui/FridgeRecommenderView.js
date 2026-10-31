@@ -14,7 +14,7 @@ class FridgeRecommenderView {
     this.audio = audio;
     this.onShowRecipeDetail = onShowRecipeDetail;
 
-    this.selectedCategory = 'BASIC';
+    this.selectedCategory = 'NATURE';
     this.lastRandomWinnerId = null;
   }
 
@@ -31,6 +31,14 @@ class FridgeRecommenderView {
     const visibleCategories = this.recipeBook.categories.filter(c =>
       unlockedBaseIngs.some(ing => ing.category_id === c.category_id)
     );
+
+    if (
+      this.selectedCategory !== 'ALL' &&
+      !visibleCategories.some(c => c.category_id === this.selectedCategory) &&
+      visibleCategories.length > 0
+    ) {
+      this.selectedCategory = visibleCategories[0].category_id;
+    }
 
     const filteredIngs = this.selectedCategory === 'ALL'
       ? unlockedBaseIngs
