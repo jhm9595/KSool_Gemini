@@ -10,13 +10,17 @@ class AlchemyEngine {
     this.audio = audio;
   }
 
-  executeCraft() {
+  executeCraft(preferredRecipeId = null) {
     const slots = this.craftingPot.getSlots();
     if (slots.length < 2) {
       return { ok: false, message: '재료를 최소 2종류 이상 넣어주세요.' };
     }
 
-    const matchedRecipe = this.recipeBook.matchRecipe(slots, this.inventory.unlockedRecipeIds);
+    const matchedRecipe = this.recipeBook.matchRecipe(
+      slots,
+      this.inventory.unlockedRecipeIds,
+      preferredRecipeId
+    );
 
     if (matchedRecipe) {
       this.audio.playSuccess();
@@ -29,11 +33,11 @@ class AlchemyEngine {
         recipe: matchedRecipe,
         isNewDiscovery: unlockInfo.isNew,
         newlyUnlockedIngredient: unlockInfo.newlyUnlockedIngredient,
+        stepUpInfo: unlockInfo.stepUpInfo || null,
         usedSlots
       };
     } else {
       this.audio.playFail();
-      // 요구사항 5: 실패 시 힌트 피드백은 구조만 두고 현재 NullFeedbackStrategy가 null 반환
       const optionalFeedback = this.feedbackStrategy
         ? this.feedbackStrategy.getFailFeedback(slots, this.recipeBook)
         : null;

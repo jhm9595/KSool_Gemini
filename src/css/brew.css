@@ -32,6 +32,239 @@
   color: #fcd34d;
 }
 
+/* 단계별 넘버링 퀴즈 & 자유 주조 컨트롤 바 */
+.brew-step-quiz-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.brew-mode-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.brew-mode-tabs {
+  display: inline-flex;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.brew-mode-tab-btn {
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.brew-mode-tab-btn.active {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+.step-rule-pill {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fcd34d;
+  white-space: nowrap;
+}
+
+.brew-quiz-card {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid #3b82f6;
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.45);
+}
+
+.brew-quiz-card.is-solved {
+  border-color: #10b981;
+  background: rgba(6, 78, 59, 0.25);
+}
+
+.quiz-nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.quiz-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quiz-nav-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid #475569;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-size: 0.68rem;
+  font-weight: 900;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quiz-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.quiz-num-badge {
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: #60a5fa;
+  letter-spacing: 0.3px;
+}
+
+.quiz-step-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+}
+
+.quiz-jump-next-btn {
+  padding: 3px 8px;
+  border-radius: 7px;
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  background: rgba(56, 189, 248, 0.16);
+  color: #7dd3fc;
+  font-size: 0.66rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.quiz-question-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.quiz-mystery-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #1e293b;
+  border: 1px dashed #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.45rem;
+  flex-shrink: 0;
+}
+
+.quiz-question-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.quiz-target-title {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.quiz-chosung-pill {
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde047;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
+.quiz-desc-text {
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  line-height: 1.42;
+}
+
+.quiz-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(71, 85, 105, 0.6);
+}
+
+.quiz-formula-structure {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #93c5fd;
+}
+
+.quiz-clue-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.quiz-clue-btn {
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid #475569;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-size: 0.65rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.quiz-clue-btn.active {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.22);
+  color: #fde047;
+}
+
+.brew-free-mode-banner {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 7px 11px;
+  font-size: 0.71rem;
+  color: #cbd5e1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
 /* 동적 슬롯 컨테이너 (초안 4슬롯, 제한 없이 확장 가능) */
 .pot-slots-grid {
   display: flex;
@@ -373,15 +606,28 @@
 
 .img-unlocked-pill {
   position: absolute;
-  top: 5px;
+  top: 22px;
   left: 5px;
-  font-size: 0.52rem;
+  font-size: 0.5rem;
   font-weight: 800;
-  padding: 1px 5px;
+  padding: 1px 4px;
   border-radius: 4px;
   background: rgba(168, 85, 247, 0.28);
   color: #e9d5ff;
   border: 1px solid rgba(192, 132, 252, 0.45);
+}
+
+.sool-num-badge {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  font-size: 0.56rem;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.4);
 }
 
 .sool-card.level-locked {

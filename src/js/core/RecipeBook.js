@@ -12,6 +12,7 @@ class RecipeBook {
     // 데이터 기반 레시피 의존성 그래프 (DAG): 하드코딩 없이 리프(기초) 재료 자동 판별용
     this.producerRecipesByIngId = new Map();
     this.unlockedIngIdByRecipeId = new Map();
+    this.progression = new window.KSool.ProgressionEngine();
   }
 
   load(bundleData, customPromotedRecipes = []) {
@@ -68,6 +69,7 @@ class RecipeBook {
     });
 
     this._buildIngredientDependencyGraph();
+    this.progression.applyProgressionToRecipeBook(this);
   }
 
   /**
@@ -133,7 +135,17 @@ class RecipeBook {
   }
 
   getAllRecipes() {
-    return Array.from(this.recipes.values());
+    return Array.from(this.recipes.values()).sort(
+      (a, b) => (a.recipe_number || a.recipe_id) - (b.recipe_number || b.recipe_id)
+    );
+  }
+
+  getRecipeByNumber(recipeNumber) {
+    const num = Number(recipeNumber);
+    for (const rec of this.recipes.values()) {
+      if (rec.recipe_number === num) return rec;
+    }
+    return null;
   }
 
   getRecipeItems(recipeId) {
@@ -159,8 +171,9 @@ class RecipeBook {
    * - EASY 레시피(1:1 동등 비율)는 기약비가 1:1이면 매칭
    * - NORMAL/MASTER 레시피는 정확한 투입 개수 또는 기약 황금비율 일치 시 매칭
    * - 상세 재료 필수(requires_detail_ingredient) 레시피를 우선 검사합니다.
+   * - preferredRecipeId(퀴즈 모드 현재 타겟)가 후보군에 있으면 최우선 반환합니다.
    */
-  matchRecipe(potSlots, unlockedRecipeIds = new Set()) {
+  matchRecipe(potSlots, unlockedRecipeIds = new Set(), preferredRecipeId = null) {
     if (!potSlots || potSlots.length < 2) return null;
 
     // 같은 대표 재료끼리 합산이 필요한 일반 레시피 대비 및 상세 재료 구분
@@ -169,7 +182,7 @@ class RecipeBook {
       if (a.requires_detail_ingredient !== b.requires_detail_ingredient) {
         return a.requires_detail_ingredient ? -1 : 1;
       }
-      return a.recipe_id - b.recipe_id;
+      return (a.recipe_number || a.recipe_id) - (b.recipe_number || b.recipe_id);
     });
 
     const candidates = [];
@@ -213,7 +226,12 @@ class RecipeBook {
     }
 
     if (candidates.length === 0) return null;
-    // 아직 해금되지 않은 레시피가 있다면 우선 반환 (예: 레모네이드 vs 토닉워터 동일 조합 대응)
+    // 퀴즈 모드에서 현재 타겟으로 지정된 레시피가 후보군에 있다면 최우선 매칭
+    if (preferredRecipeId) {
+      const preferred = candidates.find(c => Number(c.recipe_id) === Number(preferredRecipeId));
+      if (preferred) return preferred;
+    }
+    // 아직 해금되지 않은 레시피가 있다면 넘버링 순서대로 우선 반환 (예: 레모네이드 No.17 vs 토닉워터 No.18 동일 조합 대응)
     const unDiscovered = candidates.find(c => !unlockedRecipeIds.has(c.recipe_id));
     return unDiscovered || candidates[0];
   }
@@ -256,6 +274,8 @@ class RecipeBook {
 
     this.recipes.set(newId, newRecipe);
     this.recipeItemsByRecipeId.set(newId, newItems);
+    this._buildIngredientDependencyGraph();
+    this.progression.applyProgressionToRecipeBook(this);
 
     return { recipe: newRecipe, items: newItems };
   }

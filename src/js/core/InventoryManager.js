@@ -6,6 +6,7 @@ class InventoryManager {
     this.storage = storageService;
 
     this.userLevel = 1;
+    this.unlockedStepId = 1; // 점진적 단계 (STEP 1 ~ STEP 7)
     this.unlockedRecipeIds = new Set();
     this.unlockedIngredientIds = new Set();
     this.unlockedImageRecipeIds = new Set(); // 미니게임 클리어로 그림(아이콘)만 선해금된 레시피 ID 집합
@@ -17,13 +18,14 @@ class InventoryManager {
       fridge: false,
       suggestions: false
     };
-    this.unlockAllSandboxMode = false; // 모든 재료 즉시 실험해보기 토글용
+    this.unlockAllSandboxMode = false; // 모든 재료/단계 즉시 실험해보기 토글용
   }
 
   init() {
     this.unlockedRecipeIds.clear();
     this.unlockedIngredientIds.clear();
     this.unlockedImageRecipeIds.clear();
+    this.unlockedStepId = 1;
     this.craftFailCount = 0;
     this.shownTabIntros = {
       collection: false,
@@ -35,6 +37,9 @@ class InventoryManager {
     const saved = this.storage.loadState();
     if (saved) {
       if (typeof saved.userLevel === 'number') this.userLevel = saved.userLevel;
+      if (typeof saved.unlockedStepId === 'number') {
+        this.unlockedStepId = Math.max(1, saved.unlockedStepId);
+      }
       if (Array.isArray(saved.unlockedRecipeIds)) {
         saved.unlockedRecipeIds.forEach(id => this.unlockedRecipeIds.add(Number(id)));
       }
@@ -59,23 +64,57 @@ class InventoryManager {
       }
     }
 
-    // 2. 하드코딩 없이 레시피 그래프(DAG)를 데이터 기반으로 분석하여
-    //    어떤 레시피의 결과물도 아닌 '순수 리프(Leaf) 재료'를 자동으로 기본 해금 등록
-    for (const [id] of this.recipeBook.baseIngredients.entries()) {
-      if (this.recipeBook.isLeafIngredient(id)) {
-        this.unlockedIngredientIds.add(Number(id));
+    // 2. 현재 해금된 레시피 진행도에 맞춰 Step(1~7) 및 단계별 기초 재료·조합 재료 동기화
+    this._syncStepAndIngredients();
+    this._recalculateLevel();
+  }
+
+  /**
+   * 현재 해금된 레시피를 기준으로 도달한 Step(1~7)을 계산하고,
+   * 해당 Step까지 허용된 기초(Leaf) 재료 + 조합 완성으로 해금된 재료만 인벤토리에 활성화합니다.
+   */
+  _syncStepAndIngredients() {
+    const progression = this.recipeBook.progression;
+    const allRecipes = this.recipeBook.getAllRecipes();
+    const steps = progression.getAllSteps();
+
+    let computedStep = 1;
+    for (const step of steps) {
+      if (step.step_id === 1) continue;
+      const prevStepRecipes = allRecipes.filter(r => r.step_id < step.step_id);
+      if (prevStepRecipes.length === 0) continue;
+
+      const allPrevCleared = prevStepRecipes.every(r => this.unlockedRecipeIds.has(Number(r.recipe_id)));
+      const countReached = this.unlockedRecipeIds.size >= prevStepRecipes.length;
+      if (allPrevCleared || countReached) {
+        computedStep = step.step_id;
+      } else {
+        break;
       }
     }
 
-    // 3. 실제로 해금한 레시피(unlockedRecipeIds)를 통해서만 비-리프(조합형) 재료 해금 동기화
+    if (computedStep > this.unlockedStepId) {
+      this.unlockedStepId = computedStep;
+    }
+
+    this.unlockedIngredientIds.clear();
+
+    // (a) 현재 도달한 Step 이하의 기초(Leaf) 재료만 순차 해금
+    for (const step of steps) {
+      if (step.step_id <= this.unlockedStepId) {
+        for (const ingId of step.unlockLeafIds) {
+          this.unlockedIngredientIds.add(Number(ingId));
+        }
+      }
+    }
+
+    // (b) 실제로 조합 성공한 레시피(unlockedRecipeIds)가 해금하는 결과물 재료 등록
     for (const rId of this.unlockedRecipeIds) {
       const unlockedIng = this.recipeBook.getUnlockedIngredientByRecipe(rId);
       if (unlockedIng) {
         this.unlockedIngredientIds.add(Number(unlockedIng.ingredient_id));
       }
     }
-
-    this._recalculateLevel();
   }
 
   _recalculateLevel() {
@@ -84,6 +123,18 @@ class InventoryManager {
     if (computedLevel > this.userLevel) {
       this.userLevel = computedLevel;
     }
+  }
+
+  getCurrentStepConfig() {
+    const progression = this.recipeBook.progression;
+    if (this.unlockAllSandboxMode) {
+      return progression.getStepConfig(progression.getAllSteps().length);
+    }
+    return progression.getStepConfig(this.unlockedStepId);
+  }
+
+  isDetailPickerUnlocked() {
+    return Boolean(this.getCurrentStepConfig().allowDetailPicker);
   }
 
   isIngredientAvailable(ingredientId) {
@@ -108,34 +159,85 @@ class InventoryManager {
     return isNew;
   }
 
+  /**
+   * 해당 레시피가 '현재 단계'에서 지금 당장 조합/힌트 도전 가능한지 판별합니다.
+   * 1) 하위 재료가 모두 해금되어 있어야 함
+   * 2) 레시피의 최대 비율이 현재 Step의 재료당 최대 개수(maxCountPerSlot) 이하여야 함
+   * 3) 특산 상세재료 필수 레시피라면 특산 선택기가 해금된 Step이어야 함
+   */
   isRecipeChallengeable(recipe) {
     if (!recipe) return false;
-    // 해당 레시피를 구성하는 하위 재료들이 현재 주조실에서 모두 사용 가능(해금)한 상태여야 지금 당장 조합/힌트 도전 가능!
     const reqItems = this.recipeBook.getRecipeItems(recipe.recipe_id);
     if (!reqItems || reqItems.length === 0) return false;
-    return reqItems.every(it => this.isIngredientAvailable(it.ingredient_id));
+
+    const allIngsAvailable = reqItems.every(it => this.isIngredientAvailable(it.ingredient_id));
+    if (!allIngsAvailable) return false;
+
+    const stepConfig = this.getCurrentStepConfig();
+    const maxRatio = recipe.max_ratio || Math.max(...reqItems.map(i => Number(i.ratio) || 1));
+    const sumRatio = recipe.sum_ratio || reqItems.reduce((s, i) => s + (Number(i.ratio) || 1), 0);
+
+    if (maxRatio > stepConfig.maxCountPerSlot) return false;
+    if (sumRatio > stepConfig.maxTotalCount) return false;
+    if (recipe.requires_detail_ingredient && !stepConfig.allowDetailPicker) return false;
+
+    return true;
+  }
+
+  /**
+   * 넘버링 퀴즈 모드에서 다음으로 도전할 미해금 레시피(가장 빠른 No.XX)를 반환합니다.
+   */
+  getNextQuizRecipe() {
+    const all = this.recipeBook.getAllRecipes();
+    // 1순위: 현재 단계에서 즉시 조합 가능하면서 아직 미해금된 가장 빠른 번호
+    const challengeableNext = all.find(
+      r => !this.isRecipeUnlocked(r.recipe_id) && this.isRecipeChallengeable(r)
+    );
+    if (challengeableNext) return challengeableNext;
+
+    // 2순위: 아직 미해금된 가장 빠른 번호
+    const anyUnlockedNext = all.find(r => !this.isRecipeUnlocked(r.recipe_id));
+    return anyUnlockedNext || all[all.length - 1] || null;
   }
 
   unlockRecipe(recipeId) {
     const rId = Number(recipeId);
     const isNew = !this.unlockedRecipeIds.has(rId);
+    const prevStepId = this.unlockedStepId;
+    const prevIngIds = new Set(this.unlockedIngredientIds);
+
     this.unlockedRecipeIds.add(rId);
 
     const unlockedIng = this.recipeBook.getUnlockedIngredientByRecipe(rId);
     let newlyUnlockedIngredient = null;
+    if (unlockedIng && !prevIngIds.has(Number(unlockedIng.ingredient_id))) {
+      newlyUnlockedIngredient = unlockedIng;
+    }
 
-    if (unlockedIng) {
-      const ingId = Number(unlockedIng.ingredient_id);
-      if (!this.unlockedIngredientIds.has(ingId)) {
-        this.unlockedIngredientIds.add(ingId);
-        newlyUnlockedIngredient = unlockedIng;
+    this._syncStepAndIngredients();
+
+    let stepUpInfo = null;
+    if (this.unlockedStepId > prevStepId) {
+      const newStepConfig = this.recipeBook.progression.getStepConfig(this.unlockedStepId);
+      const newlyUnlockedLeafIngredients = [];
+      for (const ingId of this.unlockedIngredientIds) {
+        if (!prevIngIds.has(ingId) && this.recipeBook.isLeafIngredient(ingId)) {
+          const baseIng = this.recipeBook.getBaseIngredient(ingId);
+          if (baseIng) newlyUnlockedLeafIngredients.push(baseIng);
+        }
       }
+      stepUpInfo = {
+        prevStepId,
+        newStepId: this.unlockedStepId,
+        newStepConfig,
+        newlyUnlockedLeafIngredients
+      };
     }
 
     this._recalculateLevel();
     this.save();
 
-    return { isNew, newlyUnlockedIngredient };
+    return { isNew, newlyUnlockedIngredient, stepUpInfo };
   }
 
   getHintState(recipeId) {
@@ -190,6 +292,7 @@ class InventoryManager {
   save() {
     this.storage.saveState({
       userLevel: this.userLevel,
+      unlockedStepId: this.unlockedStepId,
       unlockedRecipeIds: Array.from(this.unlockedRecipeIds),
       unlockedIngredientIds: Array.from(this.unlockedIngredientIds),
       unlockedImageRecipeIds: Array.from(this.unlockedImageRecipeIds),

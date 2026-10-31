@@ -55,6 +55,9 @@
   <!-- [탭 1] 주조실 (Crafting View) -->
   <section id="view-brew" class="view active">
     <div class="pot-section">
+      <!-- 단계별 넘버링 퀴즈 모드 & 자유 주조 모드 전환 패널 -->
+      <div id="brew-step-quiz-bar" class="brew-step-quiz-bar"></div>
+
       <!-- 동적 조합 슬롯 (초안 4칸, 무제한 확장 가능) -->
       <div id="pot-slots-grid" class="pot-slots-grid"></div>
 
@@ -137,6 +140,7 @@
 <script src="./src/js/services/BrandResolver.js"></script>
 <script src="./src/js/services/StorageService.js"></script>
 <script src="./src/js/core/CraftingPot.js"></script>
+<script src="./src/js/core/ProgressionEngine.js"></script>
 <script src="./src/js/core/RecipeBook.js"></script>
 <script src="./src/js/core/InventoryManager.js"></script>
 <script src="./src/js/core/hint/FeedbackHintStrategy.js"></script>

@@ -13,27 +13,53 @@ class CraftingPot {
 
   /**
    * 재료를 탭했을 때 호출 (Tap-to-Stack)
-   * - 이미 같은 재료(대표+상세 조합)가 슬롯에 있으면 우측 하단 count + 1
-   * - 없으면 새 슬롯에 count = 1로 추가
-   * - 모든 재료 총합은 maxTotalCount(10) 이하로 제한
+   * - 현재 진행 단계(stepConfig)의 재료당 최대 개수(maxCountPerSlot) 및 총합(maxTotalCount) 제약을 적용합니다.
+   * - Step 1~4(maxCountPerSlot = 1)에서는 비율 없이 1개씩만 투입 가능하며,
+   *   Step 5(최대 2개) -> Step 6(최대 3개) -> Step 7(최대 10개) 순으로 점진 확장됩니다.
    */
-  tapIngredient(baseId, detailId = null) {
+  tapIngredient(baseId, detailId = null, stepConfig = null) {
+    const maxPerSlot = stepConfig ? stepConfig.maxCountPerSlot : this.config.maxTotalCount;
+    const maxTotal = stepConfig ? stepConfig.maxTotalCount : this.config.maxTotalCount;
     const total = this.getTotalCount();
-    if (total >= this.config.maxTotalCount) {
-      return {
-        ok: false,
-        reason: 'MAX_TOTAL_REACHED',
-        message: `재료 총 개수 합계는 최대 ${this.config.maxTotalCount}개까지만 넣을 수 있습니다!`
-      };
-    }
 
     const existing = this.slots.find(
       s => s.baseId === Number(baseId) && (s.detailId || null) === (detailId ? Number(detailId) : null)
     );
 
     if (existing) {
+      if (existing.count >= maxPerSlot) {
+        if (maxPerSlot === 1) {
+          return {
+            ok: false,
+            reason: 'STEP_RATIO_LOCKED',
+            message: '현재 단계(No.01~31 · 1:1 기초 조합)에서는 재료를 1개씩만 넣을 수 있습니다!\n(No.32 황금비율 입문 단계부터 비율 조절이 해금됩니다)'
+          };
+        }
+        return {
+          ok: false,
+          reason: 'STEP_MAX_PER_SLOT',
+          message: `현재 단계(${stepConfig.code})에서는 한 재료당 최대 ${maxPerSlot}개까지만 넣을 수 있습니다!\n(다음 단계 진급 시 최대 비율이 확장됩니다)`
+        };
+      }
+
+      if (total >= maxTotal) {
+        return {
+          ok: false,
+          reason: 'MAX_TOTAL_REACHED',
+          message: `현재 단계에서 재료 총 개수 합계는 최대 ${maxTotal}개까지만 넣을 수 있습니다!`
+        };
+      }
+
       existing.count += 1;
       return { ok: true, action: 'INCREMENTED', slot: existing };
+    }
+
+    if (total >= maxTotal) {
+      return {
+        ok: false,
+        reason: 'MAX_TOTAL_REACHED',
+        message: `현재 단계에서 재료 총 개수 합계는 최대 ${maxTotal}개까지만 넣을 수 있습니다!`
+      };
     }
 
     const maxSlots = this.config.getEffectiveMaxSlots();

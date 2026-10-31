@@ -112,7 +112,7 @@ class HintModalView {
 
       container.innerHTML = `
         <div class="hint-top-header">
-          <div class="modal-title">🕵️ 비법 힌트 센터</div>
+          <div class="modal-title">🕵️ [${recipe.formatted_number || 'No.01'}] 비법 힌트 센터</div>
           <button class="modal-close-x" id="hint-close-btn">✕</button>
         </div>
 
