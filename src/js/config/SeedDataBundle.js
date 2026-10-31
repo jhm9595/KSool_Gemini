@@ -91,7 +91,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 103,
-      "category_id": "ALCOHOL",
+      "category_id": "BASIC",
       "display_name": "복분자주",
       "real_name": "복분자주",
       "is_licensed": false,
