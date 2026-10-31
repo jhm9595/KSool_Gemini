@@ -763,7 +763,7 @@
     "id": 96,
     "recipe_id": 39,
     "slot_order": 2,
-    "ingredient_id": 701,
+    "ingredient_id": 705,
     "detail_ingredient_id": null,
     "ratio": 1
   },
@@ -947,7 +947,7 @@
     "id": 119,
     "recipe_id": 49,
     "slot_order": 3,
-    "ingredient_id": 701,
+    "ingredient_id": 705,
     "detail_ingredient_id": null,
     "ratio": 1
   },

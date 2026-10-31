@@ -104,13 +104,13 @@ class ProgressionEngine {
         step_id: 7,
         code: 'STEP 7',
         title: '전설의 황금비율 & 특산 명주 (최대 10개 해금!)',
-        subtitle: '총합 10개 비율 제한 해제 및 브랜드·브루어리·팔도지도 특산 재료가 모두 열렸습니다!',
+        subtitle: '총합 10개 비율 제한 해제 및 신규 감미료(꿀)·곡물(미숫가루), 특산 재료가 모두 열렸습니다!',
         maxCountPerSlot: 10,
         maxTotalCount: 10,
         allowDetailPicker: true,
         ruleBadge: '👑 마스터 비율: 최대 10개 + 특산재료',
-        ruleNotice: '모든 비율 제한(총합 10개)과 특산 상세재료(브랜드·브루어리·팔도지도)가 해금되었습니다!',
-        unlockLeafIds: [503], // 미숫가루
+        ruleNotice: '모든 비율 제한(총합 10개)과 특산 상세재료, 신규 꿀·미숫가루가 해금되었습니다!',
+        unlockLeafIds: [503, 705], // 미숫가루, 꿀
         canonicalRecipeOrder: [43, 49, 31, 40, 41, 2, 39, 55, 56] // No.49 ~ No.57
       }
     ];

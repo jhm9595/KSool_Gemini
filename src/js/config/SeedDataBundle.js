@@ -553,7 +553,7 @@ window.KSool.SeedDataBundle = {
       "display_name": "유자청",
       "real_name": "유자청",
       "is_licensed": false,
-      "emoji": "🍯",
+      "emoji": "🫙",
       "picker_component": "NONE",
       "picker_config": null
     },
@@ -564,6 +564,16 @@ window.KSool.SeedDataBundle = {
       "real_name": "매실청",
       "is_licensed": false,
       "emoji": "🫙",
+      "picker_component": "NONE",
+      "picker_config": null
+    },
+    {
+      "ingredient_id": 705,
+      "category_id": "ETC",
+      "display_name": "꿀",
+      "real_name": "꿀",
+      "is_licensed": false,
+      "emoji": "🍯",
       "picker_component": "NONE",
       "picker_config": null
     },
@@ -1666,7 +1676,7 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍯",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 9 : 설탕(단맛) 1! 텁텁함을 잡아주고 입안에 감기는 달콤함을 극대화한 전통 주막 스타일.",
+      "description": "막걸리 9 : 꿀 1! 텁텁함을 잡아주고 입안에 감기는 달콤함을 극대화한 전통 주막 스타일.",
       "requires_order": false,
       "max_ratio": 9,
       "sum_ratio": 10,
@@ -1675,7 +1685,7 @@ window.KSool.SeedDataBundle = {
       "step_order": 7,
       "recipe_number": 55,
       "formatted_number": "No.55",
-      "unlock_hint": "전통 탁주 아홉에 달콤한 결정 하나를 더해, 특유의 텁텁함은 잡고 입안에 감기는 달콤함을 극대화한 주막 스타일입니다."
+      "unlock_hint": "전통 탁주 아홉에 달콤한 황금빛 꿀을 더해, 특유의 텁텁함은 잡고 입안에 감기는 달콤함을 극대화한 주막 스타일입니다."
     },
     {
       "recipe_id": 40,
@@ -1886,7 +1896,7 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍯",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 5 : 미숫가루 3 : 설탕 1! 고소함에 달콤함까지 완벽하게 밸런스를 맞춘 주막 시그니처.",
+      "description": "막걸리 5 : 미숫가루 3 : 꿀 1! 고소함에 달콤함까지 완벽하게 밸런스를 맞춘 주막 시그니처.",
       "requires_order": false,
       "max_ratio": 5,
       "sum_ratio": 9,
@@ -1895,7 +1905,7 @@ window.KSool.SeedDataBundle = {
       "step_order": 2,
       "recipe_number": 50,
       "formatted_number": "No.50",
-      "unlock_hint": "전통 탁주와 고소한 볶은 곡물 가루 조합에 달콤한 결정을 한 스푼 더해 고소함과 단맛의 균형을 완성한 시그니처입니다."
+      "unlock_hint": "전통 탁주와 고소한 볶은 곡물 가루 조합에 진한 꿀 한 스푼을 더해 고소함과 단맛의 균형을 완성한 시그니처입니다."
     },
     {
       "recipe_id": 50,
@@ -2839,7 +2849,7 @@ window.KSool.SeedDataBundle = {
       "id": 96,
       "recipe_id": 39,
       "slot_order": 2,
-      "ingredient_id": 701,
+      "ingredient_id": 705,
       "detail_ingredient_id": null,
       "ratio": 1
     },
@@ -3023,7 +3033,7 @@ window.KSool.SeedDataBundle = {
       "id": 119,
       "recipe_id": 49,
       "slot_order": 3,
-      "ingredient_id": 701,
+      "ingredient_id": 705,
       "detail_ingredient_id": null,
       "ratio": 1
     },

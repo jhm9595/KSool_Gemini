@@ -507,7 +507,7 @@
     "display_name": "유자청",
     "real_name": "유자청",
     "is_licensed": false,
-    "emoji": "🍯",
+    "emoji": "🫙",
     "picker_component": "NONE",
     "picker_config": null
   },
@@ -518,6 +518,16 @@
     "real_name": "매실청",
     "is_licensed": false,
     "emoji": "🫙",
+    "picker_component": "NONE",
+    "picker_config": null
+  },
+  {
+    "ingredient_id": 705,
+    "category_id": "ETC",
+    "display_name": "꿀",
+    "real_name": "꿀",
+    "is_licensed": false,
+    "emoji": "🍯",
     "picker_component": "NONE",
     "picker_config": null
   },
