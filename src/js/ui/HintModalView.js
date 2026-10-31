@@ -33,6 +33,7 @@ class HintModalView {
     this.showHelpGuide = false;
     this.minigameStatus = 'PLAYING';
     this._resetGuessSlots();
+    this._clearActiveRecipeHistory();
 
     // 도감에서 미해금 카드를 누르면 [⚾ 베이스볼 / 🎮 그림 해금 게임 / (있을 경우 📺 힌트보기)] 선택 화면부터 노출
     this.viewMode = 'CHOICE';
@@ -43,7 +44,17 @@ class HintModalView {
 
   close() {
     this._stopMinigame();
+    this._clearActiveRecipeHistory();
     document.getElementById('hint-modal').classList.remove('active');
+  }
+
+  _clearActiveRecipeHistory() {
+    if (this.activeRecipeId) {
+      const hintState = this.inventory.getHintState(this.activeRecipeId);
+      if (hintState) {
+        hintState.history = [];
+      }
+    }
   }
 
   _stopMinigame() {
@@ -524,14 +535,26 @@ class HintModalView {
       </div>
     ` : '';
 
+    const targetInfoCardHtml = `
+      <div class="bb-target-info-card">
+        <div class="bb-target-title-row">
+          <span class="bb-target-num">${recipe.formatted_number || ''}</span>
+          <span class="bb-target-name">${resolvedName}</span>
+        </div>
+        ${recipe.unlock_hint ? `
+          <div class="bb-target-hint">
+            <span class="hint-bulb">💡</span> ${recipe.unlock_hint}
+          </div>
+        ` : ''}
+      </div>
+    `;
+
     container.innerHTML = `
       <div class="hint-top-header">
         <div style="display:flex; align-items:center; gap:6px; min-width:0;">
           <button class="hint-back-choice-btn" id="hint-back-choice-btn" title="선택 화면으로">←</button>
-          <div class="modal-title" style="display:flex; align-items:center; gap:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+          <div class="modal-title" style="display:flex; align-items:center; gap:5px;">
             <span>⚾ 베이스볼</span>
-            <span style="color:#475569;">·</span>
-            ${targetBadgeHtml}
           </div>
           <button class="bb-help-btn ${this.showHelpGuide ? 'active' : ''}" id="bb-help-toggle-btn" title="베이스볼 게임 설명 보기">?</button>
         </div>
@@ -541,6 +564,8 @@ class HintModalView {
         </div>
       </div>
       ${helpGuideHtml}
+
+      ${targetInfoCardHtml}
 
       ${mainSectionHtml}
     `;
@@ -680,6 +705,8 @@ class HintModalView {
     const choiceBaseballBtn = container.querySelector('#choice-baseball-btn');
     if (choiceBaseballBtn) {
       choiceBaseballBtn.onclick = () => {
+        this._clearActiveRecipeHistory();
+        this._resetGuessSlots();
         this.viewMode = 'BASEBALL';
         this.audio.playTap();
         this.render();
@@ -713,6 +740,7 @@ class HintModalView {
     const backChoiceBtn = container.querySelector('#hint-back-choice-btn');
     if (backChoiceBtn) {
       backChoiceBtn.onclick = () => {
+        this._clearActiveRecipeHistory();
         this.viewMode = 'CHOICE';
         this.audio.playTap();
         this.render();
@@ -763,6 +791,8 @@ class HintModalView {
     const goBaseballBtn = container.querySelector('#mg-go-baseball-btn');
     if (goBaseballBtn) {
       goBaseballBtn.onclick = () => {
+        this._clearActiveRecipeHistory();
+        this._resetGuessSlots();
         this.viewMode = 'BASEBALL';
         this.audio.playTap();
         this.render();
