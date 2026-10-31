@@ -353,10 +353,20 @@ class KSoolApp {
     const container = document.getElementById('brew-step-quiz-bar');
     if (!container) return;
 
+    const allRecipes = this.recipeBook.getAllRecipes();
+    const totalCount = allRecipes.length;
     const nextUnsolved = this.inventory.getNextQuizRecipe();
+
+    const navigableRecipes = allRecipes.filter(
+      r => this.inventory.isRecipeUnlocked(r.recipe_id) || this.inventory.isRecipeChallengeable(r)
+    );
+    if (navigableRecipes.length === 0 && allRecipes.length > 0) {
+      navigableRecipes.push(allRecipes[0]);
+    }
+
     let targetRec = this.recipeBook.getRecipe(this.quizTargetRecipeId);
-    if (!targetRec || this.inventory.isRecipeUnlocked(targetRec.recipe_id)) {
-      targetRec = nextUnsolved || targetRec;
+    if (!targetRec || !navigableRecipes.some(r => r.recipe_id === targetRec.recipe_id)) {
+      targetRec = nextUnsolved || navigableRecipes[0];
       if (targetRec) this.quizTargetRecipeId = targetRec.recipe_id;
     }
 
@@ -373,10 +383,13 @@ class KSoolApp {
 
     if (this.brewMode === 'FREE' || !targetRec) {
       container.innerHTML = modeTabsHtml;
-      this._bindBrewQuizEvents(container, targetRec);
+      this._bindBrewQuizEvents(container, navigableRecipes, targetRec);
       return;
     }
 
+    const navIdx = navigableRecipes.findIndex(r => r.recipe_id === targetRec.recipe_id);
+    const hasPrev = navIdx > 0;
+    const hasNext = navIdx >= 0 && navIdx < navigableRecipes.length - 1;
     const isUnlocked = this.inventory.isRecipeUnlocked(targetRec.recipe_id);
     const isImageUnlocked = this.inventory.isRecipeImageUnlocked(targetRec.recipe_id);
     const resolvedName = this.brandResolver.resolveName(targetRec);
@@ -389,21 +402,25 @@ class KSoolApp {
           <div class="quiz-question-body">
             <div class="quiz-header-inline">
               <div class="quiz-title-group">
-                <span class="quiz-num-badge">${targetRec.formatted_number}</span>
                 <span class="quiz-target-title">${resolvedName}</span>
+                ${!isUnlocked ? `<button type="button" class="quiz-infer-btn" id="quiz-open-hint-btn">추리</button>` : ''}
               </div>
-              <button type="button" class="quiz-infer-btn" id="quiz-open-hint-btn">추리</button>
+              <div class="quiz-nav-right">
+                <button type="button" class="quiz-nav-btn" id="quiz-prev-btn" ${hasPrev ? '' : 'disabled'} title="이전 번호">◀</button>
+                <span class="quiz-num-badge">${targetRec.formatted_number} <span class="quiz-num-total">/ ${totalCount}</span></span>
+                <button type="button" class="quiz-nav-btn" id="quiz-next-btn" ${hasNext ? '' : 'disabled'} title="다음 번호">▶</button>
+              </div>
             </div>
-            <div class="quiz-desc-text">${targetRec.unlock_hint || ''}</div>
+            <div class="quiz-desc-text">${isUnlocked ? targetRec.description : (targetRec.unlock_hint || '')}</div>
           </div>
         </div>
       </div>
     `;
 
-    this._bindBrewQuizEvents(container, targetRec);
+    this._bindBrewQuizEvents(container, navigableRecipes, targetRec);
   }
 
-  _bindBrewQuizEvents(container, targetRec) {
+  _bindBrewQuizEvents(container, navigableRecipes, targetRec) {
     container.querySelectorAll('[data-brew-mode]').forEach(btn => {
       btn.onclick = () => {
         this.brewMode = btn.getAttribute('data-brew-mode');
@@ -411,6 +428,30 @@ class KSoolApp {
         this._renderBrewStepQuizBar();
       };
     });
+
+    const prevBtn = container.querySelector('#quiz-prev-btn');
+    if (prevBtn && targetRec) {
+      prevBtn.onclick = () => {
+        const idx = navigableRecipes.findIndex(r => r.recipe_id === targetRec.recipe_id);
+        if (idx > 0) {
+          this.quizTargetRecipeId = navigableRecipes[idx - 1].recipe_id;
+          this.audio.playTap();
+          this._renderBrewStepQuizBar();
+        }
+      };
+    }
+
+    const nextBtn = container.querySelector('#quiz-next-btn');
+    if (nextBtn && targetRec) {
+      nextBtn.onclick = () => {
+        const idx = navigableRecipes.findIndex(r => r.recipe_id === targetRec.recipe_id);
+        if (idx >= 0 && idx < navigableRecipes.length - 1) {
+          this.quizTargetRecipeId = navigableRecipes[idx + 1].recipe_id;
+          this.audio.playTap();
+          this._renderBrewStepQuizBar();
+        }
+      };
+    }
 
     const hintBtn = container.querySelector('#quiz-open-hint-btn');
     if (hintBtn && targetRec) {
