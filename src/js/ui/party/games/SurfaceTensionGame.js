@@ -1,20 +1,19 @@
 window.KSool = window.KSool || {};
 
 /**
- * ③ 표면장력 소주잔 채우기 (아웃 카운트형)
- * 잔에 술이 넘치기 직전까지 돌아가며 액체를 채워 넣다가,
- * 표면장력 한계를 넘겨 잔을 넘치게 만든 사람이 패배하는 게임.
+ * ③ 표면장력 소주잔 채우기 (미니멀 서스펜스형)
+ * - 수위 퍼센티지 및 플레이어/패스 UI 완전 제거 (실제 수면의 볼록함만 보고 판단)
+ * - 캔버스 잔 또는 하단 버튼을 꾹 누르고 있는 동안 술이 차오르고, 손을 떼면 즉시 멈춤
+ * - 표면장력 한계(100%~106%)를 넘겨 넘쳐버리면 즉시 벌칙 발동
  */
 class SurfaceTensionGame {
   constructor(hub) {
     this.hub = hub;
     this.glassCapacity = 100; // 기준 100%
     this.currentLevel = 20; // 시작 시 약 20%
-    this.overflowLimit = 100; // 101% ~ 107% 사이 랜덤 한계
+    this.overflowLimit = 100; // 101% ~ 107% 사이 무작위 표면장력 임계치
     this.isPouring = false;
     this.isOverflowed = false;
-    this.currentTurnPlayer = 1;
-    this.totalPlayers = 4;
     this.animId = null;
     this.wavePhase = 0;
     this.pourInterval = null;
@@ -37,10 +36,16 @@ class SurfaceTensionGame {
   }
 
   startPour() {
-    if (this.isOverflowed) return;
+    if (this.isOverflowed) {
+      this.reset();
+      return;
+    }
     this.isPouring = true;
     this.hub.sound.startPour();
     this.hub.vibrateShort();
+
+    const btn = document.getElementById('btn-hold-pour');
+    if (btn) btn.classList.add('pouring');
 
     this.pourInterval = setInterval(() => {
       if (!this.isPouring || this.isOverflowed) return;
@@ -49,12 +54,13 @@ class SurfaceTensionGame {
       this.currentLevel += 0.35;
       this.hub.sound.updatePour(this.currentLevel / 100);
 
-      if (this.currentLevel >= 85 && !this.heartbeatTimer) {
+      // 잔이 거의 다 차면 심장박동 효과음
+      if (this.currentLevel >= 88 && !this.heartbeatTimer) {
         this.heartbeatTimer = setInterval(() => {
-          if (this.currentLevel >= 85 && !this.isOverflowed) {
+          if (this.currentLevel >= 88 && !this.isOverflowed) {
             this.hub.sound.playHeartbeat();
           }
-        }, 600);
+        }, 550);
       }
 
       if (this.currentLevel >= this.overflowLimit) {
@@ -69,11 +75,8 @@ class SurfaceTensionGame {
     if (this.pourInterval) clearInterval(this.pourInterval);
     this.hub.sound.stopPour();
 
-    if (!this.isOverflowed) {
-      // 턴을 넘기며 안전 안내
-      this.currentTurnPlayer = (this.currentTurnPlayer % this.totalPlayers) + 1;
-      this._updateInfo();
-    }
+    const btn = document.getElementById('btn-hold-pour');
+    if (btn) btn.classList.remove('pouring');
   }
 
   triggerOverflow() {
@@ -83,14 +86,15 @@ class SurfaceTensionGame {
     if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
     this.hub.sound.stopPour();
 
+    const btn = document.getElementById('btn-hold-pour');
+    if (btn) btn.classList.remove('pouring');
+
     this.hub.sound.playExplosion();
     this.hub.triggerPenalty({
       title: '🌊 술이 넘쳤다! 🌊',
-      subtitle: `[ 플레이어 ${this.currentTurnPlayer} ] 잔을 넘쳐버렸습니다! 벌칙주 원샷!`,
+      subtitle: '잔을 넘쳐버린 사람 시원하게 벌칙주 원샷!',
       accentColor: '#38bdf8'
     });
-
-    this._updateInfo();
   }
 
   render() {
@@ -98,35 +102,21 @@ class SurfaceTensionGame {
     if (!container) return;
 
     container.innerHTML = `
-      <div class="party-game-box surface-box">
-        <!-- 턴 안내 배너 -->
-        <div class="party-turn-indicator">
-          <div class="party-turn-badge">
-            <span class="pulse-dot"></span>
-            <b>플레이어 ${this.currentTurnPlayer} 차례!</b> ([따르기] 버튼을 꾹 누르세요)
-          </div>
-          <div class="tension-level-badge" id="tension-level-badge">
-            수위: ${Math.round(this.currentLevel)}%
-          </div>
-        </div>
-
-        <!-- 캔버스 표면장력 소주잔 렌더링 -->
-        <div class="glass-canvas-wrap">
-          <canvas id="tension-canvas" width="280" height="340"></canvas>
+      <div class="party-game-box surface-minimal-box">
+        <!-- 캔버스 표면장력 소주잔 렌더링 (화면 정중앙 배치) -->
+        <div class="glass-canvas-wrap" id="glass-touch-zone">
+          <canvas id="tension-canvas" width="290" height="350"></canvas>
           <div class="tension-spill-fx ${this.isOverflowed ? 'active' : ''}"></div>
         </div>
 
-        <!-- 하단 조작: 꾹 누르는 따르기 버튼 -->
-        <div class="party-bottom-controls">
+        <!-- 하단 심플 조작: 꾹 누르는 따르기 버튼 -->
+        <div class="surface-controls-wrap">
           <button type="button" class="party-hold-pour-btn ${this.isPouring ? 'pouring' : ''}" id="btn-hold-pour">
             <span class="pour-icon">🍶</span>
-            <span class="pour-label">꾹 눌러서 따르기! (손 떼면 멈춤)</span>
+            <span class="pour-label">꾹 눌러서 채우기! (손 떼면 멈춤)</span>
           </button>
-          <div class="party-range-toggle">
-            <span style="font-size:0.75rem; color:#94a3b8; font-weight:800; margin-right:4px;">참가자:</span>
-            ${[2, 3, 4, 5, 6].map(n => `
-              <button type="button" class="range-pill ${this.totalPlayers === n ? 'active' : ''}" data-players="${n}">${n}명</button>
-            `).join('')}
+          <div class="surface-minimal-hint">
+            👀 수위 숫자는 비밀! 볼록해진 표면장력을 직접 보고 손을 떼세요!
           </div>
         </div>
       </div>
@@ -136,41 +126,23 @@ class SurfaceTensionGame {
     this._startCanvasLoop();
   }
 
-  _updateInfo() {
-    const badge = document.getElementById('tension-level-badge');
-    if (badge) {
-      badge.textContent = `수위: ${Math.round(this.currentLevel)}%`;
-      if (this.currentLevel >= 85) {
-        badge.classList.add('danger');
-      } else {
-        badge.classList.remove('danger');
-      }
-    }
-    const turnBadge = document.querySelector('.party-turn-badge b');
-    if (turnBadge) {
-      turnBadge.textContent = `플레이어 ${this.currentTurnPlayer} 차례!`;
-    }
-  }
-
   _bindEvents() {
     const btn = document.getElementById('btn-hold-pour');
-    if (btn) {
-      // 마우스 및 터치 이벤트 모두 지원 (롱 프레스)
-      btn.onmousedown = (e) => { e.preventDefault(); this.startPour(); };
-      btn.onmouseup = (e) => { e.preventDefault(); this.stopPour(); };
-      btn.onmouseleave = (e) => { e.preventDefault(); this.stopPour(); };
+    const glass = document.getElementById('glass-touch-zone');
 
-      btn.ontouchstart = (e) => { e.preventDefault(); this.startPour(); };
-      btn.ontouchend = (e) => { e.preventDefault(); this.stopPour(); };
-      btn.ontouchcancel = (e) => { e.preventDefault(); this.stopPour(); };
-    }
+    const attachPourEvents = (el) => {
+      if (!el) return;
+      el.onmousedown = (e) => { e.preventDefault(); this.startPour(); };
+      el.onmouseup = (e) => { e.preventDefault(); this.stopPour(); };
+      el.onmouseleave = (e) => { e.preventDefault(); this.stopPour(); };
 
-    document.querySelectorAll('[data-players]').forEach(pBtn => {
-      pBtn.onclick = (e) => {
-        this.totalPlayers = Number(e.currentTarget.getAttribute('data-players'));
-        this.reset();
-      };
-    });
+      el.ontouchstart = (e) => { e.preventDefault(); this.startPour(); };
+      el.ontouchend = (e) => { e.preventDefault(); this.stopPour(); };
+      el.ontouchcancel = (e) => { e.preventDefault(); this.stopPour(); };
+    };
+
+    attachPourEvents(btn);
+    attachPourEvents(glass);
   }
 
   _startCanvasLoop() {
@@ -184,11 +156,11 @@ class SurfaceTensionGame {
       this.wavePhase += 0.08;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const glassTopY = 60;
-      const glassBottomY = 280;
+      const glassTopY = 65;
+      const glassBottomY = 285;
       const glassHeight = glassBottomY - glassTopY;
-      const glassWidthTop = 190;
-      const glassWidthBottom = 130;
+      const glassWidthTop = 195;
+      const glassWidthBottom = 135;
       const cx = canvas.width / 2;
 
       // 1. 유리잔 배경 윤곽 그리기
@@ -233,7 +205,7 @@ class SurfaceTensionGame {
 
       ctx.moveTo(leftX, glassBottomY);
       // 수면 곡선 (표면장력일 때 볼록해지는 효과)
-      const meniscusBulge = fillRatio > 0.95 ? (fillRatio - 0.95) * 60 : 0;
+      const meniscusBulge = fillRatio > 0.94 ? (fillRatio - 0.94) * 65 : 0;
 
       for (let x = leftX; x <= rightX; x += 5) {
         const norm = (x - cx) / (glassWidthTop / 2);
@@ -248,34 +220,48 @@ class SurfaceTensionGame {
       ctx.fill();
 
       // 표면장력 하이라이트 림
-      if (fillRatio > 0.9) {
+      if (fillRatio > 0.92) {
+        ctx.restore();
+        ctx.save();
         ctx.strokeStyle = '#fde047';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#fde047';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        for (let x = leftX; x <= rightX; x += 5) {
+          const norm = (x - cx) / (glassWidthTop / 2);
+          const dome = (1 - norm * norm) * meniscusBulge;
+          const y = currentLiquidY - dome;
+          if (x === leftX) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
         ctx.stroke();
       }
 
       ctx.restore();
 
-      // 3. 유리잔 외곽선 및 입체 광택
+      // 3. 유리잔 외곽 및 하이라이트 반사광
       ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+      ctx.lineWidth = 3.5;
       ctx.beginPath();
       ctx.moveTo(cx - glassWidthTop / 2, glassTopY);
       ctx.lineTo(cx - glassWidthBottom / 2, glassBottomY);
-      ctx.lineTo(cx + glassWidthBottom / 2, glassBottomY);
-      ctx.lineTo(cx + glassWidthTop / 2, glassTopY);
       ctx.stroke();
 
-      // 림 상단 타원
+      // 우측 하이라이트
       ctx.beginPath();
-      ctx.ellipse(cx, glassTopY, glassWidthTop / 2, 8, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = fillRatio > 0.98 ? '#ef4444' : 'rgba(255, 255, 255, 0.8)';
-      ctx.lineWidth = fillRatio > 0.98 ? 3 : 2;
+      ctx.moveTo(cx + glassWidthTop / 2, glassTopY);
+      ctx.lineTo(cx + glassWidthBottom / 2, glassBottomY);
       ctx.stroke();
+
+      // 잔 바닥 두꺼운 유리
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.fillRect(cx - glassWidthBottom / 2, glassBottomY - 8, glassWidthBottom, 8);
+
       ctx.restore();
 
-      if (this.animId) {
+      if (!this.isOverflowed) {
         this.animId = requestAnimationFrame(renderFrame);
       }
     };
@@ -284,10 +270,14 @@ class SurfaceTensionGame {
   }
 
   destroy() {
-    if (this.animId) cancelAnimationFrame(this.animId);
+    if (this.animId) {
+      cancelAnimationFrame(this.animId);
+      this.animId = null;
+    }
     if (this.pourInterval) clearInterval(this.pourInterval);
     if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
     this.hub.sound.stopPour();
+    this.isPouring = false;
   }
 }
 

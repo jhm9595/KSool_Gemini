@@ -102,12 +102,8 @@ class UpAndDownGame {
 
     container.innerHTML = `
       <div class="party-game-box updown-box">
-        <!-- 상단 턴 안내 및 범위 게이지 -->
+        <!-- 상단 범위 게이지 -->
         <div class="party-turn-indicator">
-          <div class="party-turn-badge">
-            <span class="pulse-dot"></span>
-            <b>${this.currentTurn}번째 턴</b> (차례인 사람에게 패스!)
-          </div>
           <div class="party-range-numbers">
             <span class="range-bound min">${this.minRange}</span>
             <span class="range-sep">~</span>
