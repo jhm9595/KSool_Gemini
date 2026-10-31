@@ -322,6 +322,25 @@
   background: linear-gradient(160deg, #1e293b 0%, #291d12 100%);
 }
 
+.sool-card.challengeable.image-unlocked {
+  border-color: rgba(168, 85, 247, 0.75);
+  background: linear-gradient(160deg, #1e293b 0%, #2e1065 100%);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.22);
+}
+
+.img-unlocked-pill {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  font-size: 0.52rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(168, 85, 247, 0.28);
+  color: #e9d5ff;
+  border: 1px solid rgba(192, 132, 252, 0.45);
+}
+
 .sool-card.level-locked {
   opacity: 0.45;
   cursor: not-allowed;

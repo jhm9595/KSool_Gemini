@@ -32,7 +32,10 @@ class KSoolApp {
       baseballEngine: this.baseballEngine,
       ratioProvider: this.ratioProvider,
       brandResolver: this.brandResolver,
-      audio: this.audio
+      audio: this.audio,
+      onImageUnlocked: () => {
+        this.renderCollectionView();
+      }
     });
 
     this.suggestionBoardView = new window.KSool.SuggestionBoardView({
@@ -400,6 +403,7 @@ class KSoolApp {
     grid.innerHTML = filtered.map(rec => {
       const isUnlocked = this.inventory.isRecipeUnlocked(rec.recipe_id);
       const isChallengeable = this.inventory.isRecipeChallengeable(rec);
+      const isImageUnlocked = this.inventory.isRecipeImageUnlocked(rec.recipe_id);
       const hintState = this.inventory.getHintState(rec.recipe_id);
       const clearedCount = hintState.stageCleared.filter(Boolean).length;
 
@@ -409,18 +413,35 @@ class KSoolApp {
         cardStateClass = 'unlocked';
         statusLabel = `✅ 해금 완료`;
       } else if (isChallengeable) {
-        cardStateClass = 'challengeable';
-        statusLabel = clearedCount > 0 ? `⚾ 힌트 ${clearedCount}단계 성공` : `🕵️ 힌트 추리 가능`;
+        cardStateClass = isImageUnlocked ? 'challengeable image-unlocked' : 'challengeable';
+        if (isImageUnlocked && clearedCount > 0) {
+          statusLabel = `🖼️ 그림 · ⚾ ${clearedCount}단계 성공`;
+        } else if (isImageUnlocked) {
+          statusLabel = `🖼️ 그림 해금 · ⚾ 추리 가능`;
+        } else if (clearedCount > 0) {
+          statusLabel = `⚾ 힌트 ${clearedCount}단계 성공`;
+        } else {
+          statusLabel = `🕵️ 힌트 추리 가능`;
+        }
       }
 
       const displayName = isUnlocked
         ? this.brandResolver.resolveName(rec)
         : (isChallengeable ? `미지의 ${rec.category}` : '잠긴 비전서');
 
+      const displayEmoji = isUnlocked
+        ? rec.emoji
+        : (isChallengeable ? (isImageUnlocked ? rec.emoji : '❓') : '🔒');
+
+      const imgOnlyBadge = (!isUnlocked && isChallengeable && isImageUnlocked)
+        ? `<span class="img-unlocked-pill">🖼️ 그림해금</span>`
+        : '';
+
       return `
         <div class="sool-card ${cardStateClass}" data-recipe-card="${rec.recipe_id}">
+          ${imgOnlyBadge}
           <span class="diff-badge diff-${rec.difficulty}">${rec.difficulty}</span>
-          <span class="sool-emoji">${isUnlocked ? rec.emoji : (isChallengeable ? '❓' : '🔒')}</span>
+          <span class="sool-emoji">${displayEmoji}</span>
           <span class="sool-name">${displayName}</span>
           <span class="sool-hint-status">${statusLabel}</span>
         </div>
@@ -599,6 +620,7 @@ class KSoolApp {
           this.craftingPot.clear();
           this.inventory.unlockAllSandboxMode = false;
           this.inventory.userLevel = 1;
+          this.inventory.unlockedImageRecipeIds.clear();
           this.inventory.hintProgressByRecipe = {};
           this.inventory.promotedCustomRecipes = [];
           this.inventory.init();

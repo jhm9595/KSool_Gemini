@@ -8,6 +8,7 @@ class InventoryManager {
     this.userLevel = 1;
     this.unlockedRecipeIds = new Set();
     this.unlockedIngredientIds = new Set();
+    this.unlockedImageRecipeIds = new Set(); // 미니게임 클리어로 그림(아이콘)만 선해금된 레시피 ID 집합
     this.hintProgressByRecipe = {}; // recipeId -> { stageCleared: [bool, bool, bool], solvedRatios: { ingId: ratio } }
     this.promotedCustomRecipes = [];
     this.unlockAllSandboxMode = false; // 모든 재료 즉시 실험해보기 토글용
@@ -16,6 +17,7 @@ class InventoryManager {
   init() {
     this.unlockedRecipeIds.clear();
     this.unlockedIngredientIds.clear();
+    this.unlockedImageRecipeIds.clear();
 
     // 1. 저장된 상태 복원 (해금한 레시피 목록 기준)
     const saved = this.storage.loadState();
@@ -23,6 +25,9 @@ class InventoryManager {
       if (typeof saved.userLevel === 'number') this.userLevel = saved.userLevel;
       if (Array.isArray(saved.unlockedRecipeIds)) {
         saved.unlockedRecipeIds.forEach(id => this.unlockedRecipeIds.add(Number(id)));
+      }
+      if (Array.isArray(saved.unlockedImageRecipeIds)) {
+        saved.unlockedImageRecipeIds.forEach(id => this.unlockedImageRecipeIds.add(Number(id)));
       }
       if (saved.hintProgressByRecipe && typeof saved.hintProgressByRecipe === 'object') {
         this.hintProgressByRecipe = saved.hintProgressByRecipe;
@@ -66,6 +71,19 @@ class InventoryManager {
 
   isRecipeUnlocked(recipeId) {
     return this.unlockedRecipeIds.has(Number(recipeId));
+  }
+
+  isRecipeImageUnlocked(recipeId) {
+    const rId = Number(recipeId);
+    return this.unlockedRecipeIds.has(rId) || this.unlockedImageRecipeIds.has(rId);
+  }
+
+  unlockRecipeImage(recipeId) {
+    const rId = Number(recipeId);
+    const isNew = !this.unlockedImageRecipeIds.has(rId);
+    this.unlockedImageRecipeIds.add(rId);
+    this.save();
+    return isNew;
   }
 
   isRecipeChallengeable(recipe) {
@@ -116,6 +134,7 @@ class InventoryManager {
       userLevel: this.userLevel,
       unlockedRecipeIds: Array.from(this.unlockedRecipeIds),
       unlockedIngredientIds: Array.from(this.unlockedIngredientIds),
+      unlockedImageRecipeIds: Array.from(this.unlockedImageRecipeIds),
       hintProgressByRecipe: this.hintProgressByRecipe,
       promotedCustomRecipes: this.promotedCustomRecipes
     });

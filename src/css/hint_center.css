@@ -346,22 +346,45 @@
 .updown-feedback-banner.down { color: #38bdf8; border: 1px solid #38bdf8; }
 .updown-feedback-banner.correct { color: #10b981; border: 1px solid #10b981; }
 
-/* 초기 2버튼 선택 화면 (베이스볼 / 힌트보기) */
+/* 초기 선택 화면 (베이스볼 / 그림 해금 게임 / 힌트보기) */
+.unlocked-img-preview-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(15, 23, 42, 0.9));
+  border: 1px solid rgba(192, 132, 252, 0.55);
+}
+
+.unlocked-img-emoji {
+  font-size: 2.3rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5));
+}
+
+.unlocked-img-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .hint-choice-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 12px 0 4px 0;
+  gap: 10px;
+  padding: 6px 0 2px 0;
 }
 
 .hint-big-choice-btn {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 150px;
-  padding: 18px 12px;
+  min-height: 146px;
+  padding: 18px 10px;
   border-radius: 16px;
   border: 2px solid #334155;
   background: linear-gradient(145deg, #1e293b, #0f172a);
@@ -370,16 +393,50 @@
   transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.hint-big-choice-btn.choice-span-full {
+  grid-column: 1 / -1;
+  min-height: 92px;
+  flex-direction: row;
+  justify-content: center;
+  gap: 14px;
+  padding: 14px 16px;
+}
+
 .hint-big-choice-btn.choice-baseball {
   border-color: #3b82f6;
   background: linear-gradient(145deg, #1e293b, #172554);
   box-shadow: 0 6px 18px rgba(37, 99, 235, 0.25);
 }
 
+.hint-big-choice-btn.choice-minigame {
+  border-color: #a855f7;
+  background: linear-gradient(145deg, #1e293b, #2e1065);
+  box-shadow: 0 6px 18px rgba(168, 85, 247, 0.25);
+}
+
 .hint-big-choice-btn.choice-ext-hint {
   border-color: #f59e0b;
   background: linear-gradient(145deg, #1e293b, #3b230b);
   box-shadow: 0 6px 18px rgba(245, 158, 11, 0.22);
+}
+
+.choice-badge-tag {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  font-size: 0.56rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.3);
+  color: #e9d5ff;
+  border: 1px solid rgba(192, 132, 252, 0.5);
+}
+
+.choice-badge-tag.cleared {
+  background: rgba(16, 185, 129, 0.28);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.55);
 }
 
 .hint-big-choice-btn:hover {
@@ -391,22 +448,320 @@
 }
 
 .choice-big-icon {
-  font-size: 2.5rem;
+  font-size: 2.35rem;
   line-height: 1;
 }
 
 .choice-big-title {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 900;
   color: #ffffff;
 }
 
 .choice-big-sub {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: #cbd5e1;
   text-align: center;
   word-break: keep-all;
+}
+
+/* 3종 고난도 미니게임 선택 화면 */
+.minigame-select-intro {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  background: #0f172a;
+  border: 1px solid #334155;
+  padding: 9px 12px;
+  border-radius: 10px;
+  line-height: 1.45;
+}
+
+.minigame-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.minigame-select-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 1px solid #334155;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.minigame-select-card:hover {
+  transform: translateY(-2px);
+}
+
+.minigame-select-card.mg-card-brick {
+  border-color: rgba(56, 189, 248, 0.55);
+}
+.minigame-select-card.mg-card-brick:hover {
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
+}
+
+.minigame-select-card.mg-card-qix {
+  border-color: rgba(16, 185, 129, 0.55);
+}
+.minigame-select-card.mg-card-qix:hover {
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+}
+
+.minigame-select-card.mg-card-hammer {
+  border-color: rgba(245, 158, 11, 0.55);
+}
+.minigame-select-card.mg-card-hammer:hover {
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+}
+
+.mg-card-left {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mg-card-icon {
+  font-size: 1.55rem;
+}
+
+.mg-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mg-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.mg-card-title {
+  font-size: 0.84rem;
+  font-weight: 900;
+  color: #f8fafc;
+}
+
+.mg-diff-pill {
+  font-size: 0.58rem;
+  font-weight: 900;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.mg-diff-pill.hard {
+  background: rgba(56, 189, 248, 0.2);
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+}
+
+.mg-diff-pill.vhard {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
+.mg-diff-pill.extreme {
+  background: rgba(239, 68, 68, 0.22);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+.mg-card-desc {
+  font-size: 0.68rem;
+  color: #cbd5e1;
+  line-height: 1.38;
+}
+
+.mg-play-btn {
+  padding: 7px 10px;
+  border-radius: 9px;
+  border: none;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* 아케이드 캔버스 캐비닛 및 컨트롤 바 */
+.arcade-cabinet-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.minigame-canvas {
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+  aspect-ratio: 380 / 310;
+  background: #070b14;
+  border: 2px solid #475569;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  touch-action: none;
+  user-select: none;
+  display: block;
+}
+
+#minigame-controls-slot {
+  width: 100%;
+}
+
+.mg-control-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 7px 10px;
+}
+
+.mg-control-tip {
+  font-size: 0.68rem;
+  color: #93c5fd;
+  font-weight: 700;
+}
+
+.mg-mini-retry-btn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #475569;
+  background: #1e293b;
+  color: #f8fafc;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mg-qix-dpad-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 6px 10px;
+}
+
+.mg-dpad-group {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+
+.dpad-btn {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #475569;
+  background: #1e293b;
+  color: #f8fafc;
+  font-size: 0.92rem;
+  font-weight: 900;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dpad-btn:active {
+  background: #10b981;
+  border-color: #10b981;
+  color: #090d16;
+}
+
+.mg-hammer-bar {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.mg-hammer-strike-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #fbbf24;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #090d16;
+  font-size: 0.9rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+}
+
+.mg-hammer-strike-btn:active {
+  transform: scale(0.97);
+}
+
+.mg-result-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.mg-result-banner.win {
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid #10b981;
+}
+
+.mg-result-banner.lose {
+  background: rgba(239, 68, 68, 0.16);
+  border: 1px solid #ef4444;
+}
+
+.mg-result-title {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #f8fafc;
+}
+
+.mg-result-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.mg-action-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 9px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+}
+
+.mg-action-btn.primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+}
+
+.mg-action-btn.secondary {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #e2e8f0;
 }
 
 .hint-back-choice-btn {

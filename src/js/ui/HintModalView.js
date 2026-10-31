@@ -1,16 +1,21 @@
 window.KSool = window.KSool || {};
 
 class HintModalView {
-  constructor({ recipeBook, inventory, baseballEngine, ratioProvider, brandResolver, audio }) {
+  constructor({ recipeBook, inventory, baseballEngine, ratioProvider, brandResolver, audio, onImageUnlocked }) {
     this.recipeBook = recipeBook;
     this.inventory = inventory;
     this.baseballEngine = baseballEngine;
     this.ratioProvider = ratioProvider;
     this.brandResolver = brandResolver;
     this.audio = audio;
+    this.onImageUnlocked = onImageUnlocked || null;
 
     this.activeRecipeId = null;
-    this.viewMode = 'BASEBALL'; // 'CHOICE' | 'BASEBALL'
+    this.viewMode = 'CHOICE'; // 'CHOICE' | 'BASEBALL' | 'MINIGAME_SELECT' | 'MINIGAME_PLAY'
+    this.selectedMinigameType = 'BRICK_BREAKER'; // 'BRICK_BREAKER' | 'TERRITORY_QIX' | 'CRITICAL_HAMMER'
+    this.minigameStatus = 'PLAYING'; // 'PLAYING' | 'WIN' | 'LOSE'
+    this.minigameInstance = null;
+
     this.currentGuessSlots = []; // [{ token, emoji, name, label }]
     this.selectedStage2Category = null; // 2단계에서 선택된 (1단계 통과) 재료 유형 탭
     this.selectedUpDownSlotOrder = null; // 베이스볼 완료 후 상단 정답 슬롯 클릭 시 열림
@@ -19,24 +24,32 @@ class HintModalView {
   }
 
   open(recipeId) {
+    this._stopMinigame();
     this.activeRecipeId = Number(recipeId);
     this.lastUpDownResult = null;
     this.selectedUpDownSlotOrder = null;
     this.selectedStage2Category = null;
     this.showHelpGuide = false;
+    this.minigameStatus = 'PLAYING';
     this._resetGuessSlots();
 
-    // 등록된 외부 힌트(영상/글)가 있으면 [베이스볼 / 힌트보기] 2버튼 선택 화면부터 노출,
-    // 등록된 힌트가 없으면 즉시 베이스볼 게임 화면으로 진입
-    const extHints = this.recipeBook.getExternalHints(this.activeRecipeId);
-    this.viewMode = extHints && extHints.length > 0 ? 'CHOICE' : 'BASEBALL';
+    // 도감에서 미해금 카드를 누르면 [⚾ 베이스볼 / 🎮 그림 해금 게임 / (있을 경우 📺 힌트보기)] 선택 화면부터 노출
+    this.viewMode = 'CHOICE';
 
     this.render();
     document.getElementById('hint-modal').classList.add('active');
   }
 
   close() {
+    this._stopMinigame();
     document.getElementById('hint-modal').classList.remove('active');
+  }
+
+  _stopMinigame() {
+    if (this.minigameInstance) {
+      this.minigameInstance.stop();
+      this.minigameInstance = null;
+    }
   }
 
   _resetGuessSlots() {
@@ -55,24 +68,54 @@ class HintModalView {
     const recipe = this.recipeBook.getRecipe(this.activeRecipeId);
     if (!recipe || !container) return;
 
+    if (this.viewMode !== 'MINIGAME_PLAY') {
+      this._stopMinigame();
+    }
+
     const items = this.recipeBook.getRecipeItems(this.activeRecipeId);
     const extHints = this.recipeBook.getExternalHints(this.activeRecipeId);
     const hasExtHint = extHints && extHints.length > 0;
+    const isImageUnlocked = this.inventory.isRecipeImageUnlocked(this.activeRecipeId);
 
-    // 1) 등록된 힌트가 있을 때 처음 보여주는 큼지막한 2버튼 선택 화면 (베이스볼 / 힌트보기)
-    if (this.viewMode === 'CHOICE' && hasExtHint) {
-      const primaryHint = extHints[0];
-      const isVideo = primaryHint.platform === 'YOUTUBE';
-      const hintIcon = isVideo ? '📺' : '📝';
-      const hintSubLabel = isVideo
-        ? `영상 힌트 보러가기 (${window.KSool.ExternalHintLinker.formatTimestamp(primaryHint.start_time_sec)})`
-        : '힌트 글 보러가기';
+    // =========================================================================
+    // [모드 1] 진입 선택 화면 (⚾ 베이스볼 / 🎮 그림 해금 미니게임 / 📺 외부 힌트)
+    // =========================================================================
+    if (this.viewMode === 'CHOICE') {
+      let extHintCardHtml = '';
+      if (hasExtHint) {
+        const primaryHint = extHints[0];
+        const isVideo = primaryHint.platform === 'YOUTUBE';
+        const hintIcon = isVideo ? '📺' : '📝';
+        const hintSubLabel = isVideo
+          ? `영상 힌트 보러가기 (${window.KSool.ExternalHintLinker.formatTimestamp(primaryHint.start_time_sec)})`
+          : '힌트 글 보러가기';
+
+        extHintCardHtml = `
+          <button class="hint-big-choice-btn choice-ext-hint choice-span-full" id="choice-ext-hint-btn">
+            <span class="choice-big-icon">${hintIcon}</span>
+            <span class="choice-big-title">힌트보기</span>
+            <span class="choice-big-sub">${hintSubLabel}</span>
+          </button>
+        `;
+      }
+
+      const unlockedPreviewBanner = isImageUnlocked ? `
+        <div class="unlocked-img-preview-banner">
+          <span class="unlocked-img-emoji">${recipe.emoji}</span>
+          <div class="unlocked-img-text">
+            <div style="font-weight:900; color:#e9d5ff; font-size:0.82rem;">🖼️ 그림 힌트 해금 완료!</div>
+            <div style="font-size:0.7rem; color:#cbd5e1;">이 술의 외형(그림)이 도감에 공개되었습니다. 이제 베이스볼로 재료를 추리해보세요!</div>
+          </div>
+        </div>
+      ` : '';
 
       container.innerHTML = `
         <div class="hint-top-header">
-          <div class="modal-title">⚾ 베이스볼 게임</div>
+          <div class="modal-title">🕵️ 비법 힌트 센터</div>
           <button class="modal-close-x" id="hint-close-btn">✕</button>
         </div>
+
+        ${unlockedPreviewBanner}
 
         <div class="hint-choice-grid">
           <button class="hint-big-choice-btn choice-baseball" id="choice-baseball-btn">
@@ -81,11 +124,14 @@ class HintModalView {
             <span class="choice-big-sub">재료 & 황금비율 추리 게임</span>
           </button>
 
-          <button class="hint-big-choice-btn choice-ext-hint" id="choice-ext-hint-btn">
-            <span class="choice-big-icon">${hintIcon}</span>
-            <span class="choice-big-title">힌트보기</span>
-            <span class="choice-big-sub">${hintSubLabel}</span>
+          <button class="hint-big-choice-btn choice-minigame" id="choice-minigame-btn">
+            <span class="choice-badge-tag ${isImageUnlocked ? 'cleared' : ''}">${isImageUnlocked ? '✅ 해금됨' : '🎮 3종 아케이드'}</span>
+            <span class="choice-big-icon">${isImageUnlocked ? recipe.emoji : '🕹️'}</span>
+            <span class="choice-big-title">그림 해금 게임</span>
+            <span class="choice-big-sub">블럭깨기 · 땅따먹기 · 통얼음 격파</span>
           </button>
+
+          ${extHintCardHtml}
         </div>
       `;
 
@@ -93,11 +139,166 @@ class HintModalView {
       return;
     }
 
+    // =========================================================================
+    // [모드 2] 3종 고난도 그림 해금 미니게임 선택 화면
+    // =========================================================================
+    if (this.viewMode === 'MINIGAME_SELECT') {
+      container.innerHTML = `
+        <div class="hint-top-header">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <button class="hint-back-choice-btn" id="hint-back-choice-btn" title="선택 화면으로">←</button>
+            <div class="modal-title">🕹️ 그림 해금 아케이드 (3종)</div>
+          </div>
+          <button class="modal-close-x" id="hint-close-btn">✕</button>
+        </div>
+
+        <div class="minigame-select-intro">
+          3가지 미니게임 중 <b>원하는 게임 1개만 클리어</b>해도 도감에서 <b>❓ 대신 실제 술 그림(${isImageUnlocked ? recipe.emoji : '🖼️'})</b>이 즉시 해금됩니다!
+        </div>
+
+        <div class="minigame-cards-list">
+          <div class="minigame-select-card mg-card-brick" data-start-minigame="BRICK_BREAKER">
+            <div class="mg-card-left">
+              <span class="mg-card-icon">🧱</span>
+            </div>
+            <div class="mg-card-body">
+              <div class="mg-card-title-row">
+                <span class="mg-card-title">1. 아이스 브레이커 (블럭깨기)</span>
+                <span class="mg-diff-pill hard">HARD · 85%</span>
+              </div>
+              <div class="mg-card-desc">
+                다중 체력(1~3단) 얼음과 강철 범퍼를 돌파하세요! 깨진 얼음에서 떨어지는 <b>☠️독방울(라이프 감소)</b>과 <b>❄️냉기(패들 축소)</b>를 피해야 합니다.
+              </div>
+            </div>
+            <button class="mg-play-btn">도전 ➔</button>
+          </div>
+
+          <div class="minigame-select-card mg-card-qix" data-start-minigame="TERRITORY_QIX">
+            <div class="mg-card-left">
+              <span class="mg-card-icon">📐</span>
+            </div>
+            <div class="mg-card-body">
+              <div class="mg-card-title-row">
+                <span class="mg-card-title">2. 네온 땅따먹기 (영역 점령)</span>
+                <span class="mg-diff-pill vhard">VERY HARD · 75%</span>
+              </div>
+              <div class="mg-card-desc">
+                어둠 속을 질주하는 <b>보스 코어 + 고속 화염구 2기</b>가 내 궤적(선)에 닿기 전에 안전지대로 복귀해 숨겨진 그림 영역을 포위 점령하세요!
+              </div>
+            </div>
+            <button class="mg-play-btn">도전 ➔</button>
+          </div>
+
+          <div class="minigame-select-card mg-card-hammer" data-start-minigame="CRITICAL_HAMMER">
+            <div class="mg-card-left">
+              <span class="mg-card-icon">🔨</span>
+            </div>
+            <div class="mg-card-body">
+              <div class="mg-card-title-row">
+                <span class="mg-card-title">3. 크리티컬 아이스 해머</span>
+                <span class="mg-diff-pill extreme">EXTREME · 5연타</span>
+              </div>
+              <div class="mg-card-desc">
+                단계마다 급가속되는 바늘이 <b>노란 CRITICAL 구간</b>에 올 때만 타격하세요! 양옆 <b>💀함정 구간</b>을 치면 통얼음이 다시 재생됩니다!
+              </div>
+            </div>
+            <button class="mg-play-btn">도전 ➔</button>
+          </div>
+        </div>
+      `;
+
+      this._bindEvents(container);
+      return;
+    }
+
+    // =========================================================================
+    // [모드 3] 미니게임 아케이드 플레이 화면 (60fps HTML5 Canvas)
+    // =========================================================================
+    if (this.viewMode === 'MINIGAME_PLAY') {
+      const gameTitles = {
+        BRICK_BREAKER: '🧱 아이스 브레이커',
+        TERRITORY_QIX: '📐 네온 땅따먹기',
+        CRITICAL_HAMMER: '🔨 크리티컬 아이스 해머'
+      };
+
+      let controlsHtml = '';
+      if (this.minigameStatus === 'WIN') {
+        controlsHtml = `
+          <div class="mg-result-banner win">
+            <div class="mg-result-title">🎉 그림 해금 성공! 도감에 [${recipe.emoji}] 그림이 공개되었습니다!</div>
+            <div class="mg-result-actions">
+              <button class="mg-action-btn primary" id="mg-go-baseball-btn">⚾ 베이스볼 추리하러 가기</button>
+              <button class="mg-action-btn secondary" id="mg-retry-btn">🔄 다시 플레이</button>
+            </div>
+          </div>
+        `;
+      } else if (this.minigameStatus === 'LOSE') {
+        controlsHtml = `
+          <div class="mg-result-banner lose">
+            <div class="mg-result-title">💥 공략 실패! 장애물과 함정 패턴을 피해 다시 도전해보세요!</div>
+            <div class="mg-result-actions">
+              <button class="mg-action-btn primary" id="mg-retry-btn">🔄 즉시 재도전</button>
+              <button class="mg-action-btn secondary" id="mg-back-select-btn">🕹️ 다른 게임 선택</button>
+            </div>
+          </div>
+        `;
+      } else {
+        if (this.selectedMinigameType === 'BRICK_BREAKER') {
+          controlsHtml = `
+            <div class="mg-control-bar">
+              <span class="mg-control-tip">↔ 화면(캔버스)을 좌우로 드래그하거나 키보드 ◀ ▶ 키로 패들을 움직이세요!</span>
+              <button class="mg-mini-retry-btn" id="mg-retry-btn">🔄 재시작</button>
+            </div>
+          `;
+        } else if (this.selectedMinigameType === 'TERRITORY_QIX') {
+          controlsHtml = `
+            <div class="mg-qix-dpad-bar">
+              <div class="mg-dpad-group">
+                <button class="dpad-btn" data-qix-dir="-1,0">◀</button>
+                <button class="dpad-btn" data-qix-dir="0,-1">▲</button>
+                <button class="dpad-btn" data-qix-dir="0,1">▼</button>
+                <button class="dpad-btn" data-qix-dir="1,0">▶</button>
+              </div>
+              <button class="mg-mini-retry-btn" id="mg-retry-btn">🔄 재시작</button>
+            </div>
+          `;
+        } else if (this.selectedMinigameType === 'CRITICAL_HAMMER') {
+          controlsHtml = `
+            <div class="mg-hammer-bar">
+              <button class="mg-hammer-strike-btn" id="mg-hammer-strike-btn">🔨 지금 내려치기! (STRIKE / SPACE)</button>
+              <button class="mg-mini-retry-btn" id="mg-retry-btn">🔄</button>
+            </div>
+          `;
+        }
+      }
+
+      container.innerHTML = `
+        <div class="hint-top-header">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <button class="hint-back-choice-btn" id="mg-back-select-top-btn" title="게임 선택 화면으로">←</button>
+            <div class="modal-title">${gameTitles[this.selectedMinigameType] || '🕹️ 미니게임'}</div>
+          </div>
+          <button class="modal-close-x" id="hint-close-btn">✕</button>
+        </div>
+
+        <div class="arcade-cabinet-box">
+          <canvas id="minigame-canvas" width="380" height="310" class="minigame-canvas"></canvas>
+          <div id="minigame-controls-slot">${controlsHtml}</div>
+        </div>
+      `;
+
+      this._bindEvents(container);
+      this._startCanvasMinigame(recipe);
+      return;
+    }
+
+    // =========================================================================
+    // [모드 4] ⚾ 베이스볼 & 황금비율 Up/Down 추리 화면
+    // =========================================================================
     const hintState = this.inventory.getHintState(this.activeRecipeId);
     const maxStage = this.baseballEngine.getMaxStageForRecipe(recipe);
     const currentStage = this.baseballEngine.getCurrentActiveStage(this.activeRecipeId);
     const isBaseballDone = this.baseballEngine.isAllStagesCleared(this.activeRecipeId);
-    const isOrderSensitive = Boolean(recipe.requires_order);
 
     // 슬롯 개수가 현재 단계의 정답 토큰 수와 다르면 동기화
     if (!isBaseballDone) {
@@ -120,13 +321,6 @@ class HintModalView {
       return `<div class="${cls}" title="${st}단계">${icon}</div>`;
     }).join('');
 
-    const orderNotice = isOrderSensitive ? '순서 중요(Ball 판정)' : '순서 무관 · 중복 불가';
-    const stageLabels = {
-      1: `1단계: 재료 유형 맞추기 (${orderNotice})`,
-      2: `2단계: 대표 재료 맞추기 (${orderNotice})`,
-      3: `3단계: 상세 재료 맞추기 (${orderNotice})`
-    };
-
     let mainSectionHtml = '';
 
     if (!isBaseballDone) {
@@ -148,8 +342,6 @@ class HintModalView {
         `;
       }).join('');
 
-      // 2단계인 경우: 1단계에서 맞춘 재료 유형(Category) 탭만 노출하되,
-      // 모든 탭 중 가장 높이가 높은 탭의 높이에 맞춰 팝업 크기가 고정되도록 CSS Grid(1/1) 오버레이로 렌더링
       let stage2CatBarHtml = '';
       let optionsPoolHtml = '';
 
@@ -226,9 +418,6 @@ class HintModalView {
       `;
     } else {
       // [B] 베이스볼 모두 클리어 완료!
-      // 상단 영역에 내가 푼 정답 재료들을 주조실 슬롯과 동일한 UI로 보여주되,
-      // 우측 하단 배지에 숫자 대신 물음표(?)를 표시(맞춘 재료는 정답 숫자 표시)하고,
-      // 재료를 클릭하면 아래에서 Up/Down 영역이 열리도록 구성
       const solvedSlotsHtml = items.map(it => {
         const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
         const base = this.recipeBook.getBaseIngredient(it.ingredient_id);
@@ -308,7 +497,7 @@ class HintModalView {
     container.innerHTML = `
       <div class="hint-top-header">
         <div style="display:flex; align-items:center; gap:6px;">
-          ${hasExtHint ? `<button class="hint-back-choice-btn" id="hint-back-choice-btn" title="선택 화면으로">←</button>` : ''}
+          <button class="hint-back-choice-btn" id="hint-back-choice-btn" title="선택 화면으로">←</button>
           <div class="modal-title">⚾ 베이스볼 게임</div>
           <button class="bb-help-btn ${this.showHelpGuide ? 'active' : ''}" id="bb-help-toggle-btn" title="베이스볼 게임 설명 보기">?</button>
         </div>
@@ -322,6 +511,62 @@ class HintModalView {
       ${mainSectionHtml}
     `;
 
+    this._bindEvents(container);
+  }
+
+  _startCanvasMinigame(recipe) {
+    this._stopMinigame();
+    const canvas = document.getElementById('minigame-canvas');
+    if (!canvas) return;
+
+    this.minigameStatus = 'PLAYING';
+    this.minigameInstance = new window.KSool.ImageMinigameSuite(
+      canvas,
+      recipe,
+      this.audio,
+      () => {
+        // 클리어 성공 시 도감 그림만 선해금 저장 & 도감 그리드 즉시 갱신!
+        this.minigameStatus = 'WIN';
+        this.inventory.unlockRecipeImage(this.activeRecipeId);
+        if (this.onImageUnlocked) {
+          this.onImageUnlocked();
+        }
+        this._updateMinigameControlsOnly(recipe);
+      },
+      () => {
+        this.minigameStatus = 'LOSE';
+        this._updateMinigameControlsOnly(recipe);
+      }
+    );
+    this.minigameInstance.start(this.selectedMinigameType);
+  }
+
+  _updateMinigameControlsOnly(recipe) {
+    const slot = document.getElementById('minigame-controls-slot');
+    const container = document.getElementById('hint-modal-content');
+    if (!slot || !container) return;
+
+    if (this.minigameStatus === 'WIN') {
+      slot.innerHTML = `
+        <div class="mg-result-banner win">
+          <div class="mg-result-title">🎉 그림 해금 성공! 도감에 [${recipe.emoji}] 그림이 공개되었습니다!</div>
+          <div class="mg-result-actions">
+            <button class="mg-action-btn primary" id="mg-go-baseball-btn">⚾ 베이스볼 추리하러 가기</button>
+            <button class="mg-action-btn secondary" id="mg-retry-btn">🔄 다시 플레이</button>
+          </div>
+        </div>
+      `;
+    } else if (this.minigameStatus === 'LOSE') {
+      slot.innerHTML = `
+        <div class="mg-result-banner lose">
+          <div class="mg-result-title">💥 공략 실패! 장애물과 함정 패턴을 피해 다시 도전해보세요!</div>
+          <div class="mg-result-actions">
+            <button class="mg-action-btn primary" id="mg-retry-btn">🔄 즉시 재도전</button>
+            <button class="mg-action-btn secondary" id="mg-back-select-btn">🕹️ 다른 게임 선택</button>
+          </div>
+        </div>
+      `;
+    }
     this._bindEvents(container);
   }
 
@@ -342,7 +587,6 @@ class HintModalView {
     }
 
     if (stage === 2) {
-      // 1단계에서 맞춘 재료 유형(Category)에 속한 해금 재료만 표시
       const solvedCatIds = this.baseballEngine.getAnswerTokens(this.activeRecipeId, 1);
       const activeCat = overrideCatId || this.selectedStage2Category || solvedCatIds[0];
       return unlockedBaseIngs
@@ -359,7 +603,6 @@ class HintModalView {
         });
     }
 
-    // Stage 3: 2단계에서 맞춘 대표 재료들의 상세 재료 + 기본 재료 후보만 표시
     const solvedBaseIds = this.baseballEngine.getAnswerTokens(this.activeRecipeId, 2).map(Number);
     const detailOpts = Array.from(this.recipeBook.detailIngredients.values())
       .filter(det => solvedBaseIds.includes(Number(det.base_ingredient_id)) && this.inventory.isIngredientAvailable(det.base_ingredient_id))
@@ -399,7 +642,7 @@ class HintModalView {
       };
     }
 
-    // 초기 선택 화면: [베이스볼] 버튼 클릭 -> 베이스볼 게임 화면으로 전환
+    // 초기 선택 화면: [베이스볼] 버튼 클릭
     const choiceBaseballBtn = container.querySelector('#choice-baseball-btn');
     if (choiceBaseballBtn) {
       choiceBaseballBtn.onclick = () => {
@@ -409,7 +652,17 @@ class HintModalView {
       };
     }
 
-    // 초기 선택 화면: [힌트보기] 버튼 클릭 -> 등록된 영상(유튜브 타임스탬프) 또는 힌트 글(블로그)로 즉시 이동
+    // 초기 선택 화면: [그림 해금 게임] 버튼 클릭 -> 3종 미니게임 선택 화면
+    const choiceMinigameBtn = container.querySelector('#choice-minigame-btn');
+    if (choiceMinigameBtn) {
+      choiceMinigameBtn.onclick = () => {
+        this.viewMode = 'MINIGAME_SELECT';
+        this.audio.playTap();
+        this.render();
+      };
+    }
+
+    // 초기 선택 화면: [힌트보기] 버튼 클릭
     const choiceExtHintBtn = container.querySelector('#choice-ext-hint-btn');
     if (choiceExtHintBtn) {
       choiceExtHintBtn.onclick = () => {
@@ -422,7 +675,7 @@ class HintModalView {
       };
     }
 
-    // 베이스볼 화면에서 다시 초기 2버튼 선택 화면으로 돌아가기
+    // 선택 화면으로 돌아가기
     const backChoiceBtn = container.querySelector('#hint-back-choice-btn');
     if (backChoiceBtn) {
       backChoiceBtn.onclick = () => {
@@ -432,7 +685,83 @@ class HintModalView {
       };
     }
 
-    // 2단계 카테고리 탭 전환 (1단계에서 푼 재료유형 탭)
+    // 3종 미니게임 카드 클릭 -> 해당 미니게임 즉시 시작
+    container.querySelectorAll('[data-start-minigame]').forEach(card => {
+      card.onclick = () => {
+        this.selectedMinigameType = card.getAttribute('data-start-minigame');
+        this.minigameStatus = 'PLAYING';
+        this.viewMode = 'MINIGAME_PLAY';
+        this.audio.playTap();
+        this.render();
+      };
+    });
+
+    // 미니게임 플레이 화면 -> 3종 미니게임 목록으로 돌아가기
+    const backSelectTopBtn = container.querySelector('#mg-back-select-top-btn');
+    if (backSelectTopBtn) {
+      backSelectTopBtn.onclick = () => {
+        this.viewMode = 'MINIGAME_SELECT';
+        this.audio.playTap();
+        this.render();
+      };
+    }
+
+    const backSelectBtn = container.querySelector('#mg-back-select-btn');
+    if (backSelectBtn) {
+      backSelectBtn.onclick = () => {
+        this.viewMode = 'MINIGAME_SELECT';
+        this.audio.playTap();
+        this.render();
+      };
+    }
+
+    // 미니게임 재도전 버튼
+    const retryBtn = container.querySelector('#mg-retry-btn');
+    if (retryBtn) {
+      retryBtn.onclick = () => {
+        this.minigameStatus = 'PLAYING';
+        this.audio.playTap();
+        this.render();
+      };
+    }
+
+    // 미니게임 클리어 후 바로 베이스볼 추리로 이동
+    const goBaseballBtn = container.querySelector('#mg-go-baseball-btn');
+    if (goBaseballBtn) {
+      goBaseballBtn.onclick = () => {
+        this.viewMode = 'BASEBALL';
+        this.audio.playTap();
+        this.render();
+      };
+    }
+
+    // 땅따먹기(QIX) 온스크린 방향키 D-Pad 조작
+    container.querySelectorAll('[data-qix-dir]').forEach(btn => {
+      const handleDir = (e) => {
+        if (e.cancelable) e.preventDefault();
+        const [dc, dr] = btn.getAttribute('data-qix-dir').split(',').map(Number);
+        if (this.minigameInstance) {
+          this.minigameInstance.setQixDirection(dc, dr);
+        }
+      };
+      btn.onmousedown = handleDir;
+      btn.ontouchstart = handleDir;
+    });
+
+    // 크리티컬 아이스 해머 대형 타격 버튼
+    const hammerStrikeBtn = container.querySelector('#mg-hammer-strike-btn');
+    if (hammerStrikeBtn) {
+      const handleStrike = (e) => {
+        if (e.cancelable) e.preventDefault();
+        if (this.minigameInstance) {
+          this.minigameInstance.triggerHammerStrike();
+        }
+      };
+      hammerStrikeBtn.onmousedown = handleStrike;
+      hammerStrikeBtn.ontouchstart = handleStrike;
+    }
+
+    // 2단계 카테고리 탭 전환
     container.querySelectorAll('[data-bb-stage2-cat]').forEach(btn => {
       btn.onclick = () => {
         this.selectedStage2Category = btn.getAttribute('data-bb-stage2-cat');
@@ -451,7 +780,7 @@ class HintModalView {
       };
     });
 
-    // 숫자야구 후보 선택 (중복 선택 방지: 이미 선택된 항목을 다시 누르면 슬롯에서 해제)
+    // 숫자야구 후보 선택
     container.querySelectorAll('[data-bb-token]').forEach(btn => {
       btn.onclick = () => {
         const token = btn.getAttribute('data-bb-token');
