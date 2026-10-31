@@ -16,8 +16,8 @@ class UpAndDownGame {
     this.secretNumber = 0;
     this.minRange = 1;
     this.maxRange = 50;
-    this.lastUpVal = 1;
-    this.lastDownVal = 50;
+    this.lastUpVal = 0;
+    this.lastDownVal = 51;
     this.inputVal = '';
     this.isFinished = false;
     this.lastResult = null; // 'UP' | 'DOWN' | 'BOMB'
@@ -31,8 +31,8 @@ class UpAndDownGame {
     this.secretNumber = Math.floor(Math.random() * this.maxNumber) + 1;
     this.minRange = 1;
     this.maxRange = this.maxNumber;
-    this.lastUpVal = 1;
-    this.lastDownVal = this.maxNumber;
+    this.lastUpVal = 0;
+    this.lastDownVal = this.maxNumber + 1; // 51
     this.inputVal = '';
     this.isFinished = false;
     this.lastResult = null;
