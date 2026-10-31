@@ -276,13 +276,11 @@ class PartyGameHubView {
   renderLobby(container) {
     container.innerHTML = `
       <div class="party-lobby-container">
-        <!-- 상단 헤더 -->
+        <!-- 상단 헤더 (공백 축소, 우측 상단 순수 아이콘 사운드 버튼) -->
         <div class="party-lobby-header">
-          <div class="party-lobby-top-row">
-            <button type="button" class="party-sound-toggle-btn" id="party-sound-toggle">
-              ${this.sound.isMuted ? '🔇 무음' : '🔊 효과음'}
-            </button>
-          </div>
+          <button type="button" class="party-sound-toggle-btn" id="party-sound-toggle" title="효과음 On/Off" aria-label="효과음 On/Off">
+            ${this.sound.isMuted ? '🔇' : '🔊'}
+          </button>
           <h2 class="party-lobby-title">🍻 술자리 미니게임 모음</h2>
           <p class="party-lobby-desc">스마트폰을 테이블 중앙에 두고 함께 즐기는 7대 술자리 게임!</p>
         </div>
@@ -319,7 +317,7 @@ class PartyGameHubView {
     if (soundBtn) {
       soundBtn.onclick = () => {
         this.sound.isMuted = !this.sound.isMuted;
-        soundBtn.textContent = this.sound.isMuted ? '🔇 무음' : '🔊 효과음';
+        soundBtn.textContent = this.sound.isMuted ? '🔇' : '🔊';
       };
     }
   }
