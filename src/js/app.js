@@ -467,9 +467,10 @@ class KSoolApp {
       const name = this.brandResolver.resolveName(ing);
 
       return `
-        <div class="ing-card ${inPotCount > 0 ? 'in-pot' : ''}"
-             data-base-ing-id="${ing.ingredient_id}">
-          ${pickerLabel ? `<span class="ing-picker-indicator">${pickerLabel}</span>` : ''}
+        <div class="ing-card ${inPotCount > 0 ? 'in-pot' : ''} ${hasCustomPicker ? 'has-picker' : ''}"
+             data-base-ing-id="${ing.ingredient_id}"
+             title="클릭하여 가마솥에 담기">
+          ${pickerLabel ? `<button type="button" class="ing-picker-btn" data-open-detail-picker="${ing.ingredient_id}" title="상세 재료 선택 팝업 열기">${pickerLabel} ▾</button>` : ''}
           <span class="ing-emoji">${ing.emoji}</span>
           <span class="ing-name">${name}</span>
           ${inPotCount > 1 ? `<span class="slot-count-badge">${inPotCount}</span>` : ''}
@@ -477,18 +478,23 @@ class KSoolApp {
       `;
     }).join('');
 
+    // 상세재료 버튼(브랜드/브루어리/팔도지도) 클릭 시에만 상세 선택 모달 오픈
+    grid.querySelectorAll('[data-open-detail-picker]').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const baseId = Number(btn.getAttribute('data-open-detail-picker'));
+        const baseIng = this.recipeBook.getBaseIngredient(baseId);
+        const details = this.recipeBook.getDetailsForBase(baseId);
+        this.audio.playTap();
+        this.openDetailPickerModal(baseIng, details);
+      };
+    });
+
+    // 대표 재료 카드(아이콘/영역) 클릭 시 즉시 기본 재료로 가마솥에 투입
     grid.querySelectorAll('[data-base-ing-id]').forEach(card => {
       card.onclick = () => {
         const baseId = Number(card.getAttribute('data-base-ing-id'));
-        const baseIng = this.recipeBook.getBaseIngredient(baseId);
-        const details = this.recipeBook.getDetailsForBase(baseId);
-
-        if (details.length > 0 && baseIng.picker_component && baseIng.picker_component !== 'NONE') {
-          this.audio.playTap();
-          this.openDetailPickerModal(baseIng, details);
-        } else {
-          this._addIngredientToPot(baseId, null);
-        }
+        this._addIngredientToPot(baseId, null);
       };
     });
   }
