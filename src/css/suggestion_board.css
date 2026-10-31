@@ -1,0 +1,152 @@
+/* 👍 초간단 조합 추천 게시판 & 관리자 ⚡딸깍 뷰 */
+.suggestion-view-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 12px 14px;
+  gap: 10px;
+}
+
+.suggestion-top-bar {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.suggestion-pot-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.suggest-submit-btn {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.suggest-submit-btn:disabled {
+  background: #334155;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.suggestion-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 16px;
+}
+
+/* 초간단 한 줄 카드: [재료 아이콘+비율] ── [👍] [👎] [⚡적용] */
+.suggestion-row-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.suggestion-items-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  flex: 1;
+}
+
+.sug-ing-pill {
+  background: #0f172a;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #f8fafc;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sug-ratio-sub {
+  background: #f59e0b;
+  color: #0b1120;
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.sug-plus {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.suggestion-actions-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.vote-btn {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  padding: 6px 9px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vote-btn.up:hover, .vote-btn.up.voted {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
+
+.vote-btn.down:hover, .vote-btn.down.voted {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.admin-apply-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+  color: #0f172a;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+}
+
+.admin-apply-btn:hover {
+  transform: scale(1.04);
+}
