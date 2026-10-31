@@ -22,18 +22,17 @@ class CraftingPot {
     const maxTotal = stepConfig ? stepConfig.maxTotalCount : this.config.maxTotalCount;
     const total = this.getTotalCount();
 
-    const existing = this.slots.find(
+    const existingIdx = this.slots.findIndex(
       s => s.baseId === Number(baseId) && (s.detailId || null) === (detailId ? Number(detailId) : null)
     );
+    const existing = existingIdx >= 0 ? this.slots[existingIdx] : null;
 
     if (existing) {
       if (existing.count >= maxPerSlot) {
         if (maxPerSlot === 1) {
-          return {
-            ok: false,
-            reason: 'STEP_RATIO_LOCKED',
-            message: '현재 단계(No.01~31 · 1:1 기초 조합)에서는 재료를 1개씩만 넣을 수 있습니다!\n(No.32 황금비율 입문 단계부터 비율 조절이 해금됩니다)'
-          };
+          // 비율 해금 전 단계(maxPerSlot === 1)에서는 같은 재료를 다시 누르면 조합칸에서 내려감(토글 제거)
+          this.slots.splice(existingIdx, 1);
+          return { ok: true, action: 'REMOVED', slot: null };
         }
         return {
           ok: false,
