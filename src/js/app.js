@@ -154,7 +154,7 @@ class KSoolApp {
   switchTab(target) {
     if (!this.inventory.isTabUnlocked(target)) return;
     if (this.currentTab === 'party' && target !== 'party') {
-      this.partyGameHubView.releaseWakeLock();
+      this.partyGameHubView.onLeavePartyTab();
     }
     this.currentTab = target;
     document.querySelectorAll('[data-tab-target]').forEach(b => {

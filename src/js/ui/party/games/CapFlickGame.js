@@ -181,6 +181,10 @@ class CapFlickGame {
       };
     });
   }
+
+  destroy() {
+    // CapFlickGame has no running timers to cancel
+  }
 }
 
 window.KSool.CapFlickGame = CapFlickGame;

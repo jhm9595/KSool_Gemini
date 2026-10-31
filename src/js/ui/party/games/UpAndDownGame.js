@@ -229,6 +229,10 @@ class UpAndDownGame {
       };
     }
   }
+
+  destroy() {
+    // UpAndDownGame has no running timers to cancel
+  }
 }
 
 window.KSool.UpAndDownGame = UpAndDownGame;
