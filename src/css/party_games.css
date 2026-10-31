@@ -475,30 +475,66 @@
   overflow: hidden;
 }
 
-.party-range-fill {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  background: linear-gradient(90deg, #38bdf8, #f43f5e);
-  border-radius: 6px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* ==========================================================================
+   ① 숫자 Up & Down 전용 스타일 (오프라인 술자리 낙장불입 버전)
+   ========================================================================== */
+.updown-box {
+  justify-content: space-between !important;
+  align-items: center !important;
+  height: 100% !important;
+  width: 100% !important;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 8px 12px 14px;
+  box-sizing: border-box;
 }
 
+/* 1. 상단: 영역 박스 없는 큼지막한 두 줄 [10 UP] [40 DOWN] */
+.updown-status-large {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  margin: 4px 0 2px;
+  user-select: none;
+}
+
+.updown-line {
+  font-size: min(2.5rem, 8.5vw);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+}
+
+.updown-line.up {
+  color: #38bdf8;
+  text-shadow: 0 0 20px rgba(56, 189, 248, 0.45);
+}
+
+.updown-line.down {
+  color: #f43f5e;
+  text-shadow: 0 0 20px rgba(244, 63, 94, 0.45);
+}
+
+/* 2. 가운데: 대폭 커진 초록 메탈 병뚜껑 */
 .party-cap-visual-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin: 12px 0 8px;
+  justify-content: center;
+  margin: 6px 0;
+  flex: 1;
 }
 
 .soju-cap-circle {
-  width: 120px;
-  height: 120px;
+  width: min(150px, 42vw);
+  height: min(150px, 42vw);
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #22c55e 0%, #15803d 70%, #14532d 100%);
-  border: 4px solid #86efac;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6), inset 0 0 12px rgba(255, 255, 255, 0.4);
+  border: 5px solid #86efac;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65), inset 0 0 16px rgba(255, 255, 255, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -508,20 +544,20 @@
 
 .soju-cap-circle.up {
   border-color: #38bdf8;
-  box-shadow: 0 0 24px rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 28px rgba(56, 189, 248, 0.6);
   transform: translateY(-4px);
 }
 
 .soju-cap-circle.down {
   border-color: #f43f5e;
-  box-shadow: 0 0 24px rgba(244, 63, 94, 0.6);
+  box-shadow: 0 0 28px rgba(244, 63, 94, 0.6);
   transform: translateY(4px);
 }
 
 .soju-cap-circle.exploded {
   background: radial-gradient(circle at 35% 35%, #ef4444 0%, #991b1b 100%);
   border-color: #fca5a5;
-  box-shadow: 0 0 35px #ef4444;
+  box-shadow: 0 0 40px #ef4444;
   animation: shakeCap 0.4s infinite;
 }
 
@@ -532,87 +568,114 @@
 }
 
 .soju-cap-inner {
-  width: 90px;
-  height: 90px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
-  border: 2px dashed rgba(255, 255, 255, 0.35);
+  border: 2.5px dashed rgba(255, 255, 255, 0.35);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-.soju-cap-label { font-size: 0.65rem; font-weight: 900; color: #dcfce7; letter-spacing: 1px; }
-.soju-cap-secret { font-size: 2.2rem; font-weight: 900; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.5); }
-.soju-cap-star { font-size: 0.7rem; color: #fde047; }
+.soju-cap-label { font-size: 0.68rem; font-weight: 900; color: #dcfce7; letter-spacing: 1.5px; }
+.soju-cap-secret { font-size: 2.8rem; font-weight: 900; color: #ffffff; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+.soju-cap-star { font-size: 0.8rem; color: #fde047; }
 
-.party-feedback-badge {
-  font-size: 1.15rem;
-  font-weight: 900;
-  padding: 6px 14px;
-  border-radius: 10px;
-  letter-spacing: -0.3px;
-}
-.party-feedback-badge.up { background: rgba(2, 132, 199, 0.3); color: #38bdf8; border: 1px solid #0284c7; }
-.party-feedback-badge.down { background: rgba(225, 29, 72, 0.3); color: #fb7185; border: 1px solid #e11d48; }
-.party-feedback-badge.bomb { background: #ef4444; color: #ffffff; animation: shakeCap 0.3s infinite; }
-.party-feedback-badge.ready { font-size: 0.82rem; color: #94a3b8; }
-
-.party-numpad-section { width: 100%; }
-.party-quick-inputs-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* 3. 입력된 숫자 표시창 (키보드 팝업 없는 순수 뷰포트) */
+.updown-display-row {
+  width: 100%;
   margin-bottom: 8px;
 }
-.party-quick-btn {
-  background: #1e293b;
-  border: 1px solid #475569;
-  color: #cbd5e1;
-  font-size: 0.88rem;
-  font-weight: 900;
-  padding: 8px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-}
+
 .party-number-display {
-  flex: 1;
+  width: 100%;
+  height: 52px;
   background: #0f172a;
-  border: 2px solid #38bdf8;
-  border-radius: 10px;
-  height: 48px;
-  font-size: 1.6rem;
+  border: 2px solid rgba(56, 189, 248, 0.4);
+  border-radius: 12px;
+  font-size: 2rem;
   font-weight: 900;
   color: #ffffff;
-  text-align: center;
-  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+  letter-spacing: 2px;
 }
+
+.party-number-display.placeholder {
+  color: #475569;
+  font-size: 1.4rem;
+  letter-spacing: 4px;
+}
+
+/* 4. 3x4 = 12칸 스마트폰 다이얼 패드 */
 .party-numpad-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
 }
+
 .party-num-key {
-  min-height: 48px;
+  min-height: 54px;
   background: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 8px;
+  border: 1.5px solid #334155;
+  border-radius: 12px;
   color: #f1f5f9;
-  font-size: 1.25rem;
+  font-size: 1.6rem;
   font-weight: 900;
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: all 0.12s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
-.party-num-key:active { background: #0284c7; transform: scale(0.95); }
-.party-num-action-key {
-  min-height: 48px;
-  border-radius: 8px;
+
+.party-num-key:active {
+  background: #0284c7;
+  border-color: #38bdf8;
+  transform: scale(0.96);
+}
+
+.party-key-action {
+  min-height: 54px;
+  border-radius: 12px;
   font-weight: 900;
   cursor: pointer;
-  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
 }
-.party-num-action-key.clear { background: #475569; color: #ffffff; font-size: 1.1rem; }
-.party-num-action-key.submit { background: #10b981; color: #ffffff; font-size: 1rem; }
+
+.party-key-action.restart {
+  background: #334155;
+  border: 1.5px solid #475569;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+.party-key-action.restart:active {
+  background: #475569;
+  transform: scale(0.96);
+}
+
+.party-key-action.submit {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: 1.5px solid #34d399;
+  color: #ffffff;
+  font-size: 1.05rem;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+}
+
+.party-key-action.submit:active {
+  transform: scale(0.96);
+}
 
 /* ==========================================================================
    ② 꼬다리 치기 전용 스타일 (미니멀 물리 타격형)
