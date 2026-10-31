@@ -455,7 +455,7 @@ class KSoolApp {
       ${modeTabsHtml}
       <div class="brew-quiz-card">
         <div class="quiz-question-row">
-          <div class="quiz-mystery-icon">${isUnlocked || isImageUnlocked ? targetRec.emoji : '❓'}</div>
+          <div class="quiz-mystery-icon">${(isUnlocked || isImageUnlocked) ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(targetRec, 36) : targetRec.emoji) : '❓'}</div>
           <div class="quiz-question-body">
             <div class="quiz-header-inline">
               <div class="quiz-title-group">
@@ -568,7 +568,7 @@ class KSoolApp {
         html.push(`
           <div class="pot-slot filled" data-pot-slot-idx="${i}" title="클릭하면 개수가 1 줄어듭니다">
             ${detailBadge}
-            <span class="slot-emoji">${target ? target.emoji : '🍶'}</span>
+            <span class="slot-emoji">${target ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(target, 28) : target.emoji) : '🍶'}</span>
             <span class="slot-name">${name}</span>
             ${countBadge}
           </div>
@@ -680,7 +680,7 @@ class KSoolApp {
              data-base-ing-id="${ing.ingredient_id}"
              title="클릭하여 가마솥에 담기">
           ${pickerLabel ? `<button type="button" class="ing-picker-btn" data-open-detail-picker="${ing.ingredient_id}" title="상세 재료 선택 팝업 열기">${pickerLabel} ▾</button>` : ''}
-          <span class="ing-emoji">${ing.emoji}</span>
+          <span class="ing-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(ing, 32) : ing.emoji}</span>
           <span class="ing-name">${name}</span>
           ${inPotCount > 1 ? `<span class="slot-count-badge">${inPotCount}</span>` : ''}
         </div>
@@ -822,9 +822,9 @@ class KSoolApp {
 
       const displayName = this.brandResolver.resolveName(rec);
 
-      const displayEmoji = isUnlocked
-        ? rec.emoji
-        : (isImageUnlocked ? rec.emoji : '❓');
+      const displayEmoji = (isUnlocked || isImageUnlocked)
+        ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(rec, 34) : rec.emoji)
+        : '❓';
 
       const numBadge = `<span class="sool-num-badge">${rec.formatted_number || `No.${rec.recipe_id}`}</span>`;
 
@@ -875,7 +875,8 @@ class KSoolApp {
         const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
         const base = this.recipeBook.getBaseIngredient(it.ingredient_id);
         const target = det || base;
-        return `${target.emoji}${this.brandResolver.resolveName(target)}(${it.ratio})`;
+        const icon = window.KSool?.pixelIcon ? window.KSool.pixelIcon(target, 18) : target.emoji;
+        return `${icon} ${this.brandResolver.resolveName(target)}(${it.ratio})`;
       }).join(' + ');
 
       if (!isNew) {
@@ -890,7 +891,7 @@ class KSoolApp {
 
             <div class="craft-result-info-card">
               <div class="craft-result-left">
-                <div class="craft-result-emoji">${rec.emoji}</div>
+                <div class="craft-result-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(rec, 48) : rec.emoji}</div>
                 <div class="craft-result-name">${this.brandResolver.resolveName(rec)}</div>
               </div>
               <div class="craft-result-desc">
@@ -947,7 +948,7 @@ class KSoolApp {
               </div>
               <div class="craft-unlock-items-box chain-box">
                 <span class="bb-option-btn picked craft-unlock-chip-chain">
-                  <span>${newIng.emoji}</span>
+                  <span>${window.KSool?.pixelIcon ? window.KSool.pixelIcon(newIng, 24) : newIng.emoji}</span>
                   <span>${ingName}</span>
                 </span>
               </div>
@@ -983,7 +984,7 @@ class KSoolApp {
                   <div class="craft-unlock-items-box leaf-box">
                     ${ings.map(ing => `
                       <span class="bb-option-btn picked craft-unlock-chip-leaf">
-                        <span>${ing.emoji}</span>
+                        <span>${window.KSool?.pixelIcon ? window.KSool.pixelIcon(ing, 24) : ing.emoji}</span>
                         <span>${this.brandResolver.resolveName(ing)}</span>
                       </span>
                     `).join('')}
@@ -1013,7 +1014,7 @@ class KSoolApp {
           </div>
           <div class="craft-result-info-card">
             <div class="craft-result-left">
-              <div class="craft-result-emoji">${rec.emoji}</div>
+              <div class="craft-result-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(rec, 48) : rec.emoji}</div>
               <div class="craft-result-name">${this.brandResolver.resolveName(rec)}</div>
             </div>
             <div class="craft-result-desc">
@@ -1033,7 +1034,8 @@ class KSoolApp {
         const det = this.recipeBook.getDetailIngredient(s.detailId);
         const base = this.recipeBook.getBaseIngredient(s.baseId);
         const target = det || base;
-        return `${target.emoji}${this.brandResolver.resolveName(target)}(${s.count})`;
+        const icon = window.KSool?.pixelIcon ? window.KSool.pixelIcon(target, 18) : target.emoji;
+        return `${icon} ${this.brandResolver.resolveName(target)}(${s.count})`;
       }).join(' + ');
 
       const failGuideText = '비율이나 재료 조합이 맞지 않습니다! [도감·힌트] 탭이나 퀴즈 카드의 [힌트] 버튼을 눌러 힌트를 확인해보세요.';

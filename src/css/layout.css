@@ -235,3 +235,23 @@ header {
   cursor: pointer;
   flex-shrink: 0;
 }
+
+/* Custom Retro Pixel Art Icons */
+.k-pixel-icon {
+  image-rendering: pixelated;
+  shape-rendering: crispEdges;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.k-pixel-icon:hover {
+  transform: scale(1.08);
+}
+
+.k-pixel-icon-fallback {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+}

@@ -59,7 +59,7 @@ class FridgeRecommenderView {
       return `
         <div class="fridge-ing-chip ${checked ? 'checked' : ''}" data-fridge-ing="${ing.ingredient_id}">
           ${checked ? '<span class="fridge-check-mark">✓</span>' : ''}
-          <span style="font-size:1.35rem;">${ing.emoji}</span>
+          <span style="display:flex; align-items:center; justify-content:center;">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(ing, 26) : ing.emoji}</span>
           <span style="font-size:0.68rem; font-weight:700; color:#f1f5f9; text-align:center; word-break:keep-all;">
             ${name}
           </span>
@@ -114,7 +114,7 @@ class FridgeRecommenderView {
           return `
             <div class="pot-slot filled sug-slot-card ${inFridge ? 'fridge-matched-slot' : 'fridge-missing-slot'}">
               ${detailBadge}
-              <span class="slot-emoji">${target ? target.emoji : '🍶'}</span>
+              <span class="slot-emoji">${target ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(target, 24) : target.emoji) : '🍶'}</span>
               <span class="slot-name">${target ? this.brandResolver.resolveName(target) : ''}</span>
               ${ratioBadge}
             </div>
@@ -131,7 +131,7 @@ class FridgeRecommenderView {
             <div class="fridge-recipe-card ${isWinner ? 'highlighted-winner' : ''}" data-fridge-rec="${rec.recipe_id}">
               <div class="fridge-card-top">
                 <div style="display:flex; align-items:center; gap:8px;">
-                  <span style="font-size:1.35rem;">${rec.emoji}</span>
+                  <span style="display:flex; align-items:center; justify-content:center;">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(rec, 28) : rec.emoji}</span>
                   <span style="font-size:0.86rem; font-weight:900; color:#f8fafc;">
                     ${isWinner ? '🎯 [당첨!] ' : ''}${this.brandResolver.resolveName(rec)}
                   </span>

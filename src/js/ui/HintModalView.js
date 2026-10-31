@@ -120,7 +120,7 @@ class HintModalView {
 
       const unlockedPreviewBanner = isImageUnlocked ? `
         <div class="unlocked-img-preview-banner">
-          <span class="unlocked-img-emoji">${recipe.emoji}</span>
+          <span class="unlocked-img-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 32) : recipe.emoji}</span>
           <div class="unlocked-img-text">
             <div style="font-weight:900; color:#e9d5ff; font-size:0.82rem;">🖼️ 그림 힌트 해금 완료!</div>
             <div style="font-size:0.7rem; color:#cbd5e1;">이 술의 외형(그림)이 도감에 공개되었습니다. 이제 베이스볼로 재료를 추리해보세요!</div>
@@ -152,7 +152,7 @@ class HintModalView {
 
           <button class="hint-big-choice-btn choice-minigame" id="choice-minigame-btn">
             <span class="choice-badge-tag ${isImageUnlocked ? 'cleared' : ''}">${isImageUnlocked ? '✅ 해금됨' : '🎮 3종 아케이드'}</span>
-            <span class="choice-big-icon">${isImageUnlocked ? recipe.emoji : '🕹️'}</span>
+            <span class="choice-big-icon">${isImageUnlocked ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 32) : recipe.emoji) : '🕹️'}</span>
             <span class="choice-big-title">그림 해금 게임</span>
             <span class="choice-big-sub">블럭깨기 · 땅따먹기 · 통얼음 격파</span>
           </button>
@@ -251,7 +251,7 @@ class HintModalView {
       if (this.minigameStatus === 'WIN') {
         controlsHtml = `
           <div class="mg-result-banner win">
-            <div class="mg-result-title">🎉 그림 해금 성공! 도감에 [${recipe.emoji}] 그림이 공개되었습니다!</div>
+            <div class="mg-result-title">🎉 그림 해금 성공! 도감에 [${window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 20) : recipe.emoji}] 그림이 공개되었습니다!</div>
             <div class="mg-result-actions">
               <button class="mg-action-btn primary" id="mg-go-baseball-btn">⚾ 베이스볼 추리하러 가기</button>
               <button class="mg-action-btn secondary" id="mg-retry-btn">🔄 다시 플레이</button>
@@ -683,7 +683,7 @@ class HintModalView {
     if (this.minigameStatus === 'WIN') {
       slot.innerHTML = `
         <div class="mg-result-banner win">
-          <div class="mg-result-title">🎉 그림 해금 성공! 도감에 [${recipe.emoji}] 그림이 공개되었습니다!</div>
+          <div class="mg-result-title">🎉 그림 해금 성공! 도감에 [${window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 20) : recipe.emoji}] 그림이 공개되었습니다!</div>
           <div class="mg-result-actions">
             <button class="mg-action-btn primary" id="mg-go-baseball-btn">⚾ 베이스볼 추리하러 가기</button>
             <button class="mg-action-btn secondary" id="mg-retry-btn">🔄 다시 플레이</button>

@@ -326,7 +326,7 @@ class PenaltyCocktailGame {
                     <button type="button" 
                             class="fridge-ing-chip alcohol ${isChecked ? 'selected' : ''}" 
                             data-ing-id="${ing.ingredient_id}">
-                      <span class="chip-emoji">${ing.emoji || '🍺'}</span>
+                      <span class="chip-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(ing, 22) : (ing.emoji || '🍺')}</span>
                       <span class="chip-name">${ing.display_name}</span>
                       <span class="chip-check">${isChecked ? '✓' : '+'}</span>
                     </button>
@@ -345,7 +345,7 @@ class PenaltyCocktailGame {
                     <button type="button" 
                             class="fridge-ing-chip drink ${isChecked ? 'selected' : ''}" 
                             data-ing-id="${ing.ingredient_id}">
-                      <span class="chip-emoji">${ing.emoji || '🥤'}</span>
+                      <span class="chip-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(ing, 22) : (ing.emoji || '🥤')}</span>
                       <span class="chip-name">${ing.display_name}</span>
                       <span class="chip-check">${isChecked ? '✓' : '+'}</span>
                     </button>
@@ -436,7 +436,7 @@ class PenaltyCocktailGame {
               <div class="recipe-item-row">
                 <div class="item-left">
                   <span class="item-dot" style="background:${item.color};"></span>
-                  <span class="item-emoji">${item.ing.emoji || '🍺'}</span>
+                  <span class="item-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(item.ing, 22) : (item.ing.emoji || '🍺')}</span>
                   <span class="item-name">${item.ing.display_name}</span>
                 </div>
                 <div class="item-right">
