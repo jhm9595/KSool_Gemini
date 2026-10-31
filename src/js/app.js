@@ -179,7 +179,7 @@ class KSoolApp {
       this.pendingTabIntroQueue.push('collection');
     }
 
-    if (!this.inventory.shownTabIntros.fridge && this.inventory.getUnlockProgressRatio() >= 0.5) {
+    if (!this.inventory.shownTabIntros.fridge && this.inventory.getUnlockProgressRatio() >= 0.8) {
       this.inventory.shownTabIntros.fridge = true;
       this.inventory.save();
       this.pendingTabIntroQueue.push('fridge');
@@ -214,9 +214,9 @@ class KSoolApp {
       },
       fridge: {
         emoji: '🧊',
-        badge: '신규 탭 해금 (도감 50% 달성)',
+        badge: '신규 탭 해금 (도감 80% 달성)',
         title: '[냉장고를 부탁해] 탭이 열렸습니다!',
-        desc: '도감의 절반(50%) 이상을 정복하셨군요! 이제 <b>[🧊 냉장고를 부탁해]</b> 탭에서 내 냉장고 속 재료를 선택하면, 내가 해금한 술 조합 중 재료가 가장 많이 일치하는 꿀조합을 추천받고 <b>🎲 랜덤 추첨</b>도 돌릴 수 있습니다!',
+        desc: '도감의 80% 이상을 정복하셨군요! 이제 <b>[🧊 냉장고를 부탁해]</b> 탭에서 내 냉장고 속 재료를 선택하면, 내가 해금한 술 조합 중 재료가 가장 많이 일치하는 꿀조합을 추천받고 <b>🎲 랜덤 추첨</b>도 돌릴 수 있습니다!',
         btnLabel: '🧊 냉장고를 부탁해 가기'
       },
       suggestions: {
@@ -393,8 +393,8 @@ class KSoolApp {
     const isUnlocked = this.inventory.isRecipeUnlocked(targetRec.recipe_id);
     const isImageUnlocked = this.inventory.isRecipeImageUnlocked(targetRec.recipe_id);
     const resolvedName = this.brandResolver.resolveName(targetRec);
-    const needsRatio = this.ratioProvider ? this.ratioProvider.requiresRatioGame(targetRec.recipe_id) : (targetRec.sum_ratio > (targetRec.item_count || 1));
-    const ratioBadgeHtml = needsRatio ? `<span class="quiz-ratio-count-badge">총 비율: ${targetRec.sum_ratio || 0}개</span>` : '';
+    const isCollectionUnlocked = this.inventory.isTabUnlocked('collection');
+    const showHintBtn = !isUnlocked && isCollectionUnlocked;
 
     container.innerHTML = `
       ${modeTabsHtml}
@@ -405,10 +405,9 @@ class KSoolApp {
             <div class="quiz-header-inline">
               <div class="quiz-title-group">
                 <span class="quiz-target-title">${resolvedName}</span>
-                ${!isUnlocked ? `<button type="button" class="quiz-infer-btn" id="quiz-open-hint-btn">추리</button>` : ''}
+                ${showHintBtn ? `<button type="button" class="quiz-infer-btn" id="quiz-open-hint-btn">힌트</button>` : ''}
               </div>
               <div class="quiz-nav-right">
-                ${ratioBadgeHtml}
                 <button type="button" class="quiz-nav-btn" id="quiz-prev-btn" ${hasPrev ? '' : 'disabled'} title="이전 번호">◀</button>
                 <span class="quiz-num-badge">${targetRec.formatted_number} <span class="quiz-num-total">/ ${totalCount}</span></span>
                 <button type="button" class="quiz-nav-btn" id="quiz-next-btn" ${hasNext ? '' : 'disabled'} title="다음 번호">▶</button>

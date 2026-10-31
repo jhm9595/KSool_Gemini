@@ -269,7 +269,7 @@ class InventoryManager {
   }
 
   isFridgeTabUnlocked() {
-    return Boolean(this.unlockAllSandboxMode || this.getUnlockProgressRatio() >= 0.5 || this.shownTabIntros.fridge);
+    return Boolean(this.unlockAllSandboxMode || this.getUnlockProgressRatio() >= 0.8 || this.shownTabIntros.fridge);
   }
 
   isSuggestionTabUnlocked() {

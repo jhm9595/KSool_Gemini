@@ -614,9 +614,6 @@ class HintModalView {
             <span class="bb-target-num">${recipe.formatted_number || ''}</span>
             <span class="bb-target-name">${resolvedName}</span>
           </div>
-          ${needsRatioGame ? `
-            <span class="bb-ratio-count-badge">총 비율: ${recipe.sum_ratio || 0}개</span>
-          ` : ''}
         </div>
         ${recipe.unlock_hint ? `
           <div class="bb-target-hint">
