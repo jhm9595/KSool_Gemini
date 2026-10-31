@@ -737,7 +737,7 @@
 .flick-power-section {
   width: 100%;
   max-width: 360px;
-  margin: 0 auto;
+  margin: 0 auto 18px;
   display: flex;
   flex-direction: column;
   gap: 8px;

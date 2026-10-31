@@ -284,7 +284,7 @@ class CapFlickGame {
           <div id="flick-feedback-badge" class="flick-feedback-badge"></div>
         </div>
 
-        <!-- 하단: 왔다갔다 타이밍 파워 게이지 -->
+        <!-- 하단: 왔다갔다 타이밍 파워 게이지 (설명 텍스트 없이 순수 게이지 정보만 유지) -->
         <div class="flick-power-section">
           <div class="flick-timing-meter" id="flick-timing-meter">
             <div class="flick-meter-zones">
@@ -297,11 +297,6 @@ class CapFlickGame {
               <div class="flick-meter-cursor" id="flick-meter-cursor" style="left: 20%;"></div>
             </div>
           </div>
-
-          <!-- 심플 안내 문구 -->
-          <div class="flick-minimal-hint">
-            👆 <b>화면을 길게 누르면</b> 파워가 왔다갔다! <b>손을 떼면</b> 튕깁니다!
-          </div>
         </div>
       </div>
     `;
@@ -310,8 +305,8 @@ class CapFlickGame {
   }
 
   _bindTouchEvents() {
-    const arena = document.getElementById('cap-flick-arena');
-    if (!arena) return;
+    const stage = document.querySelector('.capflick-minimal-box') || document.getElementById('cap-flick-arena');
+    if (!stage) return;
 
     // 포인터 다운 (누르기 시작: 파워 차징 시작)
     const onStart = (e) => {
@@ -327,14 +322,14 @@ class CapFlickGame {
 
     // 모바일 터치 + PC 마우스 통합 지원
     if (window.PointerEvent) {
-      arena.onpointerdown = onStart;
+      stage.onpointerdown = onStart;
       window.onpointerup = onEnd;
       window.onpointercancel = onEnd;
     } else {
-      arena.ontouchstart = onStart;
+      stage.ontouchstart = onStart;
       window.ontouchend = onEnd;
       window.ontouchcancel = onEnd;
-      arena.onmousedown = onStart;
+      stage.onmousedown = onStart;
       window.onmouseup = onEnd;
     }
   }
