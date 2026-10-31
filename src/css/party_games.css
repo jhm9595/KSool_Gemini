@@ -489,33 +489,49 @@
   box-sizing: border-box;
 }
 
-/* 1. 상단: 영역 박스 없는 큼지막한 두 줄 [10 UP] [40 DOWN] */
+/* 1. 상단: 영역 박스 없는 큼지막한 두 줄 [10 UP] [40 DOWN] 세로줄 칼맞춤 */
 .updown-status-large {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(64px, max-content) max-content;
   justify-content: center;
-  gap: 2px;
+  align-items: baseline;
+  column-gap: 20px;
+  row-gap: 4px;
   width: 100%;
-  margin: 4px 0 2px;
+  margin-top: 24px;
+  margin-bottom: 8px;
   user-select: none;
 }
 
-.updown-line {
-  font-size: min(2.5rem, 8.5vw);
+.updown-num {
+  font-size: min(3.5rem, 12vw);
   font-weight: 900;
-  letter-spacing: -0.5px;
-  line-height: 1.15;
+  text-align: left;
+  justify-self: start;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 
-.updown-line.up {
+.updown-tag {
+  font-size: min(3.5rem, 12vw);
+  font-weight: 900;
+  text-align: left;
+  justify-self: start;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+}
+
+.updown-num.up,
+.updown-tag.up {
   color: #38bdf8;
-  text-shadow: 0 0 20px rgba(56, 189, 248, 0.45);
+  text-shadow: 0 0 24px rgba(56, 189, 248, 0.5);
 }
 
-.updown-line.down {
+.updown-num.down,
+.updown-tag.down {
   color: #f43f5e;
-  text-shadow: 0 0 20px rgba(244, 63, 94, 0.45);
+  text-shadow: 0 0 24px rgba(244, 63, 94, 0.5);
 }
 
 /* 2. 가운데: 대폭 커진 초록 메탈 병뚜껑 */

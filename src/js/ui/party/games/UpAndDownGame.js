@@ -189,10 +189,12 @@ class UpAndDownGame {
 
     container.innerHTML = `
       <div class="party-game-box updown-box">
-        <!-- 1. 맨 위: 테두리/영역 없는 큼지막한 두 줄 [UP] [DOWN] 텍스트 -->
+        <!-- 1. 맨 위: 숫자는 좌측 세로줄, UP/DOWN은 우측 세로줄에 맞춘 대형 타이포그래피 (2x2 그리드) -->
         <div class="updown-status-large">
-          <div class="updown-line up">${this.lastUpVal} UP</div>
-          <div class="updown-line down">${this.lastDownVal} DOWN</div>
+          <span class="updown-num up">${this.lastUpVal}</span>
+          <span class="updown-tag up">UP</span>
+          <span class="updown-num down">${this.lastDownVal}</span>
+          <span class="updown-tag down">DOWN</span>
         </div>
 
         <!-- 2. 가운데: 대폭 커진 초록 메탈 병뚜껑 (설명 텍스트 일체 없음) -->
