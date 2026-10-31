@@ -105,23 +105,26 @@ class HintModalView {
           ⚾ ${stageLabels[currentStage]} (총 ${items.length}칸 · 비율은 비공개)
         </div>
         <div class="baseball-slots">${slotsHtml}</div>
-        <div class="bb-options-pool">${optionsHtml}</div>
-        <button class="mix-btn" id="bb-submit-btn" style="padding:9px;" ${canSubmit ? '' : 'disabled'}>
-          ⚾ Strike / Ball / Out 판정하기
-        </button>
+        <div class="bb-options-row">
+          <div class="bb-options-pool">${optionsHtml}</div>
+          <button class="bb-submit-icon-btn" id="bb-submit-btn" title="Strike / Ball / Out 판정하기" ${canSubmit ? '' : 'disabled'}>
+            ⚾
+          </button>
+        </div>
       `;
     }
 
-    const historyHtml = (hintState.history || []).slice(0, 5).map(h => `
+    const latestRecord = (hintState.history || [])[0];
+    const historyHtml = latestRecord ? `
       <div class="bb-history-row">
-        <span>[${h.stage}단계] ${h.guessLabels.join(' · ')}</span>
+        <span>[${latestRecord.stage}단계] ${latestRecord.guessLabels.join(' · ')}</span>
         <span class="bb-score-pills">
-          <span class="pill-strike">${h.strikes}S</span>
-          <span class="pill-ball">${h.balls}B</span>
-          <span class="pill-out">${h.outs}O</span>
+          <span class="pill-strike">${latestRecord.strikes}S</span>
+          <span class="pill-ball">${latestRecord.balls}B</span>
+          <span class="pill-out">${latestRecord.outs}O</span>
         </span>
       </div>
-    `).join('');
+    ` : '';
 
     // 5-2: 비율 공개 힌트 (Up/Down 게임 & 광고 슬롯 구조)
     let ratioSectionHtml = '';

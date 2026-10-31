@@ -97,7 +97,8 @@ class BaseballHintEngine {
       outs,
       isStageCleared
     };
-    state.history.unshift(record);
+    // 누적(append)하지 않고 매번 최신 판정 결과 1건만 유지
+    state.history = [record];
     this.inventory.save();
 
     const allCompleted = this.isAllStagesCleared(recipeId);
