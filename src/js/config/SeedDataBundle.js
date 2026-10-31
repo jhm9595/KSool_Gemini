@@ -1,8 +1,7 @@
 window.KSool = window.KSool || {};
 
 /**
- * file:// 오프라인 로컬 환경 실행 시 fetch() CORS 차단 방어용 인라인 시드 데이터 번들
- * data/*.json의 모든 마스터 데이터를 그대로 내장하여 웹서버 없이도 100% 자립 동작합니다.
+ * K-SOOL 시드 데이터 번들 (모든 마스터 데이터 통합 패키지)
  */
 window.KSool.SeedDataBundle = {
   categories: [
@@ -307,6 +306,15 @@ window.KSool.SeedDataBundle = {
     "emoji": "🍎",
     "picker_component": "NONE",
     "picker_config": null
+  },
+  {
+    "ingredient_id": 315,
+    "display_name": "오렌지",
+    "real_name": "오렌지",
+    "category": "과일/채소",
+    "is_unlocked_initially": false,
+    "description": "새콤달콤 비타민이 가득한 둥근 감귤류 과일. 죠스바의 겉 껍질 맛을 담당합니다.",
+    "emoji": "🍊"
   },
   {
     "ingredient_id": 401,
@@ -2364,7 +2372,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 3,
     "step_order": 12,
-    "unlock_hint": "빨간 딸기 과즙과 상큼한 사과향을 차가운 결정과 함께 얼려낸 상어 지느러미 모양 아이스바입니다."
+    "unlock_hint": "빨간 딸기 과즙과 상큼한 오렌지 과즙을 차가운 결정과 함께 얼려낸 상어 지느러미 모양 아이스바입니다."
   },
   {
     "recipe_id": 67,
@@ -4032,7 +4040,7 @@ window.KSool.SeedDataBundle = {
     "id": 166,
     "recipe_id": 66,
     "slot_order": 2,
-    "ingredient_id": 306,
+    "ingredient_id": 315,
     "detail_ingredient_id": null,
     "ratio": 1
   },

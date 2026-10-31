@@ -58,7 +58,7 @@ class ProgressionEngine {
         allowDetailPicker: false,
         ruleBadge: '⚖️ 1:1:1 3재료 조합 (재료당 최대 1개)',
         ruleNotice: '이제 3가지 재료를 1개씩(1:1:1) 조합하는 레시피가 등장합니다!',
-        unlockLeafIds: [301, 601, 302, 306, 309, 314, 504], // 레몬, 홍차, 멜론, 사과, 배, 석류, 커피콩
+        unlockLeafIds: [301, 601, 302, 306, 309, 314, 504, 315], // 레몬, 홍차, 멜론, 사과, 배, 석류, 커피콩, 오렌지
         canonicalRecipeOrder: [13, 14, 52, 15, 9, 3, 23, 32, 59, 63, 65, 66, 67, 73, 78, 80, 81, 83] // No.17 ~ No.34
       },
       {

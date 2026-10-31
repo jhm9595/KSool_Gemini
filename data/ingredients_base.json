@@ -258,6 +258,15 @@
     "picker_config": null
   },
   {
+    "ingredient_id": 315,
+    "display_name": "오렌지",
+    "real_name": "오렌지",
+    "category": "과일/채소",
+    "is_unlocked_initially": false,
+    "description": "새콤달콤 비타민이 가득한 둥근 감귤류 과일. 죠스바의 겉 껍질 맛을 담당합니다.",
+    "emoji": "🍊"
+  },
+  {
     "ingredient_id": 401,
     "category_id": "DRINK",
     "display_name": "우유",
