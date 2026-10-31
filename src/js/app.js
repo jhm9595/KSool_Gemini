@@ -862,21 +862,6 @@ class KSoolApp {
       const hasStepUp = Boolean(result.stepUpInfo && result.stepUpInfo.newStepConfig);
 
       if (hasChainUnlock || hasStepUp) {
-        let stepUpHeaderHtml = '';
-        if (hasStepUp) {
-          const stCfg = result.stepUpInfo.newStepConfig;
-          stepUpHeaderHtml = `
-            <div class="craft-stepup-header">
-              <div class="craft-stepup-title">
-                <span>🎊</span> <span>${stCfg.title} 해금!</span>
-              </div>
-              <div class="craft-stepup-sub">
-                ${stCfg.ruleBadge} — ${stCfg.subtitle}
-              </div>
-            </div>
-          `;
-        }
-
         const groupsHtml = [];
 
         // 1. [재료 해금] 연쇄 크래프팅 해금 재료 (에메랄드 녹색 테마)
@@ -945,12 +930,13 @@ class KSoolApp {
           }
         }
 
-        unifiedUnlockBanner = `
-          <div class="craft-unified-unlock-card">
-            ${stepUpHeaderHtml}
-            ${groupsHtml.join('')}
-          </div>
-        `;
+        if (groupsHtml.length > 0) {
+          unifiedUnlockBanner = `
+            <div class="craft-unified-unlock-card">
+              ${groupsHtml.join('')}
+            </div>
+          `;
+        }
       }
 
       content.innerHTML = `
@@ -986,7 +972,7 @@ class KSoolApp {
         return `${target.emoji}${this.brandResolver.resolveName(target)}(${s.count})`;
       }).join(' + ');
 
-      const failGuideText = '비율이나 재료 조합이 맞지 않습니다! [도감·힌트] 탭이나 퀴즈 카드의 [추리] 버튼을 눌러 힌트를 확인해보세요.';
+      const failGuideText = '비율이나 재료 조합이 맞지 않습니다! [도감·힌트] 탭이나 퀴즈 카드의 [힌트] 버튼을 눌러 힌트를 확인해보세요.';
 
       content.innerHTML = `
         <div style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px;">
