@@ -153,6 +153,34 @@ class UpAndDownGame {
 
     this.inputVal = '';
     this.render();
+    this._triggerFlashAnimation(this.lastResult);
+  }
+
+  _triggerFlashAnimation(type) {
+    const box = document.querySelector('.updown-box');
+    if (!box) return;
+
+    // 이전 플래시 엘리먼트 정리
+    box.querySelectorAll('.updown-flash-banner, .updown-flash-vignette').forEach(el => el.remove());
+
+    const isUp = type === 'UP';
+    const text = isUp ? '▲ UP' : '▼ DOWN';
+    const typeClass = isUp ? 'up' : 'down';
+
+    const vignette = document.createElement('div');
+    vignette.className = `updown-flash-vignette ${typeClass}`;
+
+    const banner = document.createElement('div');
+    banner.className = `updown-flash-banner ${typeClass}`;
+    banner.textContent = text;
+
+    box.appendChild(vignette);
+    box.appendChild(banner);
+
+    setTimeout(() => {
+      vignette.remove();
+      banner.remove();
+    }, 750);
   }
 
   _triggerOutOfRangeFail(wrongNum) {

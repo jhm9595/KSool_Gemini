@@ -449,6 +449,8 @@
   margin: 0 auto;
   padding: 6px 14px 14px;
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
 }
 
 /* 1. 상단: 영역 박스 없는 큼지막한 두 줄 [10 UP] [40 DOWN] 세로줄 기준 중앙정렬 */
@@ -517,19 +519,17 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  transition: all 0.25s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .soju-cap-circle.up {
   border-color: #38bdf8;
   box-shadow: 0 0 28px rgba(56, 189, 248, 0.6);
-  transform: translateY(-4px);
 }
 
 .soju-cap-circle.down {
   border-color: #f43f5e;
   box-shadow: 0 0 28px rgba(244, 63, 94, 0.6);
-  transform: translateY(4px);
 }
 
 .soju-cap-circle.exploded {
@@ -653,6 +653,93 @@
 
 .party-key-action.submit:active {
   transform: scale(0.96);
+}
+
+/* 5. 확인 시 즉시 화면에 크게 떴다가 사라지는 UP / DOWN 플래시 애니메이션 */
+.updown-flash-banner {
+  position: absolute;
+  top: 36%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: min(4.8rem, 20vw);
+  font-weight: 900;
+  letter-spacing: 2px;
+  pointer-events: none;
+  z-index: 60;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.updown-flash-banner.up {
+  color: #38bdf8;
+  text-shadow: 0 0 30px rgba(56, 189, 248, 0.95), 0 0 70px rgba(56, 189, 248, 0.7);
+  animation: flashPopupUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.updown-flash-banner.down {
+  color: #f43f5e;
+  text-shadow: 0 0 30px rgba(244, 63, 94, 0.95), 0 0 70px rgba(244, 63, 94, 0.7);
+  animation: flashPopupDown 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes flashPopupUp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -36%) scale(0.55);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  55% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -70%) scale(1.25);
+  }
+}
+
+@keyframes flashPopupDown {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -64%) scale(0.55);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  55% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -30%) scale(1.25);
+  }
+}
+
+.updown-flash-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 55;
+  animation: flashVignette 0.65s ease-out forwards;
+}
+
+.updown-flash-vignette.up {
+  box-shadow: inset 0 0 70px rgba(56, 189, 248, 0.45);
+}
+
+.updown-flash-vignette.down {
+  box-shadow: inset 0 0 70px rgba(244, 63, 94, 0.45);
+}
+
+@keyframes flashVignette {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* ==========================================================================
