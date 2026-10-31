@@ -209,6 +209,11 @@ class CapFlickGame {
         el.className = 'flick-hit-word ppak show pop-anim';
       });
 
+      clearTimeout(this.hitTextTimeout);
+      this.hitTextTimeout = setTimeout(() => {
+        hitWordEls.forEach(el => el.classList.remove('show'));
+      }, 900);
+
       // 300ms 후 병뚜껑 가운데 ? 버튼 등장 (불필요한 하단 텍스트/버튼 없이 뚜껑에만 표시)
       setTimeout(() => {
         const qBtn = document.getElementById('cap-question-btn');
@@ -287,7 +292,7 @@ class CapFlickGame {
 
         <!-- 3. 메인 인터랙션 아레나 (중앙 초록 병뚜껑 + 2배 길어진 꼬다리 와이어) -->
         <div class="capflick-center-stage" id="cap-flick-arena">
-          <svg class="soju-cap-flick-svg" viewBox="0 0 320 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg class="soju-cap-flick-svg" viewBox="0 18 320 336" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <!-- 뚜껑 메탈 그라데이션 -->
               <radialGradient id="cap-metal-grad" cx="50%" cy="40%" r="55%">

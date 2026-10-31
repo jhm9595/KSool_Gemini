@@ -753,7 +753,8 @@
 }
 
 .capflick-center-stage {
-  flex: 1;
+  flex: 0 0 auto;
+  height: clamp(230px, 36vh, 290px);
   width: 100%;
   display: flex;
   align-items: center;
@@ -765,8 +766,9 @@
 }
 
 .soju-cap-flick-svg {
-  width: min(290px, 80vw);
-  height: min(340px, 60vh);
+  width: auto;
+  height: 100%;
+  max-width: min(280px, 75vw);
   filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.7));
   overflow: visible;
 }
@@ -831,11 +833,11 @@
   80% { transform: translate(4px, -2px) scale(0.99); }
 }
 
-/* 게이지와 뚜껑 사이 대칭 타격 강도 텍스트 슬롯 (정중앙 세로줄 맞춤) */
+/* 게이지와 뚜껑 사이 대칭 타격 강도 텍스트 슬롯 (정중앙 세로줄 & 뚜껑-게이지 상하 정중앙 flex 배치) */
 .flick-hit-slot {
+  flex: 1;
   width: 100%;
-  max-width: 360px;
-  height: clamp(34px, 5vh, 44px);
+  max-width: 380px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -843,15 +845,20 @@
   text-align: center;
   pointer-events: none;
   z-index: 15;
+  min-height: 50px;
 }
 
 .flick-hit-slot.top-symmetrical {
   transform: rotate(180deg);
 }
 
+.flick-hit-slot.bottom-symmetrical {
+  transform: none;
+}
+
 .flick-hit-word {
   font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
-  font-size: clamp(2rem, 3.8vh, 2.6rem);
+  font-size: clamp(2.6rem, 5vh, 3.4rem);
   font-weight: 900;
   letter-spacing: -0.5px;
   line-height: 1;
@@ -873,20 +880,21 @@
 /* 톡: 청량 에메랄드 그린 */
 .flick-hit-word.tok {
   color: #4ade80;
+  font-size: clamp(2.6rem, 5vh, 3.4rem);
   text-shadow: 0 0 16px rgba(74, 222, 128, 0.8), 0 0 32px rgba(34, 197, 94, 0.5);
 }
 
 /* 딱!: 네온 골드 옐로우 */
 .flick-hit-word.ttak {
   color: #fde047;
-  font-size: clamp(2.3rem, 4.3vh, 3rem);
+  font-size: clamp(3rem, 5.8vh, 4rem);
   text-shadow: 0 0 20px rgba(253, 224, 71, 0.9), 0 0 40px rgba(234, 179, 8, 0.6);
 }
 
 /* 빡!: 강렬한 크림슨 레드 폭발 */
 .flick-hit-word.ppak {
   color: #ff4d6d;
-  font-size: clamp(2.6rem, 4.8vh, 3.4rem);
+  font-size: clamp(3.5rem, 6.6vh, 4.8rem);
   text-shadow: 0 0 24px rgba(255, 77, 109, 0.95), 0 0 50px rgba(239, 68, 68, 0.8);
 }
 
