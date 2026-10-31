@@ -438,126 +438,196 @@
 }
 
 /* ==========================================================================
-   ① 숫자 Up & Down 전용 스타일 (오프라인 술자리 낙장불입 버전)
+   ① Up & Down 전용 스타일 (오프라인 양방향 대칭 테이블탑 버전)
    ========================================================================== */
-.updown-box {
+.updown-box.tabletop-symmetrical {
+  display: flex !important;
+  flex-direction: column !important;
   justify-content: space-between !important;
   align-items: center !important;
   height: 100% !important;
   width: 100% !important;
   max-width: 440px;
   margin: 0 auto;
-  padding: 6px 14px 14px;
+  padding: 4px 10px 8px;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
-}
-
-/* 1. 상단: 영역 박스 없는 큼지막한 두 줄 [10 UP] [40 DOWN] 세로줄 기준 중앙정렬 */
-.updown-status-large {
-  display: grid;
-  grid-template-columns: minmax(70px, max-content) minmax(140px, max-content);
-  justify-content: center;
-  align-items: baseline;
-  column-gap: 24px;
-  row-gap: 4px;
-  width: 100%;
-  margin-top: 20px;
-  margin-bottom: 6px;
   user-select: none;
 }
 
-.updown-num {
-  font-size: min(3.5rem, 12vw);
+/* 플레이어 스테이션 (상단 180도 회전, 하단 정방향 0도) */
+.updown-player-station {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: transform 0.2s ease;
+}
+
+.updown-player-station.top-station {
+  transform: rotate(180deg);
+}
+
+.station-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+/* 축약형 UP/DOWN 배지 짝 */
+.updown-status-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 95px;
+}
+
+.updown-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+.badge-num {
+  font-size: 1.25rem;
   font-weight: 900;
-  text-align: center;
-  justify-self: center;
-  letter-spacing: -1px;
-  line-height: 1.1;
+  min-width: 28px;
+  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-.updown-tag {
-  font-size: min(3.5rem, 12vw);
+.badge-txt {
+  font-size: 0.95rem;
   font-weight: 900;
-  text-align: center;
-  justify-self: center;
   letter-spacing: 0.5px;
-  line-height: 1.1;
 }
 
-.updown-num.up,
-.updown-tag.up {
+.updown-badge-row.up .badge-num,
+.updown-badge-row.up .badge-txt {
   color: #38bdf8;
-  text-shadow: 0 0 24px rgba(56, 189, 248, 0.5);
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
 }
 
-.updown-num.down,
-.updown-tag.down {
+.updown-badge-row.down .badge-num,
+.updown-badge-row.down .badge-txt {
   color: #f43f5e;
-  text-shadow: 0 0 24px rgba(244, 63, 94, 0.5);
+  text-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
 }
 
-/* 2. 가운데: 대폭 커진 초록 메탈 병뚜껑 */
-.party-cap-visual-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 4px 0;
+/* 입력 번호 디스플레이 */
+.party-number-display {
   flex: 1;
-}
-
-.soju-cap-circle {
-  width: min(136px, 38vw);
-  height: min(136px, 38vw);
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #22c55e 0%, #15803d 70%, #14532d 100%);
-  border: 5px solid #86efac;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65), inset 0 0 16px rgba(255, 255, 255, 0.35);
+  height: 42px;
+  background: #0f172a;
+  border: 1.5px solid rgba(56, 189, 248, 0.4);
+  border-radius: 10px;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+  letter-spacing: 2px;
 }
 
-.soju-cap-circle.up {
+.party-number-display.placeholder {
+  color: #475569;
+  font-size: 1.2rem;
+  letter-spacing: 4px;
+}
+
+/* 컴팩트 다이얼 그리드 */
+.party-numpad-grid.compact {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  width: 100%;
+}
+
+.party-numpad-grid.compact .party-num-key {
+  height: clamp(34px, 5.2vh, 42px);
+  min-height: unset;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #f1f5f9;
+  font-size: 1.25rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.party-numpad-grid.compact .party-num-key:active {
+  background: #0284c7;
   border-color: #38bdf8;
-  box-shadow: 0 0 28px rgba(56, 189, 248, 0.6);
+  transform: scale(0.95);
 }
 
-.soju-cap-circle.down {
-  border-color: #f43f5e;
-  box-shadow: 0 0 28px rgba(244, 63, 94, 0.6);
-}
-
-.soju-cap-circle.exploded {
-  background: radial-gradient(circle at 35% 35%, #ef4444 0%, #991b1b 100%);
-  border-color: #fca5a5;
-  box-shadow: 0 0 40px #ef4444;
-  animation: shakeCap 0.4s infinite;
-}
-
-@keyframes shakeCap {
-  0%, 100% { transform: translate(0, 0) scale(1.05); }
-  25% { transform: translate(-3px, 2px) rotate(-2deg); }
-  75% { transform: translate(3px, -2px) rotate(2deg); }
-}
-
-.soju-cap-inner {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  border: 2.5px dashed rgba(255, 255, 255, 0.35);
+.party-numpad-grid.compact .party-key-action {
+  height: clamp(34px, 5.2vh, 42px);
+  min-height: unset;
+  border-radius: 8px;
+  font-weight: 900;
+  cursor: pointer;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
+  font-size: 1.05rem;
+  transition: all 0.1s ease;
 }
 
-.soju-cap-label { font-size: 0.66rem; font-weight: 900; color: #dcfce7; letter-spacing: 1.5px; }
-.soju-cap-secret { font-size: 2.5rem; font-weight: 900; color: #ffffff; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+.party-numpad-grid.compact .party-key-action.restart {
+  background: #334155;
+  border: 1px solid #475569;
+  color: #cbd5e1;
+}
+
+.party-numpad-grid.compact .party-key-action.restart:active {
+  background: #475569;
+  transform: scale(0.95);
+}
+
+.party-numpad-grid.compact .party-key-action.submit {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: 1px solid #34d399;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+}
+
+.party-numpad-grid.compact .party-key-action.submit:active {
+  transform: scale(0.95);
+}
+
+/* 중앙 극사실적 3D 소주 병뚜껑 래퍼 */
+.updown-center-cap-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px 0;
+  position: relative;
+  z-index: 20;
+}
+
+.realistic-cap-container {
+  width: clamp(76px, 12vh, 92px);
+  height: clamp(76px, 12vh, 92px);
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.65));
+  transition: transform 0.2s ease;
+}
+
+.realistic-cap-container.exploded {
+  animation: shakeCap 0.4s infinite;
+  filter: drop-shadow(0 0 20px #ef4444);
+}
 .soju-cap-star { font-size: 0.75rem; color: #fde047; }
 
 /* 3. 입력된 숫자 표시창 (키보드 팝업 없는 순수 뷰포트) */
@@ -751,6 +821,15 @@
   padding-bottom: 8px;
 }
 
+.capflick-minimal-box.tabletop-symmetrical {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  height: 100% !important;
+  padding: 4px 10px 8px;
+  box-sizing: border-box;
+}
+
 .capflick-center-stage {
   flex: 1;
   width: 100%;
@@ -861,14 +940,25 @@
   animation: pulseDot 0.4s infinite alternate;
 }
 
-/* 하단: 왔다갔다 타이밍 파워 게이지 */
+/* 상하 대칭 왔다갔다 타이밍 파워 게이지 */
 .flick-power-section {
   width: 100%;
   max-width: 360px;
-  margin: 0 auto 18px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
+}
+
+.flick-power-section.top-symmetrical {
+  transform: rotate(180deg);
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.flick-power-section.bottom-symmetrical {
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
 .flick-timing-meter {
@@ -1434,6 +1524,104 @@
   padding: 16px 12px 24px;
   position: relative;
   transition: background 0.2s ease;
+}
+
+.hunmin-pure-stage.tabletop-symmetrical {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  height: 100% !important;
+  width: 100% !important;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  padding: 8px 12px 14px;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+/* 대칭 자음 반쪽 영역 */
+.hunmin-symmetric-half {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.hunmin-symmetric-half.top-half {
+  transform: rotate(180deg);
+}
+
+.hunmin-symmetric-half .pure-chosung-text {
+  font-size: min(5rem, 16vw);
+  font-weight: 900;
+  color: #fde047;
+  letter-spacing: 12px;
+  margin-left: 12px;
+  text-shadow: 0 0 24px rgba(253, 224, 71, 0.7), 0 6px 20px rgba(0, 0, 0, 0.8);
+  will-change: transform, opacity;
+}
+
+/* 중앙 가벼운 구분선 & 타이머/컨트롤 허브 */
+.hunmin-center-divider-zone {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+  z-index: 10;
+}
+
+.hunmin-light-divider {
+  width: 100%;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent 0%, rgba(148, 163, 184, 0.35) 20%, rgba(56, 189, 248, 0.6) 50%, rgba(148, 163, 184, 0.35) 80%, transparent 100%);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+}
+
+.hunmin-center-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+  padding: 0 4px;
+}
+
+.hunmin-center-timer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hunmin-center-quick-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.hunmin-float-btn.mini {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #cbd5e1;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hunmin-float-btn.mini:hover {
+  background: rgba(56, 189, 248, 0.2);
+  color: #ffffff;
+  border-color: #38bdf8;
 }
 
 .hunmin-pure-stage.urgent {

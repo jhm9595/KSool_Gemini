@@ -121,13 +121,12 @@ class HunminBombGame {
       this.hub.sound.playUp();
       this.hub.vibrateShort();
     }
-    const choTextEl = document.getElementById('pure-chosung-text');
-    if (choTextEl) {
+    document.querySelectorAll('.pure-chosung-text').forEach(choTextEl => {
       choTextEl.textContent = this.currentCho;
       choTextEl.classList.remove('pop-anim');
       void choTextEl.offsetWidth;
       choTextEl.classList.add('pop-anim');
-    }
+    });
   }
 
   passTurn() {
@@ -289,32 +288,46 @@ class HunminBombGame {
     const isUrgent = !isUnlimited && this.remainingBombTime <= 1.5 && !this.isExploded;
 
     container.innerHTML = `
-      <div class="party-game-box hunmin-pure-stage ${isUrgent ? 'urgent' : ''}" id="hunmin-touch-screen">
-        <!-- 1. 시간 표시 (타이머 바 & 남은 시간) -->
-        <div class="hunmin-top-timer-pure">
-          <div class="hunmin-timer-track">
-            <div class="hunmin-timer-fill ${isUrgent ? 'danger' : ''}" id="hunmin-timer-fill" style="width:${timePercent}%;"></div>
-          </div>
-          <div class="hunmin-time-digits ${isUrgent ? 'danger' : ''}" id="hunmin-time-digits">
-            ${isUnlimited ? '∞ 무제한' : `⏱️ ${this.remainingBombTime.toFixed(1)}초`}
-          </div>
-        </div>
-
-        <!-- 2. 순수 초대형 자음 2개 (네모칸, 폭탄 그림, 설명문 일체 없음!) -->
-        <div class="pure-chosung-display">
-          <div class="pure-chosung-text pop-anim" id="pure-chosung-text">
+      <div class="party-game-box hunmin-pure-stage tabletop-symmetrical ${isUrgent ? 'urgent' : ''}" id="hunmin-touch-screen">
+        <!-- 1. 상단 자음 (상대방 플레이어용 180도 회전 대칭) -->
+        <div class="hunmin-symmetric-half top-half">
+          <div class="pure-chosung-text pop-anim">
             ${this.currentCho}
           </div>
         </div>
 
-        <!-- 3. 상단 플로팅 퀵 버튼 (설정 변경 & 다른 자음 즉시 뽑기) -->
-        <div class="hunmin-floating-actions">
-          <button type="button" class="hunmin-float-btn" id="btn-shuffle-cho" title="다른 자음 즉시 제시">
-            🔀 자음변경
-          </button>
-          <button type="button" class="hunmin-float-btn" id="btn-open-setup" title="시간 설정">
-            ⚙️ 시간설정
-          </button>
+        <!-- 2. 중앙 영역 구분선 & 타이머/조작 허브 -->
+        <div class="hunmin-center-divider-zone">
+          <div class="hunmin-light-divider"></div>
+
+          <div class="hunmin-center-meta-row">
+            <div class="hunmin-center-timer">
+              <div class="hunmin-timer-track">
+                <div class="hunmin-timer-fill ${isUrgent ? 'danger' : ''}" id="hunmin-timer-fill" style="width:${timePercent}%;"></div>
+              </div>
+              <div class="hunmin-time-digits ${isUrgent ? 'danger' : ''}" id="hunmin-time-digits">
+                ${isUnlimited ? '∞ 무제한' : `⏱️ ${this.remainingBombTime.toFixed(1)}초`}
+              </div>
+            </div>
+
+            <div class="hunmin-center-quick-actions">
+              <button type="button" class="hunmin-float-btn mini" id="btn-shuffle-cho" title="다른 자음 제시">
+                🔀 자음변경
+              </button>
+              <button type="button" class="hunmin-float-btn mini" id="btn-open-setup" title="시간 설정">
+                ⚙️ 시간설정
+              </button>
+            </div>
+          </div>
+
+          <div class="hunmin-light-divider"></div>
+        </div>
+
+        <!-- 3. 하단 자음 (내 쪽 플레이어용 정방향 0도) -->
+        <div class="hunmin-symmetric-half bottom-half">
+          <div class="pure-chosung-text pop-anim">
+            ${this.currentCho}
+          </div>
         </div>
       </div>
     `;

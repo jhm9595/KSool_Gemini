@@ -54,8 +54,7 @@ class CapFlickGame {
     this.isCharging = true;
     this.chargeStartTime = performance.now();
 
-    const meterEl = document.getElementById('flick-timing-meter');
-    if (meterEl) meterEl.classList.add('charging');
+    document.querySelectorAll('.flick-timing-meter').forEach(el => el.classList.add('charging'));
 
     const updateLoop = () => {
       if (!this.isCharging) return;
@@ -83,8 +82,7 @@ class CapFlickGame {
       this.animLoopId = null;
     }
 
-    const meterEl = document.getElementById('flick-timing-meter');
-    if (meterEl) meterEl.classList.remove('charging');
+    document.querySelectorAll('.flick-timing-meter').forEach(el => el.classList.remove('charging'));
 
     const holdDuration = performance.now() - this.chargeStartTime;
 
@@ -186,33 +184,55 @@ class CapFlickGame {
   }
 
   _updateMeterUI(power) {
-    const cursor = document.getElementById('flick-meter-cursor');
-    const fill = document.getElementById('flick-meter-fill');
-    if (!cursor || !fill) return;
+    const cursors = document.querySelectorAll('.flick-meter-cursor');
+    const fills = document.querySelectorAll('.flick-meter-fill');
+    if (!cursors.length || !fills.length) return;
 
     const percent = Math.min(100, Math.max(0, power * 100));
-    cursor.style.left = `${percent}%`;
-    fill.style.width = `${percent}%`;
-
-    if (percent <= 33) {
-      fill.style.background = 'linear-gradient(90deg, #10b981, #22c55e)';
-    } else if (percent <= 72) {
-      fill.style.background = 'linear-gradient(90deg, #22c55e, #eab308)';
-    } else {
-      fill.style.background = 'linear-gradient(90deg, #eab308, #ef4444)';
-    }
+    cursors.forEach(cursor => {
+      cursor.style.left = `${percent}%`;
+    });
+    fills.forEach(fill => {
+      fill.style.width = `${percent}%`;
+      if (percent <= 33) {
+        fill.style.background = 'linear-gradient(90deg, #10b981, #22c55e)';
+      } else if (percent <= 72) {
+        fill.style.background = 'linear-gradient(90deg, #22c55e, #eab308)';
+      } else {
+        fill.style.background = 'linear-gradient(90deg, #eab308, #ef4444)';
+      }
+    });
   }
 
   // =========================================================================
-  // 미니멀 렌더링 & 이벤트 바인딩
+  // 미니멀 렌더링 & 이벤트 바인딩 (오프라인 양방향 대칭 게이지)
   // =========================================================================
 
   render() {
     const container = document.getElementById('party-game-stage');
     if (!container) return;
 
+    const meterHtml = `
+      <div class="flick-timing-meter">
+        <div class="flick-meter-zones">
+          <span class="m-zone green">🟢 톡 (약)</span>
+          <span class="m-zone yellow">🟡 딱 (중)</span>
+          <span class="m-zone red">🔴 빡! (강)</span>
+        </div>
+        <div class="flick-meter-track">
+          <div class="flick-meter-fill" style="width: 20%;"></div>
+          <div class="flick-meter-cursor" style="left: 20%;"></div>
+        </div>
+      </div>
+    `;
+
     container.innerHTML = `
-      <div class="party-game-box capflick-minimal-box">
+      <div class="party-game-box capflick-minimal-box tabletop-symmetrical">
+        <!-- 상단: 대칭 타이밍 파워 게이지 (상대방 플레이어용 180도 회전) -->
+        <div class="flick-power-section top-symmetrical">
+          ${meterHtml}
+        </div>
+
         <!-- 메인 인터랙션 아레나 (중앙 초록 병뚜껑 + 2배 길어진 꼬다리 와이어) -->
         <div class="capflick-center-stage" id="cap-flick-arena">
           <svg class="soju-cap-flick-svg" viewBox="0 0 320 380" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -285,19 +305,9 @@ class CapFlickGame {
           <div id="flick-feedback-badge" class="flick-feedback-badge"></div>
         </div>
 
-        <!-- 하단: 왔다갔다 타이밍 파워 게이지 (설명 텍스트 없이 순수 게이지 정보만 유지) -->
-        <div class="flick-power-section">
-          <div class="flick-timing-meter" id="flick-timing-meter">
-            <div class="flick-meter-zones">
-              <span class="m-zone green">🟢 톡 (약)</span>
-              <span class="m-zone yellow">🟡 딱 (중)</span>
-              <span class="m-zone red">🔴 빡! (강)</span>
-            </div>
-            <div class="flick-meter-track">
-              <div class="flick-meter-fill" id="flick-meter-fill" style="width: 20%;"></div>
-              <div class="flick-meter-cursor" id="flick-meter-cursor" style="left: 20%;"></div>
-            </div>
-          </div>
+        <!-- 하단: 대칭 타이밍 파워 게이지 (내 쪽 플레이어용 정방향) -->
+        <div class="flick-power-section bottom-symmetrical">
+          ${meterHtml}
         </div>
       </div>
     `;
