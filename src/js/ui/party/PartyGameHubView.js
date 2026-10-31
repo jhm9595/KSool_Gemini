@@ -64,8 +64,8 @@ class PartyGameHubView {
       {
         key: 'penaltycocktail',
         emoji: '🍹',
-        title: '벌칙주 정하기',
-        badge: '냉장고 벌칙주',
+        title: '랜덤 벌칙주 제조기',
+        badge: '벌칙주',
         accentColor: '#a855f7',
         desc: '선택한 술과 음료로 랜덤 비율의 벌칙주를 만드는 게임'
       }
