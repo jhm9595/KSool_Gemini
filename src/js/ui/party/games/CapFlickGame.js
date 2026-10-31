@@ -192,6 +192,11 @@ class CapFlickGame {
 
       if (wireGroup) {
         wireGroup.classList.remove('spring-shake');
+        const flyAngle = this.angle || 0;
+        // 타격 방향으로 일직선 추진 벡터 설정
+        const flyX = flyAngle * 7;
+        wireGroup.style.setProperty('--fly-angle', `${flyAngle}deg`);
+        wireGroup.style.setProperty('--fly-x', `${flyX}px`);
         wireGroup.classList.add('broken-fly');
       }
 
@@ -204,12 +209,10 @@ class CapFlickGame {
         el.className = 'flick-hit-word ppak show pop-anim';
       });
 
-      // 300ms 후 병뚜껑 가운데 ? 버튼 및 Up & Down 이동 안내 등장
+      // 300ms 후 병뚜껑 가운데 ? 버튼 등장 (불필요한 하단 텍스트/버튼 없이 뚜껑에만 표시)
       setTimeout(() => {
         const qBtn = document.getElementById('cap-question-btn');
-        const guidePill = document.getElementById('cap-updown-guide-pill');
         if (qBtn) qBtn.classList.add('show');
-        if (guidePill) guidePill.classList.add('show');
       }, 300);
     }
 
@@ -319,10 +322,16 @@ class CapFlickGame {
               <circle cx="160" cy="275" r="24" fill="rgba(21,128,61,0.5)" stroke="rgba(134,239,172,0.4)" stroke-width="1.5"/>
             </g>
 
-            <!-- 2. 길고 디테일한 알루미늄 꼬다리 와이어 (회전 중심점: 캡 상단 결합부 160, 206) -->
+            <!-- 2. 꼬다리가 뜯겨나간 단면 스텀프 (와이어가 일직선으로 날아가도 캡에 남아있는 파단면) -->
+            <g class="soju-cap-broken-stump" style="opacity: ${this.isBroken ? 1 : 0};">
+              <path d="M152 208 L168 208 L165 200 L155 200 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
+              <circle cx="160" cy="199" r="2.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
+            </g>
+
+            <!-- 3. 길고 디테일한 알루미늄 꼬다리 와이어 (회전 중심점: 캡 상단 결합부 160, 206) -->
             <g id="cap-wire-transform-group" 
                class="${this.isBroken ? 'broken-fly' : ''}" 
-               style="transform-origin: 160px 206px; transform: rotate(${this.angle}deg);">
+               style="transform-origin: 160px 206px; transform: rotate(${this.angle}deg); --fly-angle: ${this.angle || 0}deg; --fly-x: ${(this.angle || 0) * 7}px;">
               
               <!-- 캡과 이어지는 브래킷 조인트 -->
               <path d="M152 208 L168 208 L165 200 L155 200 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
@@ -349,7 +358,7 @@ class CapFlickGame {
               <circle cx="172" cy="27" r="3.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
             </g>
 
-            <!-- 3. 병뚜껑 가운데 ? 버튼 (꼬다리 끊어지면 등장하는 숫자게임 바로가기) -->
+            <!-- 4. 병뚜껑 가운데 ? 버튼 (꼬다리 끊어지면 등장하는 숫자게임 바로가기) -->
             <g id="cap-question-btn" 
                class="cap-question-btn ${this.showQuestionMark ? 'show' : ''}" 
                role="button" 
@@ -365,16 +374,6 @@ class CapFlickGame {
               <text x="160" y="275" text-anchor="middle" dominant-baseline="central" class="q-mark-char">?</text>
             </g>
           </svg>
-
-          <!-- 꼬다리 탈락 후 Up & Down 안내 및 계속하기 힌트 -->
-          <div id="cap-updown-guide-pill" class="cap-updown-guide-pill ${this.showQuestionMark ? 'show' : ''}">
-            <button type="button" class="btn-jump-updown" id="btn-jump-updown">
-              <span class="jump-pill-icon">🎲</span>
-              <span class="jump-pill-text"><strong>?</strong> 터치 시 <strong>Up & Down</strong> 이동!</span>
-              <span class="jump-pill-arrow">›</span>
-            </button>
-            <span class="jump-dismiss-hint">화면을 터치하면 꼬다리 치기 계속</span>
-          </div>
         </div>
 
         <!-- 4. 하단 타격 강도 피드백 (뚜껑과 게이지 사이, 정방향 0도, 정중앙 세로줄) -->
@@ -398,8 +397,8 @@ class CapFlickGame {
 
     // 포인터 다운 (누르기 시작: 파워 차징 시작 또는 ? 버튼 처리)
     const onStart = (e) => {
-      // 1. 병뚜껑 가운데 ? 버튼이나 안내 바 클릭 시 Up & Down 화면으로 즉시 전환
-      if (e.target && (e.target.closest('#cap-question-btn') || e.target.closest('#btn-jump-updown'))) {
+      // 1. 병뚜껑 가운데 ? 버튼 클릭 시 Up & Down 화면으로 즉시 전환
+      if (e.target && e.target.closest('#cap-question-btn')) {
         e.preventDefault();
         e.stopPropagation();
         this._goToUpDown();
@@ -441,7 +440,7 @@ class CapFlickGame {
       window.onmouseup = onEnd;
     }
 
-    // SVG ? 버튼 및 가이드 버튼에 직접 클릭 이벤트도 보강
+    // SVG ? 버튼에 직접 클릭 이벤트도 보강
     const qBtn = document.getElementById('cap-question-btn');
     if (qBtn) {
       const handleQ = (e) => {
@@ -451,17 +450,6 @@ class CapFlickGame {
       };
       qBtn.onclick = handleQ;
       qBtn.ontouchend = handleQ;
-    }
-
-    const jumpBtn = document.getElementById('btn-jump-updown');
-    if (jumpBtn) {
-      const handleJump = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this._goToUpDown();
-      };
-      jumpBtn.onclick = handleJump;
-      jumpBtn.ontouchend = handleJump;
     }
   }
 
