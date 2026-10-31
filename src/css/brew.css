@@ -290,6 +290,23 @@
   flex-shrink: 0;
 }
 
+.collection-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.collection-top-row .cat-filter-bar {
+  flex: 1;
+  padding-bottom: 0;
+}
+
+.collection-progress-pill {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .sool-grid {
   flex: 1;
   overflow-y: auto;
