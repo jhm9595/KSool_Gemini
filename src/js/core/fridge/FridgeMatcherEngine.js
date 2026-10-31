@@ -166,8 +166,11 @@ class FridgeMatcherEngine {
       }
     }
 
-    // 3. 최대한 재료가 많이 맞아 있는 순서대로 정렬 (matchedCount 내림차순 -> 일치율 내림차순)
+    // 3. 최대한 재료가 많이 맞아 있는 순서대로 정렬 (isFullMatch 우선 -> matchedCount 내림차순 -> 일치율 내림차순)
     results.sort((a, b) => {
+      if (a.isFullMatch !== b.isFullMatch) {
+        return a.isFullMatch ? -1 : 1;
+      }
       if (b.matchedCount !== a.matchedCount) {
         return b.matchedCount - a.matchedCount;
       }

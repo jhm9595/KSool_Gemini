@@ -110,6 +110,44 @@
   gap: 10px;
 }
 
+.fridge-filter-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.fridge-filter-tab {
+  flex: 1;
+  padding: 6px 10px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.fridge-filter-tab:hover {
+  border-color: #64748b;
+  color: #f1f5f9;
+}
+
+.fridge-filter-tab.active {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: #10b981;
+  color: #6ee7b7;
+}
+
+.fridge-no-full-match-card {
+  background: #0f172a;
+  border: 1px dashed #475569;
+  border-radius: 12px;
+  padding: 18px 12px;
+  text-align: center;
+  margin: 4px 0;
+}
+
 .random-pick-btn {
   width: 100%;
   padding: 12px;

@@ -16,6 +16,7 @@ class FridgeRecommenderView {
 
     this.selectedCategory = 'ALCOHOL';
     this.lastRandomWinnerKey = null;
+    this.filterMode = 'FULL';
   }
 
   render() {
@@ -66,74 +67,101 @@ class FridgeRecommenderView {
     }).join('');
 
     const unlockedAlcoholMatches = this.fridgeEngine.findCraftableFromFridge();
+    const fullMatches = unlockedAlcoholMatches.filter(m => m.isFullMatch);
+    const partialMatches = unlockedAlcoholMatches.filter(m => !m.isFullMatch);
     const selectedCount = eligibleIngs.filter(ing => this.fridgeEngine.isSelected(ing.ingredient_id)).length;
     const isSugUnlocked = this.inventory.isSuggestionTabUnlocked();
 
-    const matchesHtml = unlockedAlcoholMatches.length === 0
-      ? `<div style="text-align:center; padding:18px 10px; font-size:0.78rem; color:#94a3b8; line-height:1.5;">
-           선택한 냉장고 재료가 들어간 <b>해금된 술 조합</b>${isSugUnlocked ? ' 및 <b>조합추천</b>' : ''}이 없습니다.<br/>
-           (위에서 냉장고 재료를 1개 이상 선택해보세요!)
-         </div>`
-      : unlockedAlcoholMatches.map(entry => {
-          const isWinner = this.lastRandomWinnerKey === entry.entryKey;
-          const slotsHtml = entry.items.map(it => {
-            const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
-            const base = this.recipeBook.getBaseIngredient(it.ingredient_id);
-            const target = det || base;
-            const inFridge = this.fridgeEngine.isSelected(it.ingredient_id);
-            const detailBadge = det ? `<span class="slot-detail-tag">특산</span>` : '';
-            const ratioBadge = Number(it.ratio) > 1 ? `<span class="slot-count-badge">${it.ratio}</span>` : '';
-            return `
-              <div class="pot-slot filled sug-slot-card ${inFridge ? 'fridge-matched-slot' : 'fridge-missing-slot'}">
-                ${detailBadge}
-                <span class="slot-emoji">${target ? target.emoji : '🍶'}</span>
-                <span class="slot-name">${target ? this.brandResolver.resolveName(target) : ''}</span>
-                ${ratioBadge}
-              </div>
-            `;
-          }).join('');
+    const currentList = this.filterMode === 'FULL' ? fullMatches : unlockedAlcoholMatches;
 
-          const matchBadgeHtml = entry.isFullMatch
-            ? `<span class="fridge-match-pill full">✅ ${entry.matchedCount}/${entry.totalCount} 재료 일치</span>`
-            : `<span class="fridge-match-pill partial">🔍 ${entry.matchedCount}/${entry.totalCount} 재료 일치</span>`;
-
-          if (entry.entryType === 'OFFICIAL') {
-            const rec = entry.recipe;
-            return `
-              <div class="fridge-recipe-card ${isWinner ? 'highlighted-winner' : ''}" data-fridge-rec="${rec.recipe_id}">
-                <div class="fridge-card-top">
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:1.35rem;">${rec.emoji}</span>
-                    <span style="font-size:0.86rem; font-weight:900; color:#f8fafc;">
-                      ${isWinner ? '🎯 [당첨!] ' : ''}${this.brandResolver.resolveName(rec)}
-                    </span>
-                  </div>
-                  <div style="display:flex; align-items:center; gap:6px;">
-                    ${matchBadgeHtml}
-                    <span class="diff-badge diff-${rec.difficulty}" style="position:static;">${rec.difficulty}</span>
-                  </div>
-                </div>
-                <div class="suggestion-items-wrap">${slotsHtml}</div>
-              </div>
-            `;
-          } else {
-            const sug = entry.suggestion;
-            return `
-              <div class="fridge-recipe-card suggestion-origin ${isWinner ? 'highlighted-winner' : ''}">
-                <div class="fridge-card-top">
-                  <div style="display:flex; align-items:center; gap:6px;">
-                    <span class="online-sug-badge">🌐 조합추천</span>
-                    <span style="font-size:0.8rem; font-weight:800; color:#e2e8f0;">
-                      ${isWinner ? '🎯 [당첨!] ' : ''}유저 추천 조합 (👍 ${sug.upvotes})
-                    </span>
-                  </div>
-                  ${matchBadgeHtml}
-                </div>
-                <div class="suggestion-items-wrap">${slotsHtml}</div>
-              </div>
-            `;
-          }
+    let matchesHtml = '';
+    if (unlockedAlcoholMatches.length === 0) {
+      matchesHtml = `
+        <div style="text-align:center; padding:18px 10px; font-size:0.78rem; color:#94a3b8; line-height:1.5;">
+          선택한 냉장고 재료가 들어간 <b>해금된 술 조합</b>${isSugUnlocked ? ' 및 <b>조합추천</b>' : ''}이 없습니다.<br/>
+          (위에서 냉장고 재료를 1개 이상 선택해보세요!)
+        </div>
+      `;
+    } else if (this.filterMode === 'FULL' && fullMatches.length === 0) {
+      matchesHtml = `
+        <div class="fridge-no-full-match-card">
+          <div style="font-size:1.4rem; margin-bottom:4px;">🍶</div>
+          <div style="font-weight:900; color:#f8fafc; font-size:0.86rem; margin-bottom:4px;">
+            바로 만들 수 있는 술이 아직 없습니다
+          </div>
+          <div style="font-size:0.75rem; color:#94a3b8; line-height:1.45;">
+            선택한 냉장고 재료만으로 완성 가능한 술이 없습니다.<br/>
+            함께 조합할 주류나 음료를 1개 이상 더 선택해보세요!
+          </div>
+          ${partialMatches.length > 0 ? `
+            <button class="fridge-mini-btn" id="fridge-view-all-sub-btn" style="margin-top:8px; padding:6px 12px; font-size:0.74rem;">
+              🔍 재료 일부 일치 조합 보기 (${partialMatches.length}건)
+            </button>
+          ` : ''}
+        </div>
+      `;
+    } else {
+      matchesHtml = currentList.map(entry => {
+        const isWinner = this.lastRandomWinnerKey === entry.entryKey;
+        const slotsHtml = entry.items.map(it => {
+          const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
+          const base = this.recipeBook.getBaseIngredient(it.ingredient_id);
+          const target = det || base;
+          const inFridge = this.fridgeEngine.isSelected(it.ingredient_id);
+          const detailBadge = det ? `<span class="slot-detail-tag">특산</span>` : '';
+          const ratioBadge = Number(it.ratio) > 1 ? `<span class="slot-count-badge">${it.ratio}</span>` : '';
+          return `
+            <div class="pot-slot filled sug-slot-card ${inFridge ? 'fridge-matched-slot' : 'fridge-missing-slot'}">
+              ${detailBadge}
+              <span class="slot-emoji">${target ? target.emoji : '🍶'}</span>
+              <span class="slot-name">${target ? this.brandResolver.resolveName(target) : ''}</span>
+              ${ratioBadge}
+            </div>
+          `;
         }).join('');
+
+        const matchBadgeHtml = entry.isFullMatch
+          ? `<span class="fridge-match-pill full">✅ ${entry.matchedCount}/${entry.totalCount} 재료 일치</span>`
+          : `<span class="fridge-match-pill partial">🔍 ${entry.matchedCount}/${entry.totalCount} 재료 일치</span>`;
+
+        if (entry.entryType === 'OFFICIAL') {
+          const rec = entry.recipe;
+          return `
+            <div class="fridge-recipe-card ${isWinner ? 'highlighted-winner' : ''}" data-fridge-rec="${rec.recipe_id}">
+              <div class="fridge-card-top">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:1.35rem;">${rec.emoji}</span>
+                  <span style="font-size:0.86rem; font-weight:900; color:#f8fafc;">
+                    ${isWinner ? '🎯 [당첨!] ' : ''}${this.brandResolver.resolveName(rec)}
+                  </span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  ${matchBadgeHtml}
+                  <span class="diff-badge diff-${rec.difficulty}" style="position:static;">${rec.difficulty}</span>
+                </div>
+              </div>
+              <div class="suggestion-items-wrap">${slotsHtml}</div>
+            </div>
+          `;
+        } else {
+          const sug = entry.suggestion;
+          return `
+            <div class="fridge-recipe-card suggestion-origin ${isWinner ? 'highlighted-winner' : ''}">
+              <div class="fridge-card-top">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span class="online-sug-badge">🌐 조합추천</span>
+                  <span style="font-size:0.8rem; font-weight:800; color:#e2e8f0;">
+                    ${isWinner ? '🎯 [당첨!] ' : ''}유저 추천 조합 (👍 ${sug.upvotes})
+                  </span>
+                </div>
+                ${matchBadgeHtml}
+              </div>
+              <div class="suggestion-items-wrap">${slotsHtml}</div>
+            </div>
+          `;
+        }
+      }).join('');
+    }
 
     container.innerHTML = `
       <div class="fridge-view-container">
@@ -153,17 +181,28 @@ class FridgeRecommenderView {
           <div class="fridge-ing-selector">${ingGridHtml}</div>
         </div>
 
-        <!-- 2. 해금된 가능 술 조합 + 온라인 조합추천 목록 (재료 많이 맞은 순) -->
+        <!-- 2. 해금된 가능 술 조합 + 온라인 조합추천 목록 -->
         <div class="fridge-result-section">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <span style="font-size:0.82rem; font-weight:900; color:#f8fafc;">
-              🍸 추천 조합 (${unlockedAlcoholMatches.length}건 · 재료 일치순)
+              🍸 추천 조합 (${this.filterMode === 'FULL' ? `재료 일치 ${fullMatches.length}건` : `전체 ${unlockedAlcoholMatches.length}건`})
             </span>
           </div>
 
-          <button class="random-pick-btn" id="fridge-random-pick-btn" ${unlockedAlcoholMatches.length === 0 ? 'disabled' : ''}>
-            <span>🎲 오늘 마실 술 랜덤 고르기 (${unlockedAlcoholMatches.length}종 중 추첨)</span>
+          <button class="random-pick-btn" id="fridge-random-pick-btn" ${fullMatches.length === 0 ? 'disabled' : ''}>
+            <span>${fullMatches.length > 0
+              ? `🎲 오늘 마실 술 랜덤 추첨 (재료 일치 ${fullMatches.length}종 중 추첨)`
+              : `🎲 오늘 마실 술 랜덤 추첨 (재료 일치 조합 없음)`}</span>
           </button>
+
+          <div class="fridge-filter-tabs">
+            <button class="fridge-filter-tab ${this.filterMode === 'FULL' ? 'active' : ''}" data-fridge-filter="FULL">
+              ✅ 바로 제작 가능 (${fullMatches.length})
+            </button>
+            <button class="fridge-filter-tab ${this.filterMode === 'ALL' ? 'active' : ''}" data-fridge-filter="ALL">
+              🔍 전체 조합 (${unlockedAlcoholMatches.length})
+            </button>
+          </div>
 
           <div class="fridge-match-list">
             ${matchesHtml}
@@ -172,10 +211,10 @@ class FridgeRecommenderView {
       </div>
     `;
 
-    this._bindEvents(container, unlockedAlcoholMatches);
+    this._bindEvents(container, unlockedAlcoholMatches, fullMatches);
   }
 
-  _bindEvents(container, unlockedAlcoholMatches) {
+  _bindEvents(container, unlockedAlcoholMatches, fullMatches) {
     container.querySelectorAll('[data-fridge-cat]').forEach(btn => {
       btn.onclick = () => {
         this.selectedCategory = btn.getAttribute('data-fridge-cat');
@@ -183,6 +222,23 @@ class FridgeRecommenderView {
         this.render();
       };
     });
+
+    container.querySelectorAll('[data-fridge-filter]').forEach(btn => {
+      btn.onclick = () => {
+        this.filterMode = btn.getAttribute('data-fridge-filter');
+        this.audio.playTap();
+        this.render();
+      };
+    });
+
+    const viewAllSubBtn = container.querySelector('#fridge-view-all-sub-btn');
+    if (viewAllSubBtn) {
+      viewAllSubBtn.onclick = () => {
+        this.filterMode = 'ALL';
+        this.audio.playTap();
+        this.render();
+      };
+    }
 
     container.querySelectorAll('[data-fridge-ing]').forEach(chip => {
       chip.onclick = () => {
@@ -217,10 +273,12 @@ class FridgeRecommenderView {
     const randomBtn = container.querySelector('#fridge-random-pick-btn');
     if (randomBtn) {
       randomBtn.onclick = () => {
-        const picked = this.fridgeEngine.pickRandomRecipe(unlockedAlcoholMatches);
+        if (!fullMatches || fullMatches.length === 0) return;
+        const picked = this.fridgeEngine.pickRandomRecipe(fullMatches);
         if (!picked) return;
         this.lastRandomWinnerKey = picked.entryKey;
         this.audio.playSuccess();
+        this.filterMode = 'FULL';
         this.render();
         if (picked.entryType === 'OFFICIAL' && picked.recipe && this.onShowRecipeDetail) {
           this.onShowRecipeDetail(picked.recipe);
