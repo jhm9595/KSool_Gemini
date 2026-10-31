@@ -126,9 +126,9 @@
 
 .party-lobby-top-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .party-badge {

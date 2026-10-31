@@ -279,7 +279,6 @@ class PartyGameHubView {
         <!-- 상단 헤더 -->
         <div class="party-lobby-header">
           <div class="party-lobby-top-row">
-            <span class="party-badge">OFFLINE TABLETOP</span>
             <button type="button" class="party-sound-toggle-btn" id="party-sound-toggle">
               ${this.sound.isMuted ? '🔇 무음' : '🔊 효과음'}
             </button>
