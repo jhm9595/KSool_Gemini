@@ -93,9 +93,10 @@ class SurfaceTensionGame {
 
     this.hub.sound.playExplosion();
     this.hub.triggerPenalty({
-      title: '🌊 술이 넘쳤다! 🌊',
-      subtitle: '잔을 넘쳐버린 사람 시원하게 벌칙주 원샷!',
-      accentColor: '#38bdf8'
+      title: '넘침! 원샷!',
+      subtitle: '표면장력 한계 돌파',
+      accentColor: '#38bdf8',
+      icon: '🌊'
     });
   }
 

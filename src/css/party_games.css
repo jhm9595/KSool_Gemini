@@ -1487,44 +1487,54 @@
 
 .penalty-modal-card {
   background: #0f172a;
-  border: 4px solid var(--penalty-color, #ef4444);
-  border-radius: 20px;
-  padding: 28px 20px;
+  border: 3.5px solid var(--penalty-color, #ef4444);
+  border-radius: 24px;
+  padding: 30px 24px;
   text-align: center;
-  max-width: 360px;
-  width: 100%;
+  max-width: 320px;
+  width: 90%;
   box-shadow: 0 0 50px var(--penalty-color, #ef4444);
   animation: shakeCap 0.4s infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .penalty-siren-halo {
-  font-size: 3.5rem;
+  font-size: 3.4rem;
   margin-bottom: 8px;
+  line-height: 1;
 }
 
 .penalty-title {
-  font-size: 1.85rem;
+  font-size: 2.3rem;
   font-weight: 900;
   color: #ffffff;
   letter-spacing: -0.5px;
-  margin-bottom: 8px;
-  text-shadow: 0 0 15px var(--penalty-color, #ef4444);
+  margin-bottom: 6px;
+  text-shadow: 0 0 20px var(--penalty-color, #ef4444);
+  white-space: nowrap;
+  line-height: 1.15;
 }
 
 .penalty-subtitle {
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: #fde047;
-  line-height: 1.5;
-  margin-bottom: 16px;
+  line-height: 1.3;
+  margin-bottom: 20px;
+  white-space: nowrap;
 }
 
 .penalty-tap-hint {
-  font-size: 0.84rem;
-  font-weight: 800;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: #94a3b8;
-  background: rgba(30, 41, 59, 0.8);
-  padding: 6px 12px;
-  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 7px 16px;
+  border-radius: 20px;
   display: inline-block;
+  white-space: nowrap;
 }

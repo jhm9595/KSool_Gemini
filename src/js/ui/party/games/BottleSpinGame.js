@@ -460,9 +460,10 @@ class BottleSpinGame {
 
     this.hub.sound.playExplosion();
     this.hub.triggerPenalty({
-      title: '🎯 손가락 지목 당첨! 🎯',
-      subtitle: '빨간 타깃에 걸린 참가자 원샷!',
-      accentColor: '#ef4444'
+      title: '지목! 원샷!',
+      subtitle: '타깃 당첨',
+      accentColor: '#ef4444',
+      icon: '🎯'
     });
 
     this._updateFingerUI();

@@ -131,7 +131,7 @@ class PartyGameHubView {
     }
   }
 
-  triggerPenalty({ title, subtitle, accentColor = '#ef4444' }) {
+  triggerPenalty({ title, subtitle, accentColor = '#ef4444', icon = '🚨' }) {
     this.vibratePenalty();
 
     const overlay = document.getElementById('party-penalty-overlay');
@@ -140,10 +140,10 @@ class PartyGameHubView {
     overlay.style.setProperty('--penalty-color', accentColor);
     overlay.innerHTML = `
       <div class="penalty-modal-card">
-        <div class="penalty-siren-halo">🚨</div>
+        <div class="penalty-siren-halo">${icon}</div>
         <div class="penalty-title">${title}</div>
         <div class="penalty-subtitle">${subtitle}</div>
-        <div class="penalty-tap-hint">👆 화면 아무 곳이나 터치하면 다음 판 즉시 시작!</div>
+        <div class="penalty-tap-hint">터치하여 계속</div>
       </div>
     `;
 

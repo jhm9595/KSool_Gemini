@@ -157,9 +157,10 @@ class HunminBombGame {
     this.isExploded = true;
     this.hub.sound.playExplosion();
     this.hub.triggerPenalty({
-      title: '💥 쾅! 폭탄이 터졌다! 💥',
-      subtitle: `${this.bombTimeSetting}초 안에 단어를 외치지 못한 사람 원샷!`,
-      accentColor: '#ef4444'
+      title: '폭발! 원샷!',
+      subtitle: '시간 초과',
+      accentColor: '#ef4444',
+      icon: '💣'
     });
     this.render();
   }

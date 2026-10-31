@@ -126,9 +126,10 @@ class UpAndDownGame {
       this.lastResult = 'BOMB';
       this.hub.sound.playExplosion();
       this.hub.triggerPenalty({
-        title: '💥 뚜껑 정답 당첨! 마셔라! 💥',
-        subtitle: `정답 숫자 [ ${this.secretNumber} ]을(를) 맞힌 사람 당첨! 원샷!`,
-        accentColor: '#10b981'
+        title: '당첨! 원샷!',
+        subtitle: `정답 [ ${this.secretNumber} ]`,
+        accentColor: '#10b981',
+        icon: '💥'
       });
       this.render();
       return;
@@ -159,9 +160,10 @@ class UpAndDownGame {
     this.lastResult = 'BOMB';
     this.hub.sound.playExplosion();
     this.hub.triggerPenalty({
-      title: '🚨 낙장불입! 범위 이탈 탈락! 🚨',
-      subtitle: `[ ${wrongNum} ] 입력! 유효 범위(${this.minRange}~${this.maxRange})를 벗어난 숫자를 눌러 즉시 탈락! 원샷!`,
-      accentColor: '#ef4444'
+      title: '탈락! 원샷!',
+      subtitle: `[ ${wrongNum} ] 범위 이탈`,
+      accentColor: '#ef4444',
+      icon: '🚨'
     });
     this.render();
   }

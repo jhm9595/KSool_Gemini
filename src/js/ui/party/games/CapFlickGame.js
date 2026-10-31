@@ -175,9 +175,10 @@ class CapFlickGame {
       setTimeout(() => this.hub.sound.playExplosion(), 120);
 
       this.hub.triggerPenalty({
-        title: '💥 꼬다리 끊어짐! 당첨! 💥',
-        subtitle: '꼬다리를 날려버린 사람 시원하게 원샷!',
-        accentColor: '#10b981'
+        title: '격파! 원샷!',
+        subtitle: '꼬다리 탈락',
+        accentColor: '#10b981',
+        icon: '💥'
       });
     }
 
