@@ -214,7 +214,9 @@ class PartyGameHubView {
   openLobby(shouldUpdateHistory = true) {
     // 실행 중이던 게임 정리
     if (this.activeGameKey && this.games[this.activeGameKey] && typeof this.games[this.activeGameKey].destroy === 'function') {
-      this.games[this.activeGameKey].destroy();
+      try {
+        this.games[this.activeGameKey].destroy();
+      } catch (_) {}
     }
 
     this.mode = 'lobby';
@@ -227,18 +229,22 @@ class PartyGameHubView {
       container.classList.remove('party-fullscreen-mode');
     }
 
+    // 1. 무조건 즉시 게임 목록 로비를 화면에 렌더링!
+    this.render();
+
+    // 2. 브라우저 히스토리 상태 정리 (뒤로가기 스택 동기화)
     if (shouldUpdateHistory) {
       if (window.history.state && window.history.state.partyGame) {
-        window.history.back();
-        return; // popstate 핸들러가 openLobby(false)를 호출함
+        try {
+          window.history.back();
+        } catch (_) {}
       } else {
         try {
-          window.history.replaceState(null, '', '#party');
+          const cleanUrl = window.location.href.split('#')[0];
+          window.history.replaceState(null, '', cleanUrl);
         } catch (_) {}
       }
     }
-
-    this.render();
   }
 
   render() {
@@ -351,7 +357,11 @@ class PartyGameHubView {
     // 뒤로가기 버튼 이벤트
     const backBtn = container.querySelector('#party-back-btn');
     if (backBtn) {
-      backBtn.onclick = () => {
+      backBtn.onclick = (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
         this.openLobby(true);
       };
     }
