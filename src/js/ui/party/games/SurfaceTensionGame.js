@@ -93,10 +93,7 @@ class SurfaceTensionGame {
       this.currentLevel += 0.35;
       this.hub.sound.updatePour(this.currentLevel / 100);
 
-      // 70% 수위 도달 시 상단 가림막 전격 오픈!
-      if (this.currentLevel >= this.revealThreshold && !this.isBlindLifted) {
-        this.liftBlind();
-      }
+      // (가림막은 붓는 도중이 아니라 손을 뗐을 때 70% 이상이면 오픈)
 
       // 88% 이상 위험 수위 도달 시 심장박동 효과음
       if (this.currentLevel >= 88 && !this.heartbeatTimer) {
@@ -120,16 +117,7 @@ class SurfaceTensionGame {
     this.hub.vibrateShort();
 
     const blindEl = document.getElementById('surface-blind-cover');
-    const toastEl = document.getElementById('surface-reveal-toast');
-
     if (blindEl) blindEl.classList.add('lifted');
-    if (toastEl) {
-      toastEl.classList.add('show');
-      if (this.toastTimer) clearTimeout(this.toastTimer);
-      this.toastTimer = setTimeout(() => {
-        toastEl.classList.remove('show');
-      }, 1400);
-    }
   }
 
   stopPour() {
@@ -141,10 +129,15 @@ class SurfaceTensionGame {
     const stageBox = document.getElementById('surface-screen-touch-area');
     if (stageBox) stageBox.classList.remove('pouring');
 
-    // [핵심 룰]: 손을 뗐을 때 표면장력 한계치를 넘었으면 즉시 탈락(넘침! 원샷!)
+    // [핵심 룰 1]: 손을 뗐을 때 표면장력 한계치를 넘었으면 즉시 탈락(넘침! 원샷!)
     if (this.currentLevel > this.overflowLimit) {
       this.triggerOverflow();
       return;
+    }
+
+    // [핵심 룰 2]: 손을 뗐을 때 70% 이상 채웠다면 가림막을 전격 오픈!
+    if (this.currentLevel >= this.revealThreshold && !this.isBlindLifted) {
+      this.liftBlind();
     }
 
     // 안전하게 통과! 긴장감 넘치는 햅틱/사운드 피드백
@@ -185,31 +178,19 @@ class SurfaceTensionGame {
 
     container.innerHTML = `
       <div class="party-game-box surface-minimal-box" id="surface-screen-touch-area">
-        <!-- 화면 정중앙 캔버스 소주잔 (버튼/설명 일체 없이 화면 전체가 터치 영역) -->
+        <!-- 화면 정중앙 캔버스 소주잔 (글자/설명 일체 없이 화면 전체가 직관적인 터치 영역) -->
         <div class="glass-canvas-wrap">
           <canvas id="tension-canvas" width="310" height="390"></canvas>
 
-          <!-- 상단 미스터리 잔 높이 가림막 (70% 도달 시 오픈) -->
+          <!-- 상단 미스터리 잔 높이 가림막 (손을 뗐을 때 70% 이상이면 해제, 딱 자물쇠만 표시) -->
           <div id="surface-blind-cover" class="surface-blind-cover ${this.isBlindLifted ? 'lifted' : ''}">
             <div class="blind-content">
               <span class="blind-icon">🔒</span>
-              <span class="blind-title">미스터리 잔 높이</span>
-              <span class="blind-sub">70% 도달 시 입구 오픈!</span>
             </div>
             <div class="blind-caution-stripe"></div>
           </div>
 
-          <!-- 가림막 오픈 시 극적인 플래시 토스트 -->
-          <div id="surface-reveal-toast" class="surface-reveal-toast">
-            🚨 가림막 오픈! 잔 입구 공개! 🚨
-          </div>
-
           <div class="tension-spill-fx ${this.isOverflowed ? 'active' : ''}"></div>
-        </div>
-
-        <!-- 하단 간결한 터치 가이드 -->
-        <div class="surface-turn-guide">
-          👆 화면을 꾹 눌러 술 채우기 (손을 떼면 멈춤)
         </div>
       </div>
     `;

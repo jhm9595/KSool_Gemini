@@ -1138,35 +1138,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
   padding: 8px 16px;
   text-align: center;
   user-select: none;
 }
 
 .blind-icon {
-  font-size: 1.8rem;
+  font-size: 2.4rem;
   line-height: 1;
-  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.8));
+  filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.9));
   animation: pulseLock 1.8s infinite ease-in-out;
-}
-
-.blind-title {
-  font-size: 1rem;
-  font-weight: 900;
-  color: #f8fafc;
-  letter-spacing: -0.3px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-}
-
-.blind-sub {
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: #38bdf8;
-  background: rgba(14, 165, 233, 0.15);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  padding: 3px 10px;
-  border-radius: 12px;
 }
 
 .blind-caution-stripe {
