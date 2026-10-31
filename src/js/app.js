@@ -417,7 +417,18 @@ class KSoolApp {
     if (!filterBar || !grid) return;
 
     const allRecipes = this.recipeBook.getAllRecipes();
-    const categories = ['전체', '기초합성', '소맥/폭탄주', '과일/편의점주', '막걸리꿀조합', '특산명주', '유저추천꿀조합'];
+    // 주조실과 동일하게 이미 해금했거나 지금 당장 해금 가능한(하위 재료가 모두 해금된) 레시피만 도감에 노출
+    const visibleRecipes = allRecipes.filter(rec =>
+      this.inventory.isRecipeUnlocked(rec.recipe_id) || this.inventory.isRecipeChallengeable(rec)
+    );
+
+    const baseCategories = ['기초합성', '소맥/폭탄주', '과일/편의점주', '막걸리꿀조합', '특산명주', '유저추천꿀조합'];
+    const availableCats = baseCategories.filter(cat => visibleRecipes.some(r => r.category === cat));
+    const categories = [...availableCats, '전체'];
+
+    if (this.selectedRecipeCategory !== '전체' && !availableCats.includes(this.selectedRecipeCategory)) {
+      this.selectedRecipeCategory = availableCats[0] || '전체';
+    }
 
     filterBar.innerHTML = categories.map(cat => `
       <button class="cat-chip ${this.selectedRecipeCategory === cat ? 'active' : ''}" data-rec-cat="${cat}">
@@ -434,22 +445,18 @@ class KSoolApp {
     });
 
     const filtered = this.selectedRecipeCategory === '전체'
-      ? allRecipes
-      : allRecipes.filter(r => r.category === this.selectedRecipeCategory);
+      ? visibleRecipes
+      : visibleRecipes.filter(r => r.category === this.selectedRecipeCategory);
 
     grid.innerHTML = filtered.map(rec => {
       const isUnlocked = this.inventory.isRecipeUnlocked(rec.recipe_id);
-      const isChallengeable = this.inventory.isRecipeChallengeable(rec);
       const isImageUnlocked = this.inventory.isRecipeImageUnlocked(rec.recipe_id);
       const hintState = this.inventory.getHintState(rec.recipe_id);
       const clearedCount = hintState.stageCleared.filter(Boolean).length;
 
-      let cardStateClass = 'level-locked';
-      let statusLabel = `🔒 Lv.${rec.required_level || 1} 필요`;
-      if (isUnlocked) {
-        cardStateClass = 'unlocked';
-        statusLabel = `✅ 해금 완료`;
-      } else if (isChallengeable) {
+      let cardStateClass = 'unlocked';
+      let statusLabel = '';
+      if (!isUnlocked) {
         cardStateClass = isImageUnlocked ? 'challengeable image-unlocked' : 'challengeable';
         if (isImageUnlocked && clearedCount > 0) {
           statusLabel = `🖼️ 그림 · ⚾ ${clearedCount}단계 성공`;
@@ -464,13 +471,13 @@ class KSoolApp {
 
       const displayName = isUnlocked
         ? this.brandResolver.resolveName(rec)
-        : (isChallengeable ? `미지의 ${rec.category}` : '잠긴 비전서');
+        : `미지의 ${rec.category}`;
 
       const displayEmoji = isUnlocked
         ? rec.emoji
-        : (isChallengeable ? (isImageUnlocked ? rec.emoji : '❓') : '🔒');
+        : (isImageUnlocked ? rec.emoji : '❓');
 
-      const imgOnlyBadge = (!isUnlocked && isChallengeable && isImageUnlocked)
+      const imgOnlyBadge = (!isUnlocked && isImageUnlocked)
         ? `<span class="img-unlocked-pill">🖼️ 그림해금</span>`
         : '';
 
@@ -480,7 +487,7 @@ class KSoolApp {
           <span class="diff-badge diff-${rec.difficulty}">${rec.difficulty}</span>
           <span class="sool-emoji">${displayEmoji}</span>
           <span class="sool-name">${displayName}</span>
-          <span class="sool-hint-status">${statusLabel}</span>
+          ${statusLabel ? `<span class="sool-hint-status">${statusLabel}</span>` : ''}
         </div>
       `;
     }).join('');
@@ -490,17 +497,13 @@ class KSoolApp {
         const rId = Number(card.getAttribute('data-recipe-card'));
         const rec = this.recipeBook.getRecipe(rId);
         const isUnlocked = this.inventory.isRecipeUnlocked(rId);
-        const isChallengeable = this.inventory.isRecipeChallengeable(rec);
 
         if (isUnlocked) {
           this.audio.playTap();
           this.showCraftResultModal({ isSuccess: true, recipe: rec, isNewDiscovery: false });
-        } else if (isChallengeable) {
+        } else {
           this.audio.playTap();
           this.hintModalView.open(rId);
-        } else {
-          this.audio.playFail();
-          alert(`이 레시피는 Lv.${rec.required_level}부터 힌트 추리 및 해금 도전을 할 수 있습니다!\n(더 많은 술을 해금하거나 상단 Lv 배지를 눌러 레벨을 올려보세요.)`);
         }
       };
     });

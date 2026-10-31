@@ -88,11 +88,17 @@ class InventoryManager {
 
   isRecipeChallengeable(recipe) {
     if (!recipe) return false;
-    if (this.userLevel < (recipe.required_level || 1)) return false;
-    // 해당 레시피를 구성하는 하위 대표 재료들이 모두 현재 해금되어 있어야 도전/힌트 추리 가능!
+    // 해당 레시피를 구성하는 하위 재료들이 현재 주조실에서 모두 사용 가능(해금)한 상태여야 지금 당장 조합/힌트 도전 가능!
     const reqItems = this.recipeBook.getRecipeItems(recipe.recipe_id);
     if (!reqItems || reqItems.length === 0) return false;
-    return reqItems.every(it => this.isIngredientAvailable(it.ingredient_id));
+    return reqItems.every(it => {
+      if (!this.isIngredientAvailable(it.ingredient_id)) return false;
+      if (it.detail_ingredient_id && !this.unlockAllSandboxMode) {
+        const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
+        if (det && this.userLevel < (det.required_user_level || 1)) return false;
+      }
+      return true;
+    });
   }
 
   unlockRecipe(recipeId) {
