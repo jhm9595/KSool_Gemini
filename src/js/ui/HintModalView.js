@@ -272,6 +272,8 @@ class HintModalView {
         }
       }
 
+      const canvasHeight = this.selectedMinigameType === 'TERRITORY_QIX' ? 430 : 320;
+
       container.innerHTML = `
         <div class="hint-top-header">
           <div style="display:flex; align-items:center; gap:6px;">
@@ -282,7 +284,7 @@ class HintModalView {
         </div>
 
         <div class="arcade-cabinet-box">
-          <canvas id="minigame-canvas" width="380" height="310" class="minigame-canvas"></canvas>
+          <canvas id="minigame-canvas" width="380" height="${canvasHeight}" class="minigame-canvas"></canvas>
           <div id="minigame-controls-slot">${controlsHtml}</div>
         </div>
       `;

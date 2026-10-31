@@ -532,9 +532,9 @@ class ImageMinigameSuite {
   // =========================================================================
   _initTerritoryQix() {
     const cols = 52;
-    const rows = 36;
-    const topOffset = 34;
-    const bottomPad = 20;
+    const rows = 48;
+    const topOffset = 32;
+    const bottomPad = 0;
     const cellW = this.width / cols;
     const cellH = (this.height - topOffset - bottomPad) / rows;
 
@@ -553,6 +553,7 @@ class ImageMinigameSuite {
       cellH,
       grid,
       lives: 3,
+      totalTime: 45,
       timeLeft: 45,
       lastTime: performance.now(),
       targetPct: 75,
@@ -564,7 +565,7 @@ class ImageMinigameSuite {
         moveAccum: 0
       },
       enemies: [
-        // 보스 코어 + 고속 추격 구체 2개
+        // 보스 코어 + 고속 추격 구체 2개 (초반 40% 속도로 시작해 점점 100%까지 가속)
         { c: cols * 0.5, r: rows * 0.5, vc: 13.5, vr: 11.2, isBoss: true },
         { c: cols * 0.3, r: rows * 0.35, vc: -15.0, vr: 13.0, isBoss: false },
         { c: cols * 0.7, r: rows * 0.65, vc: 14.2, vr: -14.5, isBoss: false }
@@ -757,9 +758,15 @@ class ImageMinigameSuite {
     }
 
     // 적 구체 이동 및 선(2) 충돌 검사
+    // 초반에는 적당한 속도(40%)로 시작하여 시간이 흐르거나 점령률이 올라갈수록 점점 빨라져 기존 최고 속도(100%)에 도달
+    const timeProgress = Math.min(1, Math.max(0, ((st.totalTime || 45) - st.timeLeft) / 32));
+    const captureProgress = Math.min(1, st.capturedPct / st.targetPct);
+    const ramp = Math.max(timeProgress, captureProgress * 0.85);
+    const speedMultiplier = 0.40 + 0.60 * ramp;
+
     for (const en of st.enemies) {
-      const nextC = en.c + en.vc * dt;
-      const nextR = en.r + en.vr * dt;
+      const nextC = en.c + en.vc * speedMultiplier * dt;
+      const nextR = en.r + en.vr * speedMultiplier * dt;
       const checkC = Math.max(0, Math.min(st.cols - 1, Math.floor(nextC)));
       const checkR = Math.max(0, Math.min(st.rows - 1, Math.floor(nextR)));
 
@@ -858,7 +865,7 @@ class ImageMinigameSuite {
       timeLeftSec: st.timeLeft,
       progressPct: st.capturedPct,
       targetPct: st.targetPct,
-      subText: '원하는 방향을 터치/드래그(또는 방향키)하여 선을 긋고 안전지대로 복귀하세요!'
+      subText: ''
     });
   }
 
