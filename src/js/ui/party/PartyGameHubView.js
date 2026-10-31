@@ -10,14 +10,16 @@ window.KSool = window.KSool || {};
  * - 1초 내 빠른 재시작 풀스크린 벌칙 오버레이
  */
 class PartyGameHubView {
-  constructor(containerId = 'view-party') {
+  constructor(containerId = 'view-party', services = {}) {
     this.containerId = containerId;
+    this.recipeBook = services.recipeBook || window.app?.recipeBook;
+    this.inventory = services.inventory || window.app?.inventory;
     this.sound = new window.KSool.PartySoundSynth();
     this.mode = 'lobby'; // 'lobby' | 'game'
     this.activeGameKey = null;
     this.wakeLock = null;
 
-    // 5대 술게임 메타데이터 목록 (로비 카드 렌더링용)
+    // 6대 술게임 메타데이터 목록 (로비 카드 렌더링용)
     this.gamesList = [
       {
         key: 'updown',
@@ -58,6 +60,14 @@ class PartyGameHubView {
         badge: '폭탄 돌리기',
         accentColor: '#ef4444',
         desc: '제시된 초성의 단어를 외치며 폭탄을 넘기는 게임'
+      },
+      {
+        key: 'penaltycocktail',
+        emoji: '🍹',
+        title: '벌칙주 정하기',
+        badge: '냉장고 벌칙주',
+        accentColor: '#a855f7',
+        desc: '선택한 술과 음료로 랜덤 비율의 벌칙주를 만드는 게임'
       }
     ];
 
@@ -67,7 +77,8 @@ class PartyGameHubView {
       capflick: new window.KSool.CapFlickGame(this),
       surface: new window.KSool.SurfaceTensionGame(this),
       bottlespin: new window.KSool.BottleSpinGame(this),
-      hunmin: new window.KSool.HunminBombGame(this)
+      hunmin: new window.KSool.HunminBombGame(this),
+      penaltycocktail: new window.KSool.PenaltyCocktailGame(this)
     };
 
     this._setupWakeLockListener();
@@ -265,7 +276,7 @@ class PartyGameHubView {
             </button>
           </div>
           <h2 class="party-lobby-title">🍻 술자리 미니게임 모음</h2>
-          <p class="party-lobby-desc">스마트폰을 테이블 중앙에 두고 함께 즐기는 5대 술자리 게임!</p>
+          <p class="party-lobby-desc">스마트폰을 테이블 중앙에 두고 함께 즐기는 6대 술자리 게임!</p>
         </div>
 
         <!-- 중앙 큼지막한 게임 선택 카드 목록 -->

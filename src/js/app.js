@@ -78,7 +78,10 @@ class KSoolApp {
       }
     });
 
-    this.partyGameHubView = new window.KSool.PartyGameHubView('view-party');
+    this.partyGameHubView = new window.KSool.PartyGameHubView('view-party', {
+      recipeBook: this.recipeBook,
+      inventory: this.inventory
+    });
 
     this.currentTab = 'brew';
     this.brewMode = 'QUIZ'; // 'QUIZ' (단계별 넘버링 추리 퀴즈) | 'FREE' (자유 주조)
