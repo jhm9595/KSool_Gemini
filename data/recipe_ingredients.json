@@ -275,7 +275,7 @@
     "id": 35,
     "recipe_id": 14,
     "slot_order": 3,
-    "ingredient_id": 701,
+    "ingredient_id": 201,
     "detail_ingredient_id": null,
     "ratio": 1
   },

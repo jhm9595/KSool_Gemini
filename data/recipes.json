@@ -287,16 +287,16 @@
   },
   {
     "recipe_id": 14,
-    "display_name": "레모네이드",
-    "real_name": "레모네이드",
+    "display_name": "블루레몬에이드",
+    "real_name": "블루레몬에이드",
     "is_licensed": false,
     "difficulty": "EASY",
     "required_level": 1,
     "requires_detail_ingredient": false,
-    "emoji": "🍋",
+    "emoji": "🩵",
     "category": "기초합성",
-    "unlocks_ingredient_id": null,
-    "description": "레몬과 탄산수, 설탕이 어우러진 새콤달콤 스파클링 에이드.",
+    "unlocks_ingredient_id": 605,
+    "description": "레몬과 탄산수, 시원한 얼음이 만나 탄생한 청량한 블루레몬에이드! 블루레몬주 재료로 해금됩니다.",
     "requires_order": false,
     "max_ratio": 1,
     "sum_ratio": 3,
@@ -305,7 +305,7 @@
     "step_order": 2,
     "recipe_number": 17,
     "formatted_number": "No.17",
-    "unlock_hint": "톡 쏘는 기포 워터에 시큼한 노란 과일즙과 달콤한 결정을 녹여 만든 카페의 대표 스파클링 음료입니다."
+    "unlock_hint": "시큼한 노란 시트러스 과일에 톡 쏘는 탄산 기포와 차가운 얼음 결정을 더해 만든 시원하고 청량한 푸른빛 에이드입니다."
   },
   {
     "recipe_id": 15,

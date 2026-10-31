@@ -58,7 +58,7 @@ class ProgressionEngine {
         allowDetailPicker: false,
         ruleBadge: '⚖️ 1:1:1 3재료 조합 (재료당 최대 1개)',
         ruleNotice: '이제 3가지 재료를 1개씩(1:1:1) 조합하는 레시피가 등장합니다!',
-        unlockLeafIds: [301, 601, 605, 302, 306, 309], // 레몬, 홍차, 블루레몬에이드, 멜론, 사과, 배
+        unlockLeafIds: [301, 601, 302, 306, 309], // 레몬, 홍차, 멜론, 사과, 배
         canonicalRecipeOrder: [13, 14, 52, 15, 9, 3, 23, 32] // No.16 ~ No.23
       },
       {
