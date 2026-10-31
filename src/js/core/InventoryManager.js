@@ -16,7 +16,8 @@ class InventoryManager {
     this.shownTabIntros = {
       collection: false,
       fridge: false,
-      suggestions: false
+      suggestions: false,
+      detailPicker: false
     };
     this.unlockAllSandboxMode = false; // 모든 재료/단계 즉시 실험해보기 토글용
   }
@@ -30,7 +31,8 @@ class InventoryManager {
     this.shownTabIntros = {
       collection: false,
       fridge: false,
-      suggestions: false
+      suggestions: false,
+      detailPicker: false
     };
 
     // 1. 저장된 상태 복원 (해금한 레시피 목록 기준)

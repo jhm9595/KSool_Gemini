@@ -656,30 +656,114 @@
   border-style: dashed;
 }
 
+.ing-card.has-picker {
+  border-color: rgba(56, 189, 248, 0.6);
+}
+
 .ing-picker-btn {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 3px;
+  right: 3px;
   z-index: 2;
   font-size: 0.58rem;
-  background: rgba(56, 189, 248, 0.22);
-  color: #7dd3fc;
-  border: 1px solid rgba(56, 189, 248, 0.55);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(56, 189, 248, 0.35));
+  color: #fde047;
+  border: 1px solid #f59e0b;
   padding: 2px 6px;
   border-radius: 6px;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.25);
   transition: all 0.15s ease;
 }
 
 .ing-picker-btn:hover {
-  background: #0284c7;
+  background: linear-gradient(135deg, #f59e0b, #0284c7);
   color: #ffffff;
-  border-color: #7dd3fc;
+  border-color: #fde047;
+  transform: scale(1.05);
 }
 
 .ing-picker-btn:active {
   transform: scale(0.93);
+}
+
+/* 상세 재료 해금 팝업 데모 스타일 */
+.detail-guide-demo-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px dashed #38bdf8;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 6px 0;
+}
+
+.demo-callout-card {
+  position: relative;
+  width: 74px;
+  height: 74px;
+  background: #1e293b;
+  border: 2px solid #38bdf8;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+  flex-shrink: 0;
+}
+
+.demo-picker-highlight {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  font-size: 0.58rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: #ffffff;
+  border: 1.5px solid #fde047;
+  padding: 2px 5px;
+  border-radius: 6px;
+  animation: pulsePickerDemo 1.2s infinite;
+}
+
+@keyframes pulsePickerDemo {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 6px rgba(253, 224, 71, 0.6);
+  }
+  50% {
+    transform: scale(1.12);
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.95);
+  }
+}
+
+.demo-callout-arrow-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
+}
+
+.demo-arrow {
+  font-size: 1.6rem;
+  animation: bounceArrow 1.2s infinite;
+}
+
+@keyframes bounceArrow {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-6px); }
+}
+
+.demo-arrow-text {
+  font-size: 0.78rem;
+  color: #38bdf8;
+  line-height: 1.45;
+  font-weight: 800;
 }
 
 .ing-emoji {

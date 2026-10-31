@@ -106,6 +106,11 @@ class KSoolApp {
 
     this._bindGlobalEvents();
     this.renderAll();
+
+    this._checkProgressiveTabUnlocks();
+    if (this.pendingTabIntroQueue.length > 0) {
+      setTimeout(() => this._showNextPendingTabIntro(), 600);
+    }
   }
 
   /**
@@ -185,6 +190,12 @@ class KSoolApp {
       this.pendingTabIntroQueue.push('fridge');
     }
 
+    if (!this.inventory.shownTabIntros.detailPicker && this.inventory.isDetailPickerUnlocked()) {
+      this.inventory.shownTabIntros.detailPicker = true;
+      this.inventory.save();
+      this.pendingTabIntroQueue.push('detailPicker');
+    }
+
     const totalRecipes = this.recipeBook.getAllRecipes().length;
     if (
       !this.inventory.shownTabIntros.suggestions &&
@@ -218,6 +229,35 @@ class KSoolApp {
         title: '[냉장고를 부탁해] 탭이 열렸습니다!',
         desc: '도감의 80% 이상을 정복하셨군요! 이제 <b>[🧊 냉장고를 부탁해]</b> 탭에서 내 냉장고 속 재료를 선택하면, 내가 해금한 술 조합 중 재료가 가장 많이 일치하는 꿀조합을 추천받고 <b>🎲 랜덤 추첨</b>도 돌릴 수 있습니다!',
         btnLabel: '🧊 냉장고를 부탁해 가기'
+      },
+      detailPicker: {
+        emoji: '🗺️',
+        badge: '특산·브랜드 재료 해금',
+        title: '대표재료의 상세 재료가 해금되었습니다!',
+        desc: `
+          <div style="font-size:0.84rem; color:#fde047; font-weight:800; margin-bottom:8px;">
+            🌾 이천 임금님쌀 · 🍾 제주 화산암반 21 등 명품 상세 재료 등장!
+          </div>
+          <div class="detail-guide-demo-box">
+            <div class="demo-callout-card">
+              <span class="demo-picker-highlight">🗺️팔도지도 ▾</span>
+              <span style="font-size:1.6rem;">🌾</span>
+              <span style="font-size:0.75rem; font-weight:800; color:#f1f5f9;">쌀</span>
+            </div>
+            <div class="demo-callout-arrow-wrap">
+              <span class="demo-arrow">👈</span>
+              <div class="demo-arrow-text">
+                재료 카드 <b>오른쪽 위 버튼</b>을 누르면<br/>
+                상세 재료를 고를 수 있습니다!
+              </div>
+            </div>
+          </div>
+          <div style="text-align:left; font-size:0.75rem; color:#cbd5e1; line-height:1.6; margin-top:8px; background:rgba(15,23,42,0.7); border:1px solid #334155; padding:8px 10px; border-radius:8px;">
+            • <b>카드 중앙 터치</b>: 일반 기본 대표재료(일반 쌀, 소주 등) 투입<br/>
+            • <b>우측 상단 버튼 터치</b>: [🗺️팔도지도], [🍾브랜드] 등 전용 상세 선택창 오픈!
+          </div>
+        `,
+        btnLabel: '⚗️ 주조실에서 상세 재료 확인하기'
       },
       suggestions: {
         emoji: '👍',
@@ -257,7 +297,11 @@ class KSoolApp {
       goBtn.onclick = () => {
         modal.classList.remove('active');
         this.audio.playTap();
-        this.switchTab(tabKey);
+        if (tabKey === 'detailPicker') {
+          this.switchTab('brew');
+        } else {
+          this.switchTab(tabKey);
+        }
         this._showNextPendingTabIntro();
       };
     }
