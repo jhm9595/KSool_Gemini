@@ -1238,7 +1238,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 2,
     "recipe_number": 18,
     "formatted_number": "No.18",
-    "unlock_hint": "시큼한 노란 시트러스 과일에 톡 쏘는 탄산 기포와 차가운 얼음 결정을 더해 만든 시원하고 청량한 푸른빛 에이드입니다."
+    "unlock_hint": "시큼한 노란 시트러스 과일에 톡 쏘는 탄산 기포와 차가운 사각 결정체를 더해 만든 시원하고 청량한 푸른빛 에이드입니다."
   },
   {
     "recipe_id": 15,
@@ -1634,7 +1634,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 8,
     "recipe_number": 24,
     "formatted_number": "No.24",
-    "unlock_hint": "갈증 해소에 좋은 시원한 가을 과일에 달콤한 결정과 살얼음을 갈아 넣은 튜브형 슬러시 아이스크림입니다."
+    "unlock_hint": "갈증 해소에 좋은 시원한 가을 과일에 달콤한 결정과 차가운 빙설 알갱이를 갈아 넣은 튜브형 슬러시 아이스크림입니다."
   },
   {
     "recipe_id": 33,
@@ -1788,7 +1788,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 8,
     "recipe_number": 59,
     "formatted_number": "No.59",
-    "unlock_hint": "전통 탁주 아홉에 달콤한 황금빛 꿀을 더해, 특유의 텁텁함은 잡고 입안에 감기는 달콤함을 극대화한 주막 스타일입니다."
+    "unlock_hint": "전통 탁주 아홉에 일벌들이 빚어낸 달콤한 황금빛 천연 감미료를 더해, 특유의 텁텁함은 잡고 입안에 감기는 달콤함을 극대화한 주막 스타일입니다."
   },
   {
     "recipe_id": 40,
@@ -2008,7 +2008,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 3,
     "recipe_number": 54,
     "formatted_number": "No.54",
-    "unlock_hint": "전통 탁주와 고소한 볶은 곡물 가루 조합에 진한 꿀 한 스푼을 더해 고소함과 단맛의 균형을 완성한 시그니처입니다."
+    "unlock_hint": "전통 탁주와 고소한 볶은 곡물 가루 조합에 벌들이 빚어낸 진한 황금빛 감미료 한 스푼을 더해 고소함과 단맛의 균형을 완성한 시그니처입니다."
   },
   {
     "recipe_id": 50,
@@ -2184,7 +2184,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 6,
     "recipe_number": 31,
     "formatted_number": "No.31",
-    "unlock_hint": "요강을 뒤집어엎을 만큼 기운이 넘친다는 검붉은 산딸기 열매에 투명한 증류주와 단맛을 더해 숙성한 전통주입니다."
+    "unlock_hint": "요강을 뒤집어엎을 만큼 기운이 넘친다는 검붉은 숲속 야생 열매에 투명한 증류주와 단맛을 더해 숙성한 전통주입니다."
   },
   {
     "recipe_id": 58,
@@ -2206,7 +2206,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 10,
     "recipe_number": 16,
     "formatted_number": "No.16",
-    "unlock_hint": "기포가 올라오는 시원한 탄산수에 달콤한 결정을 녹여 만든 초록 병의 국민 탄산음료입니다."
+    "unlock_hint": "톡 쏘는 기포가 솟구치는 청량한 스파클링 워터에 달콤한 결정을 녹여 만든 초록 병의 국민 투명 탄산음료입니다."
   },
   {
     "recipe_id": 59,
@@ -2332,7 +2332,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 4,
     "step_order": 11,
-    "unlock_hint": "새콤한 발효 식초에 달콤한 석류 엑기스와 감미료를 절묘하게 배합해 마시기 좋게 만든 붉은 과채 식초 음료입니다."
+    "unlock_hint": "자연 발효된 시큼한 산미의 액체에 달콤한 붉은 루비빛 과실 엑기스와 감미료를 절묘하게 배합해 마시기 좋게 만든 붉은 과채 발효 음료입니다."
   },
   {
     "recipe_id": 65,
@@ -2352,7 +2352,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 3,
     "step_order": 11,
-    "unlock_hint": "검게 볶은 로스팅 원두에 맑은 물과 차가운 얼음을 가득 부어 완성한 현대인의 생명수입니다."
+    "unlock_hint": "검게 볶은 로스팅 원두에 맑은 자연의 액체와 차가운 사각 결정체를 가득 채워 완성한 현대인의 생명수입니다."
   },
   {
     "recipe_id": 66,
@@ -2372,7 +2372,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 3,
     "step_order": 12,
-    "unlock_hint": "빨간 딸기 과즙과 상큼한 오렌지 과즙을 차가운 결정과 함께 얼려낸 상어 지느러미 모양 아이스바입니다."
+    "unlock_hint": "상큼한 붉은 베리 과즙과 새콤달콤한 주황빛 감귤 과즙을 차가운 사각 결정체와 함께 얼려낸 바다 포식자 모양 아이스바입니다."
   },
   {
     "recipe_id": 67,
@@ -2392,7 +2392,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 3,
     "step_order": 13,
-    "unlock_hint": "목장의 부드러운 우유에 달콤한 설탕 결정을 듬뿍 넣고 꽁꽁 얼려낸 고소하고 달콤한 팥빙수 스타일 아이스바입니다."
+    "unlock_hint": "구수한 붉은 곡물 앙금에 하얀 목장 음료와 달콤한 결정을 듬뿍 넣고 꽁꽁 얼려낸, 어르신들도 사랑하는 전통 팥빙수맛 사각 아이스바입니다."
   },
   {
     "recipe_id": 68,
@@ -2412,7 +2412,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 7,
     "step_order": 11,
-    "unlock_hint": "[브랜드 상세 필수] 맥주 탭에서 청정라거 테라피 두 배와 주류 냉장고의 참방울 후레쉬를 황금비율로 말아 올렸습니다."
+    "unlock_hint": "[브랜드 상세 필수] 호주 청정 맥아로 빚은 초록 병 라거 두 배와 깨끗한 숯으로 거른 국민 증류주를 황금비율로 말아 올렸습니다."
   },
   {
     "recipe_id": 69,
@@ -2432,7 +2432,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 7,
     "step_order": 12,
-    "unlock_hint": "[브랜드 상세 필수] 청정라거 테라피 두 배에 돌아온 레트로 하늘색 두꺼비를 더해 시원하게 꺾어 마시는 조합입니다."
+    "unlock_hint": "[브랜드 상세 필수] 초록 병의 청정 탄산 라거 두 배에 돌아온 하늘색 레트로 두꺼비 증류주를 더해 시원하게 꺾어 마시는 조합입니다."
   },
   {
     "recipe_id": 70,
@@ -2452,7 +2452,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 7,
     "step_order": 13,
-    "unlock_hint": "[브랜드 상세 필수] 짜릿한 카아스 프레시 두 배에 처음부터 부드러운 소주를 더한 원조 스테디셀러 소맥입니다."
+    "unlock_hint": "[브랜드 상세 필수] 갓 뽑은 듯 톡 쏘는 청색 라벨의 국민 라거 두 배에 대관령 암반수로 빚은 부드러운 증류주를 더한 원조 스테디셀러 폭탄주입니다."
   },
   {
     "recipe_id": 71,
@@ -2472,7 +2472,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 7,
     "step_order": 14,
-    "unlock_hint": "[브랜드 상세 필수] 더블 숙성 앰버 라거 두 배에 두꺼비 이즈백을 더해 묵직함과 부드러움을 동시에 잡았습니다."
+    "unlock_hint": "[브랜드 상세 필수] 북대서양 해풍 맥아의 앰버빛 라거 두 배에 깔끔하게 돌아온 레트로 두꺼비 증류주를 더해 묵직함과 부드러움을 동시에 잡았습니다."
   },
   {
     "recipe_id": 72,
@@ -2492,7 +2492,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 7,
     "step_order": 15,
-    "unlock_hint": "[브랜드 상세 필수] 라이벌 관계인 카아스 프레시와 청정라거 테라피 두 맥주를 1:1로 섞어 카스텔라 빵처럼 부드러운 거품을 냅니다."
+    "unlock_hint": "[브랜드 상세 필수] 국내 라거계를 양분하는 파란 라벨의 국민 라거와 초록 병의 청정 발효주를 1:1로 섞어 빵처럼 부드러운 극상의 거품을 냅니다."
   },
   {
     "recipe_id": 73,
@@ -2512,7 +2512,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 3,
     "step_order": 14,
-    "unlock_hint": "소주, 맥주, 사이다를 1:1:1로 섞어 숟가락으로 탕 치면 우유 없이도 솟구치는 신비로운 밀크 탄산주입니다."
+    "unlock_hint": "도수 높은 투명 증류주, 시원한 황금빛 발효주, 톡 쏘는 투명 탄산음료를 1:1:1로 섞어 숟가락으로 탕 치면 목장 음료 없이도 솟구치는 신비로운 밀크 탄산주입니다."
   },
   {
     "recipe_id": 74,
@@ -2532,7 +2532,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 5,
     "step_order": 9,
-    "unlock_hint": "맥주 두 배에 소주 하나, 검은 탄산 하나를 겹쳐 첫 모금은 쓴 소맥, 끝 모금은 달콤한 콜라가 반겨주는 술입니다."
+    "unlock_hint": "황금빛 발효주 두 배에 투명한 증류주 하나, 달콤한 갈색 탄산음료 하나를 잔 속에 겹쳐 첫 모금은 알싸하지만 끝 모금은 달콤함이 반겨주는 계단식 폭탄주입니다."
   },
   {
     "recipe_id": 75,
@@ -2552,7 +2552,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 5,
     "step_order": 10,
-    "unlock_hint": "기초 증류주와 수분 흡수를 돕는 파란 이온음료를 반반 섞어 마시는 순간 훅 가는 앉은뱅이술입니다."
+    "unlock_hint": "알싸한 투명 증류주와 빠른 수분 보충을 돕는 파란 라벨의 전해질 스포츠 음료를 반반 섞어 마시는 순간 방심하다 훅 가는 앉은뱅이술입니다."
   },
   {
     "recipe_id": 76,
@@ -2572,7 +2572,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 5,
     "step_order": 11,
-    "unlock_hint": "소주에 고카페인 타우린 드링크와 푸른 이온음료를 1:1:1로 섞은 눈부신 형광 에메랄드빛 각성 폭탄주입니다."
+    "unlock_hint": "투명한 증류주에 밤샘용 고카페인 각성 음료와 푸른빛 전해질 스포츠 음료를 1:1:1로 배합해 완성한 영롱한 형광 에메랄드빛 폭탄주입니다."
   },
   {
     "recipe_id": 77,
@@ -2592,7 +2592,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 4,
     "step_order": 12,
-    "unlock_hint": "소주에 붉은 과채 식초와 푸른 레몬 에이드를 비중 차이로 층분리시켜 잔 속에 태극 문양을 띄운 예술주입니다."
+    "unlock_hint": "투명한 증류주를 베이스로 새콤한 붉은 과채 발효 음료와 청량한 푸른빛 에이드를 비중 차이로 층분리시켜 잔 속에 대한민국 국기 문양을 띄운 비주얼 칵테일입니다."
   },
   {
     "recipe_id": 78,
@@ -2612,7 +2612,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 3,
     "step_order": 15,
-    "unlock_hint": "소주에 시원한 아메리카노를 1:1로 섞어 알코올 특유의 역한 냄새를 그윽한 원두 향으로 지워버린 칵테일입니다."
+    "unlock_hint": "도수 높은 투명 증류주에 깊게 볶은 차가운 블랙 원두 추출액을 1:1로 섞어 알코올 향을 그윽한 로스팅 원두 풍미로 지워버린 직장인 칵테일입니다."
   },
   {
     "recipe_id": 79,
@@ -2632,7 +2632,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 5,
     "step_order": 12,
-    "unlock_hint": "시원한 황금 라거 두 배에 아이스 아메리카노 하나를 부어 수제 흑맥주 풍미를 낸 커피 맥주입니다."
+    "unlock_hint": "시원한 황금빛 거품 발효주 두 배에 차가운 블랙 원두 음료 하나를 부어 유럽 펍의 다크 스타우트 풍미를 재현한 하이브리드 주류입니다."
   },
   {
     "recipe_id": 80,
@@ -2652,7 +2652,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 3,
     "step_order": 16,
-    "unlock_hint": "소주와 맑은 탄산음료에 국민 멜론 사각 아이스바를 녹여 크리미하게 저어 마시는 달콤한 편의점주입니다."
+    "unlock_hint": "투명한 증류주와 톡 쏘는 맑은 탄산음료에 연두빛 국민 과일 아이스바를 통째로 녹여 부드럽게 저어 마시는 달콤한 편의점 칵테일입니다."
   },
   {
     "recipe_id": 81,
@@ -2672,7 +2672,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 3,
     "step_order": 17,
-    "unlock_hint": "소주와 맑은 탄산음료에 상어 모양 아이스바를 녹여 신비로운 보랏빛 바다를 연출하는 편의점 칵테일입니다."
+    "unlock_hint": "투명한 증류주와 청량한 맑은 탄산음료에 바다 포식자 모양 아이스바를 담가 서서히 녹여 신비로운 보랏빛 바다를 연출하는 편의점 칵테일입니다."
   },
   {
     "recipe_id": 82,
@@ -2692,7 +2692,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 5,
     "step_order": 13,
-    "unlock_hint": "구수한 전통 탁주 두 배에 고소한 목장 우유와 단팥 아이스바를 녹여 팥빙수처럼 걸쭉하게 즐기는 막걸리입니다."
+    "unlock_hint": "구수한 전통 쌀 발효 탁주 두 배에 부드러운 순백 목장 음료와 달콤한 붉은 팥 앙금 아이스바를 녹여 팥빙수처럼 걸쭉하고 달달하게 즐기는 이색 디저트 주류입니다."
   },
   {
     "recipe_id": 83,
@@ -2712,7 +2712,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 4,
     "step_id": 3,
     "step_order": 18,
-    "unlock_hint": "소주와 시원한 아메리카노, 목장 우유와 달콤한 설탕을 1:1:1:1로 섞어 서양의 유명 커피 리큐르 칵테일을 재현한 음료입니다."
+    "unlock_hint": "투명한 증류주와 차가운 블랙 원두 추출액, 부드러운 순백 목장 음료와 달콤한 결정을 1:1:1:1로 섞어 서양의 유명 리큐르 칵테일을 친숙하게 재현한 주류입니다."
   }
 ],
   recipe_ingredients: [
