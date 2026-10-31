@@ -3,8 +3,8 @@ window.KSool = window.KSool || {};
 /**
  * 6) 초간단 조합 추천 & 관리자 '딸깍' 도감 편입 서비스
  * - 이름, 설명 입력 없이 오직 게임 내 재료+비율 묶음만 노출
- * - 유저는 👍 / 👎 만 투표
- * - 관리자가 [⚡적용]을 누르면 즉시 정식 도감(RECIPE)으로 편입되고 목록에서 제거됨
+ * - 재료 해금 스포일러 방지: 유저가 '이미 해금한 재료'들로만 구성된 추천 조합만 화면에 노출합니다.
+ * - 유저는 👍 / 👎 만 투표, 관리자가 [⚡적용]을 누르면 즉시 정식 도감(RECIPE)으로 편입되고 목록에서 제거됨
  */
 class SuggestionService {
   constructor(recipeBook, inventoryManager, brandResolver) {
@@ -33,6 +33,30 @@ class SuggestionService {
 
   _seedDefaultSuggestions() {
     this.suggestions = [
+      // 스타터 재료 기반 추천 조합 (초기 유저도 스포일러 없이 바로 확인 가능)
+      {
+        suggestion_key: '103:0@2+606:0@2+301:0@1',
+        items: [
+          { ingredient_id: 103, detail_id: null, ratio: 2 },
+          { ingredient_id: 606, detail_id: null, ratio: 2 },
+          { ingredient_id: 301, detail_id: null, ratio: 1 }
+        ],
+        upvotes: 35,
+        downvotes: 2,
+        is_applied: false
+      },
+      {
+        suggestion_key: '601:0@3+401:0@2+701:0@1',
+        items: [
+          { ingredient_id: 601, detail_id: null, ratio: 3 },
+          { ingredient_id: 401, detail_id: null, ratio: 2 },
+          { ingredient_id: 701, detail_id: null, ratio: 1 }
+        ],
+        upvotes: 24,
+        downvotes: 1,
+        is_applied: false
+      },
+      // 소주/얼음 해금 시 노출되는 추천 조합
       {
         suggestion_key: '101:0@2+201:0@1+602:0@2+606:0@2',
         items: [
@@ -45,17 +69,7 @@ class SuggestionService {
         downvotes: 3,
         is_applied: false
       },
-      {
-        suggestion_key: '101:10102@2+201:0@1+614:0@3',
-        items: [
-          { ingredient_id: 101, detail_id: 10102, ratio: 2 },
-          { ingredient_id: 614, detail_id: null, ratio: 3 },
-          { ingredient_id: 201, detail_id: null, ratio: 1 }
-        ],
-        upvotes: 29,
-        downvotes: 1,
-        is_applied: false
-      },
+      // 막걸리/밀크소다/얼음 해금 시 노출되는 추천 조합
       {
         suggestion_key: '105:0@4+604:0@3+201:0@1',
         items: [
@@ -78,9 +92,15 @@ class SuggestionService {
       .join('+');
   }
 
+  /**
+   * 내가 해금한 재료들로만 이루어진 추천 조합만 필터링하여 반환합니다. (재료 해금 힌트/스포일러 원천 차단)
+   */
   getActiveSuggestions() {
     return this.suggestions
-      .filter(s => !s.is_applied)
+      .filter(s => {
+        if (s.is_applied) return false;
+        return s.items.every(it => this.inventory.isIngredientAvailable(it.ingredient_id));
+      })
       .sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes));
   }
 
@@ -125,7 +145,7 @@ class SuggestionService {
     if (!item) return;
 
     const prev = this.userVotes[suggestionKey];
-    if (prev === type) return; // 중복 클릭 방지
+    if (prev === type) return;
 
     if (prev === 'UP') item.upvotes = Math.max(0, item.upvotes - 1);
     if (prev === 'DOWN') item.downvotes = Math.max(0, item.downvotes - 1);
