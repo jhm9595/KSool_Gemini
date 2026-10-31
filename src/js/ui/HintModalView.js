@@ -15,6 +15,7 @@ class HintModalView {
     this.selectedStage2Category = null; // 2단계에서 선택된 (1단계 통과) 재료 유형 탭
     this.selectedUpDownSlotOrder = null; // 베이스볼 완료 후 상단 정답 슬롯 클릭 시 열림
     this.lastUpDownResult = null;
+    this.showHelpGuide = false; // 베이스볼 게임 방법 간단 도움말 토글
   }
 
   open(recipeId) {
@@ -22,6 +23,7 @@ class HintModalView {
     this.lastUpDownResult = null;
     this.selectedUpDownSlotOrder = null;
     this.selectedStage2Category = null;
+    this.showHelpGuide = false;
     this._resetGuessSlots();
 
     // 등록된 외부 힌트(영상/글)가 있으면 [베이스볼 / 힌트보기] 2버튼 선택 화면부터 노출,
@@ -68,12 +70,7 @@ class HintModalView {
 
       container.innerHTML = `
         <div class="hint-top-header">
-          <div>
-            <div class="modal-title">🕵️ 미해금 비법 추리 (Lv.${recipe.required_level || 1} 도전)</div>
-            <div style="font-size:0.72rem; color:#94a3b8;">
-              난이도: <b>${recipe.difficulty}</b> · 총 재료 수: <b>${items.length}개</b>
-            </div>
-          </div>
+          <div class="modal-title">⚾ 베이스볼 게임</div>
           <button class="modal-close-x" id="hint-close-btn">✕</button>
         </div>
 
@@ -216,15 +213,6 @@ class HintModalView {
 
       mainSectionHtml = `
         <div class="hint-section-box">
-          <div class="hint-section-title">
-            <span>⚾ 3단계 재료 숫자야구</span>
-            <span style="font-size:0.68rem; color:#93c5fd;">
-              ${maxStage === 2 ? '대표 재료 조합 (2단계 완료 시 비율 열림)' : '특산 재료 조합 (3단계 완료 시 비율 열림)'}
-            </span>
-          </div>
-          <div style="font-size:0.74rem; color:#fcd34d; font-weight:700;">
-            ⚾ ${stageLabels[currentStage]} (총 ${this.currentGuessSlots.length}종 선택)
-          </div>
           <div class="baseball-slots">${slotsHtml}</div>
           ${stage2CatBarHtml}
           <div class="bb-options-row">
@@ -307,22 +295,29 @@ class HintModalView {
       `;
     }
 
+    const helpGuideHtml = this.showHelpGuide ? `
+      <div class="bb-help-popover">
+        <div><b>⚾ 베이스볼 게임 규칙</b></div>
+        <div>• <b>S (스트라이크)</b>: 정답에 포함된 재료</div>
+        <div>• <b>B (볼)</b>: 재료는 맞지만 투입 순서가 다름 (순서 중요 레시피 전용)</div>
+        <div>• <b>O (아웃)</b>: 정답에 없는 재료</div>
+        <div style="color:#fcd34d; margin-top:2px;">1단계(재료 유형) ➔ 2단계(대표 재료)를 맞추면 각 재료의 비율(<b>?</b>) Up/Down이 열립니다!</div>
+      </div>
+    ` : '';
+
     container.innerHTML = `
       <div class="hint-top-header">
-        <div style="display:flex; align-items:center; gap:8px;">
+        <div style="display:flex; align-items:center; gap:6px;">
           ${hasExtHint ? `<button class="hint-back-choice-btn" id="hint-back-choice-btn" title="선택 화면으로">←</button>` : ''}
-          <div>
-            <div class="modal-title">🕵️ 미해금 비법 추리 (Lv.${recipe.required_level || 1} 도전)</div>
-            <div style="font-size:0.72rem; color:#94a3b8;">
-              난이도: <b>${recipe.difficulty}</b> · 총 재료 수: <b>${items.length}개</b>
-            </div>
-          </div>
+          <div class="modal-title">⚾ 베이스볼 게임</div>
+          <button class="bb-help-btn ${this.showHelpGuide ? 'active' : ''}" id="bb-help-toggle-btn" title="베이스볼 게임 설명 보기">?</button>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
           <div class="stage-checkboxes" title="1:유형 -> 2:대표 -> 3:상세">${checkboxesHtml}</div>
           <button class="modal-close-x" id="hint-close-btn">✕</button>
         </div>
       </div>
+      ${helpGuideHtml}
 
       ${mainSectionHtml}
     `;
@@ -394,6 +389,15 @@ class HintModalView {
   _bindEvents(container) {
     const closeBtn = container.querySelector('#hint-close-btn');
     if (closeBtn) closeBtn.onclick = () => this.close();
+
+    const helpBtn = container.querySelector('#bb-help-toggle-btn');
+    if (helpBtn) {
+      helpBtn.onclick = () => {
+        this.showHelpGuide = !this.showHelpGuide;
+        this.audio.playTap();
+        this.render();
+      };
+    }
 
     // 초기 선택 화면: [베이스볼] 버튼 클릭 -> 베이스볼 게임 화면으로 전환
     const choiceBaseballBtn = container.querySelector('#choice-baseball-btn');

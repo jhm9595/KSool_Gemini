@@ -7,6 +7,41 @@
   border-bottom: 1px solid #334155;
 }
 
+.bb-help-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid #64748b;
+  background: #0f172a;
+  color: #cbd5e1;
+  font-size: 0.74rem;
+  font-weight: 900;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.bb-help-btn:hover, .bb-help-btn.active {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.2);
+  color: #7dd3fc;
+}
+
+.bb-help-popover {
+  background: #0f172a;
+  border: 1px solid #38bdf8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.73rem;
+  color: #e2e8f0;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 /* 우측 상단 3개의 네모 체크박스 [☑] [☑] [□] */
 .stage-checkboxes {
   display: flex;
