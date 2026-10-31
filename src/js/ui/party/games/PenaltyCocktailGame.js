@@ -15,7 +15,21 @@ class PenaltyCocktailGame {
     this.lastResult = null;
     this.mixingTimeout = null;
 
-    // 대표 음료/주류 고유 색상 맵
+    // 서로 구분이 확실한 10종 고대비 파스텔 톤 팔레트
+    this.pastelPalette = [
+      '#ff9ebb', // 파스텔 딸기 핑크
+      '#5eead4', // 파스텔 민트 에메랄드
+      '#fde047', // 파스텔 레몬 옐로우
+      '#c084fc', // 파스텔 라벤더 바이올렛
+      '#38bdf8', // 파스텔 아쿠아 스카이블루
+      '#fb923c', // 파스텔 살구 피치
+      '#fef08a', // 파스텔 바닐라 크림
+      '#f472b6', // 파스텔 로즈 마젠타
+      '#a3e635', // 파스텔 라임 그린
+      '#fb7185'  // 파스텔 체리 코랄
+    ];
+
+    // 대표 음료/주류 고유 색상 맵 (기본 폴백)
     this.colorMap = {
       101: '#86efac', // 소주 (은은한 에메랄드)
       102: '#eab308', // 맥주 (황금빛 골드)
@@ -128,6 +142,36 @@ class PenaltyCocktailGame {
   }
 
   /**
+   * 비율 총합을 무조건 10으로 맞추는 정수 분할 알고리즘
+   * - 1개: [10]
+   * - 2개: [3, 7], [4, 6] 등 (합 10)
+   * - 3개: [3, 4, 3], [2, 5, 3] 등 (합 10)
+   * - 4개: [2, 3, 3, 2] 등 (합 10)
+   */
+  _generateTenSumRatios(count) {
+    if (count <= 1) return [10];
+    if (count === 2) {
+      const a = Math.floor(Math.random() * 9) + 1; // 1 ~ 9
+      return [a, 10 - a];
+    }
+    // count >= 3: 1부터 9 사이에서 (count - 1)개의 서로 다른 분할점 무작위 추출
+    const dividers = [];
+    while (dividers.length < count - 1) {
+      const d = Math.floor(Math.random() * 9) + 1;
+      if (!dividers.includes(d)) dividers.push(d);
+    }
+    dividers.sort((a, b) => a - b);
+    const parts = [];
+    let prev = 0;
+    for (const d of dividers) {
+      parts.push(d - prev);
+      prev = d;
+    }
+    parts.push(10 - prev);
+    return parts;
+  }
+
+  /**
    * 벌칙주 랜덤 조제 알고리즘
    */
   craftPenaltyDrink() {
@@ -144,37 +188,30 @@ class PenaltyCocktailGame {
     const pickCount = activeIngs.length === 1 ? 1 : Math.min(activeIngs.length, Math.floor(Math.random() * 3) + 2);
     const chosen = shuffled.slice(0, pickCount);
 
-    // 2. 무작위 비율 할당 (1 ~ 4 파트)
-    const itemsWithParts = chosen.map(ing => ({
+    // 2. 무조건 비율 총합 10을 맞추는 정수 분할 할당
+    const ratios = this._generateTenSumRatios(chosen.length);
+
+    // 3. 재료별로 서로 겹치지 않는 고대비 파스텔 톤 색상 무작위 배정
+    const shuffledColors = [...this.pastelPalette].sort(() => Math.random() - 0.5);
+
+    const itemsWithParts = chosen.map((ing, idx) => ({
       ing,
-      parts: Math.floor(Math.random() * 4) + 1,
-      color: this.getIngredientColor(ing)
+      parts: ratios[idx],
+      percent: ratios[idx] * 10, // 10비율 기준이므로 정확히 10배 (총합 100%)
+      color: shuffledColors[idx % shuffledColors.length]
     }));
 
-    const totalParts = itemsWithParts.reduce((sum, item) => sum + item.parts, 0);
-
-    // 백분율 계산
-    itemsWithParts.forEach(item => {
-      item.percent = Math.round((item.parts / totalParts) * 100);
-    });
-
-    // 백분율 총합 100% 보정
-    const currentSum = itemsWithParts.reduce((sum, item) => sum + item.percent, 0);
-    if (itemsWithParts.length > 0 && currentSum !== 100) {
-      itemsWithParts[0].percent += (100 - currentSum);
-    }
-
-    // 3. 기상천외한 벌칙주 명칭 작명
+    // 4. 기상천외한 벌칙주 명칭 작명
     const title = this._generateCocktailName(itemsWithParts, this.selectedGlass);
 
     this.lastResult = {
       glass: this.selectedGlass,
       items: itemsWithParts,
-      totalParts,
+      totalParts: 10,
       title
     };
 
-    // 4. 조제 믹싱 연출 시작
+    // 5. 조제 믹싱 연출 시작
     this.state = 'mixing';
     if (this.hub.sound && typeof this.hub.sound.playPour === 'function') {
       this.hub.sound.playPour();
@@ -366,13 +403,13 @@ class PenaltyCocktailGame {
       return;
     }
 
-    const { glass, items, totalParts, title } = this.lastResult;
+    const { glass, items, title } = this.lastResult;
     const isSoju = glass === 'soju';
 
     // 잔에 채워지는 레이어 생성 (아래에서 위로 적층)
     const layersHtml = items.map(item => `
       <div class="liquid-layer" style="height: ${item.percent}%; background: ${item.color};">
-        <span class="layer-label">${item.ing.display_name} (${item.percent}%)</span>
+        <span class="layer-label">${item.ing.display_name} ${item.parts}</span>
       </div>
     `).join('');
 
@@ -384,32 +421,32 @@ class PenaltyCocktailGame {
           <h3 class="result-cocktail-title">${title}</h3>
         </div>
 
-        <!-- 2. 중앙: 다채롭게 채워진 비주얼 잔 -->
+        <!-- 2. 중앙: 실제 소주잔 비율로 커진 비주얼 잔 -->
         <div class="result-glass-display-wrap">
           <div class="glass-svg-container ${isSoju ? 'soju-glass' : 'beer-glass'}">
             <div class="glass-outer-shell">
               <div class="glass-liquid-column">
                 ${layersHtml}
               </div>
+              ${isSoju ? '<div class="soju-thick-base"></div>' : '<div class="beer-thick-base"></div>'}
               <div class="glass-highlight-reflection"></div>
             </div>
             <div class="glass-base-shadow"></div>
           </div>
         </div>
 
-        <!-- 3. 상세 배합 레시피 목록 -->
+        <!-- 3. 상세 배합 목록 (제목 완전 제거, 확대된 폰트와 간결한 N 비율) -->
         <div class="recipe-breakdown-card">
-          <div class="recipe-card-title">📋 제조 배합 비율 (총 ${totalParts}비율)</div>
           <div class="recipe-items-list">
             ${items.map(item => `
               <div class="recipe-item-row">
                 <div class="item-left">
                   <span class="item-dot" style="background:${item.color};"></span>
-                  <span class="item-name">${item.ing.emoji || ''} ${item.ing.display_name}</span>
+                  <span class="item-emoji">${item.ing.emoji || '🍺'}</span>
+                  <span class="item-name">${item.ing.display_name}</span>
                 </div>
                 <div class="item-right">
-                  <span class="item-parts">${item.parts}비율</span>
-                  <span class="item-percent">(${item.percent}%)</span>
+                  <span class="item-ratio-num">${item.parts}</span>
                 </div>
               </div>
             `).join('')}
@@ -419,10 +456,10 @@ class PenaltyCocktailGame {
         <!-- 4. 하단 액션 버튼 -->
         <div class="result-action-buttons">
           <button type="button" class="btn-cocktail-action reroll" id="btn-cocktail-reroll">
-            🔄 다시 제조
+            🎲 다시 제조
           </button>
           <button type="button" class="btn-cocktail-action edit" id="btn-cocktail-edit">
-            📝 재료 다시 선택
+            🧊 재료 다시 선택
           </button>
         </div>
       </div>

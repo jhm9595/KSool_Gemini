@@ -2279,6 +2279,8 @@
   justify-content: space-between !important;
   height: 100% !important;
   overflow-y: auto;
+  padding: 8px 12px 14px;
+  gap: 10px;
 }
 
 .result-header-card {
@@ -2290,21 +2292,21 @@
 }
 
 .result-glass-pill {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 800;
   color: #cbd5e1;
-  background: rgba(30, 41, 59, 0.8);
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  padding: 2px 10px;
-  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  padding: 3px 12px;
+  border-radius: 14px;
 }
 
 .result-cocktail-title {
-  font-size: 1.55rem;
+  font-size: clamp(1.4rem, 3.8vh, 1.8rem);
   font-weight: 900;
   color: #ffffff;
   letter-spacing: -0.5px;
-  text-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.7);
   margin: 2px 0;
 }
 
@@ -2313,8 +2315,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 6px 0;
-  min-height: 170px;
+  margin: 4px 0;
+  min-height: 185px;
+  flex: 0 0 auto;
 }
 
 .glass-svg-container {
@@ -2322,17 +2325,43 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.7));
+  filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.75));
 }
 
-/* 소주잔 쉘 */
+/* 실제 소주잔 비율: 입구 약 140px, 바닥 약 110px, 높이 155px (약 1 : 1.1 비율) */
 .glass-svg-container.soju-glass .glass-outer-shell {
-  width: 95px;
-  height: 125px;
-  clip-path: polygon(10% 0%, 90% 0%, 80% 90%, 80% 100%, 20% 100%, 20% 90%);
-  background: rgba(255, 255, 255, 0.12);
-  border-top: 3px solid rgba(255, 255, 255, 0.7);
-  box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.35);
+  width: 140px;
+  height: 155px;
+  clip-path: polygon(0% 0%, 100% 0%, 89% 100%, 11% 100%);
+  background: rgba(255, 255, 255, 0.08);
+  border-top: 3.5px solid rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 0 16px rgba(255, 255, 255, 0.35);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  border-radius: 0 0 12px 12px;
+}
+
+/* 소주잔 하단 두꺼운 크리스탈 유리 바닥 */
+.glass-outer-shell .soju-thick-base {
+  width: 100%;
+  height: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.35) 60%, rgba(200, 230, 255, 0.5) 100%);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
+}
+
+/* 맥주 글라스 쉘 (250ml) */
+.glass-svg-container.beer-glass .glass-outer-shell {
+  width: 135px;
+  height: 195px;
+  clip-path: polygon(3% 0%, 97% 0%, 88% 100%, 12% 100%);
+  background: rgba(255, 255, 255, 0.08);
+  border-top: 3.5px solid rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 0 16px rgba(255, 255, 255, 0.35);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -2341,25 +2370,17 @@
   border-radius: 0 0 10px 10px;
 }
 
-/* 맥주 글라스 쉘 */
-.glass-svg-container.beer-glass .glass-outer-shell {
-  width: 105px;
-  height: 165px;
-  clip-path: polygon(5% 0%, 95% 0%, 85% 92%, 85% 100%, 15% 100%, 15% 92%);
-  background: rgba(255, 255, 255, 0.12);
-  border-top: 3px solid rgba(255, 255, 255, 0.7);
-  box-shadow: inset 0 0 14px rgba(255, 255, 255, 0.35);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  overflow: hidden;
-  border-radius: 0 0 8px 8px;
+.glass-outer-shell .beer-thick-base {
+  width: 100%;
+  height: 20px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.3) 100%);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
 }
 
 .glass-liquid-column {
   width: 100%;
-  height: 88%;
+  flex: 1;
   display: flex;
   flex-direction: column-reverse; /* 아래에서 위로 적층 */
   overflow: hidden;
@@ -2371,107 +2392,139 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  border-top: 1px dashed rgba(255, 255, 255, 0.35);
+  border-top: 1px dashed rgba(255, 255, 255, 0.4);
   transition: height 0.5s ease;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.25);
 }
 
 .layer-label {
-  font-size: 0.65rem;
+  font-size: 0.76rem;
   font-weight: 900;
   color: #ffffff;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
-  padding: 1px 4px;
-  background: rgba(0, 0, 0, 0.35);
-  border-radius: 4px;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 6px;
   white-space: nowrap;
 }
 
 .glass-highlight-reflection {
   position: absolute;
   top: 0;
-  left: 12%;
-  width: 16%;
+  left: 10%;
+  width: 18%;
   height: 100%;
-  background: linear-gradient(90deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+  background: linear-gradient(90deg, rgba(255,255,255,0.45) 0%, transparent 100%);
   pointer-events: none;
 }
 
-/* 6. 상세 레시피 카드 */
+.glass-base-shadow {
+  width: 120px;
+  height: 12px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, transparent 75%);
+  margin-top: 2px;
+}
+
+/* 6. 상세 레시피 카드 (제목 없음, 크기 대폭 확대) */
 .recipe-breakdown-card {
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(15, 23, 42, 0.88);
   border: 1.5px solid rgba(148, 163, 184, 0.25);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 10px 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-.recipe-card-title {
-  font-size: 0.82rem;
-  font-weight: 900;
-  color: #94a3b8;
+  flex: 0 0 auto;
 }
 
 .recipe-items-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .recipe-item-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 6px;
-  background: rgba(30, 41, 59, 0.6);
-  border-radius: 8px;
+  padding: 10px 14px;
+  min-height: 48px;
+  background: rgba(30, 41, 59, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
 }
 
 .recipe-item-row .item-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  flex: 1;
+  overflow: hidden;
 }
 
 .item-dot {
-  width: 10px;
-  height: 10px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  box-shadow: 0 0 6px currentColor;
+  flex-shrink: 0;
+}
+
+.item-emoji {
+  font-size: 1.35rem;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .item-name {
-  font-size: 0.85rem;
-  font-weight: 800;
-  color: #f1f5f9;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #f8fafc;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .recipe-item-row .item-right {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: flex-end;
+  margin-left: 12px;
+  flex-shrink: 0;
 }
 
-.item-parts {
-  font-size: 0.88rem;
+.item-ratio-num {
+  font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
+  font-size: 1.6rem;
   font-weight: 900;
   color: #fde047;
-}
-
-.item-percent {
-  font-size: 0.76rem;
-  color: #94a3b8;
-  font-weight: 700;
+  text-shadow: 0 0 12px rgba(253, 224, 71, 0.75);
+  letter-spacing: -0.5px;
+  min-width: 28px;
+  text-align: right;
+  line-height: 1;
 }
 
 /* 7. 결과 화면 버튼들 */
 .result-action-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
+  margin-top: 4px;
+}
+
+.btn-cocktail-action {
+  height: 48px;
+  border-radius: 14px;
+  font-size: 1.05rem;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
 }
 
 .btn-cocktail-action {
