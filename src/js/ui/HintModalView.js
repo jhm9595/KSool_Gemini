@@ -10,6 +10,7 @@ class HintModalView {
     this.audio = audio;
 
     this.activeRecipeId = null;
+    this.viewMode = 'BASEBALL'; // 'CHOICE' | 'BASEBALL'
     this.currentGuessSlots = []; // [{ token, label }]
     this.selectedUpDownSlotOrder = 1;
     this.lastUpDownResult = null;
@@ -20,6 +21,12 @@ class HintModalView {
     this.lastUpDownResult = null;
     this.selectedUpDownSlotOrder = 1;
     this._resetGuessSlots();
+
+    // 등록된 외부 힌트(영상/글)가 있으면 [베이스볼 / 힌트보기] 2버튼 선택 화면부터 노출,
+    // 등록된 힌트가 없으면 즉시 베이스볼 게임 화면으로 진입
+    const extHints = this.recipeBook.getExternalHints(this.activeRecipeId);
+    this.viewMode = extHints && extHints.length > 0 ? 'CHOICE' : 'BASEBALL';
+
     this.render();
     document.getElementById('hint-modal').classList.add('active');
   }
@@ -39,6 +46,48 @@ class HintModalView {
     if (!recipe || !container) return;
 
     const items = this.recipeBook.getRecipeItems(this.activeRecipeId);
+    const extHints = this.recipeBook.getExternalHints(this.activeRecipeId);
+    const hasExtHint = extHints && extHints.length > 0;
+
+    // 1) 등록된 힌트가 있을 때 처음 보여주는 큼지막한 2버튼 선택 화면 (베이스볼 / 힌트보기)
+    if (this.viewMode === 'CHOICE' && hasExtHint) {
+      const primaryHint = extHints[0];
+      const isVideo = primaryHint.platform === 'YOUTUBE';
+      const hintIcon = isVideo ? '📺' : '📝';
+      const hintSubLabel = isVideo
+        ? `영상 힌트 보러가기 (${window.KSool.ExternalHintLinker.formatTimestamp(primaryHint.start_time_sec)})`
+        : '힌트 글 보러가기';
+
+      container.innerHTML = `
+        <div class="hint-top-header">
+          <div>
+            <div class="modal-title">🕵️ 미해금 비법 추리 (Lv.${recipe.required_level || 1} 도전)</div>
+            <div style="font-size:0.72rem; color:#94a3b8;">
+              난이도: <b>${recipe.difficulty}</b> · 총 재료 수: <b>${items.length}개</b>
+            </div>
+          </div>
+          <button class="modal-close-x" id="hint-close-btn">✕</button>
+        </div>
+
+        <div class="hint-choice-grid">
+          <button class="hint-big-choice-btn choice-baseball" id="choice-baseball-btn">
+            <span class="choice-big-icon">⚾</span>
+            <span class="choice-big-title">베이스볼</span>
+            <span class="choice-big-sub">재료 & 황금비율 추리 게임</span>
+          </button>
+
+          <button class="hint-big-choice-btn choice-ext-hint" id="choice-ext-hint-btn">
+            <span class="choice-big-icon">${hintIcon}</span>
+            <span class="choice-big-title">힌트보기</span>
+            <span class="choice-big-sub">${hintSubLabel}</span>
+          </button>
+        </div>
+      `;
+
+      this._bindEvents(container);
+      return;
+    }
+
     const hintState = this.inventory.getHintState(this.activeRecipeId);
     const maxStage = this.baseballEngine.getMaxStageForRecipe(recipe);
     const currentStage = this.baseballEngine.getCurrentActiveStage(this.activeRecipeId);
@@ -168,48 +217,15 @@ class HintModalView {
       `;
     }
 
-    // 5-3: 외부 유튜브 타임스탬프 / 블로그 수수께끼 링크
-    const extHints = this.recipeBook.getExternalHints(this.activeRecipeId);
-    const defaultHint = extHints.length > 0 ? extHints : [
-      {
-        platform: 'YOUTUBE',
-        title: `📺 유튜브에서 관련 주조법 & 힌트 영상 찾아보기 (01:15)`,
-        teaser: '클릭 시 지정된 타임스탬프 구간으로 이동합니다',
-        url: `https://www.youtube.com/results?search_query=${encodeURIComponent(this.brandResolver.resolveName(recipe) + ' 레시피')}`,
-        start_time_sec: 75
-      },
-      {
-        platform: 'BLOG',
-        title: `📝 주모의 비밀 블로그에서 수수께끼 힌트 보기`,
-        teaser: '블로그 포스트에서 숨겨진 조합 비법을 확인하세요',
-        url: 'https://section.blog.naver.com/',
-        start_time_sec: 0
-      }
-    ];
-
-    const extLinksHtml = defaultHint.map(h => {
-      const targetUrl = window.KSool.ExternalHintLinker.buildTargetUrl(h);
-      const timeBadge = h.start_time_sec > 0
-        ? `<span style="font-size:0.65rem; background:#ef4444; color:#fff; padding:2px 6px; border-radius:4px; font-weight:800;">⏱️ ${window.KSool.ExternalHintLinker.formatTimestamp(h.start_time_sec)} 재생</span>`
-        : `<span style="font-size:0.65rem; background:#10b981; color:#0f172a; padding:2px 6px; border-radius:4px; font-weight:800;">BLOG</span>`;
-
-      return `
-        <a class="external-hint-card" href="${targetUrl}" target="_blank" rel="noopener noreferrer">
-          <div>
-            <div style="font-size:0.78rem; font-weight:800;">${h.title}</div>
-            <div style="font-size:0.68rem; color:#94a3b8; margin-top:2px;">${h.teaser || ''}</div>
-          </div>
-          ${timeBadge}
-        </a>
-      `;
-    }).join('');
-
     container.innerHTML = `
       <div class="hint-top-header">
-        <div>
-          <div class="modal-title">🕵️ 미해금 비법 추리 (Lv.${recipe.required_level || 1} 도전)</div>
-          <div style="font-size:0.72rem; color:#94a3b8;">
-            난이도: <b>${recipe.difficulty}</b> · 총 재료 수: <b>${items.length}개</b>
+        <div style="display:flex; align-items:center; gap:8px;">
+          ${hasExtHint ? `<button class="hint-back-choice-btn" id="hint-back-choice-btn" title="선택 화면으로">←</button>` : ''}
+          <div>
+            <div class="modal-title">🕵️ 미해금 비법 추리 (Lv.${recipe.required_level || 1} 도전)</div>
+            <div style="font-size:0.72rem; color:#94a3b8;">
+              난이도: <b>${recipe.difficulty}</b> · 총 재료 수: <b>${items.length}개</b>
+            </div>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
@@ -239,14 +255,6 @@ class HintModalView {
           </span>
         </div>
         ${ratioSectionHtml}
-      </div>
-
-      <!-- 5-3: 유튜브 타임스탬프 / 블로그 힌트 링크 -->
-      <div class="hint-section-box">
-        <div class="hint-section-title">
-          <span>[힌트 3] 비밀 영상 & 블로그 힌트 링크</span>
-        </div>
-        ${extLinksHtml}
       </div>
     `;
 
@@ -289,6 +297,39 @@ class HintModalView {
   _bindEvents(container) {
     const closeBtn = container.querySelector('#hint-close-btn');
     if (closeBtn) closeBtn.onclick = () => this.close();
+
+    // 초기 선택 화면: [베이스볼] 버튼 클릭 -> 베이스볼 게임 화면으로 전환
+    const choiceBaseballBtn = container.querySelector('#choice-baseball-btn');
+    if (choiceBaseballBtn) {
+      choiceBaseballBtn.onclick = () => {
+        this.viewMode = 'BASEBALL';
+        this.audio.playTap();
+        this.render();
+      };
+    }
+
+    // 초기 선택 화면: [힌트보기] 버튼 클릭 -> 등록된 영상(유튜브 타임스탬프) 또는 힌트 글(블로그)로 즉시 이동
+    const choiceExtHintBtn = container.querySelector('#choice-ext-hint-btn');
+    if (choiceExtHintBtn) {
+      choiceExtHintBtn.onclick = () => {
+        const extHints = this.recipeBook.getExternalHints(this.activeRecipeId);
+        if (extHints && extHints.length > 0) {
+          const targetUrl = window.KSool.ExternalHintLinker.buildTargetUrl(extHints[0]);
+          this.audio.playTap();
+          window.open(targetUrl, '_blank', 'noopener,noreferrer');
+        }
+      };
+    }
+
+    // 베이스볼 화면에서 다시 초기 2버튼 선택 화면으로 돌아가기
+    const backChoiceBtn = container.querySelector('#hint-back-choice-btn');
+    if (backChoiceBtn) {
+      backChoiceBtn.onclick = () => {
+        this.viewMode = 'CHOICE';
+        this.audio.playTap();
+        this.render();
+      };
+    }
 
     // 숫자야구 슬롯 비우기
     container.querySelectorAll('[data-bb-slot]').forEach(el => {
