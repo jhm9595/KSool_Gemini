@@ -308,7 +308,7 @@ class CapFlickGame {
 
         <!-- 3. 메인 인터랙션 아레나 (중앙 초록 병뚜껑 + 2배 길어진 꼬다리 와이어) -->
         <div class="capflick-center-stage" id="cap-flick-arena">
-          <svg class="soju-cap-flick-svg" viewBox="0 18 320 336" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg class="soju-cap-flick-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <!-- 뚜껑 메탈 그라데이션 -->
               <radialGradient id="cap-metal-grad" cx="50%" cy="40%" r="55%">
@@ -330,55 +330,54 @@ class CapFlickGame {
               </linearGradient>
             </defs>
 
-            <!-- 1. 초록 메탈 병뚜껑 (글자 일체 없이 깔끔하고 고급스러운 메탈릭 캡) -->
+            <!-- 1. 초록 메탈 병뚜껑 (화면 정중앙 100, 100 기준) -->
             <g class="soju-cap-main-group">
               <!-- 외곽 주름 톱니 (fluted rim 28개) -->
-              <circle cx="160" cy="275" r="76" fill="#14532d"/>
-              <circle cx="160" cy="275" r="73" fill="#16a34a" stroke="#86efac" stroke-width="2"/>
+              <circle cx="100" cy="100" r="76" fill="#14532d"/>
+              <circle cx="100" cy="100" r="73" fill="#16a34a" stroke="#86efac" stroke-width="2"/>
               <!-- 캡 돔 본체 -->
-              <circle cx="160" cy="275" r="68" fill="url(#cap-metal-grad)" stroke="#22c55e" stroke-width="3"/>
+              <circle cx="100" cy="100" r="68" fill="url(#cap-metal-grad)" stroke="#22c55e" stroke-width="3"/>
               <!-- 캡 내부 메탈 음각 링 2겹 -->
-              <circle cx="160" cy="275" r="54" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="2.5"/>
-              <circle cx="160" cy="275" r="38" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="2"/>
-              <circle cx="160" cy="275" r="24" fill="rgba(21,128,61,0.5)" stroke="rgba(134,239,172,0.4)" stroke-width="1.5"/>
+              <circle cx="100" cy="100" r="54" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="2.5"/>
+              <circle cx="100" cy="100" r="38" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="2"/>
+              <circle cx="100" cy="100" r="24" fill="rgba(21,128,61,0.5)" stroke="rgba(134,239,172,0.4)" stroke-width="1.5"/>
             </g>
 
-            <!-- 2. 꼬다리가 뜯겨나간 단면 스텀프 (와이어가 일직선으로 날아가도 캡에 남아있는 파단면) -->
+            <!-- 2. 꼬다리가 뜯겨나간 단면 스텀프 (100, 100 기준 360도 회전) -->
             <g id="soju-cap-broken-stump" 
                class="soju-cap-broken-stump" 
-               style="opacity: ${this.isBroken ? 1 : 0}; transform-origin: 160px 275px; transform: rotate(${this.angle || 0}deg);">
-              <path d="M152 208 L168 208 L165 200 L155 200 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
-              <circle cx="160" cy="199" r="2.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
+               style="opacity: ${this.isBroken ? 1 : 0}; transform-origin: 100px 100px; transform: rotate(${this.angle || 0}deg);">
+              <path d="M92 33 L108 33 L105 25 L95 25 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
+              <circle cx="100" cy="24" r="2.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
             </g>
 
-            <!-- 3. 길고 디테일한 알루미늄 꼬다리 와이어 (회전 중심점: 캡 중심 160, 275) -->
+            <!-- 3. 길고 디테일한 알루미늄 꼬다리 와이어 (회전 중심점: 캡 중심 100, 100) -->
             <g id="cap-wire-transform-group" 
                class="${this.isBroken ? 'broken-fly' : ''}" 
-               style="transform-origin: 160px 275px; transform: rotate(${this.angle}deg); --fly-angle: ${this.angle || 0}deg;">
+               style="transform-origin: 100px 100px; transform: rotate(${this.angle}deg); --fly-angle: ${this.angle || 0}deg;">
               
               <!-- 캡과 이어지는 브래킷 조인트 -->
-              <path d="M152 208 L168 208 L165 200 L155 200 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
+              <path d="M92 33 L108 33 L105 25 L95 25 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
               
-              <!-- 2배 길어진 꼬다리 와이어 (160px 길이의 현실적인 꼬임 알루미늄 스트랩) -->
-              <!-- 와이어 본체 실루엣: 비틀림 굴곡 & 끝부분 살짝 휜 갈고리 -->
-              <path d="M157 200 
-                       C 155 170, 165 145, 158 115 
-                       C 153 90, 166 65, 160 40 
-                       C 158 26, 170 20, 175 28 
-                       C 178 35, 171 42, 166 48
-                       C 172 70, 159 95, 164 120
-                       C 171 150, 161 175, 163 200 Z" 
+              <!-- 2배 길어진 꼬다리 와이어 (현실적인 꼬임 알루미늄 스트랩) -->
+              <path d="M97 25 
+                       C 95 -5, 105 -30, 98 -60 
+                       C 93 -85, 106 -110, 100 -135 
+                       C 98 -149, 110 -155, 115 -147 
+                       C 118 -140, 111 -133, 106 -127
+                       C 112 -105, 99 -80, 104 -55
+                       C 111 -25, 101 0, 103 25 Z" 
                     fill="url(#wire-silver-grad)" 
                     stroke="#475569" 
                     stroke-width="1.5"
                     filter="drop-shadow(0 6px 12px rgba(0,0,0,0.55))"/>
 
               <!-- 와이어 하이라이트 반사선 -->
-              <path d="M159 195 C 158 172, 164 148, 160 118 C 156 92, 165 67, 162 45" 
+              <path d="M99 20 C 98 -3, 104 -27, 100 -57 C 96 -83, 105 -108, 102 -130" 
                     stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
               
               <!-- 끝부분 비틀림 컬 팁 -->
-              <circle cx="172" cy="27" r="3.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
+              <circle cx="112" cy="-148" r="3.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
             </g>
 
             <!-- 4. 병뚜껑 가운데 ? 버튼 (꼬다리 끊어지면 등장하는 숫자게임 바로가기) -->
@@ -386,15 +385,15 @@ class CapFlickGame {
                class="cap-question-btn ${this.showQuestionMark ? 'show' : ''}" 
                role="button" 
                aria-label="Up & Down 숫자 게임으로 이동"
-               style="transform-origin: 160px 275px;">
+               style="transform-origin: 100px 100px;">
               <!-- 펄스 회전 글로우 헤일로 -->
-              <circle cx="160" cy="275" r="42" class="q-pulse-halo"/>
+              <circle cx="100" cy="100" r="42" class="q-pulse-halo"/>
               <!-- 메인 골드 디스크 -->
-              <circle cx="160" cy="275" r="32" class="q-main-disc"/>
+              <circle cx="100" cy="100" r="32" class="q-main-disc"/>
               <!-- 내부 엠보스 림 -->
-              <circle cx="160" cy="275" r="28" class="q-inner-rim"/>
+              <circle cx="100" cy="100" r="28" class="q-inner-rim"/>
               <!-- ? 텍스트 -->
-              <text x="160" y="275" text-anchor="middle" dominant-baseline="central" class="q-mark-char">?</text>
+              <text x="100" y="100" text-anchor="middle" dominant-baseline="central" class="q-mark-char">?</text>
             </g>
           </svg>
         </div>

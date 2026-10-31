@@ -234,7 +234,7 @@ class UpAndDownGame {
           </radialGradient>
         </defs>
 
-        <!-- 1. 초록 메탈 병뚜껑 (CapFlick과 동일한 28 fluted crimp 림 및 원형 돔 레이어) -->
+        <!-- 1. 초록 메탈 병뚜껑 (CapFlick과 1:1 완벽 동일한 정중앙 100, 100 원형) -->
         <g class="soju-cap-main-group">
           <!-- 외곽 주름 톱니 (fluted rim 28개 엣지) -->
           <circle cx="100" cy="100" r="76" fill="#14532d"/>
@@ -248,7 +248,7 @@ class UpAndDownGame {
         </g>
 
         <!-- 2. 꼬다리가 뜯겨나간 자국 (CapFlick에서 꼬다리가 뚝 끊어진 브래킷 조인트 스텀프) -->
-        <g class="soju-cap-broken-stump">
+        <g class="soju-cap-broken-stump" style="transform-origin: 100px 100px;">
           <path d="M92 33 L108 33 L105 25 L95 25 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
           <!-- 끊어진 알루미늄 단면 은색 팁 -->
           <circle cx="100" cy="24" r="2.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
@@ -264,21 +264,12 @@ class UpAndDownGame {
     `;
   }
 
-  render() {
-    const container = document.getElementById('party-game-stage');
-    if (!container) return;
-
-    container.innerHTML = `
-      <div class="party-game-box updown-box">
-        <!-- 1. 상단: 극사실적 3D 소주 병뚜껑 (CapFlick과 동일한 모양/크기) -->
-        <div class="updown-center-cap-wrap">
-          <div class="realistic-cap-container ${this.isFinished ? 'exploded' : ''}">
-            ${this._getBottleCapSvg()}
-          </div>
-        </div>
-
-        <!-- 2. 뚜껑과 패드 사이 정확한 중간 위치: 큼지막한 세로줄 맞춤 UP / DOWN 대칭 표시 -->
-        <div class="updown-middle-status-slot">
+  _renderStation(isTop = false) {
+    const flipClass = isTop ? 'top-station' : 'bottom-station';
+    return `
+      <div class="updown-player-station ${flipClass}">
+        <!-- 1. 병뚜껑 쪽 인접: UP / DOWN 대칭 표시 (세로 중앙축 맞춤 대형 타이포) -->
+        <div class="updown-station-status-slot">
           <div class="updown-status-grid">
             <div class="updown-status-row up">
               <span class="status-num">${this.lastUpVal}</span>
@@ -291,33 +282,55 @@ class UpAndDownGame {
           </div>
         </div>
 
-        <!-- 3. 하단: 숫자 디스플레이 & 3x4 다이얼 패드 -->
-        <div class="updown-bottom-station">
-          <div class="party-number-display ${!this.inputVal ? 'placeholder' : ''}">
-            ${this.inputVal || '· ·'}
-          </div>
-          <div class="party-numpad-grid compact">
-            <button type="button" class="party-num-key" data-digit="1">1</button>
-            <button type="button" class="party-num-key" data-digit="2">2</button>
-            <button type="button" class="party-num-key" data-digit="3">3</button>
+        <!-- 2. 입력된 숫자 디스플레이 -->
+        <div class="party-number-display ${!this.inputVal ? 'placeholder' : ''}">
+          ${this.inputVal || '· ·'}
+        </div>
 
-            <button type="button" class="party-num-key" data-digit="4">4</button>
-            <button type="button" class="party-num-key" data-digit="5">5</button>
-            <button type="button" class="party-num-key" data-digit="6">6</button>
+        <!-- 3. 3x4 스마트폰 다이얼 패드 -->
+        <div class="party-numpad-grid compact">
+          <button type="button" class="party-num-key" data-digit="1">1</button>
+          <button type="button" class="party-num-key" data-digit="2">2</button>
+          <button type="button" class="party-num-key" data-digit="3">3</button>
 
-            <button type="button" class="party-num-key" data-digit="7">7</button>
-            <button type="button" class="party-num-key" data-digit="8">8</button>
-            <button type="button" class="party-num-key" data-digit="9">9</button>
+          <button type="button" class="party-num-key" data-digit="4">4</button>
+          <button type="button" class="party-num-key" data-digit="5">5</button>
+          <button type="button" class="party-num-key" data-digit="6">6</button>
 
-            <button type="button" class="party-key-action restart btn-updown-restart" title="새 게임 시작">
-              New
-            </button>
-            <button type="button" class="party-num-key" data-digit="0">0</button>
-            <button type="button" class="party-key-action submit btn-updown-submit" title="숫자 확인">
-              확인
-            </button>
+          <button type="button" class="party-num-key" data-digit="7">7</button>
+          <button type="button" class="party-num-key" data-digit="8">8</button>
+          <button type="button" class="party-num-key" data-digit="9">9</button>
+
+          <button type="button" class="party-key-action restart btn-updown-restart" title="새 게임 시작">
+            New
+          </button>
+          <button type="button" class="party-num-key" data-digit="0">0</button>
+          <button type="button" class="party-key-action submit btn-updown-submit" title="숫자 확인">
+            확인
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  render() {
+    const container = document.getElementById('party-game-stage');
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="party-game-box updown-box tabletop-symmetrical">
+        <!-- 1. 상단: 상대방 플레이어 스테이션 (180도 회전 대칭) -->
+        ${this._renderStation(true)}
+
+        <!-- 2. 중앙: 극사실적 3D 소주 병뚜껑 (CapFlick과 1:1 완벽 동일한 정중앙 위치 및 크기) -->
+        <div class="updown-center-cap-wrap">
+          <div class="realistic-cap-container ${this.isFinished ? 'exploded' : ''}">
+            ${this._getBottleCapSvg()}
           </div>
         </div>
+
+        <!-- 3. 하단: 내 쪽 플레이어 스테이션 (정방향 0도) -->
+        ${this._renderStation(false)}
       </div>
     `;
 

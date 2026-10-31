@@ -461,20 +461,54 @@
   user-select: none;
 }
 
-/* 상단 극사실적 3D 소주 병뚜껑 (CapFlick과 동일한 모양 및 대형 크기) */
+/* 대칭 테이블탑 플레이어 스테이션 (상단 180도 / 하단 0도) */
+.updown-player-station {
+  flex: 1;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  min-height: 0;
+}
+
+.updown-player-station.top-station {
+  transform: rotate(180deg);
+}
+
+.updown-player-station.bottom-station {
+  transform: none;
+}
+
+/* 극사실적 3D 소주 병뚜껑 공통 스테이지 (CapFlick & UpAndDown 1:1 완벽 일치) */
+.capflick-center-stage,
 .updown-center-cap-wrap {
   flex: 0 0 auto;
+  width: clamp(130px, 18vh, 160px);
+  height: clamp(130px, 18vh, 160px);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 2px auto 0;
   position: relative;
+  margin: 0 auto;
   z-index: 20;
 }
 
+.capflick-center-stage {
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+}
+
 .realistic-cap-container {
-  width: clamp(140px, 20vh, 180px);
-  height: clamp(140px, 20vh, 180px);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.75));
   transition: transform 0.2s ease;
 }
@@ -482,6 +516,13 @@
 .realistic-cap-container.exploded {
   animation: shakeCap 0.4s infinite;
   filter: drop-shadow(0 0 28px #ef4444);
+}
+
+.soju-cap-flick-svg,
+.soju-cap-svg-realistic {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 .soju-cap-center-num {
@@ -494,22 +535,22 @@
 }
 
 /* 뚜껑과 패드 사이 딱 중간 위치의 큼지막한 UP / DOWN 대칭 표시 */
-.updown-middle-status-slot {
+.updown-station-status-slot {
   flex: 1;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  min-height: 80px;
+  min-height: 48px;
 }
 
 .updown-status-grid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
   width: 100%;
-  max-width: 300px;
+  max-width: 260px;
   margin: 0 auto;
 }
 
@@ -517,12 +558,12 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: baseline;
-  gap: 18px;
+  gap: 14px;
   line-height: 1.1;
 }
 
 .updown-status-row .status-num {
-  font-size: clamp(2.8rem, 6vh, 4.2rem);
+  font-size: clamp(2.2rem, 5vh, 3.2rem);
   font-weight: 900;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -530,7 +571,7 @@
 }
 
 .updown-status-row .status-label {
-  font-size: clamp(2.2rem, 5vh, 3.4rem);
+  font-size: clamp(1.8rem, 4vh, 2.6rem);
   font-weight: 900;
   text-align: left;
   letter-spacing: 1px;
@@ -539,25 +580,13 @@
 .updown-status-row.up .status-num,
 .updown-status-row.up .status-label {
   color: #38bdf8;
-  text-shadow: 0 0 24px rgba(56, 189, 248, 0.9), 0 0 50px rgba(56, 189, 248, 0.6);
+  text-shadow: 0 0 20px rgba(56, 189, 248, 0.9), 0 0 40px rgba(56, 189, 248, 0.6);
 }
 
 .updown-status-row.down .status-num,
 .updown-status-row.down .status-label {
   color: #f43f5e;
-  text-shadow: 0 0 24px rgba(244, 63, 94, 0.9), 0 0 50px rgba(244, 63, 94, 0.6);
-}
-
-/* 하단 컨트롤 영역: 디스플레이 & 패드 */
-.updown-bottom-station {
-  flex: 0 0 auto;
-  width: 100%;
-  max-width: 320px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: center;
+  text-shadow: 0 0 20px rgba(244, 63, 94, 0.9), 0 0 40px rgba(244, 63, 94, 0.6);
 }
 
 /* 입력 번호 디스플레이 (중앙정렬) */
@@ -664,7 +693,7 @@
 /* 5. 확인 시 즉시 화면에 크게 떴다가 사라지는 UP / DOWN 플래시 애니메이션 */
 .updown-flash-banner {
   position: absolute;
-  top: 36%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: min(4.8rem, 20vw);
@@ -766,26 +795,7 @@
   box-sizing: border-box;
 }
 
-.capflick-center-stage {
-  flex: 0 0 auto;
-  height: clamp(230px, 36vh, 290px);
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  cursor: pointer;
-  user-select: none;
-  touch-action: none;
-}
 
-.soju-cap-flick-svg {
-  width: auto;
-  height: 100%;
-  max-width: min(280px, 75vw);
-  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.7));
-  overflow: visible;
-}
 
 #cap-wire-transform-group {
   transition: transform 0.32s cubic-bezier(0.2, 1.25, 0.45, 1);
@@ -913,7 +923,7 @@
   opacity: 0;
   pointer-events: none;
   transform: scale(0.2);
-  transform-origin: 160px 275px;
+  transform-origin: 100px 100px;
   transition: opacity 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   cursor: pointer;
 }
@@ -929,7 +939,7 @@
   stroke: #fde047;
   stroke-width: 2.5;
   stroke-dasharray: 6 3;
-  transform-origin: 160px 275px;
+  transform-origin: 100px 100px;
   animation: qHaloSpin 6s linear infinite;
 }
 
@@ -958,7 +968,7 @@
   font-size: 38px;
   font-weight: 900;
   fill: #fde047;
-  transform-origin: 160px 275px;
+  transform-origin: 100px 100px;
   filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.95));
   animation: qMarkPulse 1.1s ease-in-out infinite alternate;
   user-select: none;
