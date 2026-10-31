@@ -4,7 +4,7 @@ window.KSool = window.KSool || {};
  * ③ 표면장력 소주잔 채우기 (랜덤 잔 높이 & 미스터리 가림막 서바이벌)
  * - 판마다 잔의 높이와 형태가 무작위로 변경 (롱 텀블러, 소주잔, 온더락, 미니 숏잔)
  * - 초반에는 상단 가림막(Blind Cover)으로 잔의 실제 높이와 입구를 완벽히 은폐!
- * - 70% 수위에 도달하면 '가림막 오픈!' 사운드와 함께 잔의 진짜 입구가 전격 공개!
+ * - 90% 수위를 넘겨 손을 떼면 '가림막 오픈!' 사운드와 함께 잔의 진짜 입구가 전격 공개!
  * - [핵심 룰]: 손을 뗐을 때 표면장력 한계를 넘었으면 즉시 탈락(넘침! 원샷!)
  */
 class SurfaceTensionGame {
@@ -29,7 +29,7 @@ class SurfaceTensionGame {
 
     this.currentLevel = 15; // 0 ~ 100% (표면장력 돌파 시 100% 초과)
     this.overflowLimit = 100; // 100.0% ~ 105.5% 사이 표면장력 한계치
-    this.revealThreshold = 70; // 70% 도달 시 가림막 해제
+    this.revealThreshold = 90; // 90% 초과 도달 시 손을 뗐을 때 가림막 해제
     this.isBlindLifted = false;
 
     this.isPouring = false;
@@ -56,10 +56,10 @@ class SurfaceTensionGame {
     this.glassWidthTop = profile.widthTop;
     this.glassWidthBottom = profile.widthBottom;
 
-    // 2. 가림막 및 수위 초기화 (12~19% 시작, 70%에서 가림막 오픈)
+    // 2. 가림막 및 수위 초기화 (12~19% 시작, 90% 넘었을 때 가림막 오픈)
     this.currentLevel = Math.floor(Math.random() * 8) + 12;
     this.overflowLimit = 100 + Math.random() * 5.5; // 100.0% ~ 105.5%
-    this.revealThreshold = 70;
+    this.revealThreshold = 90;
     this.isBlindLifted = false;
 
     this.isPouring = false;
@@ -93,7 +93,7 @@ class SurfaceTensionGame {
       this.currentLevel += 0.35;
       this.hub.sound.updatePour(this.currentLevel / 100);
 
-      // (가림막은 붓는 도중이 아니라 손을 뗐을 때 70% 이상이면 오픈)
+      // (가림막은 붓는 도중이 아니라 손을 뗐을 때 90% 이상이면 오픈)
 
       // 88% 이상 위험 수위 도달 시 심장박동 효과음
       if (this.currentLevel >= 88 && !this.heartbeatTimer) {
@@ -135,7 +135,7 @@ class SurfaceTensionGame {
       return;
     }
 
-    // [핵심 룰 2]: 손을 뗐을 때 70% 이상 채웠다면 가림막을 전격 오픈!
+    // [핵심 룰 2]: 손을 뗐을 때 90% 이상 채웠다면 가림막을 전격 오픈!
     if (this.currentLevel >= this.revealThreshold && !this.isBlindLifted) {
       this.liftBlind();
     }
@@ -182,7 +182,7 @@ class SurfaceTensionGame {
         <div class="glass-canvas-wrap">
           <canvas id="tension-canvas" width="310" height="390"></canvas>
 
-          <!-- 상단 미스터리 잔 높이 가림막 (손을 뗐을 때 70% 이상이면 해제, 딱 자물쇠만 표시) -->
+          <!-- 상단 미스터리 잔 높이 가림막 (손을 뗐을 때 90% 이상이면 해제, 딱 자물쇠만 표시) -->
           <div id="surface-blind-cover" class="surface-blind-cover ${this.isBlindLifted ? 'lifted' : ''}">
             <div class="blind-content">
               <span class="blind-icon">🔒</span>
