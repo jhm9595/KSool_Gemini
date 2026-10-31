@@ -272,7 +272,7 @@ class HintModalView {
         }
       }
 
-      const canvasHeight = this.selectedMinigameType === 'TERRITORY_QIX' ? 430 : 320;
+      const canvasHeight = (this.selectedMinigameType === 'BRICK_BREAKER' || this.selectedMinigameType === 'TERRITORY_QIX') ? 430 : 320;
 
       container.innerHTML = `
         <div class="hint-top-header">

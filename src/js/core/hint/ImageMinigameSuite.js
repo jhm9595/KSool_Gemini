@@ -194,33 +194,36 @@ class ImageMinigameSuite {
   // =========================================================================
   _initBrickBreaker() {
     const cols = 6;
-    const rows = 5;
-    const padX = 14;
-    const topY = 44;
+    const rows = 6;
+    const padX = 12;
+    const topY = 40;
     const gap = 4;
     const bw = (this.width - padX * 2 - gap * (cols - 1)) / cols;
-    const bh = 26;
+    const bh = 28;
 
     this.bbState = {
       lives: 3,
+      totalTime: 45,
       timeLeft: 45,
       lastTime: performance.now(),
       targetPct: 85,
+      blockAreaBottom: topY + rows * (bh + gap),
       paddle: {
-        x: this.width / 2 - 38,
-        y: this.height - 28,
-        w: 76,
-        baseW: 76,
+        x: this.width / 2 - 40,
+        y: this.height - 24,
+        w: 80,
+        baseW: 80,
         h: 12,
-        shrinkTimer: 0
+        shrinkTimer: 0,
+        keyDir: 0
       },
       ball: {
         x: this.width / 2,
-        y: this.height - 44,
-        vx: (Math.random() > 0.5 ? 1 : -1) * 3.8,
-        vy: -4.3,
+        y: this.height - 42,
+        vx: (Math.random() > 0.5 ? 1 : -1) * 3.4,
+        vy: -3.9,
         r: 7,
-        speedMultiplier: 1.0
+        speedMultiplier: 0.52
       },
       blocks: [],
       hazards: [], // 위에서 떨어지는 독방울(☠️) / 빙결함정(❄️)
@@ -233,10 +236,10 @@ class ImageMinigameSuite {
         // 중앙 코어는 HP 3, 상단은 HP 2, 일부 칸은 파괴불가 강철 범퍼(고난도 궤적 교란)
         let hp = 1;
         let isSteel = false;
-        if (r === 2 && (c === 1 || c === 4)) {
+        if (r === 3 && (c === 1 || c === 4)) {
           isSteel = true;
           hp = 999;
-        } else if (r === 1 && (c === 2 || c === 3)) {
+        } else if ((r === 1 || r === 2) && (c === 2 || c === 3)) {
           hp = 3;
         } else if (r <= 2) {
           hp = 2;
@@ -272,15 +275,31 @@ class ImageMinigameSuite {
         movePaddle(e.touches[0].clientX);
       }
     };
+    const onKeyDown = (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a') this.bbState.paddle.keyDir = -1;
+      else if (e.key === 'ArrowRight' || e.key === 'd') this.bbState.paddle.keyDir = 1;
+    };
+    const onKeyUp = (e) => {
+      if (
+        (e.key === 'ArrowLeft' || e.key === 'a') && this.bbState.paddle.keyDir === -1 ||
+        (e.key === 'ArrowRight' || e.key === 'd') && this.bbState.paddle.keyDir === 1
+      ) {
+        this.bbState.paddle.keyDir = 0;
+      }
+    };
 
     this.canvas.addEventListener('mousemove', onMouseMove);
     this.canvas.addEventListener('touchmove', onTouchMove, { passive: false });
     this.canvas.addEventListener('touchstart', onTouchMove, { passive: false });
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
 
     this._cleanupInputHandlers = () => {
       this.canvas.removeEventListener('mousemove', onMouseMove);
       this.canvas.removeEventListener('touchmove', onTouchMove);
       this.canvas.removeEventListener('touchstart', onTouchMove);
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
     };
   }
 
@@ -298,14 +317,24 @@ class ImageMinigameSuite {
       return;
     }
 
-    if (st.paddle.shrinkTimer > 0) {
-      st.paddle.shrinkTimer -= dt;
-      if (st.paddle.shrinkTimer <= 0) {
-        st.paddle.w = st.paddle.baseW;
+    const p = st.paddle;
+    if (p.shrinkTimer > 0) {
+      p.shrinkTimer -= dt;
+      if (p.shrinkTimer <= 0) {
+        p.w = p.baseW;
       }
     }
+    if (p.keyDir !== 0) {
+      p.x = Math.max(6, Math.min(this.width - p.w - 6, p.x + p.keyDir * 320 * dt));
+    }
+
+    // 초반에는 적당한 속도(52%)로 시작하여 시간이 흐르거나 블럭 파괴율이 올라갈수록 점점 빨라져 기존 속도(115%)에 도달
+    const timeProgress = Math.min(1, Math.max(0, ((st.totalTime || 45) - st.timeLeft) / 34));
+    const breakProgress = st.brokenCount / Math.max(1, st.totalBreakable);
+    const ramp = Math.max(timeProgress * 0.85, breakProgress);
 
     const b = st.ball;
+    b.speedMultiplier = 0.52 + 0.63 * ramp;
     b.x += b.vx * b.speedMultiplier;
     b.y += b.vy * b.speedMultiplier;
 
@@ -325,7 +354,6 @@ class ImageMinigameSuite {
     }
 
     // 패들 충돌
-    const p = st.paddle;
     if (
       b.vy > 0 &&
       b.y + b.r >= p.y &&
@@ -339,7 +367,6 @@ class ImageMinigameSuite {
       b.vx = Math.sin(angle) * speed;
       b.vy = -Math.cos(angle) * speed;
       b.y = p.y - b.r - 1;
-      b.speedMultiplier = Math.min(1.48, b.speedMultiplier + 0.025);
       this.audio.playTap();
     }
 
@@ -441,8 +468,8 @@ class ImageMinigameSuite {
       }
       b.x = p.x + p.w / 2;
       b.y = p.y - 16;
-      b.vx = (Math.random() > 0.5 ? 1 : -1) * 3.8;
-      b.vy = -4.3;
+      b.vx = (Math.random() > 0.5 ? 1 : -1) * 3.4;
+      b.vy = -3.9;
     }
 
     // 승리 판정
@@ -456,8 +483,11 @@ class ImageMinigameSuite {
 
   _drawBrickBreaker(ctx) {
     const st = this.bbState;
-    // 1. 배경에 숨겨진 완성 술 그림을 먼저 그림
-    ctx.drawImage(this.hiddenArtCanvas, 0, 0);
+    // 1. 전체 캔버스 암막 배경 + 블럭 영역 바로 뒤에 숨겨진 완성 술 일러스트 배치
+    ctx.fillStyle = '#070b14';
+    ctx.fillRect(0, 0, this.width, this.height);
+    const artH = Math.min(this.height - 34, (st.blockAreaBottom || 240) + 20);
+    ctx.drawImage(this.hiddenArtCanvas, 0, 0, this.width, this.height, 0, 32, this.width, artH);
 
     // 2. 아직 안 깨진 블럭 영역은 불투명한 빙결 장막으로 가림
     for (const blk of st.blocks) {
@@ -523,7 +553,7 @@ class ImageMinigameSuite {
       timeLeftSec: st.timeLeft,
       progressPct: pct,
       targetPct: st.targetPct,
-      subText: '좌우 드래그로 패들 이동 · 떨어지는 ☠️독방울과 ❄️빙결 함정을 피하세요!'
+      subText: ''
     });
   }
 
@@ -653,43 +683,85 @@ class ImageMinigameSuite {
       }
     }
 
-    // 2. 적 구체들이 위치한 미점령(0) 영역을 BFS로 마킹 (적이 없는 닫힌 영역은 전부 점령!)
-    const visited = Array.from({ length: rows }, () => new Uint8Array(cols));
-    const queue = [];
+    // 2. 미점령(0) 영역을 연결 요소(Connected Components) 단위로 분리
+    const compMap = Array.from({ length: rows }, () => new Int32Array(cols).fill(-1));
+    const components = [];
+    const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
-    for (const en of st.enemies) {
-      const er = Math.max(1, Math.min(rows - 2, Math.floor(en.r)));
-      const ec = Math.max(1, Math.min(cols - 2, Math.floor(en.c)));
-      if (grid[er][ec] === 0 && !visited[er][ec]) {
-        visited[er][ec] = 1;
-        queue.push([er, ec]);
+    for (let r = 1; r < rows - 1; r++) {
+      for (let c = 1; c < cols - 1; c++) {
+        if (grid[r][c] === 0 && compMap[r][c] === -1) {
+          const compId = components.length;
+          const cells = [];
+          const queue = [[r, c]];
+          compMap[r][c] = compId;
+          let head = 0;
+          while (head < queue.length) {
+            const [cr, cc] = queue[head++];
+            cells.push([cr, cc]);
+            for (const [dr, dc] of dirs) {
+              const nr = cr + dr;
+              const nc = cc + dc;
+              if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                if (grid[nr][nc] === 0 && compMap[nr][nc] === -1) {
+                  compMap[nr][nc] = compId;
+                  queue.push([nr, nc]);
+                }
+              }
+            }
+          }
+          components.push({ id: compId, cells, enemyCount: 0 });
+        }
       }
     }
 
-    let head = 0;
-    const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-    while (head < queue.length) {
-      const [cr, cc] = queue[head++];
-      for (const [dr, dc] of dirs) {
-        const nr = cr + dr;
-        const nc = cc + dc;
-        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
-          if (grid[nr][nc] === 0 && !visited[nr][nc]) {
-            visited[nr][nc] = 1;
-            queue.push([nr, nc]);
+    // 3. 각 분리된 영역에 속한 적 구체 수 집계
+    for (const en of st.enemies) {
+      const er = Math.max(1, Math.min(rows - 2, Math.floor(en.r)));
+      const ec = Math.max(1, Math.min(cols - 2, Math.floor(en.c)));
+      const cid = compMap[er][ec];
+      if (cid !== -1 && components[cid]) {
+        components[cid].enemyCount++;
+      }
+    }
+
+    // 4. 땅따먹기 핵심 룰 적용:
+    // 영역이 2개 이상으로 갈라졌을 때, 적이 양쪽에 나뉘어 있더라도 반드시 한쪽(더 작은 영역들)은 100% 점령되고
+    // 단 1개의 메인 미점령 영역(적이 있는 가장 큰 영역)만 남도록 보장!
+    if (components.length > 0) {
+      const compsWithEnemies = components.filter(comp => comp.enemyCount > 0);
+      const pool = compsWithEnemies.length > 0 ? compsWithEnemies : components;
+      pool.sort((a, b) => b.cells.length - a.cells.length);
+      const survivorComp = pool[0];
+
+      // 살아남은 단 1개의 영역을 제외한 모든 분할 영역을 점령지(1)로 전환!
+      for (const comp of components) {
+        if (comp.id !== survivorComp.id) {
+          for (const [cr, cc] of comp.cells) {
+            grid[cr][cc] = 1;
+          }
+        }
+      }
+
+      // 점령된 영역에 갇혀 있던 적 구체는 남은 미점령 영역 중심으로 재배치
+      if (survivorComp.cells.length > 0) {
+        const fallbackCell = survivorComp.cells[Math.floor(survivorComp.cells.length / 2)];
+        for (const en of st.enemies) {
+          const er = Math.max(1, Math.min(rows - 2, Math.floor(en.r)));
+          const ec = Math.max(1, Math.min(cols - 2, Math.floor(en.c)));
+          if (compMap[er][ec] !== survivorComp.id) {
+            en.r = fallbackCell[0] + 0.5;
+            en.c = fallbackCell[1] + 0.5;
           }
         }
       }
     }
 
-    // 3. 적과 연결되지 않은 모든 0번 칸을 1(점령 완료)로 전환!
+    // 5. 전체 점령률 집계
     let capturedCells = 0;
     const totalInnerCells = (rows - 2) * (cols - 2);
     for (let r = 1; r < rows - 1; r++) {
       for (let c = 1; c < cols - 1; c++) {
-        if (grid[r][c] === 0 && !visited[r][c]) {
-          grid[r][c] = 1;
-        }
         if (grid[r][c] === 1) {
           capturedCells++;
         }
