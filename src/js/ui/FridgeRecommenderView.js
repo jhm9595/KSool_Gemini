@@ -6,7 +6,8 @@ window.KSool = window.KSool || {};
  * - 오직 내가 해금한 '완성 술 조합' 레시피만 결과에 표시 (소주/얼음/탄산수 등 재료 제작식 제외)
  */
 class FridgeRecommenderView {
-  constructor({ recipeBook, inventory, fridgeEngine, brandResolver, audio, onShowRecipeDetail }) {
+  constructor({ containerId = 'view-fridge', recipeBook, inventory, fridgeEngine, brandResolver, audio, onShowRecipeDetail } = {}) {
+    this.containerId = containerId;
     this.recipeBook = recipeBook;
     this.inventory = inventory;
     this.fridgeEngine = fridgeEngine;
@@ -20,7 +21,7 @@ class FridgeRecommenderView {
   }
 
   render() {
-    const container = document.getElementById('view-fridge');
+    const container = document.getElementById(this.containerId);
     if (!container) return;
 
     // 실제 술 조합에 쓰이는 해금된 냉장고 재료만 필터링

@@ -149,6 +149,7 @@ class InventoryManager {
   }
 
   isRecipeImageUnlocked(recipeId) {
+    if (this.unlockAllSandboxMode) return true;
     const rId = Number(recipeId);
     return this.unlockedRecipeIds.has(rId) || this.unlockedImageRecipeIds.has(rId);
   }
@@ -169,6 +170,7 @@ class InventoryManager {
    */
   isRecipeChallengeable(recipe) {
     if (!recipe) return false;
+    if (this.unlockAllSandboxMode) return true;
     const reqItems = this.recipeBook.getRecipeItems(recipe.recipe_id);
     if (!reqItems || reqItems.length === 0) return false;
 
@@ -243,6 +245,19 @@ class InventoryManager {
   }
 
   getHintState(recipeId) {
+    if (this.unlockAllSandboxMode) {
+      const items = this.recipeBook ? (this.recipeBook.getRecipeItems(recipeId) || []) : [];
+      const solvedRatios = {};
+      items.forEach(it => {
+        solvedRatios[String(it.slot_order)] = Number(it.ratio) || 1;
+      });
+      return {
+        stageCleared: [true, true, true],
+        solvedRatios,
+        history: []
+      };
+    }
+
     const key = String(recipeId);
     if (!this.hintProgressByRecipe[key]) {
       this.hintProgressByRecipe[key] = {

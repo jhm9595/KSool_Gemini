@@ -1860,7 +1860,7 @@
   border-radius: 24px;
   padding: 30px 24px;
   text-align: center;
-  max-width: 320px;
+  max-width: 360px;
   width: 90%;
   box-shadow: 0 0 50px var(--penalty-color, #ef4444);
   animation: shakeCap 0.4s infinite;
@@ -1868,6 +1868,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  word-break: keep-all;
 }
 
 .penalty-siren-halo {
@@ -1877,35 +1878,45 @@
 }
 
 .penalty-title {
-  font-size: 2.3rem;
+  font-size: clamp(2rem, 5vh, 2.5rem);
   font-weight: 900;
   color: #ffffff;
   letter-spacing: -0.5px;
   margin-bottom: 6px;
   text-shadow: 0 0 20px var(--penalty-color, #ef4444);
-  white-space: nowrap;
-  line-height: 1.15;
+  word-break: keep-all;
+  white-space: normal;
+  line-height: 1.2;
 }
 
 .penalty-subtitle {
-  font-size: 1.25rem;
+  font-size: clamp(1.1rem, 3vh, 1.35rem);
   font-weight: 800;
   color: #fde047;
-  line-height: 1.3;
+  line-height: 1.35;
   margin-bottom: 20px;
-  white-space: nowrap;
+  word-break: keep-all;
+  white-space: normal;
 }
 
 .penalty-tap-hint {
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #94a3b8;
   background: rgba(30, 41, 59, 0.85);
   border: 1px solid rgba(148, 163, 184, 0.2);
-  padding: 7px 16px;
+  padding: 8px 18px;
   border-radius: 20px;
   display: inline-block;
-  white-space: nowrap;
+  word-break: keep-all;
+}
+
+/* ⑦ 냉장고를 부탁해 미니게임 임베드 스타일 */
+.party-game-stage .fridge-view-container {
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 4px 2px 20px;
 }
 
 /* ==========================================================================

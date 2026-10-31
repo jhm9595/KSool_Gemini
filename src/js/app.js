@@ -155,6 +155,12 @@ class KSoolApp {
   }
 
   switchTab(target) {
+    if (target === 'fridge') {
+      this.switchTab('party');
+      this.partyGameHubView.playGame('fridge');
+      return;
+    }
+
     if (!this.inventory.isTabUnlocked(target)) return;
     if (this.currentTab === 'party' && target !== 'party') {
       this.partyGameHubView.onLeavePartyTab();
@@ -170,13 +176,13 @@ class KSoolApp {
   }
 
   renderTabBar() {
-    if (!this.inventory.isTabUnlocked(this.currentTab)) {
+    if (this.currentTab === 'fridge' || !this.inventory.isTabUnlocked(this.currentTab)) {
       this.currentTab = 'brew';
     }
 
     document.querySelectorAll('[data-tab-target]').forEach(btn => {
       const target = btn.getAttribute('data-tab-target');
-      const isVisible = this.inventory.isTabUnlocked(target);
+      const isVisible = target !== 'fridge' && this.inventory.isTabUnlocked(target);
       btn.style.display = isVisible ? '' : 'none';
       btn.classList.toggle('active', target === this.currentTab);
     });
@@ -193,12 +199,6 @@ class KSoolApp {
       this.inventory.shownTabIntros.collection = true;
       this.inventory.save();
       this.pendingTabIntroQueue.push('collection');
-    }
-
-    if (!this.inventory.shownTabIntros.fridge && this.inventory.getUnlockProgressRatio() >= 0.8) {
-      this.inventory.shownTabIntros.fridge = true;
-      this.inventory.save();
-      this.pendingTabIntroQueue.push('fridge');
     }
 
     if (!this.inventory.shownTabIntros.detailPicker && this.inventory.isDetailPickerUnlocked()) {
@@ -761,9 +761,12 @@ class KSoolApp {
 
     const allRecipes = this.recipeBook.getAllRecipes();
     // 주조실과 동일하게 이미 해금했거나 지금 당장 해금 가능한(하위 재료가 모두 해금된) 레시피만 도감에 노출
-    const visibleRecipes = allRecipes.filter(rec =>
-      this.inventory.isRecipeUnlocked(rec.recipe_id) || this.inventory.isRecipeChallengeable(rec)
-    );
+    // 전체 해금 모드(unlockAllSandboxMode)일 때는 도감 100% 모든 레시피 즉시 노출
+    const visibleRecipes = this.inventory.unlockAllSandboxMode
+      ? allRecipes
+      : allRecipes.filter(rec =>
+          this.inventory.isRecipeUnlocked(rec.recipe_id) || this.inventory.isRecipeChallengeable(rec)
+        );
 
     const baseCategories = ['기초합성', '소맥/폭탄주', '과일/편의점주', '막걸리꿀조합', '특산명주', '유저추천꿀조합'];
     const availableCats = baseCategories.filter(cat => visibleRecipes.some(r => r.category === cat));
@@ -800,15 +803,20 @@ class KSoolApp {
       let cardStateClass = 'unlocked';
       let statusLabel = '';
       if (!isUnlocked) {
-        cardStateClass = isImageUnlocked ? 'challengeable image-unlocked' : 'challengeable';
-        if (isImageUnlocked && clearedCount > 0) {
-          statusLabel = `🖼️ 그림 · ⚾ ${clearedCount}단계 성공`;
-        } else if (isImageUnlocked) {
-          statusLabel = `🖼️ 그림 해금 · ⚾ 추리 가능`;
-        } else if (clearedCount > 0) {
-          statusLabel = `⚾ 힌트 ${clearedCount}단계 성공`;
+        if (this.inventory.unlockAllSandboxMode) {
+          cardStateClass = 'challengeable image-unlocked';
+          statusLabel = '✨ 힌트 전체 해금';
         } else {
-          statusLabel = `🕵️ 힌트 추리 가능`;
+          cardStateClass = isImageUnlocked ? 'challengeable image-unlocked' : 'challengeable';
+          if (isImageUnlocked && clearedCount > 0) {
+            statusLabel = `🖼️ 그림 · ⚾ ${clearedCount}단계 성공`;
+          } else if (isImageUnlocked) {
+            statusLabel = `🖼️ 그림 해금 · ⚾ 추리 가능`;
+          } else if (clearedCount > 0) {
+            statusLabel = `⚾ 힌트 ${clearedCount}단계 성공`;
+          } else {
+            statusLabel = `🕵️ 힌트 추리 가능`;
+          }
         }
       }
 
@@ -842,7 +850,8 @@ class KSoolApp {
         const rec = this.recipeBook.getRecipe(rId);
         const isUnlocked = this.inventory.isRecipeUnlocked(rId);
 
-        if (isUnlocked) {
+        // 전체 해금 모드(unlockAllSandboxMode)일 때는 언제든지 힌트 모달을 열어 모든 힌트와 자동세팅 확인 가능
+        if (isUnlocked && !this.inventory.unlockAllSandboxMode) {
           this.audio.playTap();
           this.showCraftResultModal({ isSuccess: true, recipe: rec, isNewDiscovery: false });
         } else {

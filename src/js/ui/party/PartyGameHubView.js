@@ -19,7 +19,7 @@ class PartyGameHubView {
     this.activeGameKey = null;
     this.wakeLock = null;
 
-    // 6대 술게임 메타데이터 목록 (로비 카드 렌더링용)
+    // 7대 술게임 메타데이터 목록 (로비 카드 렌더링용)
     this.gamesList = [
       {
         key: 'updown',
@@ -68,6 +68,14 @@ class PartyGameHubView {
         badge: '벌칙주',
         accentColor: '#a855f7',
         desc: '선택한 술과 음료로 랜덤 비율의 벌칙주를 만드는 게임'
+      },
+      {
+        key: 'fridge',
+        emoji: '🧊',
+        title: '냉장고를 부탁해',
+        badge: '조합 탐색',
+        accentColor: '#0ea5e9',
+        desc: '가지고 있는 술과 음료로 만들 수 있는 술 조합 찾기'
       }
     ];
 
@@ -78,7 +86,8 @@ class PartyGameHubView {
       surface: new window.KSool.SurfaceTensionGame(this),
       bottlespin: new window.KSool.BottleSpinGame(this),
       hunmin: new window.KSool.HunminBombGame(this),
-      penaltycocktail: new window.KSool.PenaltyCocktailGame(this)
+      penaltycocktail: new window.KSool.PenaltyCocktailGame(this),
+      fridge: new window.KSool.FridgePartyGame(this)
     };
 
     this._setupWakeLockListener();
@@ -276,7 +285,7 @@ class PartyGameHubView {
             </button>
           </div>
           <h2 class="party-lobby-title">🍻 술자리 미니게임 모음</h2>
-          <p class="party-lobby-desc">스마트폰을 테이블 중앙에 두고 함께 즐기는 6대 술자리 게임!</p>
+          <p class="party-lobby-desc">스마트폰을 테이블 중앙에 두고 함께 즐기는 7대 술자리 게임!</p>
         </div>
 
         <!-- 중앙 큼지막한 게임 선택 카드 목록 -->

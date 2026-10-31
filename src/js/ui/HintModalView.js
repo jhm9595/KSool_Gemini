@@ -36,7 +36,8 @@ class HintModalView {
     this._clearActiveRecipeHistory();
 
     // 도감에서 미해금 카드를 누르면 [⚾ 베이스볼 / 🎮 그림 해금 게임 / (있을 경우 📺 힌트보기)] 선택 화면부터 노출
-    this.viewMode = 'CHOICE';
+    // 전체 해금 모드(unlockAllSandboxMode)일 때는 즉시 100% 해금된 베이스볼 & 황금비율 화면으로 직행
+    this.viewMode = this.inventory.unlockAllSandboxMode ? 'BASEBALL' : 'CHOICE';
 
     this.render();
     document.getElementById('hint-modal').classList.add('active');

@@ -115,8 +115,12 @@ class FridgeMatcherEngine {
 
     const results = [];
 
-    // 1. 유저가 해금한 정식 술 조합 레시피 중 선택한 냉장고 재료가 포함된 항목
-    for (const rId of this.inventory.unlockedRecipeIds) {
+    // 1. 유저가 해금한 정식 술 조합 레시피 중 선택한 냉장고 재료가 포함된 항목 (전체 해금 모드 시 모든 레시피 매칭)
+    const candidateRecipeIds = this.inventory.unlockAllSandboxMode
+      ? this.recipeBook.getAllRecipes().map(r => r.recipe_id)
+      : Array.from(this.inventory.unlockedRecipeIds);
+
+    for (const rId of candidateRecipeIds) {
       const recipe = this.recipeBook.getRecipe(rId);
       if (!this.isRealAlcoholDrinkRecipe(recipe)) continue;
 
