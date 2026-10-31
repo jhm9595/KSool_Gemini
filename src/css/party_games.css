@@ -2009,16 +2009,6 @@
   gap: 6px;
 }
 
-.cocktail-glass-badge {
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: #a855f7;
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid rgba(168, 85, 247, 0.4);
-  padding: 2px 8px;
-  border-radius: 12px;
-}
-
 /* 1. 잔 선택 토글 (소주잔 vs 글라스) */
 .glass-toggle-row {
   display: grid;
@@ -2031,42 +2021,36 @@
   background: #1e293b;
   border: 2px solid #334155;
   border-radius: 12px;
-  padding: 8px 10px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
-  text-align: left;
+  text-align: center;
 }
 
 .glass-toggle-btn .glass-btn-icon {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   line-height: 1;
 }
 
-.glass-btn-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
 .glass-btn-name {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 900;
   color: #f1f5f9;
-}
-
-.glass-btn-desc {
-  font-size: 0.68rem;
-  color: #94a3b8;
-  font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .glass-toggle-btn.active {
   background: rgba(168, 85, 247, 0.2);
   border-color: #a855f7;
   box-shadow: 0 0 16px rgba(168, 85, 247, 0.4);
+}
+
+.glass-toggle-btn.active .glass-btn-name {
+  color: #c084fc;
 }
 
 .glass-toggle-btn.active .glass-btn-name {

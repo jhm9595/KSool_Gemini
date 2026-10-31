@@ -57,10 +57,20 @@ class PenaltyCocktailGame {
       clearTimeout(this.mixingTimeout);
       this.mixingTimeout = null;
     }
-    // 초기 로드 시 해금된 모든 적격 재료를 기본 선택 상태로 구성
+    // 처음 들어오면 아무것도 체크하지 않고 소주와 맥주만 체크된 상태로 설정
     const eligible = this.getEligibleIngredients();
     this.selectedIngIds.clear();
-    eligible.forEach(ing => this.selectedIngIds.add(Number(ing.ingredient_id)));
+    eligible.forEach(ing => {
+      const name = ing.display_name || '';
+      const id = Number(ing.ingredient_id);
+      if (id === 101 || id === 102 || name.includes('소주') || name.includes('맥주')) {
+        this.selectedIngIds.add(id);
+      }
+    });
+    if (this.selectedIngIds.size === 0) {
+      this.selectedIngIds.add(101);
+      this.selectedIngIds.add(102);
+    }
     this.render();
   }
 
@@ -284,40 +294,24 @@ class PenaltyCocktailGame {
 
     container.innerHTML = `
       <div class="party-game-box penalty-cocktail-box">
-        <!-- 1. 상단 잔 선택 (소주잔 vs 글라스) -->
-        <div class="cocktail-section-card glass-selector-card">
-          <div class="cocktail-section-header">
-            <span class="cocktail-section-title">🥛 제조할 잔 선택</span>
-            <span class="cocktail-glass-badge">${this.selectedGlass === 'soju' ? '소주잔 (50ml)' : '맥주 글라스 (250ml)'}</span>
-          </div>
-          <div class="glass-toggle-row">
-            <button type="button" class="glass-toggle-btn ${this.selectedGlass === 'soju' ? 'active' : ''}" data-glass="soju">
-              <span class="glass-btn-icon">🍶</span>
-              <div class="glass-btn-meta">
-                <span class="glass-btn-name">소주잔</span>
-                <span class="glass-btn-desc">원샷 특화 (50ml)</span>
-              </div>
-            </button>
-            <button type="button" class="glass-toggle-btn ${this.selectedGlass === 'glass' ? 'active' : ''}" data-glass="glass">
-              <span class="glass-btn-icon">🍺</span>
-              <div class="glass-btn-meta">
-                <span class="glass-btn-name">글라스</span>
-                <span class="glass-btn-desc">맥주잔 용량 (250ml)</span>
-              </div>
-            </button>
-          </div>
+        <!-- 1. 상단 잔 선택 (단순히 버튼 두 개: 소주잔 50ml, 글라스 250ml) -->
+        <div class="glass-toggle-row">
+          <button type="button" class="glass-toggle-btn ${this.selectedGlass === 'soju' ? 'active' : ''}" data-glass="soju">
+            <span class="glass-btn-icon">🍶</span>
+            <span class="glass-btn-name">소주잔 (50ml)</span>
+          </button>
+          <button type="button" class="glass-toggle-btn ${this.selectedGlass === 'glass' ? 'active' : ''}" data-glass="glass">
+            <span class="glass-btn-icon">🍺</span>
+            <span class="glass-btn-name">글라스 (250ml)</span>
+          </button>
         </div>
 
-        <!-- 2. 냉장고 재료 선택 (주류 & 음료) -->
+        <!-- 2. 테이블 재료 선택 (주류 & 음료) -->
         <div class="cocktail-section-card ing-selector-card">
           <div class="cocktail-section-header">
             <div class="title-with-count">
               <span class="cocktail-section-title">🧊 테이블 재료 등록</span>
               <span class="ing-count-pill">${selectedCount}개 선택됨</span>
-            </div>
-            <div class="quick-select-actions">
-              <button type="button" class="btn-quick-ing" id="btn-select-all">전체</button>
-              <button type="button" class="btn-quick-ing" id="btn-clear-all">해제</button>
             </div>
           </div>
 
@@ -484,23 +478,6 @@ class PenaltyCocktailGame {
         this.toggleIngredient(id);
       };
     });
-
-    // 전체 선택 / 해제
-    const selectAllBtn = document.getElementById('btn-select-all');
-    if (selectAllBtn) {
-      selectAllBtn.onclick = (e) => {
-        e.stopPropagation();
-        this.selectAll();
-      };
-    }
-
-    const clearAllBtn = document.getElementById('btn-clear-all');
-    if (clearAllBtn) {
-      clearAllBtn.onclick = (e) => {
-        e.stopPropagation();
-        this.clearAll();
-      };
-    }
 
     // 벌칙주 만들기 실행
     const makeBtn = document.getElementById('btn-make-cocktail');
