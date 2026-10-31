@@ -2,10 +2,9 @@ window.KSool = window.KSool || {};
 
 /**
  * 7) 내 냉장고 술 조합 추천기 & 랜덤 추첨 엔진 (FridgeMatcherEngine)
- * - 유저가 실제 집 냉장고에 보유한 재료들을 다중 선택
- * - 스포일러 원천 방지: 오직 유저가 '이미 해금한 레시피' 중에서만
- *   선택한 냉장고 재료의 부분집합(Subset)으로 만들 수 있는 모든 레시피를 반환합니다.
- * - 랜덤 고르기(pickRandomRecipe)로 가능한 목록 중 하나를 추첨합니다.
+ * - 유저가 이미 해금한 재료(isIngredientAvailable)만 냉장고에서 선택 가능
+ * - 미해금 레시피 카운트 등 일체의 힌트성 정보를 제공하지 않고,
+ *   오직 '내가 해금한 레시피'만을 기준으로 가능한 조합을 필터링합니다.
  */
 class FridgeMatcherEngine {
   constructor(recipeBook, inventoryManager) {
@@ -21,31 +20,35 @@ class FridgeMatcherEngine {
       if (raw) {
         const arr = JSON.parse(raw);
         if (Array.isArray(arr)) {
-          arr.forEach(id => this.selectedFridgeIngIds.add(Number(id)));
+          arr.forEach(id => {
+            if (this.inventory.isIngredientAvailable(Number(id))) {
+              this.selectedFridgeIngIds.add(Number(id));
+            }
+          });
         }
       }
     } catch (_) {}
-
-    // 처음 실행 시 흔한 집 냉장고 기본 재료(물, 얼음, 소주, 맥주, 사이다) 기본 체크
-    if (this.selectedFridgeIngIds.size === 0) {
-      [101, 102, 201, 202, 606].forEach(id => this.selectedFridgeIngIds.add(id));
-      this._save();
-    }
   }
 
   toggleIngredient(ingredientId) {
     const id = Number(ingredientId);
+    // 해금하지 않은 재료는 절대 선택 불가
+    if (!this.inventory.isIngredientAvailable(id)) return false;
+
     if (this.selectedFridgeIngIds.has(id)) {
       this.selectedFridgeIngIds.delete(id);
     } else {
       this.selectedFridgeIngIds.add(id);
     }
     this._save();
+    return true;
   }
 
-  selectAll() {
+  selectAllUnlocked() {
     for (const id of this.recipeBook.baseIngredients.keys()) {
-      this.selectedFridgeIngIds.add(Number(id));
+      if (this.inventory.isIngredientAvailable(id)) {
+        this.selectedFridgeIngIds.add(Number(id));
+      }
     }
     this._save();
   }
@@ -56,39 +59,34 @@ class FridgeMatcherEngine {
   }
 
   isSelected(ingredientId) {
-    return this.selectedFridgeIngIds.has(Number(ingredientId));
+    const id = Number(ingredientId);
+    return this.inventory.isIngredientAvailable(id) && this.selectedFridgeIngIds.has(id);
   }
 
   /**
-   * 현재 선택한 냉장고 재료들로 만들 수 있는 레시피를 탐색합니다.
-   * - unlockedMatches: 유저가 이미 해금한 레시피 중 제조 가능한 목록 (화면 노출)
-   * - hiddenLockedCount: 내 냉장고 재료로 만들 수 있지만 아직 미해금 상태인 레시피 수 (힌트 스포일러 방지!)
+   * 오직 유저가 이미 해금한 레시피들 중에서만
+   * 선택한 해금 재료들로 만들 수 있는 레시피 목록을 반환합니다. (힌트 악용 원천 차단)
    */
   findCraftableFromFridge() {
     const unlockedMatches = [];
-    let hiddenLockedCount = 0;
 
-    const allRecipes = this.recipeBook.getAllRecipes();
+    for (const rId of this.inventory.unlockedRecipeIds) {
+      const recipe = this.recipeBook.getRecipe(rId);
+      if (!recipe) continue;
 
-    for (const recipe of allRecipes) {
       const reqItems = this.recipeBook.getRecipeItems(recipe.recipe_id);
       if (reqItems.length === 0) continue;
 
-      // 모든 필수 재료가 내 냉장고 선택 목록에 포함되어 있는지 검사 (Subset Check)
       const canMakeWithFridge = reqItems.every(item =>
-        this.selectedFridgeIngIds.has(Number(item.ingredient_id))
+        this.isSelected(item.ingredient_id)
       );
 
-      if (!canMakeWithFridge) continue;
-
-      if (this.inventory.isRecipeUnlocked(recipe.recipe_id)) {
+      if (canMakeWithFridge) {
         unlockedMatches.push(recipe);
-      } else {
-        hiddenLockedCount += 1;
       }
     }
 
-    return { unlockedMatches, hiddenLockedCount };
+    return unlockedMatches;
   }
 
   /**

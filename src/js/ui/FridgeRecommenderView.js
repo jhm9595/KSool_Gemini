@@ -2,6 +2,8 @@ window.KSool = window.KSool || {};
 
 /**
  * 7) 내 냉장고 술 조합 추천기 & 랜덤 뽑기 뷰 (FridgeRecommenderView)
+ * - 해금된 재료만 선택 목록에 노출
+ * - 오직 내가 해금한 레시피 기준으로만 결과 표시 (미해금 개수 등 일체 미표시)
  */
 class FridgeRecommenderView {
   constructor({ recipeBook, inventory, fridgeEngine, brandResolver, audio, onShowRecipeDetail }) {
@@ -20,10 +22,14 @@ class FridgeRecommenderView {
     const container = document.getElementById('view-fridge');
     if (!container) return;
 
-    const allBase = Array.from(this.recipeBook.baseIngredients.values());
+    // 오직 해금된 재료만 필터링하여 노출
+    const unlockedBaseIngs = Array.from(this.recipeBook.baseIngredients.values()).filter(ing =>
+      this.inventory.isIngredientAvailable(ing.ingredient_id)
+    );
+
     const filteredIngs = this.selectedCategory === 'ALL'
-      ? allBase
-      : allBase.filter(i => i.category_id === this.selectedCategory);
+      ? unlockedBaseIngs
+      : unlockedBaseIngs.filter(i => i.category_id === this.selectedCategory);
 
     const catChipsHtml = [
       `<button class="cat-chip ${this.selectedCategory === 'ALL' ? 'active' : ''}" data-fridge-cat="ALL">전체</button>`,
@@ -48,12 +54,13 @@ class FridgeRecommenderView {
       `;
     }).join('');
 
-    const { unlockedMatches, hiddenLockedCount } = this.fridgeEngine.findCraftableFromFridge();
+    const unlockedMatches = this.fridgeEngine.findCraftableFromFridge();
+    const selectedCount = unlockedBaseIngs.filter(ing => this.fridgeEngine.isSelected(ing.ingredient_id)).length;
 
     const matchesHtml = unlockedMatches.length === 0
       ? `<div style="text-align:center; padding:18px 10px; font-size:0.78rem; color:#94a3b8; line-height:1.5;">
-           조건에 맞는 <b>해금된 레시피</b>가 아직 없습니다.<br/>
-           냉장고 재료를 더 선택하거나, 주조실에서 새로운 술을 먼저 해금해보세요!
+           선택한 재료로 만들 수 있는 해금된 레시피가 없습니다.<br/>
+           (내가 해금한 재료와 해금한 레시피 기준으로만 표시됩니다)
          </div>`
       : unlockedMatches.map(rec => {
           const items = this.recipeBook.getRecipeItems(rec.recipe_id);
@@ -84,19 +91,13 @@ class FridgeRecommenderView {
           `;
         }).join('');
 
-    const spoilerBannerHtml = hiddenLockedCount > 0
-      ? `<div class="spoiler-protect-banner">
-           🔒 스포일러 방지: 현재 고르신 냉장고 재료로 만들 수 있는 <b>미해금 레시피가 ${hiddenLockedCount}가지</b> 더 숨겨져 있습니다! (해금한 레시피만 공개됩니다)
-         </div>`
-      : '';
-
     container.innerHTML = `
       <div class="fridge-view-container">
-        <!-- 1. 우리 집 냉장고 재료 선택 박스 -->
+        <!-- 1. 해금된 내 냉장고 재료 선택 박스 -->
         <div class="fridge-box">
           <div class="fridge-box-header">
             <div class="fridge-title">
-              <span>🧊 내 냉장고 재료 선택 (${this.fridgeEngine.selectedFridgeIngIds.size}개 보유중)</span>
+              <span>🧊 내 냉장고 재료 선택 (${selectedCount}개 선택됨 · 해금 재료만 표시)</span>
             </div>
             <div class="fridge-quick-btns">
               <button class="fridge-mini-btn" id="fridge-select-all-btn">전체 선택</button>
@@ -112,15 +113,13 @@ class FridgeRecommenderView {
         <div class="fridge-result-section">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <span style="font-size:0.84rem; font-weight:900; color:#f8fafc;">
-              🍸 지금 바로 만들 수 있는 내 도감 술 (${unlockedMatches.length}종)
+              🍸 가능한 조합 (${unlockedMatches.length}종 · 해금된 레시피 기준)
             </span>
           </div>
 
           <button class="random-pick-btn" id="fridge-random-pick-btn" ${unlockedMatches.length === 0 ? 'disabled' : ''}>
-            <span>🎲 오늘 마실 술 랜덤 고르기! (${unlockedMatches.length}종 중 추첨)</span>
+            <span>🎲 랜덤 고르기 (${unlockedMatches.length}종 중 추첨)</span>
           </button>
-
-          ${spoilerBannerHtml}
 
           <div class="fridge-match-list">
             ${matchesHtml}
@@ -154,7 +153,7 @@ class FridgeRecommenderView {
     const selectAllBtn = container.querySelector('#fridge-select-all-btn');
     if (selectAllBtn) {
       selectAllBtn.onclick = () => {
-        this.fridgeEngine.selectAll();
+        this.fridgeEngine.selectAllUnlocked();
         this.lastRandomWinnerId = null;
         this.audio.playTap();
         this.render();
