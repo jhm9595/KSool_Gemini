@@ -58,7 +58,7 @@ class UpDownRatioGameProvider extends RatioHintProvider {
       return {
         status: 'CORRECT',
         answer,
-        shortLabel: 'V'
+        shortLabel: '정답!'
       };
     } else if (guess < answer) {
       return {

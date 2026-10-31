@@ -517,10 +517,16 @@ class HintModalView {
         `).join('');
 
         let resultRowHtml = '';
-        if (this.lastUpDownResult) {
+        if (isAllRatiosSolved) {
+          resultRowHtml = `
+            <div class="bb-history-row updown-score-row" id="updown-score-container">
+              <span class="bb-score-pills"><span class="pill-all-solved animate-pop">🎉 정답! 황금비율 완성</span></span>
+            </div>
+          `;
+        } else if (this.lastUpDownResult) {
           const st = this.lastUpDownResult.status;
           const cls = st === 'UP' ? 'pill-up' : (st === 'DOWN' ? 'pill-down' : 'pill-correct');
-          const text = st === 'UP' ? 'Up' : (st === 'DOWN' ? 'Down' : '정답!');
+          const text = st === 'UP' ? 'Up' : (st === 'DOWN' ? 'Down' : `✨ 정답! (비율: ${this.lastUpDownResult.answer || solvedVal})`);
           resultRowHtml = `
             <div class="bb-history-row updown-score-row" id="updown-score-container">
               <span class="bb-score-pills"><span class="${cls} animate-pop">${text}</span></span>
@@ -529,7 +535,7 @@ class HintModalView {
         } else if (solvedVal) {
           resultRowHtml = `
             <div class="bb-history-row updown-score-row" id="updown-score-container">
-              <span class="bb-score-pills"><span class="pill-correct animate-pop">정답! (${solvedVal})</span></span>
+              <span class="bb-score-pills"><span class="pill-correct animate-pop">✨ 정답! (비율: ${solvedVal})</span></span>
             </div>
           `;
         } else {
@@ -573,7 +579,7 @@ class HintModalView {
             • 재료 카드를 선택하고 1~10 숫자 중 황금비율 숫자를 누릅니다.<br>
             • <b>Up</b>: 실제 황금비율이 누른 숫자보다 큽니다.<br>
             • <b>Down</b>: 실제 황금비율이 누른 숫자보다 작습니다.<br>
-            • <b>정답(V)</b>: 해당 재료의 황금비율을 맞췄습니다!
+            • <b>정답</b>: 해당 재료의 황금비율을 맞췄습니다!
           </div>
           <div style="color:#6ee7b7; font-size:0.75rem; margin-top:5px; font-weight:800;">
             💡 모든 재료의 비율을 맞추면 완벽한 레시피가 완성됩니다!
@@ -1000,15 +1006,19 @@ class HintModalView {
               badge.classList.add('is-solved');
             }
           }
-          if (scoreContainer) {
-            scoreContainer.innerHTML = `<span class="bb-score-pills"><span class="pill-correct animate-pop">정답! (${num})</span></span>`;
-          }
-
           // 모든 슬롯이 정답인지 검사
           const recipe = this.recipeBook.getRecipe(this.activeRecipeId);
           const items = this.recipeBook.getRecipeItems(recipe.recipe_id);
           const hintState = this.inventory.getHintState(this.activeRecipeId);
           const isAllSolved = items.every(it => Boolean(hintState.solvedRatios[String(it.slot_order)]));
+
+          if (scoreContainer) {
+            if (isAllSolved) {
+              scoreContainer.innerHTML = `<span class="bb-score-pills"><span class="pill-all-solved animate-pop">🎉 정답! 황금비율 완성</span></span>`;
+            } else {
+              scoreContainer.innerHTML = `<span class="bb-score-pills"><span class="pill-correct animate-pop">✨ 정답! (비율: ${num})</span></span>`;
+            }
+          }
 
           if (isAllSolved) {
             const checkBoxes = container.querySelectorAll('.stage-check-box');
@@ -1058,10 +1068,16 @@ class HintModalView {
       btn.classList.toggle('correct-num', Boolean(solvedVal && Number(solvedVal) === n));
     });
 
+    const recipe = this.recipeBook.getRecipe(this.activeRecipeId);
+    const items = this.recipeBook.getRecipeItems(recipe.recipe_id);
+    const isAllSolved = items.every(it => Boolean(hintState.solvedRatios[String(it.slot_order)]));
+
     const scoreContainer = container.querySelector('#updown-score-container');
     if (scoreContainer) {
-      if (solvedVal) {
-        scoreContainer.innerHTML = `<span class="bb-score-pills"><span class="pill-correct animate-pop">정답! (${solvedVal})</span></span>`;
+      if (isAllSolved) {
+        scoreContainer.innerHTML = `<span class="bb-score-pills"><span class="pill-all-solved animate-pop">🎉 정답! 황금비율 완성</span></span>`;
+      } else if (solvedVal) {
+        scoreContainer.innerHTML = `<span class="bb-score-pills"><span class="pill-correct animate-pop">✨ 정답! (비율: ${solvedVal})</span></span>`;
       } else {
         scoreContainer.innerHTML = `<span class="bb-score-pills"><span class="pill-guide animate-pop">비율을 맞춰보세요</span></span>`;
       }
