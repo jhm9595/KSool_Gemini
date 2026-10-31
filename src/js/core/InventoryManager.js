@@ -265,7 +265,7 @@ class InventoryManager {
   }
 
   isCollectionTabUnlocked() {
-    return Boolean(this.unlockAllSandboxMode || this.craftFailCount >= 10 || this.shownTabIntros.collection);
+    return Boolean(this.unlockAllSandboxMode || this.craftFailCount >= 1 || this.shownTabIntros.collection);
   }
 
   isFridgeTabUnlocked() {

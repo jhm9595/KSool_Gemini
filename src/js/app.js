@@ -34,6 +34,7 @@ class KSoolApp {
       brandResolver: this.brandResolver,
       audio: this.audio,
       onImageUnlocked: () => {
+        this.renderBrewView();
         this.renderCollectionView();
       },
       onAutoSetupBrew: (recipeId) => {
@@ -172,7 +173,7 @@ class KSoolApp {
   _checkProgressiveTabUnlocks() {
     if (this.inventory.unlockAllSandboxMode) return;
 
-    if (!this.inventory.shownTabIntros.collection && this.inventory.craftFailCount >= 10) {
+    if (!this.inventory.shownTabIntros.collection && this.inventory.craftFailCount >= 1) {
       this.inventory.shownTabIntros.collection = true;
       this.inventory.save();
       this.pendingTabIntroQueue.push('collection');
@@ -206,7 +207,7 @@ class KSoolApp {
     const introMeta = {
       collection: {
         emoji: '📜',
-        badge: '신규 탭 해금 (조합 10회 실패)',
+        badge: '신규 탭 해금',
         title: '[도감·힌트] 탭이 열렸습니다!',
         desc: '황금비율 조합이 만만치 않으시죠? 이제 하단의 <b>[📜 도감·힌트]</b> 탭에서 지금 당장 해금할 수 있는 미해금 비전서 목록을 확인하고, <b>⚾ 베이스볼 추리</b>와 <b>🎮 그림 해금 미니게임</b>에 도전해보세요!',
         btnLabel: '📜 도감·힌트 보러가기'
@@ -346,178 +347,63 @@ class KSoolApp {
   }
 
   /**
-   * 주조실 상단: [🎯 넘버링 퀴즈 모드 / ⚗️ 자유 주조 모드] 전환 및 현재 Step 규칙·문제 카드 렌더링
+   * 주조실 상단: [🎯 단계별 퀴즈 모드 / ⚗️ 자유 주조 모드] 전환 및 간결한 문제 카드 렌더링
    */
   _renderBrewStepQuizBar() {
     const container = document.getElementById('brew-step-quiz-bar');
     if (!container) return;
 
-    const allRecipes = this.recipeBook.getAllRecipes();
-    const totalCount = allRecipes.length;
-    const stepConfig = this.inventory.getCurrentStepConfig();
     const nextUnsolved = this.inventory.getNextQuizRecipe();
-
-    // 타겟 레시피 유효성 보장 (현재 도전 가능하거나 이미 해금된 레시피 목록 내)
-    const navigableRecipes = allRecipes.filter(
-      r => this.inventory.isRecipeUnlocked(r.recipe_id) || this.inventory.isRecipeChallengeable(r)
-    );
-    if (navigableRecipes.length === 0 && allRecipes.length > 0) {
-      navigableRecipes.push(allRecipes[0]);
-    }
-
     let targetRec = this.recipeBook.getRecipe(this.quizTargetRecipeId);
-    if (!targetRec || !navigableRecipes.some(r => r.recipe_id === targetRec.recipe_id)) {
-      targetRec = nextUnsolved || navigableRecipes[0];
+    if (!targetRec || this.inventory.isRecipeUnlocked(targetRec.recipe_id)) {
+      targetRec = nextUnsolved || targetRec;
       if (targetRec) this.quizTargetRecipeId = targetRec.recipe_id;
     }
 
-    const modeHeaderHtml = `
-      <div class="brew-mode-header">
-        <div class="brew-mode-tabs">
-          <button type="button" class="brew-mode-tab-btn ${this.brewMode === 'QUIZ' ? 'active' : ''}" data-brew-mode="QUIZ">
-            🎯 단계별 퀴즈 모드
-          </button>
-          <button type="button" class="brew-mode-tab-btn ${this.brewMode === 'FREE' ? 'active' : ''}" data-brew-mode="FREE">
-            ⚗️ 자유 주조 모드
-          </button>
-        </div>
-        <span class="step-rule-pill" title="${stepConfig.subtitle}">
-          ${stepConfig.code} · ${stepConfig.ruleBadge}
-        </span>
+    const modeTabsHtml = `
+      <div class="brew-mode-tabs">
+        <button type="button" class="brew-mode-tab-btn ${this.brewMode === 'QUIZ' ? 'active' : ''}" data-brew-mode="QUIZ">
+          🎯 단계별 퀴즈 모드
+        </button>
+        <button type="button" class="brew-mode-tab-btn ${this.brewMode === 'FREE' ? 'active' : ''}" data-brew-mode="FREE">
+          ⚗️ 자유 주조 모드
+        </button>
       </div>
     `;
 
-    if (this.brewMode === 'FREE') {
-      const nextNumLabel = nextUnsolved ? `${nextUnsolved.formatted_number}` : '완료';
-      container.innerHTML = `
-        ${modeHeaderHtml}
-        <div class="brew-free-mode-banner">
-          <span>✨ <b>${stepConfig.title}</b> — ${stepConfig.ruleNotice}</span>
-          <button type="button" class="quiz-jump-next-btn" id="free-to-quiz-btn">🎯 ${nextNumLabel} 퀴즈 풀기</button>
-        </div>
-      `;
-      this._bindBrewQuizEvents(container, navigableRecipes, targetRec, nextUnsolved);
+    if (this.brewMode === 'FREE' || !targetRec) {
+      container.innerHTML = modeTabsHtml;
+      this._bindBrewQuizEvents(container, targetRec);
       return;
     }
 
-    // QUIZ 모드 카드 렌더링
-    const navIdx = navigableRecipes.findIndex(r => r.recipe_id === targetRec.recipe_id);
-    const hasPrev = navIdx > 0;
-    const hasNext = navIdx >= 0 && navIdx < navigableRecipes.length - 1;
     const isUnlocked = this.inventory.isRecipeUnlocked(targetRec.recipe_id);
     const isImageUnlocked = this.inventory.isRecipeImageUnlocked(targetRec.recipe_id);
     const resolvedName = this.brandResolver.resolveName(targetRec);
-    const items = this.recipeBook.getRecipeItems(targetRec.recipe_id);
-    const recStepCfg = this.recipeBook.progression.getStepConfig(targetRec.step_id);
-
-    const showJumpToNextBtn =
-      nextUnsolved && Number(nextUnsolved.recipe_id) !== Number(targetRec.recipe_id);
-
-    let cardBodyHtml = '';
-    if (isUnlocked) {
-      const formulaStr = items
-        .map(it => {
-          const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
-          const base = this.recipeBook.getBaseIngredient(it.ingredient_id);
-          const t = det || base;
-          return `${t.emoji}${this.brandResolver.resolveName(t)}${it.ratio > 1 ? `(${it.ratio})` : ''}`;
-        })
-        .join(' + ');
-
-      cardBodyHtml = `
-        <div class="quiz-question-row">
-          <div class="quiz-mystery-icon" style="border-style:solid; border-color:#10b981;">${targetRec.emoji}</div>
-          <div class="quiz-question-body">
-            <div class="quiz-target-title" style="color:#6ee7b7;">
-              ✅ ${resolvedName} (추리 완료!)
-            </div>
-            <div class="quiz-desc-text">${targetRec.description}</div>
-          </div>
-        </div>
-        <div class="quiz-footer-row">
-          <span class="quiz-formula-structure" style="color:#6ee7b7;">정답 조합: ${formulaStr}</span>
-          ${
-            showJumpToNextBtn
-              ? `<button type="button" class="quiz-jump-next-btn" id="quiz-jump-unsolved-btn">🎯 다음 과제(${nextUnsolved.formatted_number}) 도전 ▶</button>`
-              : `<span style="font-size:0.68rem; color:#fcd34d; font-weight:800;">🏆 현재 단계 모든 과제 클리어!</span>`
-          }
-        </div>
-      `;
-    } else {
-      const chosung = this.recipeBook.progression.extractChosungHint(resolvedName);
-      const maskedDesc = this.recipeBook.progression.maskDescriptionForQuiz(targetRec, resolvedName);
-      const namePlaceholders = resolvedName
-        .split('')
-        .map(ch => (ch === ' ' ? ' ' : '?'))
-        .join(' ');
-
-      const catMap = Object.fromEntries(this.recipeBook.categories.map(c => [c.category_id, c]));
-      const structureClue = this.quizHintRevealed
-        ? items
-            .map(it => {
-              const base = this.recipeBook.getBaseIngredient(it.ingredient_id);
-              const cat = base ? catMap[base.category_id] : null;
-              const catLabel = cat ? `${cat.emoji}${cat.name}` : '재료';
-              const ratioSuffix = targetRec.max_ratio > 1 ? ` ×${it.ratio}` : '';
-              return `[${catLabel}${ratioSuffix}]`;
-            })
-            .join(' + ')
-        : `필요 재료: ${items.length}종류 · ${
-            targetRec.max_ratio === 1
-              ? `비율 1:1${items.length === 3 ? ':1' : ''} (재료당 1개씩)`
-              : `황금비율 합계 ${targetRec.sum_ratio}개 (최대 ${targetRec.max_ratio}개)`
-          }`;
-
-      cardBodyHtml = `
-        <div class="quiz-question-row">
-          <div class="quiz-mystery-icon">${isImageUnlocked ? targetRec.emoji : '❓'}</div>
-          <div class="quiz-question-body">
-            <div class="quiz-target-title">
-              <span>미지의 ${targetRec.category} · [ ${namePlaceholders} ] (${resolvedName.replace(/\s+/g, '').length}글자)</span>
-              ${this.quizHintRevealed ? `<span class="quiz-chosung-pill">초성: ${chosung}</span>` : ''}
-            </div>
-            <div class="quiz-desc-text">💬 "${maskedDesc}"</div>
-          </div>
-        </div>
-        <div class="quiz-footer-row">
-          <span class="quiz-formula-structure">🧩 ${structureClue}</span>
-          <div class="quiz-clue-actions">
-            <button type="button" class="quiz-clue-btn ${this.quizHintRevealed ? 'active' : ''}" id="quiz-toggle-clue-btn">
-              💡 ${this.quizHintRevealed ? '초성·유형 단서 ON' : '초성·유형 단서'}
-            </button>
-            <button type="button" class="quiz-clue-btn" id="quiz-open-hint-btn">
-              ⚾ 베이스볼 힌트
-            </button>
-          </div>
-        </div>
-      `;
-    }
 
     container.innerHTML = `
-      ${modeHeaderHtml}
-      <div class="brew-quiz-card ${isUnlocked ? 'is-solved' : ''}">
-        <div class="quiz-nav-row">
-          <div class="quiz-nav-left">
-            <button type="button" class="quiz-nav-btn" id="quiz-prev-btn" ${hasPrev ? '' : 'disabled'} title="이전 번호">◀</button>
-            <span class="quiz-num-badge">${targetRec.formatted_number} <span style="font-size:0.68rem; color:#94a3b8; font-weight:700;">/ ${totalCount}</span></span>
-            <button type="button" class="quiz-nav-btn" id="quiz-next-btn" ${hasNext ? '' : 'disabled'} title="다음 번호">▶</button>
-            <span class="quiz-step-tag">${recStepCfg.code}</span>
-            <span class="diff-badge diff-${targetRec.difficulty}" style="position:static;">${targetRec.difficulty}</span>
+      ${modeTabsHtml}
+      <div class="brew-quiz-card">
+        <div class="quiz-question-row">
+          <div class="quiz-mystery-icon">${isUnlocked || isImageUnlocked ? targetRec.emoji : '❓'}</div>
+          <div class="quiz-question-body">
+            <div class="quiz-header-inline">
+              <div class="quiz-title-group">
+                <span class="quiz-num-badge">${targetRec.formatted_number}</span>
+                <span class="quiz-target-title">${resolvedName}</span>
+              </div>
+              <button type="button" class="quiz-infer-btn" id="quiz-open-hint-btn">추리</button>
+            </div>
+            <div class="quiz-desc-text">${targetRec.unlock_hint || ''}</div>
           </div>
-          ${
-            showJumpToNextBtn && !isUnlocked
-              ? `<button type="button" class="quiz-jump-next-btn" id="quiz-jump-unsolved-btn">🎯 현재 과제(${nextUnsolved.formatted_number})</button>`
-              : `<span style="font-size:0.66rem; font-weight:800; color:${isUnlocked ? '#6ee7b7' : '#fbbf24'};">${isUnlocked ? '✅ 해결됨' : '🔥 퀴즈 도전 중'}</span>`
-          }
         </div>
-        ${cardBodyHtml}
       </div>
     `;
 
-    this._bindBrewQuizEvents(container, navigableRecipes, targetRec, nextUnsolved);
+    this._bindBrewQuizEvents(container, targetRec);
   }
 
-  _bindBrewQuizEvents(container, navigableRecipes, targetRec, nextUnsolved) {
+  _bindBrewQuizEvents(container, targetRec) {
     container.querySelectorAll('[data-brew-mode]').forEach(btn => {
       btn.onclick = () => {
         this.brewMode = btn.getAttribute('data-brew-mode');
@@ -525,62 +411,6 @@ class KSoolApp {
         this._renderBrewStepQuizBar();
       };
     });
-
-    const freeToQuizBtn = container.querySelector('#free-to-quiz-btn');
-    if (freeToQuizBtn) {
-      freeToQuizBtn.onclick = () => {
-        this.brewMode = 'QUIZ';
-        if (nextUnsolved) this.quizTargetRecipeId = nextUnsolved.recipe_id;
-        this.quizHintRevealed = false;
-        this.audio.playTap();
-        this._renderBrewStepQuizBar();
-      };
-    }
-
-    const prevBtn = container.querySelector('#quiz-prev-btn');
-    if (prevBtn) {
-      prevBtn.onclick = () => {
-        const idx = navigableRecipes.findIndex(r => r.recipe_id === targetRec.recipe_id);
-        if (idx > 0) {
-          this.quizTargetRecipeId = navigableRecipes[idx - 1].recipe_id;
-          this.quizHintRevealed = false;
-          this.audio.playTap();
-          this._renderBrewStepQuizBar();
-        }
-      };
-    }
-
-    const nextBtn = container.querySelector('#quiz-next-btn');
-    if (nextBtn) {
-      nextBtn.onclick = () => {
-        const idx = navigableRecipes.findIndex(r => r.recipe_id === targetRec.recipe_id);
-        if (idx >= 0 && idx < navigableRecipes.length - 1) {
-          this.quizTargetRecipeId = navigableRecipes[idx + 1].recipe_id;
-          this.quizHintRevealed = false;
-          this.audio.playTap();
-          this._renderBrewStepQuizBar();
-        }
-      };
-    }
-
-    const jumpBtn = container.querySelector('#quiz-jump-unsolved-btn');
-    if (jumpBtn && nextUnsolved) {
-      jumpBtn.onclick = () => {
-        this.quizTargetRecipeId = nextUnsolved.recipe_id;
-        this.quizHintRevealed = false;
-        this.audio.playTap();
-        this._renderBrewStepQuizBar();
-      };
-    }
-
-    const clueBtn = container.querySelector('#quiz-toggle-clue-btn');
-    if (clueBtn) {
-      clueBtn.onclick = () => {
-        this.quizHintRevealed = !this.quizHintRevealed;
-        this.audio.playTap();
-        this._renderBrewStepQuizBar();
-      };
-    }
 
     const hintBtn = container.querySelector('#quiz-open-hint-btn');
     if (hintBtn && targetRec) {
@@ -860,9 +690,7 @@ class KSoolApp {
         }
       }
 
-      const displayName = isUnlocked
-        ? this.brandResolver.resolveName(rec)
-        : `미지의 ${rec.category}`;
+      const displayName = this.brandResolver.resolveName(rec);
 
       const displayEmoji = isUnlocked
         ? rec.emoji
@@ -939,7 +767,7 @@ class KSoolApp {
         stepUpBanner = `
           <div style="width:100%; background:linear-gradient(135deg, rgba(245,158,11,0.22), rgba(168,85,247,0.22)); border:1px solid #f59e0b; border-radius:12px; padding:10px; text-align:left; display:flex; flex-direction:column; gap:5px;">
             <div style="font-size:0.8rem; font-weight:900; color:#fde047;">
-              🎊 [${stCfg.code}] ${stCfg.title} 해금!
+              🎊 ${stCfg.title} 해금!
             </div>
             <div style="font-size:0.73rem; color:#f8fafc; font-weight:700;">
               ${stCfg.ruleBadge} — ${stCfg.subtitle}
@@ -982,9 +810,7 @@ class KSoolApp {
         return `${target.emoji}${this.brandResolver.resolveName(target)}(${s.count})`;
       }).join(' + ');
 
-      const failGuideText = this.inventory.isCollectionTabUnlocked()
-        ? '비율이나 재료 조합이 맞지 않습니다! [도감·힌트] 탭에서 미해금 술을 눌러 숫자야구 & 미니게임 힌트를 확인해보세요.'
-        : `비율이나 재료 조합이 맞지 않습니다! 다른 재료나 비율을 시도해보세요. (조합 실패 ${this.inventory.craftFailCount} / 10회 시 힌트 탭 해금)`;
+      const failGuideText = '비율이나 재료 조합이 맞지 않습니다! [도감·힌트] 탭이나 퀴즈 카드의 [추리] 버튼을 눌러 힌트를 확인해보세요.';
 
       content.innerHTML = `
         <div style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px;">

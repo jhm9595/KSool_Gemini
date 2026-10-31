@@ -838,7 +838,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 1,
       "step_order": 5,
       "recipe_number": 5,
-      "formatted_number": "No.05"
+      "formatted_number": "No.05",
+      "unlock_hint": "한국 회식 자리의 영원한 클래식! 도수 높은 투명한 증류주와 황금빛 거품의 발효주가 반반씩 만났습니다."
     },
     {
       "recipe_id": 2,
@@ -859,7 +860,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 7,
       "step_order": 6,
       "recipe_number": 54,
-      "formatted_number": "No.54"
+      "formatted_number": "No.54",
+      "unlock_hint": "투명한 증류주 잔을 거의 끝까지 채우고 황금빛 발효주를 단 한 방울만 떨어뜨리면 거짓말처럼 달콤한 맛이 나는 전설의 술입니다."
     },
     {
       "recipe_id": 3,
@@ -880,7 +882,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 3,
       "step_order": 6,
       "recipe_number": 21,
-      "formatted_number": "No.21"
+      "formatted_number": "No.21",
+      "unlock_hint": "그물 무늬가 있는 연두색 과일과 고소한 목장 음료를 차갑게 얼려낸 대한민국 국민 사각 아이스크림입니다."
     },
     {
       "recipe_id": 4,
@@ -901,7 +904,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 1,
       "step_order": 4,
       "recipe_number": 4,
-      "formatted_number": "No.04"
+      "formatted_number": "No.04",
+      "unlock_hint": "톡 쏘는 기포가 살아있는 워터에 황금빛 들판의 곡물을 더해 발효시킨 시원한 라거입니다."
     },
     {
       "recipe_id": 5,
@@ -922,7 +926,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 1,
       "step_order": 1,
       "recipe_number": 1,
-      "formatted_number": "No.01"
+      "formatted_number": "No.01",
+      "unlock_hint": "가장 순수한 자연의 액체를 뜨거운 열기로 끓여 증류해낸 한국인의 대표 투명한 술입니다."
     },
     {
       "recipe_id": 6,
@@ -943,7 +948,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 5,
       "step_order": 1,
       "recipe_number": 32,
-      "formatted_number": "No.32"
+      "formatted_number": "No.32",
+      "unlock_hint": "은은하게 우려낸 붉은 찻물을 넉넉히 붓고 투명한 증류주를 살짝 더해, 술맛 대신 향긋한 티 향을 살린 비율주입니다."
     },
     {
       "recipe_id": 7,
@@ -964,7 +970,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 6,
       "step_order": 1,
       "recipe_number": 40,
-      "formatted_number": "No.40"
+      "formatted_number": "No.40",
+      "unlock_hint": "예능 프로그램에서 화제가 된 황금비율! 향긋한 붉은 찻물과 투명한 증류주, 차가운 결정체를 계단식 비율로 완성합니다."
     },
     {
       "recipe_id": 8,
@@ -985,7 +992,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 5,
       "step_order": 7,
       "recipe_number": 38,
-      "formatted_number": "No.38"
+      "formatted_number": "No.38",
+      "unlock_hint": "밤샘 파티를 위해 투명한 증류주에 카페인 각성 음료와 빠른 수분 흡수용 스포츠 음료를 두 배씩 배합한 폭탄주입니다."
     },
     {
       "recipe_id": 9,
@@ -1006,7 +1014,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 3,
       "step_order": 5,
       "recipe_number": 20,
-      "formatted_number": "No.20"
+      "formatted_number": "No.20",
+      "unlock_hint": "투명한 증류주에 부드러운 크림 탄산음료와 푸른빛 에이드를 더해, 휴양지 바다 색깔을 재현한 칵테일입니다."
     },
     {
       "recipe_id": 10,
@@ -1027,7 +1036,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 5,
       "step_order": 3,
       "recipe_number": 34,
-      "formatted_number": "No.34"
+      "formatted_number": "No.34",
+      "unlock_hint": "진한 자주빛 과실주를 베이스로 투명한 증류주와 달콤한 투명 탄산음료를 더한, 달콤함 뒤에 묵직함이 숨은 폭탄주입니다."
     },
     {
       "recipe_id": 11,
@@ -1048,7 +1058,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 1,
       "step_order": 2,
       "recipe_number": 2,
-      "formatted_number": "No.02"
+      "formatted_number": "No.02",
+      "unlock_hint": "흐르는 액체가 한겨울 하늘에서 내리는 차가운 결정과 만나 단단하게 얼어붙은 결정체입니다."
     },
     {
       "recipe_id": 12,
@@ -1069,7 +1080,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 1,
       "step_order": 3,
       "recipe_number": 3,
-      "formatted_number": "No.03"
+      "formatted_number": "No.03",
+      "unlock_hint": "평범한 액체 속에 보이지 않는 기체를 가득 불어넣어 톡 쏘는 청량감을 만든 베이스 워터입니다."
     },
     {
       "recipe_id": 13,
@@ -1090,7 +1102,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 3,
       "step_order": 1,
       "recipe_number": 16,
-      "formatted_number": "No.16"
+      "formatted_number": "No.16",
+      "unlock_hint": "깊은 향을 우려낸 붉은 찻물에 차가운 결정체를 띄우고, 노란 시트러스 과일 조각으로 상큼함을 더한 여름 음료입니다."
     },
     {
       "recipe_id": 14,
@@ -1111,7 +1124,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 3,
       "step_order": 2,
       "recipe_number": 17,
-      "formatted_number": "No.17"
+      "formatted_number": "No.17",
+      "unlock_hint": "톡 쏘는 기포 워터에 시큼한 노란 과일즙과 달콤한 결정을 녹여 만든 카페의 대표 스파클링 음료입니다."
     },
     {
       "recipe_id": 15,
@@ -1132,7 +1146,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 3,
       "step_order": 4,
       "recipe_number": 19,
-      "formatted_number": "No.19"
+      "formatted_number": "No.19",
+      "unlock_hint": "부드럽고 하얀 목장 음료에 톡 쏘는 탄산 기포와 달콤한 결정을 더해, 사랑비 광고로 유명해진 크림 소다입니다."
     },
     {
       "recipe_id": 16,
@@ -1153,7 +1168,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 2,
       "step_order": 1,
       "recipe_number": 7,
-      "formatted_number": "No.07"
+      "formatted_number": "No.07",
+      "unlock_hint": "청량한 황금빛 발효주에 노란 열대과일의 진한 달콤함을 더해 음료수처럼 가볍게 즐기는 과일주입니다."
     },
     {
       "recipe_id": 17,
@@ -1174,7 +1190,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 5,
       "step_order": 6,
       "recipe_number": 37,
-      "formatted_number": "No.37"
+      "formatted_number": "No.37",
+      "unlock_hint": "투명한 증류주의 쓴맛을 감추기 위해 황금빛 발효주와 달콤한 노란 열대과일을 두 배씩 듬뿍 넣은 트로피컬 폭탄주입니다."
     },
     {
       "recipe_id": 18,
@@ -1195,7 +1212,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 1,
       "step_order": 6,
       "recipe_number": 6,
-      "formatted_number": "No.06"
+      "formatted_number": "No.06",
+      "unlock_hint": "쓴맛이 부담스러운 술자리 초보를 위해, 투명한 증류주에 전 세계인이 사랑하는 검은색 탄산음료를 섞었습니다."
     },
     {
       "recipe_id": 19,
@@ -1216,7 +1234,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 2,
       "step_order": 3,
       "recipe_number": 9,
-      "formatted_number": "No.09"
+      "formatted_number": "No.09",
+      "unlock_hint": "투명한 증류주 병과 초록빛 전통 과실주 병의 입구를 맞대어, 수액이 방울방울 떨어지듯 섞어 마시는 예술주입니다."
     },
     {
       "recipe_id": 20,
@@ -1237,7 +1256,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 2,
       "step_order": 2,
       "recipe_number": 8,
-      "formatted_number": "No.08"
+      "formatted_number": "No.08",
+      "unlock_hint": "투명한 증류주에 초록빛 봄 제철 핵과류를 담가 향긋하고 새콤달콤하게 숙성시킨 전통 과실주입니다."
     },
     {
       "recipe_id": 21,
@@ -1258,7 +1278,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 4,
       "step_order": 5,
       "recipe_number": 28,
-      "formatted_number": "No.28"
+      "formatted_number": "No.28",
+      "unlock_hint": "황금빛 발효주와 투명한 달콤 탄산음료, 붉은 건강 주스를 합쳐 서양의 해장 칵테일 레드아이를 재현한 조합입니다."
     },
     {
       "recipe_id": 22,
@@ -1279,7 +1300,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 4,
       "step_order": 4,
       "recipe_number": 27,
-      "formatted_number": "No.27"
+      "formatted_number": "No.27",
+      "unlock_hint": "멋쟁이 붉은 채소과일을 맑은 액체, 달콤한 결정과 함께 믹서기에 갈아 만든 건강한 주스입니다."
     },
     {
       "recipe_id": 23,
@@ -1300,7 +1322,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 3,
       "step_order": 7,
       "recipe_number": 22,
-      "formatted_number": "No.22"
+      "formatted_number": "No.22",
+      "unlock_hint": "가을의 붉은 과일과 봄의 새콤한 베리를 차갑게 얼려 배배 꼬아 만든 추억의 막대 아이스크림입니다."
     },
     {
       "recipe_id": 24,
@@ -1321,7 +1344,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 5,
       "step_order": 4,
       "recipe_number": 35,
-      "formatted_number": "No.35"
+      "formatted_number": "No.35",
+      "unlock_hint": "투명한 증류주와 두 배의 투명 탄산음료를 섞은 잔에, 배배 꼬인 붉은 막대 아이스크림을 통째로 녹여 마시는 달콤주입니다."
     },
     {
       "recipe_id": 25,
@@ -1342,7 +1366,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 4,
       "step_order": 7,
       "recipe_number": 30,
-      "formatted_number": "No.30"
+      "formatted_number": "No.30",
+      "unlock_hint": "구수한 곡물에 수분과 바람을 머금게 하여 자연 발효균을 피워낸 전통 술 빚기의 핵심 발효제입니다."
     },
     {
       "recipe_id": 26,
@@ -1363,7 +1388,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 4,
       "step_order": 8,
       "recipe_number": 31,
-      "formatted_number": "No.31"
+      "formatted_number": "No.31",
+      "unlock_hint": "한국인의 주식인 하얀 곡식과 전통 발효제, 맑은 액체를 함께 빚어 막 걸러낸 구수하고 뽀얀 전통 탁주입니다."
     },
     {
       "recipe_id": 27,
@@ -1384,7 +1410,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 5,
       "step_order": 2,
       "recipe_number": 33,
-      "formatted_number": "No.33"
+      "formatted_number": "No.33",
+      "unlock_hint": "비 오는 날 파전의 단짝! 뽀얀 전통 탁주 두 잔에 투명한 달콤 탄산음료 한 잔을 섞어 청량감을 끌어올린 주막 칵테일입니다."
     },
     {
       "recipe_id": 28,
@@ -1405,7 +1432,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 4,
       "step_order": 1,
       "recipe_number": 24,
-      "formatted_number": "No.24"
+      "formatted_number": "No.24",
+      "unlock_hint": "열대 나무의 쌉싸름한 갈색 씨앗에 부드러운 목장 음료와 달콤한 결정을 녹여 굳힌 달콤한 디저트입니다."
     },
     {
       "recipe_id": 29,
@@ -1426,7 +1454,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 4,
       "step_order": 2,
       "recipe_number": 25,
-      "formatted_number": "No.25"
+      "formatted_number": "No.25",
+      "unlock_hint": "달콤쌉싸름한 갈색 디저트를 고소한 하얀 목장 음료에 진하게 녹여낸 도라에몽의 최애 음료입니다."
     },
     {
       "recipe_id": 30,
@@ -1447,7 +1476,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 4,
       "step_order": 3,
       "recipe_number": 26,
-      "formatted_number": "No.26"
+      "formatted_number": "No.26",
+      "unlock_hint": "투명한 증류주에 진한 갈색 달콤 목장 음료를 섞어, 고급 바의 깔루아밀크 맛을 편의점 재료로 재현한 술입니다."
     },
     {
       "recipe_id": 31,
@@ -1468,7 +1498,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 7,
       "step_order": 3,
       "recipe_number": 51,
-      "formatted_number": "No.51"
+      "formatted_number": "No.51",
+      "unlock_hint": "대한민국 애주가들이 공인한 가장 부드럽고 청량한 목넘김! 투명한 증류주와 황금빛 발효주를 황금비율로 정교하게 맞췄습니다."
     },
     {
       "recipe_id": 32,
@@ -1489,7 +1520,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 3,
       "step_order": 8,
       "recipe_number": 23,
-      "formatted_number": "No.23"
+      "formatted_number": "No.23",
+      "unlock_hint": "갈증 해소에 좋은 시원한 가을 과일에 달콤한 결정과 살얼음을 갈아 넣은 튜브형 슬러시 아이스크림입니다."
     },
     {
       "recipe_id": 33,
@@ -1510,7 +1542,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 5,
       "step_order": 5,
       "recipe_number": 36,
-      "formatted_number": "No.36"
+      "formatted_number": "No.36",
+      "unlock_hint": "투명한 증류주와 넉넉한 투명 탄산음료에 시원한 가을 과일 슬러시 아이스크림을 짜 넣어 마시며 해장하는 술입니다."
     },
     {
       "recipe_id": 34,
@@ -1531,7 +1564,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 2,
       "step_order": 6,
       "recipe_number": 12,
-      "formatted_number": "No.12"
+      "formatted_number": "No.12",
+      "unlock_hint": "고소하고 하얀 목장 음료에 봄철 대표 붉은 베리 과일을 갈아 넣어 분홍빛으로 물들인 달콤한 음료입니다."
     },
     {
       "recipe_id": 35,
@@ -1552,7 +1586,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 2,
       "step_order": 7,
       "recipe_number": 13,
-      "formatted_number": "No.13"
+      "formatted_number": "No.13",
+      "unlock_hint": "목욕탕을 나온 뒤 마시는 국민 단지 음료! 하얀 목장 음료에 달콤하고 부드러운 노란 열대과일을 더했습니다."
     },
     {
       "recipe_id": 36,
@@ -1573,7 +1608,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 2,
       "step_order": 8,
       "recipe_number": 14,
-      "formatted_number": "No.14"
+      "formatted_number": "No.14",
+      "unlock_hint": "겨울철 향긋하고 울퉁불퉁한 노란 감귤류 과일을 하얀 단맛 결정에 절여 만든 전통 차 베이스입니다."
     },
     {
       "recipe_id": 37,
@@ -1594,7 +1630,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 2,
       "step_order": 9,
       "recipe_number": 15,
-      "formatted_number": "No.15"
+      "formatted_number": "No.15",
+      "unlock_hint": "소화를 돕는 싱그러운 초록빛 봄 열매를 달콤한 결정에 재워 오랫동안 발효시킨 만능 요리·음료 청입니다."
     },
     {
       "recipe_id": 38,
@@ -1615,7 +1652,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 6,
       "step_order": 2,
       "recipe_number": 41,
-      "formatted_number": "No.41"
+      "formatted_number": "No.41",
+      "unlock_hint": "뽀얀 전통 탁주에 분홍빛 베리 목장 음료를 황금비율로 섞어 부드럽고 달콤한 핑크빛으로 완성한 주막 칵테일입니다."
     },
     {
       "recipe_id": 39,
@@ -1636,7 +1674,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 7,
       "step_order": 7,
       "recipe_number": 55,
-      "formatted_number": "No.55"
+      "formatted_number": "No.55",
+      "unlock_hint": "전통 탁주 아홉에 달콤한 결정 하나를 더해, 특유의 텁텁함은 잡고 입안에 감기는 달콤함을 극대화한 주막 스타일입니다."
     },
     {
       "recipe_id": 40,
@@ -1657,7 +1696,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 7,
       "step_order": 4,
       "recipe_number": 52,
-      "formatted_number": "No.52"
+      "formatted_number": "No.52",
+      "unlock_hint": "전통 탁주를 넉넉한 베이스로 삼고 향긋한 겨울 감귤류 발효청과 맑은 액체를 더해 남도의 상큼한 풍미를 살린 명주입니다."
     },
     {
       "recipe_id": 41,
@@ -1678,7 +1718,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 7,
       "step_order": 5,
       "recipe_number": 53,
-      "formatted_number": "No.53"
+      "formatted_number": "No.53",
+      "unlock_hint": "전통 탁주 베이스에 새콤한 초록 열매 발효청과 맑은 액체를 황금비율로 희석해 식욕을 돋우는 깔끔한 반주용 탁주입니다."
     },
     {
       "recipe_id": 42,
@@ -1699,7 +1740,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 6,
       "step_order": 4,
       "recipe_number": 43,
-      "formatted_number": "No.43"
+      "formatted_number": "No.43",
+      "unlock_hint": "뽀얀 전통 탁주에 밥알이 동동 띄워진 달콤한 전통 엿기름 음료를 섞어 구수한 단맛을 살린 옛날식 믹스주입니다."
     },
     {
       "recipe_id": 43,
@@ -1720,7 +1762,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 7,
       "step_order": 1,
       "recipe_number": 49,
-      "formatted_number": "No.49"
+      "formatted_number": "No.49",
+      "unlock_hint": "전통 탁주와 볶은 곡물 가루를 넉넉한 비율로 듬뿍 섞어 한 잔만 마셔도 든든한 고소한 별미주입니다."
     },
     {
       "recipe_id": 44,
@@ -1741,7 +1784,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 6,
       "step_order": 3,
       "recipe_number": 42,
-      "formatted_number": "No.42"
+      "formatted_number": "No.42",
+      "unlock_hint": "전통 탁주의 산미를 부드럽게 감싸주도록 달콤한 노란 열대과일 목장 음료를 황금비율로 블렌딩한 술입니다."
     },
     {
       "recipe_id": 45,
@@ -1762,7 +1806,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 6,
       "step_order": 6,
       "recipe_number": 45,
-      "formatted_number": "No.45"
+      "formatted_number": "No.45",
+      "unlock_hint": "뽀얀 전통 탁주와 탱글한 알갱이가 씹히는 분홍빛 과즙 음료를 섞어 대학가 주점에서 사랑받는 달콤주입니다."
     },
     {
       "recipe_id": 46,
@@ -1783,7 +1828,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 6,
       "step_order": 7,
       "recipe_number": 46,
-      "formatted_number": "No.46"
+      "formatted_number": "No.46",
+      "unlock_hint": "전통 탁주에 숙취 해소에 유명한 시원한 가을 과일 음료를 섞어 목넘김이 꿀떡꿀떡 넘어가는 조합입니다."
     },
     {
       "recipe_id": 47,
@@ -1804,7 +1850,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 6,
       "step_order": 8,
       "recipe_number": 47,
-      "formatted_number": "No.47"
+      "formatted_number": "No.47",
+      "unlock_hint": "구수한 전통 탁주에 새콤달콤한 노란 열대 과일 주스를 배합해 상큼한 이국적 풍미를 낸 퓨전 탁주입니다."
     },
     {
       "recipe_id": 48,
@@ -1825,7 +1872,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 6,
       "step_order": 5,
       "recipe_number": 44,
-      "formatted_number": "No.44"
+      "formatted_number": "No.44",
+      "unlock_hint": "유산균이 살아있는 전통 탁주에 새콤달콤한 소형 발효유를 더해 감칠맛을 두 배로 끌어올린 국민 조합입니다."
     },
     {
       "recipe_id": 49,
@@ -1846,7 +1894,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 7,
       "step_order": 2,
       "recipe_number": 50,
-      "formatted_number": "No.50"
+      "formatted_number": "No.50",
+      "unlock_hint": "전통 탁주와 고소한 볶은 곡물 가루 조합에 달콤한 결정을 한 스푼 더해 고소함과 단맛의 균형을 완성한 시그니처입니다."
     },
     {
       "recipe_id": 50,
@@ -1867,7 +1916,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 6,
       "step_order": 9,
       "recipe_number": 48,
-      "formatted_number": "No.48"
+      "formatted_number": "No.48",
+      "unlock_hint": "뽀얀 전통 탁주에 미녀들이 즐겨 찾는 붉은 보석 과일 주스를 섞어 고운 루비빛을 낸 새콤한 탁주입니다."
     },
     {
       "recipe_id": 51,
@@ -1888,7 +1938,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 5,
       "step_order": 8,
       "recipe_number": 39,
-      "formatted_number": "No.39"
+      "formatted_number": "No.39",
+      "unlock_hint": "투명한 증류주에 쌉싸름한 믹서 워터를 두 배로 채우고, 차가운 결정체와 노란 시트러스 조각을 띄운 한국형 하이볼의 정석입니다."
     },
     {
       "recipe_id": 52,
@@ -1909,7 +1960,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 3,
       "step_order": 3,
       "recipe_number": 18,
-      "formatted_number": "No.18"
+      "formatted_number": "No.18",
+      "unlock_hint": "하이볼의 단짝 믹서! 기포가 올라오는 워터에 은은한 단맛과 상큼한 노란 시트러스 향을 조화시켰습니다."
     },
     {
       "recipe_id": 53,
@@ -1930,7 +1982,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 2,
       "step_order": 4,
       "recipe_number": 10,
-      "formatted_number": "No.10"
+      "formatted_number": "No.10",
+      "unlock_hint": "동남아의 비타민 폭탄이라 불리는 작은 초록빛 시트러스 열매를 맑은 액체에 진하게 착즙한 원액입니다."
     },
     {
       "recipe_id": 54,
@@ -1951,7 +2004,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 2,
       "step_order": 5,
       "recipe_number": 11,
-      "formatted_number": "No.11"
+      "formatted_number": "No.11",
+      "unlock_hint": "투명한 증류주에 눈이 번쩍 뜨일 만큼 강렬한 시트러스 착즙 원액을 섞어 알코올 향을 감춘 마성의 칵테일입니다."
     },
     {
       "recipe_id": 55,
@@ -1972,7 +2026,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 7,
       "step_order": 8,
       "recipe_number": 56,
-      "formatted_number": "No.56"
+      "formatted_number": "No.56",
+      "unlock_hint": "[특산 재료 필수] 팔도 지도에서 고른 경기도 임금님 진상 곡식을 두 배로 넣고 전통 발효제와 맑은 액체로 빚은 최고급 탁주입니다."
     },
     {
       "recipe_id": 56,
@@ -1993,7 +2048,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 7,
       "step_order": 9,
       "recipe_number": 57,
-      "formatted_number": "No.57"
+      "formatted_number": "No.57",
+      "unlock_hint": "[특산 재료 필수] 주류 냉장고에서 고른 남쪽 섬의 화산암반 증류주에 쌉싸름한 믹서 워터 두 배와 차가운 결정을 더했습니다."
     },
     {
       "recipe_id": 57,
@@ -2014,7 +2070,8 @@ window.KSool.SeedDataBundle = {
       "step_id": 4,
       "step_order": 6,
       "recipe_number": 29,
-      "formatted_number": "No.29"
+      "formatted_number": "No.29",
+      "unlock_hint": "요강을 뒤집어엎을 만큼 기운이 넘친다는 검붉은 산딸기 열매에 투명한 증류주와 단맛을 더해 숙성한 전통주입니다."
     }
   ],
   "recipe_ingredients": [

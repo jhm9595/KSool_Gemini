@@ -38,7 +38,7 @@ class CraftingPot {
         return {
           ok: false,
           reason: 'STEP_MAX_PER_SLOT',
-          message: `현재 단계(${stepConfig.code})에서는 한 재료당 최대 ${maxPerSlot}개까지만 넣을 수 있습니다!\n(다음 단계 진급 시 최대 비율이 확장됩니다)`
+          message: `현재 한 재료당 최대 ${maxPerSlot}개까지만 넣을 수 있습니다!\n(더 많은 조합을 해금하면 최대 비율이 확장됩니다)`
         };
       }
 

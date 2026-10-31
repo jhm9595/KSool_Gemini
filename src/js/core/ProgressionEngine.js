@@ -167,6 +167,9 @@ class ProgressionEngine {
       rec.max_ratio = maxRatio;
       rec.sum_ratio = sumRatio;
       rec.item_count = items.length;
+      if (!rec.unlock_hint) {
+        rec.unlock_hint = `${rec.category || '특별'} 계열의 조합입니다. 어울리는 재료들을 추리해 조합해보세요.`;
+      }
 
       // 난이도 자동 보정 (명시된 값이 없거나 새 레시피인 경우 자동 산출)
       if (hasDetail) {

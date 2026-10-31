@@ -110,12 +110,20 @@ class HintModalView {
         </div>
       ` : '';
 
+      const resolvedName = this.brandResolver.resolveName(recipe);
+      const lightHintHtml = recipe.unlock_hint ? `
+        <div style="background:rgba(15,23,42,0.85); border:1px solid #334155; border-radius:10px; padding:10px 12px; font-size:0.75rem; color:#cbd5e1; line-height:1.45;">
+          <span style="color:#fde047; font-weight:800; margin-right:4px;">💡 힌트:</span>${recipe.unlock_hint}
+        </div>
+      ` : '';
+
       container.innerHTML = `
         <div class="hint-top-header">
-          <div class="modal-title">🕵️ [${recipe.formatted_number || 'No.01'}] 비법 힌트 센터</div>
+          <div class="modal-title">🕵️ ${recipe.formatted_number || ''} ${resolvedName} 추리</div>
           <button class="modal-close-x" id="hint-close-btn">✕</button>
         </div>
 
+        ${lightHintHtml}
         ${unlockedPreviewBanner}
 
         <div class="hint-choice-grid">
