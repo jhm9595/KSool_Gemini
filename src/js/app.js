@@ -393,6 +393,8 @@ class KSoolApp {
     const isUnlocked = this.inventory.isRecipeUnlocked(targetRec.recipe_id);
     const isImageUnlocked = this.inventory.isRecipeImageUnlocked(targetRec.recipe_id);
     const resolvedName = this.brandResolver.resolveName(targetRec);
+    const needsRatio = this.ratioProvider ? this.ratioProvider.requiresRatioGame(targetRec.recipe_id) : (targetRec.sum_ratio > (targetRec.item_count || 1));
+    const ratioBadgeHtml = needsRatio ? `<span class="quiz-ratio-count-badge">총 비율: ${targetRec.sum_ratio || 0}개</span>` : '';
 
     container.innerHTML = `
       ${modeTabsHtml}
@@ -406,6 +408,7 @@ class KSoolApp {
                 ${!isUnlocked ? `<button type="button" class="quiz-infer-btn" id="quiz-open-hint-btn">추리</button>` : ''}
               </div>
               <div class="quiz-nav-right">
+                ${ratioBadgeHtml}
                 <button type="button" class="quiz-nav-btn" id="quiz-prev-btn" ${hasPrev ? '' : 'disabled'} title="이전 번호">◀</button>
                 <span class="quiz-num-badge">${targetRec.formatted_number} <span class="quiz-num-total">/ ${totalCount}</span></span>
                 <button type="button" class="quiz-nav-btn" id="quiz-next-btn" ${hasNext ? '' : 'disabled'} title="다음 번호">▶</button>

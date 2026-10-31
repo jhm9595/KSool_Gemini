@@ -129,6 +129,17 @@
   flex-shrink: 0;
 }
 
+.quiz-ratio-count-badge {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #fde047;
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid #f59e0b;
+  padding: 2px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
 .quiz-nav-btn {
   width: 24px;
   height: 24px;

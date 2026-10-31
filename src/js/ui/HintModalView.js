@@ -92,9 +92,13 @@ class HintModalView {
     const targetBadgeHtml = `<span style="color:#60a5fa; font-weight:900; font-size:0.78rem;">${recipe.formatted_number || ''}</span> <span style="color:#fde047; font-weight:900; font-size:0.84rem;">${resolvedName}</span>`;
 
     // =========================================================================
-    // [모드 1] 진입 선택 화면 (⚾ 베이스볼 / 🎮 그림 해금 미니게임 / 📺 외부 힌트)
+    // [모드 1] 진입 선택 화면 (⚾ 베이스볼 or 🎯 업앤다운 / 🎮 그림 해금 미니게임 / 📺 외부 힌트)
     // =========================================================================
     if (this.viewMode === 'CHOICE') {
+      const isBaseballDoneChoice = this.baseballEngine.isAllStagesCleared(this.activeRecipeId);
+      const needsRatioGameChoice = this.ratioProvider.requiresRatioGame(this.activeRecipeId);
+      const isUpAndDownChoice = isBaseballDoneChoice && needsRatioGameChoice;
+
       let extHintCardHtml = '';
       if (hasExtHint) {
         const primaryHint = extHints[0];
@@ -140,9 +144,9 @@ class HintModalView {
 
         <div class="hint-choice-grid">
           <button class="hint-big-choice-btn choice-baseball" id="choice-baseball-btn">
-            <span class="choice-big-icon">⚾</span>
-            <span class="choice-big-title">베이스볼</span>
-            <span class="choice-big-sub">재료 & 황금비율 추리 게임</span>
+            <span class="choice-big-icon">${isUpAndDownChoice ? '🎯' : '⚾'}</span>
+            <span class="choice-big-title">${isUpAndDownChoice ? '업앤다운' : '베이스볼'}</span>
+            <span class="choice-big-sub">${isUpAndDownChoice ? '황금비율 추리 게임' : '재료 & 황금비율 추리 게임'}</span>
           </button>
 
           <button class="hint-big-choice-btn choice-minigame" id="choice-minigame-btn">
@@ -331,17 +335,41 @@ class HintModalView {
       }
     }
 
+    const needsRatioGame = this.ratioProvider.requiresRatioGame(this.activeRecipeId);
+    const isAllRatiosSolved = !needsRatioGame || items.every(it => Boolean(hintState.solvedRatios[String(it.slot_order)]));
+    const isUpAndDown = isBaseballDone && needsRatioGame;
+
+    // 업앤다운 기능이 처음 공개되면 자동으로 설명 팝오버를 노출
+    if (isUpAndDown && !localStorage.getItem('ksool_seen_updown_guide')) {
+      this.showHelpGuide = true;
+      localStorage.setItem('ksool_seen_updown_guide', 'true');
+    }
+
     // 우측 상단 3개의 네모 체크박스 렌더링
     const checkboxesHtml = [1, 2, 3].map(st => {
-      const isCleared = hintState.stageCleared[st - 1];
-      const isSkipped = st === 3 && maxStage === 2;
-      const isActive = !isBaseballDone && currentStage === st;
+      let isCleared = hintState.stageCleared[st - 1];
+      let isSkipped = false;
+      let isActive = false;
+
+      if (st <= 2) {
+        isActive = !hintState.stageCleared[0] && st === 1 || (hintState.stageCleared[0] && !hintState.stageCleared[1] && st === 2);
+      } else if (st === 3) {
+        if (recipe.requires_detail_ingredient) {
+          isCleared = hintState.stageCleared[2];
+          isActive = hintState.stageCleared[1] && !hintState.stageCleared[2];
+        } else if (needsRatioGame) {
+          isCleared = isAllRatiosSolved;
+          isActive = isBaseballDone && !isAllRatiosSolved;
+        } else {
+          isSkipped = true;
+        }
+      }
       let cls = 'stage-check-box';
       if (isCleared) cls += ' checked';
       else if (isSkipped) cls += ' skipped';
       else if (isActive) cls += ' active-stage';
-      const icon = isCleared ? '✓' : (isSkipped ? '—' : st);
-      return `<div class="${cls}" title="${st}단계">${icon}</div>`;
+      const icon = isCleared ? '✓' : (isSkipped ? '—' : (st === 3 && needsRatioGame && !recipe.requires_detail_ingredient ? '🔢' : st));
+      return `<div class="${cls}" title="${st === 3 && needsRatioGame ? '3단계: 황금비율 Up/Down' : `${st}단계`}">${icon}</div>`;
     }).join('');
 
     let mainSectionHtml = '';
@@ -440,11 +468,16 @@ class HintModalView {
         </div>
       `;
     } else {
-      // [B] 베이스볼 모두 클리어 완료!
-      // 비율이 1인 재료는 굳이 숫자를 표시하거나 비율 게임을 할 필요가 없으므로 자동 해결 처리
+      // [B] 베이스볼 모두 클리어 완료! (황금비율 Up/Down 추리 화면)
       this.ratioProvider.ensureUnitRatiosAutoSolved(this.activeRecipeId);
-      const needsRatioGame = this.ratioProvider.requiresRatioGame(this.activeRecipeId);
-      if (!needsRatioGame) {
+      if (needsRatioGame) {
+        if (this.selectedUpDownSlotOrder === null) {
+          const firstRatioSlot = items.find(it => Number(it.ratio) > 1 && !hintState.solvedRatios[String(it.slot_order)]) ||
+                                 items.find(it => Number(it.ratio) > 1) ||
+                                 items[0];
+          this.selectedUpDownSlotOrder = firstRatioSlot ? Number(firstRatioSlot.slot_order) : Number(items[0].slot_order);
+        }
+      } else {
         this.selectedUpDownSlotOrder = null;
       }
 
@@ -487,16 +520,22 @@ class HintModalView {
         if (this.lastUpDownResult) {
           const st = this.lastUpDownResult.status;
           const cls = st === 'UP' ? 'pill-up' : (st === 'DOWN' ? 'pill-down' : 'pill-correct');
-          const text = st === 'UP' ? 'Up' : (st === 'DOWN' ? 'Down' : 'V');
+          const text = st === 'UP' ? 'Up' : (st === 'DOWN' ? 'Down' : '정답!');
           resultRowHtml = `
-            <div class="bb-history-row updown-score-row">
-              <span class="bb-score-pills"><span class="${cls}">${text}</span></span>
+            <div class="bb-history-row updown-score-row" id="updown-score-container">
+              <span class="bb-score-pills"><span class="${cls} animate-pop">${text}</span></span>
             </div>
           `;
         } else if (solvedVal) {
           resultRowHtml = `
-            <div class="bb-history-row updown-score-row">
-              <span class="bb-score-pills"><span class="pill-correct">V</span></span>
+            <div class="bb-history-row updown-score-row" id="updown-score-container">
+              <span class="bb-score-pills"><span class="pill-correct animate-pop">정답! (${solvedVal})</span></span>
+            </div>
+          `;
+        } else {
+          resultRowHtml = `
+            <div class="bb-history-row updown-score-row" id="updown-score-container">
+              <span class="bb-score-pills"><span class="pill-guide animate-pop">비율을 맞춰보세요</span></span>
             </div>
           `;
         }
@@ -509,7 +548,6 @@ class HintModalView {
         `;
       }
 
-      const isAllRatiosSolved = items.every(it => Boolean(hintState.solvedRatios[String(it.slot_order)]));
       const goToBrewBtnHtml = isAllRatiosSolved ? `
         <button class="mix-btn bb-go-brew-btn" id="bb-go-brew-btn">
           ⚗️ 주조실로 가기 (자동 세팅)
@@ -526,20 +564,46 @@ class HintModalView {
     }
 
     const helpGuideHtml = this.showHelpGuide ? `
-      <div class="bb-help-popover">
-        <div><b>⚾ 베이스볼 게임 규칙</b></div>
-        <div>• <b>S (스트라이크)</b>: 정답에 포함된 재료</div>
-        <div>• <b>B (볼)</b>: 재료는 맞지만 투입 순서가 다름 (순서 중요 레시피 전용)</div>
-        <div>• <b>O (아웃)</b>: 정답에 없는 재료</div>
-        <div style="color:#fcd34d; margin-top:2px;">1단계(재료 유형) ➔ 2단계(대표 재료)를 맞추면 각 재료의 비율(<b>?</b>) Up/Down이 열립니다!</div>
+      <div class="bb-help-popover updown-help-popover">
+        ${isUpAndDown ? `
+          <div style="font-size:0.86rem; color:#fde047; font-weight:900; margin-bottom:5px;">
+            🎯 업앤다운(Up & Down) 규칙
+          </div>
+          <div style="line-height:1.55; font-size:0.78rem; color:#cbd5e1;">
+            • 재료 카드를 선택하고 1~10 숫자 중 황금비율 숫자를 누릅니다.<br>
+            • <b>Up</b>: 실제 황금비율이 누른 숫자보다 큽니다.<br>
+            • <b>Down</b>: 실제 황금비율이 누른 숫자보다 작습니다.<br>
+            • <b>정답(V)</b>: 해당 재료의 황금비율을 맞췄습니다!
+          </div>
+          <div style="color:#6ee7b7; font-size:0.75rem; margin-top:5px; font-weight:800;">
+            💡 모든 재료의 비율을 맞추면 완벽한 레시피가 완성됩니다!
+          </div>
+        ` : `
+          <div style="font-size:0.86rem; color:#fde047; font-weight:900; margin-bottom:4px;">
+            ⚾ 베이스볼 게임 규칙
+          </div>
+          <div style="line-height:1.5; font-size:0.78rem; color:#cbd5e1;">
+            • <b>S (스트라이크)</b>: 정답에 포함된 재료<br>
+            • <b>B (볼)</b>: 재료는 맞지만 투입 순서가 다름<br>
+            • <b>O (아웃)</b>: 정답에 없는 재료
+          </div>
+          <div style="color:#fcd34d; font-size:0.75rem; margin-top:4px;">
+            1단계(재료 유형) ➔ 2단계(대표 재료)를 맞추면 각 재료의 비율(?) Up/Down이 열립니다!
+          </div>
+        `}
       </div>
     ` : '';
 
     const targetInfoCardHtml = `
       <div class="bb-target-info-card">
         <div class="bb-target-title-row">
-          <span class="bb-target-num">${recipe.formatted_number || ''}</span>
-          <span class="bb-target-name">${resolvedName}</span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="bb-target-num">${recipe.formatted_number || ''}</span>
+            <span class="bb-target-name">${resolvedName}</span>
+          </div>
+          ${needsRatioGame ? `
+            <span class="bb-ratio-count-badge">총 비율: ${recipe.sum_ratio || 0}개</span>
+          ` : ''}
         </div>
         ${recipe.unlock_hint ? `
           <div class="bb-target-hint">
@@ -554,9 +618,9 @@ class HintModalView {
         <div style="display:flex; align-items:center; gap:6px; min-width:0;">
           <button class="hint-back-choice-btn" id="hint-back-choice-btn" title="선택 화면으로">←</button>
           <div class="modal-title" style="display:flex; align-items:center; gap:5px;">
-            <span>⚾ 베이스볼</span>
+            <span>${isUpAndDown ? '🎯 업앤다운' : '⚾ 베이스볼'}</span>
           </div>
-          <button class="bb-help-btn ${this.showHelpGuide ? 'active' : ''}" id="bb-help-toggle-btn" title="베이스볼 게임 설명 보기">?</button>
+          <button class="bb-help-btn ${this.showHelpGuide ? 'active' : ''}" id="bb-help-toggle-btn" title="${isUpAndDown ? '업앤다운 게임 설명 보기' : '베이스볼 게임 설명 보기'}">?</button>
         </div>
         <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
           <div class="stage-checkboxes" title="1:유형 -> 2:대표 -> 3:상세">${checkboxesHtml}</div>
@@ -889,13 +953,11 @@ class HintModalView {
       };
     }
 
-    // 베이스볼 완료 후 상단 정답 슬롯(? 배지) 클릭 -> 하단 Up/Down 추리창 오픈
+    // 베이스볼 완료 후 상단 정답 슬롯(? 배지) 클릭 -> 하단 Up/Down 추리 슬롯 선택 (깜빡임 없이 in-place 갱신)
     container.querySelectorAll('[data-updown-slot]').forEach(slotEl => {
       slotEl.onclick = () => {
-        this.selectedUpDownSlotOrder = Number(slotEl.getAttribute('data-updown-slot'));
-        this.lastUpDownResult = null;
-        this.audio.playTap();
-        this.render();
+        const order = Number(slotEl.getAttribute('data-updown-slot'));
+        this._selectUpDownSlot(order, container);
       };
     });
 
@@ -912,18 +974,98 @@ class HintModalView {
       };
     }
 
-    // Up/Down 1~10 숫자 버튼 클릭
+    // Up/Down 1~10 숫자 버튼 클릭 (깜빡임 없이 깔끔한 in-place 결과 갱신)
     container.querySelectorAll('[data-updown-num]').forEach(btn => {
       btn.onclick = () => {
         if (this.selectedUpDownSlotOrder === null) return;
         const num = Number(btn.getAttribute('data-updown-num'));
         const res = this.ratioProvider.checkRatioGuess(this.activeRecipeId, this.selectedUpDownSlotOrder, num);
         this.lastUpDownResult = res;
-        if (res.status === 'CORRECT') this.audio.playSuccess();
-        else this.audio.playTap();
-        this.render();
+
+        const scoreContainer = container.querySelector('#updown-score-container');
+        if (res.status === 'CORRECT') {
+          this.audio.playSuccess();
+          // 정답 번호 버튼 강조
+          container.querySelectorAll('[data-updown-num]').forEach(b => {
+            b.classList.toggle('correct-num', Number(b.getAttribute('data-updown-num')) === num);
+          });
+          // 슬롯 배지 업데이트
+          const targetSlotEl = container.querySelector(`[data-updown-slot="${this.selectedUpDownSlotOrder}"]`);
+          if (targetSlotEl) {
+            targetSlotEl.classList.add('solved-ratio-slot');
+            const badge = targetSlotEl.querySelector('.slot-count-badge');
+            if (badge) {
+              badge.textContent = num;
+              badge.classList.remove('is-question');
+              badge.classList.add('is-solved');
+            }
+          }
+          if (scoreContainer) {
+            scoreContainer.innerHTML = `<span class="bb-score-pills"><span class="pill-correct animate-pop">정답! (${num})</span></span>`;
+          }
+
+          // 모든 슬롯이 정답인지 검사
+          const recipe = this.recipeBook.getRecipe(this.activeRecipeId);
+          const items = this.recipeBook.getRecipeItems(recipe.recipe_id);
+          const hintState = this.inventory.getHintState(this.activeRecipeId);
+          const isAllSolved = items.every(it => Boolean(hintState.solvedRatios[String(it.slot_order)]));
+
+          if (isAllSolved) {
+            const checkBoxes = container.querySelectorAll('.stage-check-box');
+            if (checkBoxes && checkBoxes[2]) {
+              checkBoxes[2].classList.remove('active-stage');
+              checkBoxes[2].classList.add('checked');
+              checkBoxes[2].textContent = '✓';
+            }
+            setTimeout(() => {
+              this.render();
+            }, 600);
+          } else {
+            // 아직 미해결된 다음 비율 슬롯으로 자동 이동
+            const nextUnsolved = items.find(it => Number(it.ratio) > 1 && !hintState.solvedRatios[String(it.slot_order)]);
+            if (nextUnsolved) {
+              setTimeout(() => {
+                this._selectUpDownSlot(nextUnsolved.slot_order, container);
+              }, 600);
+            }
+          }
+        } else {
+          this.audio.playTap();
+          if (scoreContainer) {
+            const cls = res.status === 'UP' ? 'pill-up' : 'pill-down';
+            const text = res.status === 'UP' ? 'Up' : 'Down';
+            scoreContainer.innerHTML = `<span class="bb-score-pills"><span class="${cls} animate-pop">${text}</span></span>`;
+          }
+        }
       };
     });
+  }
+
+  _selectUpDownSlot(slotOrder, container) {
+    this.selectedUpDownSlotOrder = Number(slotOrder);
+    this.lastUpDownResult = null;
+    this.audio.playTap();
+
+    container.querySelectorAll('[data-updown-slot]').forEach(el => {
+      const order = Number(el.getAttribute('data-updown-slot'));
+      el.classList.toggle('active-ratio-slot', order === this.selectedUpDownSlotOrder);
+    });
+
+    const hintState = this.inventory.getHintState(this.activeRecipeId);
+    const solvedVal = hintState.solvedRatios[String(this.selectedUpDownSlotOrder)];
+    container.querySelectorAll('[data-updown-num]').forEach(btn => {
+      const n = Number(btn.getAttribute('data-updown-num'));
+      btn.classList.toggle('correct-num', Boolean(solvedVal && Number(solvedVal) === n));
+    });
+
+    const scoreContainer = container.querySelector('#updown-score-container');
+    if (scoreContainer) {
+      if (solvedVal) {
+        scoreContainer.innerHTML = `<span class="bb-score-pills"><span class="pill-correct animate-pop">정답! (${solvedVal})</span></span>`;
+      } else {
+        scoreContainer.innerHTML = `<span class="bb-score-pills"><span class="pill-guide animate-pop">비율을 맞춰보세요</span></span>`;
+      }
+    }
   }
 }
 
