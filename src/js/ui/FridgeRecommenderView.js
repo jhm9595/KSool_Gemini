@@ -2,8 +2,8 @@ window.KSool = window.KSool || {};
 
 /**
  * 7) 내 냉장고 술 조합 추천기 & 랜덤 뽑기 뷰 (FridgeRecommenderView)
- * - 해금된 재료만 선택 목록에 노출
- * - 오직 내가 해금한 레시피 기준으로만 결과 표시 (미해금 개수 등 일체 미표시)
+ * - 실제 술 조합에 쓰이는 해금된 재료만 선택 목록에 노출 ('불', '공기', '눈' 등 제외)
+ * - 오직 내가 해금한 '완성 술 조합' 레시피만 결과에 표시 (소주/얼음/탄산수 등 재료 제작식 제외)
  */
 class FridgeRecommenderView {
   constructor({ recipeBook, inventory, fridgeEngine, brandResolver, audio, onShowRecipeDetail }) {
@@ -14,7 +14,7 @@ class FridgeRecommenderView {
     this.audio = audio;
     this.onShowRecipeDetail = onShowRecipeDetail;
 
-    this.selectedCategory = 'NATURE';
+    this.selectedCategory = 'ALCOHOL';
     this.lastRandomWinnerId = null;
   }
 
@@ -22,14 +22,12 @@ class FridgeRecommenderView {
     const container = document.getElementById('view-fridge');
     if (!container) return;
 
-    // 오직 해금된 재료만 필터링하여 노출
-    const unlockedBaseIngs = Array.from(this.recipeBook.baseIngredients.values()).filter(ing =>
-      this.inventory.isIngredientAvailable(ing.ingredient_id)
-    );
+    // 실제 술 조합에 쓰이는 해금된 냉장고 재료만 필터링
+    const eligibleIngs = this.fridgeEngine.getEligibleFridgeIngredients();
 
     // 해금된 재료가 존재하는 재료 유형만 노출하고 '전체 재료'는 제일 마지막 탭으로 배치
     const visibleCategories = this.recipeBook.categories.filter(c =>
-      unlockedBaseIngs.some(ing => ing.category_id === c.category_id)
+      eligibleIngs.some(ing => ing.category_id === c.category_id)
     );
 
     if (
@@ -41,8 +39,8 @@ class FridgeRecommenderView {
     }
 
     const filteredIngs = this.selectedCategory === 'ALL'
-      ? unlockedBaseIngs
-      : unlockedBaseIngs.filter(i => i.category_id === this.selectedCategory);
+      ? eligibleIngs
+      : eligibleIngs.filter(i => i.category_id === this.selectedCategory);
 
     const catChipsHtml = [
       ...visibleCategories.map(c => `
@@ -67,15 +65,15 @@ class FridgeRecommenderView {
       `;
     }).join('');
 
-    const unlockedMatches = this.fridgeEngine.findCraftableFromFridge();
-    const selectedCount = unlockedBaseIngs.filter(ing => this.fridgeEngine.isSelected(ing.ingredient_id)).length;
+    const unlockedAlcoholMatches = this.fridgeEngine.findCraftableFromFridge();
+    const selectedCount = eligibleIngs.filter(ing => this.fridgeEngine.isSelected(ing.ingredient_id)).length;
 
-    const matchesHtml = unlockedMatches.length === 0
+    const matchesHtml = unlockedAlcoholMatches.length === 0
       ? `<div style="text-align:center; padding:18px 10px; font-size:0.78rem; color:#94a3b8; line-height:1.5;">
-           선택한 재료로 만들 수 있는 해금된 레시피가 없습니다.<br/>
-           (내가 해금한 재료와 해금한 레시피 기준으로만 표시됩니다)
+           선택한 냉장고 재료로 만들 수 있는 <b>해금된 술 조합</b>이 없습니다.<br/>
+           (주조실에서 소주·맥주·막걸리 등 주류와 술 조합 레시피를 해금한 뒤 재료를 선택해보세요!)
          </div>`
-      : unlockedMatches.map(rec => {
+      : unlockedAlcoholMatches.map(rec => {
           const items = this.recipeBook.getRecipeItems(rec.recipe_id);
           const formulaStr = items.map(it => {
             const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
@@ -110,7 +108,7 @@ class FridgeRecommenderView {
         <div class="fridge-box">
           <div class="fridge-box-header">
             <div class="fridge-title">
-              <span>🧊 내 냉장고 재료 선택 (${selectedCount}개 선택됨 · 해금 재료만 표시)</span>
+              <span>🧊 내 냉장고 재료 선택 (${selectedCount}개 선택됨)</span>
             </div>
             <div class="fridge-quick-btns">
               <button class="fridge-mini-btn" id="fridge-select-all-btn">전체 선택</button>
@@ -122,16 +120,16 @@ class FridgeRecommenderView {
           <div class="fridge-ing-selector">${ingGridHtml}</div>
         </div>
 
-        <!-- 2. 해금된 가능 레시피 목록 & 랜덤 뽑기 -->
+        <!-- 2. 해금된 가능 술 조합 목록 & 랜덤 뽑기 -->
         <div class="fridge-result-section">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <span style="font-size:0.84rem; font-weight:900; color:#f8fafc;">
-              🍸 가능한 조합 (${unlockedMatches.length}종 · 해금된 레시피 기준)
+              🍸 가능한 술 조합 (${unlockedAlcoholMatches.length}종 · 해금된 술 기준)
             </span>
           </div>
 
-          <button class="random-pick-btn" id="fridge-random-pick-btn" ${unlockedMatches.length === 0 ? 'disabled' : ''}>
-            <span>🎲 랜덤 고르기 (${unlockedMatches.length}종 중 추첨)</span>
+          <button class="random-pick-btn" id="fridge-random-pick-btn" ${unlockedAlcoholMatches.length === 0 ? 'disabled' : ''}>
+            <span>🎲 오늘 마실 술 랜덤 고르기 (${unlockedAlcoholMatches.length}종 중 추첨)</span>
           </button>
 
           <div class="fridge-match-list">
@@ -141,10 +139,10 @@ class FridgeRecommenderView {
       </div>
     `;
 
-    this._bindEvents(container, unlockedMatches);
+    this._bindEvents(container, unlockedAlcoholMatches);
   }
 
-  _bindEvents(container, unlockedMatches) {
+  _bindEvents(container, unlockedAlcoholMatches) {
     container.querySelectorAll('[data-fridge-cat]').forEach(btn => {
       btn.onclick = () => {
         this.selectedCategory = btn.getAttribute('data-fridge-cat');
@@ -186,7 +184,7 @@ class FridgeRecommenderView {
     const randomBtn = container.querySelector('#fridge-random-pick-btn');
     if (randomBtn) {
       randomBtn.onclick = () => {
-        const picked = this.fridgeEngine.pickRandomRecipe(unlockedMatches);
+        const picked = this.fridgeEngine.pickRandomRecipe(unlockedAlcoholMatches);
         if (!picked) return;
         this.lastRandomWinnerId = picked.recipe_id;
         this.audio.playSuccess();
