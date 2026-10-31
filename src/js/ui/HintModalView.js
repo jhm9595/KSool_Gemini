@@ -1,7 +1,7 @@
 window.KSool = window.KSool || {};
 
 class HintModalView {
-  constructor({ recipeBook, inventory, baseballEngine, ratioProvider, brandResolver, audio, onImageUnlocked }) {
+  constructor({ recipeBook, inventory, baseballEngine, ratioProvider, brandResolver, audio, onImageUnlocked, onAutoSetupBrew }) {
     this.recipeBook = recipeBook;
     this.inventory = inventory;
     this.baseballEngine = baseballEngine;
@@ -9,6 +9,7 @@ class HintModalView {
     this.brandResolver = brandResolver;
     this.audio = audio;
     this.onImageUnlocked = onImageUnlocked || null;
+    this.onAutoSetupBrew = onAutoSetupBrew || null;
 
     this.activeRecipeId = null;
     this.viewMode = 'CHOICE'; // 'CHOICE' | 'BASEBALL' | 'MINIGAME_SELECT' | 'MINIGAME_PLAY'
@@ -420,10 +421,10 @@ class HintModalView {
       `;
     } else {
       // [B] 베이스볼 모두 클리어 완료!
-      // 비율이 모두 1인 조합(1:1, 1:1:1 등)은 비율 게임 없이 즉시 1로 자동 완료 처리
+      // 비율이 1인 재료는 굳이 숫자를 표시하거나 비율 게임을 할 필요가 없으므로 자동 해결 처리
+      this.ratioProvider.ensureUnitRatiosAutoSolved(this.activeRecipeId);
       const needsRatioGame = this.ratioProvider.requiresRatioGame(this.activeRecipeId);
       if (!needsRatioGame) {
-        this.ratioProvider.ensureUnitRatiosAutoSolved(this.activeRecipeId);
         this.selectedUpDownSlotOrder = null;
       }
 
@@ -431,17 +432,24 @@ class HintModalView {
         const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
         const base = this.recipeBook.getBaseIngredient(it.ingredient_id);
         const target = det || base;
+        const isUnitRatio = Number(it.ratio) === 1;
         const solvedVal = hintState.solvedRatios[String(it.slot_order)];
-        const isSelected = needsRatioGame && Number(this.selectedUpDownSlotOrder) === Number(it.slot_order);
+        const isSelected = !isUnitRatio && Number(this.selectedUpDownSlotOrder) === Number(it.slot_order);
         const detailBadge = det ? `<span class="slot-detail-tag">특산</span>` : '';
+
+        // 비율이 1인 재료는 숫자 배지를 표시하지 않음 (2 이상이거나 미해결 ? 상태일 때만 표시)
+        let badgeHtml = '';
+        if (!isUnitRatio) {
+          badgeHtml = `<span class="slot-count-badge ${solvedVal ? 'is-solved' : 'is-question'}">${solvedVal ? solvedVal : '?'}</span>`;
+        }
 
         return `
           <div class="pot-slot filled sug-slot-card hint-ratio-slot ${isSelected ? 'active-ratio-slot' : ''} ${solvedVal ? 'solved-ratio-slot' : ''}"
-               ${needsRatioGame ? `data-updown-slot="${it.slot_order}" title="클릭하여 비율 Up/Down 추리하기"` : `style="cursor:default;"`}>
+               ${!isUnitRatio ? `data-updown-slot="${it.slot_order}" title="클릭하여 비율 Up/Down 추리하기"` : `style="cursor:default;"`}>
             ${detailBadge}
             <span class="slot-emoji">${target ? target.emoji : '🍶'}</span>
             <span class="slot-name">${target ? this.brandResolver.resolveName(target) : ''}</span>
-            <span class="slot-count-badge ${solvedVal ? 'is-solved' : 'is-question'}">${solvedVal ? solvedVal : '?'}</span>
+            ${badgeHtml}
           </div>
         `;
       }).join('');
@@ -481,9 +489,17 @@ class HintModalView {
         `;
       }
 
+      const isAllRatiosSolved = items.every(it => Boolean(hintState.solvedRatios[String(it.slot_order)]));
+      const goToBrewBtnHtml = isAllRatiosSolved ? `
+        <button class="mix-btn bb-go-brew-btn" id="bb-go-brew-btn">
+          ⚗️ 주조실로 가기 (자동 세팅)
+        </button>
+      ` : '';
+
       mainSectionHtml = `
         <div class="hint-section-box">
           <div class="baseball-slots">${solvedSlotsHtml}</div>
+          ${goToBrewBtnHtml}
         </div>
         ${upDownDrawerHtml}
       `;
@@ -839,6 +855,19 @@ class HintModalView {
         this.render();
       };
     });
+
+    // 베이스볼 & 비율 추리 완료 후 [주조실로 가기] 버튼 클릭 -> 주조실 슬롯 자동 세팅 및 탭 이동
+    const goBrewBtn = container.querySelector('#bb-go-brew-btn');
+    if (goBrewBtn) {
+      goBrewBtn.onclick = () => {
+        const rId = this.activeRecipeId;
+        this.audio.playTap();
+        this.close();
+        if (this.onAutoSetupBrew && rId) {
+          this.onAutoSetupBrew(rId);
+        }
+      };
+    }
 
     // Up/Down 1~10 숫자 버튼 클릭
     container.querySelectorAll('[data-updown-num]').forEach(btn => {

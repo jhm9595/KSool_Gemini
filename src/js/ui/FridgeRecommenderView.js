@@ -81,12 +81,13 @@ class FridgeRecommenderView {
             const target = det || base;
             const inFridge = this.fridgeEngine.isSelected(it.ingredient_id);
             const detailBadge = det ? `<span class="slot-detail-tag">특산</span>` : '';
+            const ratioBadge = Number(it.ratio) > 1 ? `<span class="slot-count-badge">${it.ratio}</span>` : '';
             return `
               <div class="pot-slot filled sug-slot-card ${inFridge ? 'fridge-matched-slot' : 'fridge-missing-slot'}">
                 ${detailBadge}
                 <span class="slot-emoji">${target ? target.emoji : '🍶'}</span>
                 <span class="slot-name">${target ? this.brandResolver.resolveName(target) : ''}</span>
-                <span class="slot-count-badge">${it.ratio}</span>
+                ${ratioBadge}
               </div>
             `;
           }).join('');

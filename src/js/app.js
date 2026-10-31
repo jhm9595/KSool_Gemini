@@ -35,6 +35,9 @@ class KSoolApp {
       audio: this.audio,
       onImageUnlocked: () => {
         this.renderCollectionView();
+      },
+      onAutoSetupBrew: (recipeId) => {
+        this.autoSetupPotFromRecipe(recipeId);
       }
     });
 
@@ -128,6 +131,38 @@ class KSoolApp {
     this.suggestionBoardView.render();
   }
 
+  /**
+   * 베이스볼 & 비율 추리 완료 후 [주조실로 가기] 클릭 시
+   * 주조실 슬롯에 해당 레시피의 재료와 비율을 자동으로 세팅하고 주조실 탭으로 이동합니다.
+   */
+  autoSetupPotFromRecipe(recipeId) {
+    const items = this.recipeBook.getRecipeItems(recipeId);
+    if (!items || items.length === 0) return;
+
+    if (items.length > this.config.maxUniqueSlots) {
+      this.config.unlimitedSlotsMode = true;
+    }
+
+    this.craftingPot.clear();
+    items.forEach(it => {
+      const ratio = Math.max(1, Number(it.ratio) || 1);
+      const detId = it.detail_ingredient_id ? Number(it.detail_ingredient_id) : null;
+      for (let i = 0; i < ratio; i++) {
+        this.craftingPot.tapIngredient(Number(it.ingredient_id), detId);
+      }
+    });
+
+    this.currentTab = 'brew';
+    document.querySelectorAll('[data-tab-target]').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-tab-target') === 'brew');
+    });
+    document.querySelectorAll('.view').forEach(v => {
+      v.classList.toggle('active', v.id === 'view-brew');
+    });
+
+    this.renderAll();
+  }
+
   renderHeader() {
     const totalRecipes = this.recipeBook.getAllRecipes().length;
     const unlockedCount = this.inventory.unlockedRecipeIds.size;
@@ -191,12 +226,14 @@ class KSoolApp {
         const name = this.brandResolver.resolveName(target);
         const detailBadge = detIng ? `<span class="slot-detail-tag">특산</span>` : '';
 
+        const countBadge = slot.count > 1 ? `<span class="slot-count-badge">${slot.count}</span>` : '';
+
         html.push(`
           <div class="pot-slot filled" data-pot-slot-idx="${i}" title="클릭하면 개수가 1 줄어듭니다">
             ${detailBadge}
             <span class="slot-emoji">${target ? target.emoji : '🍶'}</span>
             <span class="slot-name">${name}</span>
-            <span class="slot-count-badge">${slot.count}</span>
+            ${countBadge}
           </div>
         `);
       } else {
@@ -302,7 +339,7 @@ class KSoolApp {
           ${pickerLabel ? `<span class="ing-picker-indicator">${pickerLabel}</span>` : ''}
           <span class="ing-emoji">${ing.emoji}</span>
           <span class="ing-name">${name}</span>
-          ${inPotCount > 0 ? `<span class="slot-count-badge">${inPotCount}</span>` : ''}
+          ${inPotCount > 1 ? `<span class="slot-count-badge">${inPotCount}</span>` : ''}
         </div>
       `;
     }).join('');

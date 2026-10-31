@@ -29,12 +29,13 @@ class SuggestionBoardView {
           const base = this.recipeBook.getBaseIngredient(s.baseId);
           const target = det || base;
           const detailBadge = det ? `<span class="slot-detail-tag">특산</span>` : '';
+          const countBadge = s.count > 1 ? `<span class="slot-count-badge">${s.count}</span>` : '';
           return `
             <div class="pot-slot filled sug-slot-card">
               ${detailBadge}
               <span class="slot-emoji">${target ? target.emoji : '🍶'}</span>
               <span class="slot-name">${this.brandResolver.resolveName(target)}</span>
-              <span class="slot-count-badge">${s.count}</span>
+              ${countBadge}
             </div>
           `;
         }).join('')
@@ -51,12 +52,13 @@ class SuggestionBoardView {
             const name = target ? this.brandResolver.resolveName(target) : `재료#${it.ingredient_id}`;
             const emoji = target ? target.emoji : '🍶';
             const detailBadge = det ? `<span class="slot-detail-tag">특산</span>` : '';
+            const ratioBadge = Number(it.ratio) > 1 ? `<span class="slot-count-badge">${it.ratio}</span>` : '';
             return `
               <div class="pot-slot filled sug-slot-card">
                 ${detailBadge}
                 <span class="slot-emoji">${emoji}</span>
                 <span class="slot-name">${name}</span>
-                <span class="slot-count-badge">${it.ratio}</span>
+                ${ratioBadge}
               </div>
             `;
           }).join('');

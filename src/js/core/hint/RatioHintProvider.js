@@ -22,25 +22,25 @@ class UpDownRatioGameProvider extends RatioHintProvider {
   requiresRatioGame(recipeId) {
     const items = this.recipeBook.getRecipeItems(recipeId);
     // 비율이 모두 1인 조합(1:1, 1:1:1 등)은 별도의 비율 Up/Down 게임 불필요
-    return items.some(it => Number(it.ratio) !== 1);
+    return items.some(it => Number(it.ratio) > 1);
   }
 
   ensureUnitRatiosAutoSolved(recipeId) {
-    if (this.requiresRatioGame(recipeId)) return false;
     const items = this.recipeBook.getRecipeItems(recipeId);
     const hintState = this.inventory.getHintState(recipeId);
     let changed = false;
+    // 비율이 1인 재료는 굳이 숫자를 맞추거나 표시할 필요가 없으므로 자동 해결 처리
     items.forEach(it => {
       const key = String(it.slot_order);
-      if (Number(hintState.solvedRatios[key]) !== Number(it.ratio)) {
-        hintState.solvedRatios[key] = Number(it.ratio);
+      if (Number(it.ratio) === 1 && Number(hintState.solvedRatios[key]) !== 1) {
+        hintState.solvedRatios[key] = 1;
         changed = true;
       }
     });
     if (changed) {
       this.inventory.save();
     }
-    return true;
+    return !this.requiresRatioGame(recipeId);
   }
 
   checkRatioGuess(recipeId, slotOrder, guessedNumber) {
