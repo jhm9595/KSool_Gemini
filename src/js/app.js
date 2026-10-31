@@ -827,9 +827,14 @@ class KSoolApp {
               </span>
             </div>
 
-            <div style="font-size:3.2rem; filter: grayscale(15%); opacity:0.9;">${rec.emoji}</div>
-            <div style="font-size:1.25rem; font-weight:900; color:#f8fafc;">
-              ${this.brandResolver.resolveName(rec)}
+            <div class="craft-result-info-card">
+              <div class="craft-result-left">
+                <div class="craft-result-emoji" style="filter: grayscale(15%); opacity:0.9;">${rec.emoji}</div>
+                <div class="craft-result-name">${this.brandResolver.resolveName(rec)}</div>
+              </div>
+              <div class="craft-result-desc">
+                ${rec.description}
+              </div>
             </div>
 
             <div style="width:100%; background:rgba(30,41,59,0.85); border:1px solid #475569; border-radius:12px; padding:12px 14px; text-align:left; display:flex; flex-direction:column; gap:8px;">
@@ -966,12 +971,14 @@ class KSoolApp {
             </span>
             <span style="background:rgba(245,158,11,0.22); border:1px solid #f59e0b; color:#fde047; font-size:0.68rem; font-weight:900; padding:2px 7px; border-radius:6px;">🎉 NEW 발견!</span>
           </div>
-          <div style="font-size:3.4rem;">${rec.emoji}</div>
-          <div style="font-size:1.25rem; font-weight:900; color:#f8fafc;">
-            ${this.brandResolver.resolveName(rec)}
-          </div>
-          <div style="font-size:0.82rem; color:#cbd5e1; line-height:1.5;">
-            ${rec.description}
+          <div class="craft-result-info-card">
+            <div class="craft-result-left">
+              <div class="craft-result-emoji">${rec.emoji}</div>
+              <div class="craft-result-name">${this.brandResolver.resolveName(rec)}</div>
+            </div>
+            <div class="craft-result-desc">
+              ${rec.description}
+            </div>
           </div>
           <div style="width:100%; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; font-size:0.8rem; color:#fcd34d; font-weight:800;">
             ${recipeFormula}
@@ -994,10 +1001,14 @@ class KSoolApp {
 
       content.innerHTML = `
         <div style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px;">
-          <div style="font-size:3.2rem;">🧪</div>
-          <div style="font-size:1.15rem; font-weight:900; color:#fca5a5;">괴식 폭탄주 (조합 실패)</div>
-          <div style="font-size:0.8rem; color:#94a3b8; line-height:1.45;">
-            ${failGuideText}
+          <div class="craft-result-info-card" style="border-color:#7f1d1d; background:rgba(69,10,10,0.25);">
+            <div class="craft-result-left">
+              <div class="craft-result-emoji">🧪</div>
+              <div class="craft-result-name" style="color:#fca5a5;">괴식 폭탄주</div>
+            </div>
+            <div class="craft-result-desc" style="border-color:#7f1d1d; color:#cbd5e1;">
+              ${failGuideText}
+            </div>
           </div>
           <div style="width:100%; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; font-size:0.75rem; color:#cbd5e1;">
             시도한 조합: ${triedStr}
