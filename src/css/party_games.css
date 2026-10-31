@@ -1,0 +1,882 @@
+/* ==========================================================================
+   K-SOOL 오프라인 술자리 패스앤플레이 미니게임 허브 스타일시트 (Tabletop High-Contrast)
+   ========================================================================== */
+
+.party-hub-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #090d16 85%);
+  color: #f8fafc;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+/* 상단 네비게이션 & 게임 탭 */
+.party-nav-header {
+  padding: 10px 14px 6px;
+  background: rgba(15, 23, 42, 0.88);
+  border-bottom: 2px solid rgba(56, 189, 248, 0.25);
+  backdrop-filter: blur(8px);
+  flex-shrink: 0;
+}
+
+.party-hub-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.party-badge {
+  font-size: 0.62rem;
+  font-weight: 900;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.party-main-text {
+  display: block;
+  font-size: 0.98rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+  margin-top: 2px;
+}
+
+.party-sound-toggle-btn {
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid #475569;
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 9px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.party-sound-toggle-btn:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+/* 5대 게임 선택 스트립 */
+.party-game-tab-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.party-game-tab-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.party-strip-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #1e293b;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+}
+
+.party-strip-tab .tab-emoji {
+  font-size: 0.95rem;
+}
+
+.party-strip-tab.active {
+  background: linear-gradient(135deg, #0284c7, #3b82f6);
+  color: #ffffff;
+  border-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+  transform: translateY(-1px);
+}
+
+/* 메인 게임 스테이지 */
+.party-game-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  position: relative;
+  padding: 10px 14px 14px;
+}
+
+.party-game-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* 턴 인디케이터 (360도 맞은편 시인성 강화) */
+.party-turn-indicator {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 12px;
+  padding: 10px 14px;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.party-turn-badge {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  animation: pulseDot 1.2s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* 하단 버튼 및 공통 컨트롤 */
+.party-bottom-controls {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.party-action-btn {
+  width: 100%;
+  min-height: 52px;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 900;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.party-action-btn.primary {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+
+.party-action-btn.primary:active {
+  transform: scale(0.97);
+}
+
+.party-action-btn.restart {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #cbd5e1;
+  min-height: 42px;
+  font-size: 0.84rem;
+}
+
+.party-action-btn.next-turn {
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  color: #ffffff;
+  min-height: 48px;
+}
+
+.party-range-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.range-pill {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.range-pill.active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #38bdf8;
+}
+
+/* ==========================================================================
+   ① Up & Down 게임 전용 스타일
+   ========================================================================== */
+.party-range-numbers {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin: 4px 0 6px;
+  letter-spacing: -0.5px;
+}
+
+.range-bound.min { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
+.range-bound.max { color: #f43f5e; text-shadow: 0 0 10px rgba(244, 63, 94, 0.4); }
+.range-sep { color: #64748b; font-size: 1.6rem; }
+
+.party-range-track {
+  width: 100%;
+  height: 8px;
+  background: #1e293b;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.party-range-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #38bdf8, #f43f5e);
+  border-radius: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.party-cap-visual-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 8px;
+}
+
+.soju-cap-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #22c55e 0%, #15803d 70%, #14532d 100%);
+  border: 4px solid #86efac;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6), inset 0 0 12px rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.soju-cap-circle.up {
+  border-color: #38bdf8;
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.6);
+  transform: translateY(-4px);
+}
+
+.soju-cap-circle.down {
+  border-color: #f43f5e;
+  box-shadow: 0 0 24px rgba(244, 63, 94, 0.6);
+  transform: translateY(4px);
+}
+
+.soju-cap-circle.exploded {
+  background: radial-gradient(circle at 35% 35%, #ef4444 0%, #991b1b 100%);
+  border-color: #fca5a5;
+  box-shadow: 0 0 35px #ef4444;
+  animation: shakeCap 0.4s infinite;
+}
+
+@keyframes shakeCap {
+  0%, 100% { transform: translate(0, 0) scale(1.05); }
+  25% { transform: translate(-3px, 2px) rotate(-2deg); }
+  75% { transform: translate(3px, -2px) rotate(2deg); }
+}
+
+.soju-cap-inner {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.soju-cap-label { font-size: 0.65rem; font-weight: 900; color: #dcfce7; letter-spacing: 1px; }
+.soju-cap-secret { font-size: 2.2rem; font-weight: 900; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.5); }
+.soju-cap-star { font-size: 0.7rem; color: #fde047; }
+
+.party-feedback-badge {
+  font-size: 1.15rem;
+  font-weight: 900;
+  padding: 6px 14px;
+  border-radius: 10px;
+  letter-spacing: -0.3px;
+}
+.party-feedback-badge.up { background: rgba(2, 132, 199, 0.3); color: #38bdf8; border: 1px solid #0284c7; }
+.party-feedback-badge.down { background: rgba(225, 29, 72, 0.3); color: #fb7185; border: 1px solid #e11d48; }
+.party-feedback-badge.bomb { background: #ef4444; color: #ffffff; animation: shakeCap 0.3s infinite; }
+.party-feedback-badge.ready { font-size: 0.82rem; color: #94a3b8; }
+
+.party-numpad-section { width: 100%; }
+.party-quick-inputs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.party-quick-btn {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #cbd5e1;
+  font-size: 0.88rem;
+  font-weight: 900;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.party-number-display {
+  flex: 1;
+  background: #0f172a;
+  border: 2px solid #38bdf8;
+  border-radius: 10px;
+  height: 48px;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ffffff;
+  text-align: center;
+  outline: none;
+}
+.party-numpad-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+.party-num-key {
+  min-height: 48px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #f1f5f9;
+  font-size: 1.25rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+.party-num-key:active { background: #0284c7; transform: scale(0.95); }
+.party-num-action-key {
+  min-height: 48px;
+  border-radius: 8px;
+  font-weight: 900;
+  cursor: pointer;
+  border: none;
+}
+.party-num-action-key.clear { background: #475569; color: #ffffff; font-size: 1.1rem; }
+.party-num-action-key.submit { background: #10b981; color: #ffffff; font-size: 1rem; }
+
+/* ==========================================================================
+   ② 꼬다리 치기 전용 스타일
+   ========================================================================== */
+.capflick-box .flick-fatigue-bar-wrap {
+  margin-top: 6px;
+}
+.flick-fatigue-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #94a3b8;
+  margin-bottom: 3px;
+}
+.flick-fatigue-track {
+  width: 100%;
+  height: 6px;
+  background: #1e293b;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.flick-fatigue-fill {
+  height: 100%;
+  background: #10b981;
+  transition: width 0.2s ease;
+}
+.flick-fatigue-fill.danger {
+  background: #ef4444;
+}
+
+.flick-stage-arena {
+  position: relative;
+  width: 260px;
+  height: 250px;
+  margin: 14px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.soju-cap-body {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #22c55e 0%, #15803d 70%, #14532d 100%);
+  border: 4px solid #86efac;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+.cap-korean-text {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 2px;
+}
+
+.cap-tail-wire {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 95px;
+  transform-origin: top center;
+  transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1;
+}
+
+.cap-tail-wire.broken-fly {
+  animation: flyWire 0.6s forwards ease-out;
+}
+
+@keyframes flyWire {
+  0% { transform: rotate(15deg) translate(0, 0); opacity: 1; }
+  100% { transform: rotate(480deg) translate(180px, -200px); opacity: 0; }
+}
+
+.cap-wire-joint {
+  width: 14px;
+  height: 10px;
+  background: #15803d;
+  border-radius: 4px;
+}
+.cap-wire-segment {
+  width: 8px;
+  height: 85px;
+  background: linear-gradient(180deg, #16a34a 0%, #22c55e 60%, #cbd5e1 100%);
+  margin: 0 auto;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  transition: background 0.2s ease;
+}
+.cap-wire-segment.whitened {
+  background: linear-gradient(180deg, #e2e8f0 0%, #fde047 50%, #ffffff 100%);
+  box-shadow: 0 0 12px #fde047;
+}
+
+.flick-tap-callout {
+  position: absolute;
+  bottom: 4px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #fde047;
+  background: rgba(15, 23, 42, 0.85);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px dashed #f59e0b;
+}
+
+/* ==========================================================================
+   ③ 표면장력 소주잔 채우기 전용 스타일
+   ========================================================================== */
+.surface-box .tension-level-badge {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #38bdf8;
+  margin-top: 4px;
+}
+.surface-box .tension-level-badge.danger {
+  color: #ef4444;
+  animation: pulseDot 0.6s infinite;
+}
+
+.glass-canvas-wrap {
+  position: relative;
+  width: 280px;
+  height: 330px;
+  margin: 6px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tension-spill-fx.active {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.4) 0%, transparent 70%);
+  animation: spillWave 0.6s infinite alternate;
+}
+
+@keyframes spillWave {
+  0% { opacity: 0.3; transform: scale(0.95); }
+  100% { opacity: 0.9; transform: scale(1.1); }
+}
+
+.party-hold-pour-btn {
+  width: 100%;
+  min-height: 64px;
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  border: 2px solid #38bdf8;
+  border-radius: 14px;
+  color: #ffffff;
+  font-size: 1.12rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(2, 132, 199, 0.4);
+  transition: all 0.15s ease;
+}
+
+.party-hold-pour-btn.pouring {
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  border-color: #fde047;
+  transform: scale(0.96);
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+}
+
+/* ==========================================================================
+   ④ 소주병 돌리기 & 손가락 룰렛 전용 스타일
+   ========================================================================== */
+.bottle-mode-tabs {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+.bottle-tab-pill {
+  flex: 1;
+  min-height: 40px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.bottle-tab-pill.active {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.bottle-arena {
+  position: relative;
+  width: 270px;
+  height: 270px;
+  margin: 10px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.bottle-compass-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px dashed rgba(56, 189, 248, 0.35);
+  border-radius: 50%;
+}
+.compass-marker {
+  position: absolute;
+  color: #38bdf8;
+  font-size: 0.85rem;
+}
+.compass-marker.north { top: 6px; left: 50%; transform: translateX(-50%); }
+.compass-marker.south { bottom: 6px; left: 50%; transform: translateX(-50%); }
+.compass-marker.east { right: 6px; top: 50%; transform: translateY(-50%); }
+.compass-marker.west { left: 6px; top: 50%; transform: translateY(-50%); }
+
+.soju-bottle-wrapper {
+  position: relative;
+  width: 70px;
+  height: 210px;
+  transform-origin: center center;
+}
+.soju-bottle-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.7));
+}
+.soju-bottle-neck-pointer {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fde047;
+  box-shadow: 0 0 12px #fde047;
+}
+
+.bottle-callout-text {
+  position: absolute;
+  bottom: -22px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #cbd5e1;
+}
+
+/* 손가락 멀티터치 아레나 */
+.finger-touch-arena {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 2px dashed rgba(56, 189, 248, 0.4);
+  border-radius: 16px;
+  margin: 10px auto;
+  overflow: hidden;
+  touch-action: none;
+}
+.finger-center-guide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  pointer-events: none;
+  width: 85%;
+}
+.finger-touch-spot {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  transform: translate(-50%, -50%);
+  border: 3px solid #38bdf8;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: pulseTouch 0.8s infinite alternate;
+}
+.finger-inner-ripple {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  opacity: 0.35;
+}
+.finger-touch-spot.target-winner {
+  border-color: #ef4444;
+  animation: shakeCap 0.3s infinite;
+  box-shadow: 0 0 35px #ef4444;
+}
+.target-skull {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ef4444;
+  font-size: 0.88rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+@keyframes pulseTouch {
+  0% { transform: translate(-50%, -50%) scale(0.9); }
+  100% { transform: translate(-50%, -50%) scale(1.15); }
+}
+
+/* ==========================================================================
+   ⑤ 훈민정음 3초 초성 폭탄 전용 스타일
+   ========================================================================== */
+.bomb-box.urgent {
+  animation: urgentFlash 0.5s infinite alternate;
+}
+
+@keyframes urgentFlash {
+  0% { background: radial-gradient(circle at 50% 20%, #450a0a 0%, #090d16 85%); }
+  100% { background: radial-gradient(circle at 50% 20%, #7f1d1d 0%, #090d16 85%); }
+}
+
+.bomb-timer-bar-wrap {
+  width: 100%;
+  height: 10px;
+  background: #1e293b;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+.bomb-timer-fill {
+  height: 100%;
+  background: #10b981;
+  transition: width 0.1s linear;
+}
+.bomb-timer-fill.danger {
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444;
+}
+.bomb-time-text {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #e2e8f0;
+}
+.bomb-time-text.danger {
+  color: #ef4444;
+  font-size: 1.4rem;
+}
+
+.hunmin-chosung-board {
+  position: relative;
+  width: 250px;
+  height: 230px;
+  background: #0f172a;
+  border: 4px solid #38bdf8;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+  margin: 12px auto;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.hunmin-chosung-board:active {
+  transform: scale(0.97);
+}
+.hunmin-chosung-board.exploded {
+  border-color: #ef4444;
+  background: #450a0a;
+  animation: shakeCap 0.3s infinite;
+}
+
+.bomb-flame-icon {
+  font-size: 2.2rem;
+  margin-bottom: 2px;
+}
+.bomb-flame-icon.burning {
+  animation: pulseDot 0.5s infinite;
+}
+
+.chosung-large-text {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: #fde047;
+  letter-spacing: 12px;
+  text-shadow: 0 0 16px rgba(253, 224, 71, 0.6);
+  margin-left: 12px; /* 자간 보정 */
+}
+
+.chosung-callout {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #cbd5e1;
+  margin-top: 8px;
+}
+
+/* ==========================================================================
+   풀스크린 벌칙 플래시 오버레이 (1초 내 빠른 재시작)
+   ========================================================================== */
+.party-penalty-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.94);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+
+.party-penalty-overlay.active {
+  display: flex;
+  animation: penaltyStrobe 0.4s infinite alternate;
+}
+
+@keyframes penaltyStrobe {
+  0% { box-shadow: inset 0 0 40px var(--penalty-color, #ef4444); }
+  100% { box-shadow: inset 0 0 120px var(--penalty-color, #ef4444); }
+}
+
+.penalty-modal-card {
+  background: #0f172a;
+  border: 4px solid var(--penalty-color, #ef4444);
+  border-radius: 20px;
+  padding: 28px 20px;
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+  box-shadow: 0 0 50px var(--penalty-color, #ef4444);
+  animation: shakeCap 0.4s infinite;
+}
+
+.penalty-siren-halo {
+  font-size: 3.5rem;
+  margin-bottom: 8px;
+}
+
+.penalty-title {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+  text-shadow: 0 0 15px var(--penalty-color, #ef4444);
+}
+
+.penalty-subtitle {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fde047;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.penalty-tap-hint {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #94a3b8;
+  background: rgba(30, 41, 59, 0.8);
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-block;
+}

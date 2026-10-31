@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="./src/css/hint_center.css">
   <link rel="stylesheet" href="./src/css/fridge_recommender.css">
   <link rel="stylesheet" href="./src/css/suggestion_board.css">
+  <link rel="stylesheet" href="./src/css/party_games.css">
 </head>
 <body>
 
@@ -96,7 +97,10 @@
   <!-- [탭 4] 초간단 조합 추천 & 관리자 '딸깍' 뷰 -->
   <section id="view-suggestions" class="view"></section>
 
-  <!-- 모바일 하단 4단 메인 탭 네비게이션 (Bottom Bar) -->
+  <!-- [탭 5] 오프라인 술자리 패스앤플레이 미니게임 뷰 -->
+  <section id="view-party" class="view"></section>
+
+  <!-- 모바일 하단 5단 메인 탭 네비게이션 (Bottom Bar) -->
   <nav class="tab-bar">
     <button class="tab-btn active" data-tab-target="brew">
       <span style="font-size:1.15rem;">⚗️</span>
@@ -108,11 +112,15 @@
     </button>
     <button class="tab-btn" data-tab-target="fridge">
       <span style="font-size:1.15rem;">🧊</span>
-      <span>냉장고를 부탁해</span>
+      <span>냉장고</span>
     </button>
     <button class="tab-btn" data-tab-target="suggestions">
       <span style="font-size:1.15rem;">👍</span>
-      <span>조합추천</span>
+      <span>추천</span>
+    </button>
+    <button class="tab-btn" data-tab-target="party">
+      <span style="font-size:1.15rem;">🍻</span>
+      <span>술게임</span>
     </button>
   </nav>
 
@@ -157,6 +165,13 @@
 <script src="./src/js/ui/HintModalView.js"></script>
 <script src="./src/js/ui/FridgeRecommenderView.js"></script>
 <script src="./src/js/ui/SuggestionBoardView.js"></script>
+<script src="./src/js/ui/party/PartySoundSynth.js"></script>
+<script src="./src/js/ui/party/games/UpAndDownGame.js"></script>
+<script src="./src/js/ui/party/games/CapFlickGame.js"></script>
+<script src="./src/js/ui/party/games/SurfaceTensionGame.js"></script>
+<script src="./src/js/ui/party/games/BottleSpinGame.js"></script>
+<script src="./src/js/ui/party/games/HunminBombGame.js"></script>
+<script src="./src/js/ui/party/PartyGameHubView.js"></script>
 <script src="./src/js/app.js"></script>
 </body>
 </html>

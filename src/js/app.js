@@ -78,6 +78,8 @@ class KSoolApp {
       }
     });
 
+    this.partyGameHubView = new window.KSool.PartyGameHubView('view-party');
+
     this.currentTab = 'brew';
     this.brewMode = 'QUIZ'; // 'QUIZ' (단계별 넘버링 추리 퀴즈) | 'FREE' (자유 주조)
     this.quizTargetRecipeId = null;
@@ -144,10 +146,16 @@ class KSoolApp {
     this.renderCollectionView();
     this.fridgeRecommenderView.render();
     this.suggestionBoardView.render();
+    if (this.currentTab === 'party') {
+      this.partyGameHubView.render();
+    }
   }
 
   switchTab(target) {
     if (!this.inventory.isTabUnlocked(target)) return;
+    if (this.currentTab === 'party' && target !== 'party') {
+      this.partyGameHubView.releaseWakeLock();
+    }
     this.currentTab = target;
     document.querySelectorAll('[data-tab-target]').forEach(b => {
       b.classList.toggle('active', b.getAttribute('data-tab-target') === target);

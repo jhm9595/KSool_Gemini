@@ -288,6 +288,7 @@ class InventoryManager {
     if (tabKey === 'collection') return this.isCollectionTabUnlocked();
     if (tabKey === 'fridge') return this.isFridgeTabUnlocked();
     if (tabKey === 'suggestions') return this.isSuggestionTabUnlocked();
+    if (tabKey === 'party') return true; // 오프라인 술자리 미니게임 탭은 언제든지 바로 플레이 가능
     return false;
   }
 
