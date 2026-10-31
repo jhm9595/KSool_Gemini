@@ -151,8 +151,24 @@ class HintModalView {
         `;
       }).join('');
 
-      // 2단계인 경우: 1단계에서 맞춘 재료 유형(Category) 탭만 주조실과 동일한 형태로 노출
+      // 2단계인 경우: 1단계에서 맞춘 재료 유형(Category) 탭만 노출하되,
+      // 모든 탭 중 가장 높이가 높은 탭의 높이에 맞춰 팝업 크기가 고정되도록 CSS Grid(1/1) 오버레이로 렌더링
       let stage2CatBarHtml = '';
+      let optionsPoolHtml = '';
+
+      const renderOptionBtn = (opt) => {
+        const isPicked = this.currentGuessSlots.some(s => s && String(s.token) === String(opt.token));
+        return `
+          <button class="bb-option-btn ${isPicked ? 'picked' : ''}"
+                  data-bb-token="${opt.token}"
+                  data-bb-emoji="${opt.emoji}"
+                  data-bb-name="${opt.name}"
+                  data-bb-label="${opt.label}">
+            ${opt.label}
+          </button>
+        `;
+      };
+
       if (currentStage === 2) {
         const solvedCatIds = this.baseballEngine.getAnswerTokens(this.activeRecipeId, 1);
         const solvedCategories = this.recipeBook.categories.filter(c => solvedCatIds.includes(c.category_id));
@@ -168,21 +184,22 @@ class HintModalView {
             `).join('')}
           </div>
         `;
-      }
 
-      const options = this._getOptionsForStage(currentStage);
-      const optionsHtml = options.map(opt => {
-        const isPicked = this.currentGuessSlots.some(s => s && String(s.token) === String(opt.token));
-        return `
-          <button class="bb-option-btn ${isPicked ? 'picked' : ''}"
-                  data-bb-token="${opt.token}"
-                  data-bb-emoji="${opt.emoji}"
-                  data-bb-name="${opt.name}"
-                  data-bb-label="${opt.label}">
-            ${opt.label}
-          </button>
-        `;
-      }).join('');
+        const panesHtml = solvedCategories.map(c => {
+          const isActivePane = this.selectedStage2Category === c.category_id;
+          const catOpts = this._getOptionsForStage(2, c.category_id);
+          return `
+            <div class="bb-cat-pane ${isActivePane ? 'active-pane' : 'hidden-pane'}">
+              ${catOpts.map(renderOptionBtn).join('')}
+            </div>
+          `;
+        }).join('');
+
+        optionsPoolHtml = `<div class="bb-options-pool bb-stacked-pool">${panesHtml}</div>`;
+      } else {
+        const options = this._getOptionsForStage(currentStage);
+        optionsPoolHtml = `<div class="bb-options-pool">${options.map(renderOptionBtn).join('')}</div>`;
+      }
 
       const canSubmit = this.currentGuessSlots.length > 0 && this.currentGuessSlots.every(s => s !== null);
 
@@ -211,7 +228,7 @@ class HintModalView {
           <div class="baseball-slots">${slotsHtml}</div>
           ${stage2CatBarHtml}
           <div class="bb-options-row">
-            <div class="bb-options-pool">${optionsHtml}</div>
+            ${optionsPoolHtml}
             <button class="bb-submit-icon-btn" id="bb-submit-btn" title="판정하기" ${canSubmit ? '' : 'disabled'}>
               ⚾
             </button>
@@ -313,7 +330,7 @@ class HintModalView {
     this._bindEvents(container);
   }
 
-  _getOptionsForStage(stage) {
+  _getOptionsForStage(stage, overrideCatId = null) {
     const unlockedBaseIngs = Array.from(this.recipeBook.baseIngredients.values()).filter(ing =>
       this.inventory.isIngredientAvailable(ing.ingredient_id)
     );
@@ -330,9 +347,9 @@ class HintModalView {
     }
 
     if (stage === 2) {
-      // 1단계에서 맞춘 재료 유형(Category)에 속한 해금 재료만 주조실 형태로 표시
+      // 1단계에서 맞춘 재료 유형(Category)에 속한 해금 재료만 표시
       const solvedCatIds = this.baseballEngine.getAnswerTokens(this.activeRecipeId, 1);
-      const activeCat = this.selectedStage2Category || solvedCatIds[0];
+      const activeCat = overrideCatId || this.selectedStage2Category || solvedCatIds[0];
       return unlockedBaseIngs
         .filter(ing => solvedCatIds.includes(ing.category_id) && (!activeCat || ing.category_id === activeCat))
         .sort((a, b) => a.ingredient_id - b.ingredient_id)
