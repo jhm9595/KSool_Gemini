@@ -12,8 +12,11 @@ window.KSool = window.KSool || {};
 class PartyGameHubView {
   constructor(containerId = 'view-party', services = {}) {
     this.containerId = containerId;
-    this.recipeBook = services.recipeBook || window.app?.recipeBook;
-    this.inventory = services.inventory || window.app?.inventory;
+    this.recipeBook = services.recipeBook || window.ksoolApp?.recipeBook || window.app?.recipeBook;
+    this.inventory = services.inventory || window.ksoolApp?.inventory || window.app?.inventory;
+    this.fridgeEngine = services.fridgeEngine || window.ksoolApp?.fridgeEngine || window.app?.fridgeEngine;
+    this.brandResolver = services.brandResolver || window.ksoolApp?.brandResolver || window.app?.brandResolver;
+    this.audio = services.audio || window.ksoolApp?.audio || window.app?.audio;
     this.sound = new window.KSool.PartySoundSynth();
     this.mode = 'lobby'; // 'lobby' | 'game'
     this.activeGameKey = null;

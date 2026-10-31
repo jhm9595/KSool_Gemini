@@ -24,11 +24,29 @@ class FridgeRecommenderView {
     const container = document.getElementById(this.containerId);
     if (!container) return;
 
+    if (!this.fridgeEngine) {
+      const app = window.ksoolApp || window.app;
+      if (app?.fridgeEngine) this.fridgeEngine = app.fridgeEngine;
+      if (app?.recipeBook && !this.recipeBook) this.recipeBook = app.recipeBook;
+      if (app?.inventory && !this.inventory) this.inventory = app.inventory;
+      if (app?.brandResolver && !this.brandResolver) this.brandResolver = app.brandResolver;
+      if (app?.audio && !this.audio) this.audio = app.audio;
+    }
+
+    if (!this.fridgeEngine || !this.recipeBook) {
+      container.innerHTML = `
+        <div style="text-align:center; padding:40px 16px; color:#94a3b8; font-size:0.85rem;">
+          냉장고 시스템을 불러오는 중입니다...
+        </div>
+      `;
+      return;
+    }
+
     // 실제 술 조합에 쓰이는 해금된 냉장고 재료만 필터링
-    const eligibleIngs = this.fridgeEngine.getEligibleFridgeIngredients();
+    const eligibleIngs = this.fridgeEngine.getEligibleFridgeIngredients() || [];
 
     // 해금된 재료가 존재하는 재료 유형만 노출하고 '전체 재료'는 제일 마지막 탭으로 배치
-    const visibleCategories = this.recipeBook.categories.filter(c =>
+    const visibleCategories = (this.recipeBook.categories || []).filter(c =>
       eligibleIngs.some(ing => ing.category_id === c.category_id)
     );
 
@@ -53,9 +71,9 @@ class FridgeRecommenderView {
       `<button class="cat-chip ${this.selectedCategory === 'ALL' ? 'active' : ''}" data-fridge-cat="ALL">📦 전체 재료</button>`
     ].join('');
 
-    const ingGridHtml = filteredIngs.map(ing => {
+    const ingGridHtml = filteredIngs.length > 0 ? filteredIngs.map(ing => {
       const checked = this.fridgeEngine.isSelected(ing.ingredient_id);
-      const name = this.brandResolver.resolveName(ing);
+      const name = this.brandResolver ? this.brandResolver.resolveName(ing) : (ing.display_name || ing.name);
       return `
         <div class="fridge-ing-chip ${checked ? 'checked' : ''}" data-fridge-ing="${ing.ingredient_id}">
           ${checked ? '<span class="fridge-check-mark">✓</span>' : ''}
@@ -65,7 +83,11 @@ class FridgeRecommenderView {
           </span>
         </div>
       `;
-    }).join('');
+    }).join('') : `
+      <div style="grid-column: 1 / -1; text-align:center; padding:18px 10px; font-size:0.76rem; color:#94a3b8; line-height:1.5;">
+        냉장고에 넣을 수 있는 술·음료 재료가 아직 없습니다.<br/>주조실에서 소주, 맥주 등을 먼저 주조해보세요!
+      </div>
+    `;
 
     const unlockedAlcoholMatches = this.fridgeEngine.findCraftableFromFridge();
     const fullMatches = unlockedAlcoholMatches.filter(m => m.isFullMatch);
@@ -219,7 +241,7 @@ class FridgeRecommenderView {
     container.querySelectorAll('[data-fridge-cat]').forEach(btn => {
       btn.onclick = () => {
         this.selectedCategory = btn.getAttribute('data-fridge-cat');
-        this.audio.playTap();
+        this.audio?.playTap?.();
         this.render();
       };
     });
@@ -227,7 +249,7 @@ class FridgeRecommenderView {
     container.querySelectorAll('[data-fridge-filter]').forEach(btn => {
       btn.onclick = () => {
         this.filterMode = btn.getAttribute('data-fridge-filter');
-        this.audio.playTap();
+        this.audio?.playTap?.();
         this.render();
       };
     });
@@ -236,7 +258,7 @@ class FridgeRecommenderView {
     if (viewAllSubBtn) {
       viewAllSubBtn.onclick = () => {
         this.filterMode = 'ALL';
-        this.audio.playTap();
+        this.audio?.playTap?.();
         this.render();
       };
     }
@@ -246,7 +268,7 @@ class FridgeRecommenderView {
         const id = Number(chip.getAttribute('data-fridge-ing'));
         this.fridgeEngine.toggleIngredient(id);
         this.lastRandomWinnerKey = null;
-        this.audio.playTap();
+        this.audio?.playTap?.();
         this.render();
       };
     });
@@ -256,7 +278,7 @@ class FridgeRecommenderView {
       selectAllBtn.onclick = () => {
         this.fridgeEngine.selectAllUnlocked();
         this.lastRandomWinnerKey = null;
-        this.audio.playTap();
+        this.audio?.playTap?.();
         this.render();
       };
     }
@@ -266,7 +288,7 @@ class FridgeRecommenderView {
       clearAllBtn.onclick = () => {
         this.fridgeEngine.clearAll();
         this.lastRandomWinnerKey = null;
-        this.audio.playTap();
+        this.audio?.playTap?.();
         this.render();
       };
     }
@@ -278,7 +300,7 @@ class FridgeRecommenderView {
         const picked = this.fridgeEngine.pickRandomRecipe(fullMatches);
         if (!picked) return;
         this.lastRandomWinnerKey = picked.entryKey;
-        this.audio.playSuccess();
+        this.audio?.playSuccess?.();
         this.filterMode = 'FULL';
         this.render();
         if (picked.entryType === 'OFFICIAL' && picked.recipe && this.onShowRecipeDetail) {
@@ -292,7 +314,7 @@ class FridgeRecommenderView {
         const rId = Number(card.getAttribute('data-fridge-rec'));
         const rec = this.recipeBook.getRecipe(rId);
         if (rec && this.onShowRecipeDetail) {
-          this.audio.playTap();
+          this.audio?.playTap?.();
           this.onShowRecipeDetail(rec);
         }
       };

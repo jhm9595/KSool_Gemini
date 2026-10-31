@@ -80,7 +80,10 @@ class KSoolApp {
 
     this.partyGameHubView = new window.KSool.PartyGameHubView('view-party', {
       recipeBook: this.recipeBook,
-      inventory: this.inventory
+      inventory: this.inventory,
+      fridgeEngine: this.fridgeEngine,
+      brandResolver: this.brandResolver,
+      audio: this.audio
     });
 
     this.currentTab = 'brew';
@@ -1213,5 +1216,6 @@ class KSoolApp {
 window.addEventListener('DOMContentLoaded', () => {
   const app = new KSoolApp();
   window.ksoolApp = app;
+  window.app = app;
   app.init();
 });

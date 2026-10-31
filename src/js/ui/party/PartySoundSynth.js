@@ -41,6 +41,10 @@ class PartySoundSynth {
     osc.stop(this.ctx.currentTime + 0.06);
   }
 
+  playSuccess() {
+    this.playUp();
+  }
+
   playUp() {
     if (this.isMuted) return;
     this._initContext();

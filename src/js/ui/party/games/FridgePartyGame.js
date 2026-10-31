@@ -11,14 +11,14 @@ class FridgePartyGame {
   }
 
   init() {
-    const app = window.app;
+    const app = window.ksoolApp || window.app;
     this.view = new window.KSool.FridgeRecommenderView({
       containerId: 'party-game-stage',
       recipeBook: this.hub.recipeBook || app?.recipeBook,
       inventory: this.hub.inventory || app?.inventory,
-      fridgeEngine: app?.fridgeEngine,
-      brandResolver: app?.brandResolver,
-      audio: app?.audio || this.hub.sound,
+      fridgeEngine: this.hub.fridgeEngine || app?.fridgeEngine,
+      brandResolver: this.hub.brandResolver || app?.brandResolver,
+      audio: this.hub.audio || app?.audio || this.hub.sound,
       onShowRecipeDetail: (recipe) => {
         if (app && typeof app.showCraftResultModal === 'function') {
           app.showCraftResultModal({ isSuccess: true, recipe, isNewDiscovery: false });
