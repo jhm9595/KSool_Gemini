@@ -26,15 +26,13 @@ class KoreaMapPickerModal extends BaseDetailPickerModal {
     const pinsHtml = details.map(det => {
       const meta = det.ui_meta || {};
       const detName = this.brandResolver.resolveName(det);
-      const isLocked = this.inventory.userLevel < (det.required_user_level || 1);
       const x = meta.pin_x || 50;
       const y = meta.pin_y || 50;
       return `
-        <button class="map-pin-btn ${isLocked ? 'locked' : ''}"
+        <button class="map-pin-btn"
                 style="left: ${x}%; top: ${y}%;"
-                data-detail-id="${det.detail_id}"
-                data-locked="${isLocked}">
-          <span>${isLocked ? '🔒' : '📍'}</span>
+                data-detail-id="${det.detail_id}">
+          <span>📍</span>
           <span>${detName}</span>
         </button>
       `;
@@ -87,23 +85,20 @@ class SojuBrandShowcaseModal extends BaseDetailPickerModal {
     const cardsHtml = details.map(det => {
       const meta = det.ui_meta || {};
       const detName = this.brandResolver.resolveName(det);
-      const isLocked = this.inventory.userLevel < (det.required_user_level || 1);
       const bottleColor = meta.bottle_color || '#16a34a';
       const capColor = meta.cap_color || '#dc2626';
 
       return `
-        <div class="bottle-showcase-card ${isLocked ? 'locked' : ''}"
-             data-detail-id="${det.detail_id}"
-             data-locked="${isLocked}">
+        <div class="bottle-showcase-card"
+             data-detail-id="${det.detail_id}">
           <div class="bottle-visual">
             <div class="bottle-silhouette" style="background: ${bottleColor};">
               <div class="bottle-cap" style="background: ${capColor};"></div>
               <span>${det.emoji || '🍶'}</span>
             </div>
             <div class="bottle-meta">
-              <div class="bottle-title">${isLocked ? '🔒 ' : ''}${detName}</div>
+              <div class="bottle-title">${detName}</div>
               <div class="bottle-abv">도수 ${meta.abv || 16.5}% · ${meta.taste_tag || '특선'}</div>
-              <div style="font-size:0.62rem; color:#fbbf24;">필요 Lv.${det.required_user_level || 1}</div>
             </div>
           </div>
           <div class="bottle-desc">${det.description || ''}</div>
@@ -146,21 +141,18 @@ class BeerTapShowcaseModal extends BaseDetailPickerModal {
     const cardsHtml = details.map(det => {
       const meta = det.ui_meta || {};
       const detName = this.brandResolver.resolveName(det);
-      const isLocked = this.inventory.userLevel < (det.required_user_level || 1);
       const canColor = meta.can_color || '#1d4ed8';
 
       return `
-        <div class="bottle-showcase-card ${isLocked ? 'locked' : ''}"
-             data-detail-id="${det.detail_id}"
-             data-locked="${isLocked}">
+        <div class="bottle-showcase-card"
+             data-detail-id="${det.detail_id}">
           <div class="bottle-visual">
             <div class="bottle-silhouette" style="background: ${canColor}; border-radius: 6px; width: 26px;">
               <span>🍺</span>
             </div>
             <div class="bottle-meta">
-              <div class="bottle-title">${isLocked ? '🔒 ' : ''}${detName}</div>
+              <div class="bottle-title">${detName}</div>
               <div class="bottle-abv">ABV ${meta.abv || 4.5}% · ${meta.taste_tag || '라거'}</div>
-              <div style="font-size:0.62rem; color:#fbbf24;">필요 Lv.${det.required_user_level || 1}</div>
             </div>
           </div>
           <div class="bottle-desc">${det.description || ''}</div>
@@ -200,11 +192,9 @@ class DefaultShelfPickerModal extends BaseDetailPickerModal {
     const baseName = this.brandResolver.resolveName(baseIng);
     const cardsHtml = details.map(det => {
       const detName = this.brandResolver.resolveName(det);
-      const isLocked = this.inventory.userLevel < (det.required_user_level || 1);
       return `
-        <div class="bottle-showcase-card ${isLocked ? 'locked' : ''}"
-             data-detail-id="${det.detail_id}"
-             data-locked="${isLocked}">
+        <div class="bottle-showcase-card"
+             data-detail-id="${det.detail_id}">
           <div class="bottle-title">${det.emoji || baseIng.emoji} ${detName}</div>
           <div class="bottle-desc">${det.description || ''}</div>
         </div>

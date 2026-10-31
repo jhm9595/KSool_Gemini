@@ -300,10 +300,9 @@ class KSoolApp {
     const totalRecipes = this.recipeBook.getAllRecipes().length;
     const unlockedCount = this.inventory.unlockedRecipeIds.size;
 
-    document.getElementById('unlocked-count').textContent = `${unlockedCount} / ${totalRecipes}`;
-    const levelPill = document.getElementById('user-level-pill');
-    if (levelPill) {
-      levelPill.textContent = `Lv.${this.inventory.userLevel} 주모`;
+    const unlockedEl = document.getElementById('unlocked-count');
+    if (unlockedEl) {
+      unlockedEl.textContent = `${unlockedCount} / ${totalRecipes}`;
     }
 
     const licenseBtn = document.getElementById('toggle-license-btn');
@@ -536,14 +535,7 @@ class KSoolApp {
 
     content.querySelectorAll('[data-detail-id]').forEach(el => {
       el.onclick = () => {
-        const isLocked = el.getAttribute('data-locked') === 'true';
         const detId = Number(el.getAttribute('data-detail-id'));
-        const det = this.recipeBook.getDetailIngredient(detId);
-        if (isLocked) {
-          this.audio.playFail();
-          alert(`이 특산 상세 재료는 주모 레벨 Lv.${det.required_user_level} 이상부터 선택할 수 있습니다! (상단 Lv 배지를 눌러 레벨업 테스트 가능)`);
-          return;
-        }
         modal.classList.remove('active');
         this._addIngredientToPot(baseIng.ingredient_id, detId);
       };
@@ -816,17 +808,6 @@ class KSoolApp {
           this.audio.playTap();
           this.renderAll();
         }
-      };
-    }
-
-    // 레벨 배지 클릭 시 테스트용 레벨 변경 (Lv.1 -> Lv.5 순환)
-    const levelPill = document.getElementById('user-level-pill');
-    if (levelPill) {
-      levelPill.onclick = () => {
-        this.inventory.userLevel = (this.inventory.userLevel % 5) + 1;
-        this.inventory.save();
-        this.audio.playTap();
-        this.renderAll();
       };
     }
   }

@@ -43,6 +43,12 @@ header {
   gap: 8px;
 }
 
+.brand-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
 .k-emblem {
   display: inline-flex;
   align-items: center;
@@ -55,6 +61,13 @@ header {
   font-weight: 900;
   color: #f8fafc;
   letter-spacing: -0.4px;
+}
+
+.brand-inline-sub {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #93c5fd;
+  letter-spacing: -0.2px;
 }
 
 .brand-sub {
