@@ -15,7 +15,8 @@ class CapFlickGame {
     this.isBroken = false;
     this.showQuestionMark = false;
     this.breakTimestamp = 0;
-    this.angle = 14; // 현재 꼬다리 각도
+    this.baseAngle = 0; // 최초 생성 시 병뚜껑 본체 & 꼬다리 연결 부위의 무작위 배치 각도 (0° ~ 360°)
+    this.bendAngle = 0; // 꼬다리와 뚜껑 접점(100px 25px)을 축으로 한 좌우 휨 각도
 
     // 파워 차징 (왔다갔다 타이밍 조절 엔진)
     this.isCharging = false;
@@ -45,8 +46,15 @@ class CapFlickGame {
     this.showQuestionMark = false;
     this.breakTimestamp = 0;
     this.isCharging = false;
-    // 초기 12시 방향에서 살짝 기운 자연스러운 상태
-    this.angle = (Math.random() < 0.5 ? -1 : 1) * (12 + Math.floor(Math.random() * 16));
+    
+    // 1. 최초 병뚜껑 본체와 꼬다리가 돌아가 있는 지점: 360도 무작위 각도로 결정
+    this.baseAngle = Math.floor(Math.random() * 360);
+    window.KSool = window.KSool || {};
+    window.KSool.lastCapAngle = this.baseAngle;
+
+    // 2. 꼬다리 자체의 접점 기준 휨 각도: 초기 0도 부근 자연스러운 상태
+    this.bendAngle = (Math.random() < 0.5 ? -1 : 1) * (2 + Math.floor(Math.random() * 6));
+
     this.currentPower = 0.2;
     this.render();
   }
@@ -121,21 +129,25 @@ class CapFlickGame {
     // 손가락이 안 보이므로 시계방향(1) 또는 반시계방향(-1) 50% 랜덤 결정
     const dir = Math.random() < 0.5 ? 1 : -1;
 
-    // 상호작용 체감 각도 설정:
-    // 톡: 조금 움직임 (약 18° ~ 34°)
-    // 딱: 중간쯤 움직임 (약 65° ~ 95°)
-    // 빡: 거의 180도 가깝게 회전 (약 150° ~ 182°)
+    // 상호작용 체감 각도 설정 (병뚜껑과 꼬다리의 접점을 축으로 회전/휨):
+    // 톡: 조금 움직임 (약 10° ~ 18°)
+    // 딱: 중간쯤 움직임 (약 32° ~ 50°)
+    // 빡: 거의 90도~120도 가깝게 확 꺾임 (약 75° ~ 110°)
     let deltaAngle = 0;
     if (powerLevel === 'light') {
-      deltaAngle = dir * (18 + Math.floor(Math.random() * 16));
+      deltaAngle = dir * (10 + Math.floor(Math.random() * 9));
     } else if (powerLevel === 'normal') {
-      deltaAngle = dir * (65 + Math.floor(Math.random() * 30));
+      deltaAngle = dir * (32 + Math.floor(Math.random() * 19));
     } else {
-      deltaAngle = dir * (150 + Math.floor(Math.random() * 32));
+      deltaAngle = dir * (75 + Math.floor(Math.random() * 35));
     }
 
-    // 360도 전방향 회전 누적
-    this.angle = (this.angle || 0) + deltaAngle;
+    // 접점(100px 25px) 기준 좌우 휨 각도 누적 (현실적인 알루미늄 철사 휨 한계: ±125° 범위 내에서 왕복)
+    let nextBend = (this.bendAngle || 0) + deltaAngle;
+    if (nextBend > 125) nextBend = 125 - (nextBend - 125) * 0.4;
+    if (nextBend < -125) nextBend = -125 - (nextBend + 125) * 0.4;
+    this.bendAngle = Math.round(nextBend);
+
     const strainRatio = Math.min(1, this.currentFatigue / this.maxFatigue);
 
     // 오디오 & 진동 피드백
@@ -153,7 +165,7 @@ class CapFlickGame {
       }
     }
 
-    // 시각 효과: 와이어 360도 회전 및 진동 애니메이션 & 양방향 대칭 타격 텍스트 (톡, 딱!, 빡!)
+    // 시각 효과: 뚜껑 본체는 고정되어 있고, 꼬다리 와이어만 접점(100px 25px)을 축으로 좌우 휨!
     const wireGroup = document.getElementById('cap-wire-transform-group');
     const arena = document.getElementById('cap-flick-arena');
 
@@ -164,8 +176,9 @@ class CapFlickGame {
     }
 
     if (wireGroup) {
-      wireGroup.style.transform = `rotate(${this.angle}deg)`;
-      wireGroup.style.setProperty('--fly-angle', `${this.angle}deg`);
+      wireGroup.style.transformOrigin = '100px 25px';
+      wireGroup.style.transform = `rotate(${this.bendAngle}deg)`;
+      wireGroup.style.setProperty('--fly-angle', `${this.bendAngle}deg`);
     }
 
     // 괄호 없이 임팩트 있는 톡, 딱!, 빡! 텍스트 (게이지와 뚜껑 사이 대칭 표시)
@@ -202,17 +215,19 @@ class CapFlickGame {
       this.isBroken = true;
       this.showQuestionMark = true;
       this.breakTimestamp = performance.now();
+      window.KSool = window.KSool || {};
+      window.KSool.lastCapAngle = this.baseAngle;
 
       if (wireGroup) {
-        const flyAngle = this.angle || 0;
+        wireGroup.style.transformOrigin = '100px 25px';
+        const flyAngle = this.bendAngle || 0;
         wireGroup.style.setProperty('--fly-angle', `${flyAngle}deg`);
         wireGroup.classList.add('broken-fly');
       }
 
-      // 부러진 단면 스텀프를 꼬다리가 끊어진 그 각도에 표시
+      // 부러진 단면 스텀프는 접점에 그대로 표시
       const stump = document.getElementById('soju-cap-broken-stump');
       if (stump) {
-        stump.style.transform = `rotate(${this.angle}deg)`;
         stump.style.opacity = '1';
       }
 
@@ -330,54 +345,57 @@ class CapFlickGame {
               </linearGradient>
             </defs>
 
-            <!-- 1. 초록 메탈 병뚜껑 (화면 정중앙 100, 100 기준) -->
-            <g class="soju-cap-main-group">
-              <!-- 외곽 주름 톱니 (fluted rim 28개) -->
-              <circle cx="100" cy="100" r="76" fill="#14532d"/>
-              <circle cx="100" cy="100" r="73" fill="#16a34a" stroke="#86efac" stroke-width="2"/>
-              <!-- 캡 돔 본체 -->
-              <circle cx="100" cy="100" r="68" fill="url(#cap-metal-grad)" stroke="#22c55e" stroke-width="3"/>
-              <!-- 캡 내부 메탈 음각 링 2겹 -->
-              <circle cx="100" cy="100" r="54" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="2.5"/>
-              <circle cx="100" cy="100" r="38" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="2"/>
-              <circle cx="100" cy="100" r="24" fill="rgba(21,128,61,0.5)" stroke="rgba(134,239,172,0.4)" stroke-width="1.5"/>
-            </g>
+            <!-- 전체 캡 어셈블리 (최초에만 360도 중 랜덤 각도로 위치가 정해지고, 게임 도중에는 고정됨) -->
+            <g id="soju-cap-assembly" style="transform-origin: 100px 100px; transform: rotate(${this.baseAngle || 0}deg);">
+              <!-- 1. 초록 메탈 병뚜껑 (화면 정중앙 100, 100 기준) -->
+              <g class="soju-cap-main-group">
+                <!-- 외곽 주름 톱니 (fluted rim 28개) -->
+                <circle cx="100" cy="100" r="76" fill="#14532d"/>
+                <circle cx="100" cy="100" r="73" fill="#16a34a" stroke="#86efac" stroke-width="2"/>
+                <!-- 캡 돔 본체 -->
+                <circle cx="100" cy="100" r="68" fill="url(#cap-metal-grad)" stroke="#22c55e" stroke-width="3"/>
+                <!-- 캡 내부 메탈 음각 링 2겹 -->
+                <circle cx="100" cy="100" r="54" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="2.5"/>
+                <circle cx="100" cy="100" r="38" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="2"/>
+                <circle cx="100" cy="100" r="24" fill="rgba(21,128,61,0.5)" stroke="rgba(134,239,172,0.4)" stroke-width="1.5"/>
+              </g>
 
-            <!-- 2. 꼬다리가 뜯겨나간 단면 스텀프 (100, 100 기준 360도 회전) -->
-            <g id="soju-cap-broken-stump" 
-               class="soju-cap-broken-stump" 
-               style="opacity: ${this.isBroken ? 1 : 0}; transform-origin: 100px 100px; transform: rotate(${this.angle || 0}deg);">
-              <path d="M92 33 L108 33 L105 25 L95 25 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
-              <circle cx="100" cy="24" r="2.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
-            </g>
+              <!-- 2. 꼬다리가 뜯겨나간 단면 스텀프 (접점 위치에 고정) -->
+              <g id="soju-cap-broken-stump" 
+                 class="soju-cap-broken-stump" 
+                 style="opacity: ${this.isBroken ? 1 : 0};">
+                <path d="M92 33 L108 33 L105 25 L95 25 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
+                <circle cx="100" cy="24" r="2.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
+              </g>
 
-            <!-- 3. 길고 디테일한 알루미늄 꼬다리 와이어 (회전 중심점: 캡 중심 100, 100) -->
-            <g id="cap-wire-transform-group" 
-               class="${this.isBroken ? 'broken-fly' : ''}" 
-               style="transform-origin: 100px 100px; transform: rotate(${this.angle}deg); --fly-angle: ${this.angle || 0}deg;">
-              
-              <!-- 캡과 이어지는 브래킷 조인트 -->
-              <path d="M92 33 L108 33 L105 25 L95 25 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
-              
-              <!-- 2배 길어진 꼬다리 와이어 (현실적인 꼬임 알루미늄 스트랩) -->
-              <path d="M97 25 
-                       C 95 -5, 105 -30, 98 -60 
-                       C 93 -85, 106 -110, 100 -135 
-                       C 98 -149, 110 -155, 115 -147 
-                       C 118 -140, 111 -133, 106 -127
-                       C 112 -105, 99 -80, 104 -55
-                       C 111 -25, 101 0, 103 25 Z" 
-                    fill="url(#wire-silver-grad)" 
-                    stroke="#475569" 
-                    stroke-width="1.5"
-                    filter="drop-shadow(0 6px 12px rgba(0,0,0,0.55))"/>
+              <!-- 3. 길고 디테일한 알루미늄 꼬다리 와이어 (회전 중심점: 병뚜껑과의 접점 100px 25px!) -->
+              <g id="cap-wire-transform-group" 
+                 class="${this.isBroken ? 'broken-fly' : ''}" 
+                 style="transform-origin: 100px 25px; transform: rotate(${this.bendAngle || 0}deg); --fly-angle: ${this.bendAngle || 0}deg;">
+                
+                <!-- 캡과 이어지는 브래킷 조인트 -->
+                <path d="M92 33 L108 33 L105 25 L95 25 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
+                
+                <!-- 2배 길어진 꼬다리 와이어 (현실적인 꼬임 알루미늄 스트랩) -->
+                <path d="M97 25 
+                         C 95 -5, 105 -30, 98 -60 
+                         C 93 -85, 106 -110, 100 -135 
+                         C 98 -149, 110 -155, 115 -147 
+                         C 118 -140, 111 -133, 106 -127
+                         C 112 -105, 99 -80, 104 -55
+                         C 111 -25, 101 0, 103 25 Z" 
+                      fill="url(#wire-silver-grad)" 
+                      stroke="#475569" 
+                      stroke-width="1.5"
+                      filter="drop-shadow(0 6px 12px rgba(0,0,0,0.55))"/>
 
-              <!-- 와이어 하이라이트 반사선 -->
-              <path d="M99 20 C 98 -3, 104 -27, 100 -57 C 96 -83, 105 -108, 102 -130" 
-                    stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
-              
-              <!-- 끝부분 비틀림 컬 팁 -->
-              <circle cx="112" cy="-148" r="3.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
+                <!-- 와이어 하이라이트 반사선 -->
+                <path d="M99 20 C 98 -3, 104 -27, 100 -57 C 96 -83, 105 -108, 102 -130" 
+                      stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+                
+                <!-- 끝부분 비틀림 컬 팁 -->
+                <circle cx="112" cy="-148" r="3.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
+              </g>
             </g>
 
             <!-- 4. 병뚜껑 가운데 ? 버튼 (꼬다리 끊어지면 등장하는 숫자게임 바로가기) -->

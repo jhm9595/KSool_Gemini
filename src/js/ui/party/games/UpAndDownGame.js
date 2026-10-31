@@ -247,8 +247,8 @@ class UpAndDownGame {
           <circle cx="100" cy="100" r="24" fill="rgba(21,128,61,0.5)" stroke="rgba(134,239,172,0.4)" stroke-width="1.5"/>
         </g>
 
-        <!-- 2. 꼬다리가 뜯겨나간 자국 (CapFlick에서 꼬다리가 뚝 끊어진 브래킷 조인트 스텀프) -->
-        <g class="soju-cap-broken-stump" style="transform-origin: 100px 100px;">
+        <!-- 2. 꼬다리가 뜯겨나간 자국 (CapFlick에서 꼬다리가 뚝 끊어진 브래킷 조인트 스텀프 - lastCapAngle과 1:1 회전 동기화) -->
+        <g class="soju-cap-broken-stump" style="transform-origin: 100px 100px; transform: rotate(${window.KSool?.lastCapAngle || 0}deg);">
           <path d="M92 33 L108 33 L105 25 L95 25 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
           <!-- 끊어진 알루미늄 단면 은색 팁 -->
           <circle cx="100" cy="24" r="2.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
