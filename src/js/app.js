@@ -793,18 +793,77 @@ class KSoolApp {
            </div>`
         : '';
 
-      const chainUnlockBanner = result.newlyUnlockedIngredient
-        ? `<div style="width:100%; background:rgba(16,185,129,0.18); border:1px solid #10b981; border-radius:10px; padding:8px; font-size:0.78rem; color:#6ee7b7; font-weight:800; text-align:center;">
-             🔓 연쇄 크래프팅 재료 해금! 이제 주조실에서 [${result.newlyUnlockedIngredient.emoji} ${this.brandResolver.resolveName(result.newlyUnlockedIngredient)}] 재료를 사용할 수 있습니다!
-           </div>`
-        : '';
+      let chainUnlockBanner = '';
+      if (result.newlyUnlockedIngredient) {
+        const newIng = result.newlyUnlockedIngredient;
+        const cat = this.recipeBook.categories.find(c => c.category_id === newIng.category_id);
+        const catLabel = cat ? `${cat.emoji} ${cat.name}` : '📦 재료';
+        const ingName = this.brandResolver.resolveName(newIng);
+
+        chainUnlockBanner = `
+          <div style="width:100%; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.4); border-radius:12px; padding:10px 12px; display:flex; flex-direction:column; gap:7px; text-align:left;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span style="font-size:0.76rem; font-weight:900; color:#6ee7b7; display:flex; align-items:center; gap:4px;">
+                🔓 연쇄 크래프팅 재료 해금!
+              </span>
+              <span style="font-size:0.68rem; color:#a7f3d0; font-weight:700;">주조실에 추가됨</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="cat-chip active" style="font-size:0.7rem; padding:3px 9px; cursor:default; pointer-events:none;">
+                ${catLabel}
+              </span>
+            </div>
+            <div style="background:rgba(15,23,42,0.7); border:1px solid #334155; border-radius:9px; padding:8px 10px; display:flex; flex-wrap:wrap; gap:6px;">
+              <span class="bb-option-btn picked" style="font-size:0.75rem; padding:5px 11px; cursor:default; pointer-events:none; border-color:#10b981; background:rgba(16,185,129,0.2); color:#ecfdf5; display:inline-flex; align-items:center; gap:5px;">
+                <span>${newIng.emoji}</span>
+                <span>${ingName}</span>
+              </span>
+            </div>
+          </div>
+        `;
+      }
 
       let stepUpBanner = '';
       if (result.stepUpInfo && result.stepUpInfo.newStepConfig) {
         const stCfg = result.stepUpInfo.newStepConfig;
-        const newLeafs = (result.stepUpInfo.newlyUnlockedLeafIngredients || [])
-          .map(ing => `${ing.emoji}${this.brandResolver.resolveName(ing)}`)
-          .join(', ');
+        const leafIngs = result.stepUpInfo.newlyUnlockedLeafIngredients || [];
+
+        let leafsHtml = '';
+        if (leafIngs.length > 0) {
+          const byCat = new Map();
+          for (const ing of leafIngs) {
+            const cId = ing.category_id || 'ETC';
+            if (!byCat.has(cId)) byCat.set(cId, []);
+            byCat.get(cId).push(ing);
+          }
+          const catGroupsHtml = Array.from(byCat.entries()).map(([cId, ings]) => {
+            const cat = this.recipeBook.categories.find(c => c.category_id === cId);
+            const catLabel = cat ? `${cat.emoji} ${cat.name}` : '📦 재료';
+            return `
+              <div style="display:flex; flex-direction:column; gap:5px;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span class="cat-chip active" style="font-size:0.68rem; padding:2px 8px; cursor:default; pointer-events:none;">${catLabel}</span>
+                </div>
+                <div style="background:rgba(15,23,42,0.7); border:1px solid #334155; border-radius:9px; padding:6px 8px; display:flex; flex-wrap:wrap; gap:6px;">
+                  ${ings.map(ing => `
+                    <span class="bb-option-btn picked" style="font-size:0.72rem; padding:4px 8px; cursor:default; pointer-events:none; border-color:#f59e0b; background:rgba(245,158,11,0.2); color:#fef3c7; display:inline-flex; align-items:center; gap:4px;">
+                      <span>${ing.emoji}</span>
+                      <span>${this.brandResolver.resolveName(ing)}</span>
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          leafsHtml = `
+            <div style="display:flex; flex-direction:column; gap:6px; margin-top:2px;">
+              <div style="font-size:0.71rem; color:#a7f3d0; font-weight:800;">🎁 신규 기초 재료 추가:</div>
+              ${catGroupsHtml}
+            </div>
+          `;
+        }
+
         stepUpBanner = `
           <div style="width:100%; background:linear-gradient(135deg, rgba(245,158,11,0.22), rgba(168,85,247,0.22)); border:1px solid #f59e0b; border-radius:12px; padding:10px; text-align:left; display:flex; flex-direction:column; gap:5px;">
             <div style="font-size:0.8rem; font-weight:900; color:#fde047;">
@@ -813,11 +872,7 @@ class KSoolApp {
             <div style="font-size:0.73rem; color:#f8fafc; font-weight:700;">
               ${stCfg.ruleBadge} — ${stCfg.subtitle}
             </div>
-            ${
-              newLeafs
-                ? `<div style="font-size:0.71rem; color:#a7f3d0; font-weight:800;">🎁 신규 기초 재료 추가: ${newLeafs}</div>`
-                : ''
-            }
+            ${leafsHtml}
           </div>
         `;
       }
@@ -834,8 +889,8 @@ class KSoolApp {
           <div style="font-size:0.82rem; color:#cbd5e1; line-height:1.5;">
             ${rec.description}
           </div>
-          <div style="width:100%; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; font-size:0.78rem; color:#fcd34d; font-weight:800;">
-            황금비율 레시피: ${recipeFormula}
+          <div style="width:100%; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; font-size:0.8rem; color:#fcd34d; font-weight:800;">
+            ${recipeFormula}
           </div>
           ${quizClearBanner}
           ${chainUnlockBanner}
