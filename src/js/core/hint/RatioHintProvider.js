@@ -19,6 +19,30 @@ class UpDownRatioGameProvider extends RatioHintProvider {
     this.inventory = inventoryManager;
   }
 
+  requiresRatioGame(recipeId) {
+    const items = this.recipeBook.getRecipeItems(recipeId);
+    // 비율이 모두 1인 조합(1:1, 1:1:1 등)은 별도의 비율 Up/Down 게임 불필요
+    return items.some(it => Number(it.ratio) !== 1);
+  }
+
+  ensureUnitRatiosAutoSolved(recipeId) {
+    if (this.requiresRatioGame(recipeId)) return false;
+    const items = this.recipeBook.getRecipeItems(recipeId);
+    const hintState = this.inventory.getHintState(recipeId);
+    let changed = false;
+    items.forEach(it => {
+      const key = String(it.slot_order);
+      if (Number(hintState.solvedRatios[key]) !== Number(it.ratio)) {
+        hintState.solvedRatios[key] = Number(it.ratio);
+        changed = true;
+      }
+    });
+    if (changed) {
+      this.inventory.save();
+    }
+    return true;
+  }
+
   checkRatioGuess(recipeId, slotOrder, guessedNumber) {
     const items = this.recipeBook.getRecipeItems(recipeId);
     const targetItem = items.find(it => Number(it.slot_order) === Number(slotOrder)) || items[0];
@@ -34,19 +58,19 @@ class UpDownRatioGameProvider extends RatioHintProvider {
       return {
         status: 'CORRECT',
         answer,
-        message: `🎉 정답입니다! 이 재료의 황금비율은 [${answer}] 입니다!`
+        shortLabel: 'V'
       };
     } else if (guess < answer) {
       return {
         status: 'UP',
         guess,
-        message: `🔼 [ ${guess} ] 보다 UP! (더 높은 숫자입니다)`
+        shortLabel: 'Up'
       };
     } else {
       return {
         status: 'DOWN',
         guess,
-        message: `🔽 [ ${guess} ] 보다 DOWN! (더 낮은 숫자입니다)`
+        shortLabel: 'Down'
       };
     }
   }

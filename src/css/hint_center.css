@@ -267,6 +267,10 @@
 .pill-ball { color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.35); }
 .pill-out { color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.35); }
 
+.pill-up { color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.35); }
+.pill-down { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.35); }
+.pill-correct { color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.35); }
+
 /* 5-2 비율 Up/Down 미니게임 패널 */
 .updown-ing-list {
   display: flex;

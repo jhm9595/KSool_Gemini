@@ -418,18 +418,24 @@ class HintModalView {
       `;
     } else {
       // [B] 베이스볼 모두 클리어 완료!
+      // 비율이 모두 1인 조합(1:1, 1:1:1 등)은 비율 게임 없이 즉시 1로 자동 완료 처리
+      const needsRatioGame = this.ratioProvider.requiresRatioGame(this.activeRecipeId);
+      if (!needsRatioGame) {
+        this.ratioProvider.ensureUnitRatiosAutoSolved(this.activeRecipeId);
+        this.selectedUpDownSlotOrder = null;
+      }
+
       const solvedSlotsHtml = items.map(it => {
         const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
         const base = this.recipeBook.getBaseIngredient(it.ingredient_id);
         const target = det || base;
         const solvedVal = hintState.solvedRatios[String(it.slot_order)];
-        const isSelected = Number(this.selectedUpDownSlotOrder) === Number(it.slot_order);
+        const isSelected = needsRatioGame && Number(this.selectedUpDownSlotOrder) === Number(it.slot_order);
         const detailBadge = det ? `<span class="slot-detail-tag">특산</span>` : '';
 
         return `
           <div class="pot-slot filled sug-slot-card hint-ratio-slot ${isSelected ? 'active-ratio-slot' : ''} ${solvedVal ? 'solved-ratio-slot' : ''}"
-               data-updown-slot="${it.slot_order}"
-               title="클릭하여 비율 Up/Down 추리하기">
+               ${needsRatioGame ? `data-updown-slot="${it.slot_order}" title="클릭하여 비율 Up/Down 추리하기"` : `style="cursor:default;"`}>
             ${detailBadge}
             <span class="slot-emoji">${target ? target.emoji : '🍶'}</span>
             <span class="slot-name">${target ? this.brandResolver.resolveName(target) : ''}</span>
@@ -439,46 +445,43 @@ class HintModalView {
       }).join('');
 
       let upDownDrawerHtml = '';
-      if (this.selectedUpDownSlotOrder !== null) {
+      if (needsRatioGame && this.selectedUpDownSlotOrder !== null) {
         const selectedItem = items.find(it => Number(it.slot_order) === Number(this.selectedUpDownSlotOrder)) || items[0];
-        const det = this.recipeBook.getDetailIngredient(selectedItem.detail_ingredient_id);
-        const base = this.recipeBook.getBaseIngredient(selectedItem.ingredient_id);
-        const target = det || base;
-        const targetName = target ? this.brandResolver.resolveName(target) : '';
         const solvedVal = hintState.solvedRatios[String(selectedItem.slot_order)];
 
         const numpadHtml = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => `
           <button class="num-btn ${Number(solvedVal) === num ? 'correct-num' : ''}" data-updown-num="${num}">${num}</button>
         `).join('');
 
-        const feedbackBannerHtml = this.lastUpDownResult
-          ? `<div class="updown-feedback-banner ${this.lastUpDownResult.status.toLowerCase()}">${this.lastUpDownResult.message}</div>`
-          : `<div class="updown-feedback-banner">${target.emoji} <b>${targetName}</b>의 투입 비율(1 ~ 10)을 눌러 Up/Down을 확인하세요!</div>`;
+        let resultRowHtml = '';
+        if (this.lastUpDownResult) {
+          const st = this.lastUpDownResult.status;
+          const cls = st === 'UP' ? 'pill-up' : (st === 'DOWN' ? 'pill-down' : 'pill-correct');
+          const text = st === 'UP' ? 'Up' : (st === 'DOWN' ? 'Down' : 'V');
+          resultRowHtml = `
+            <div class="bb-history-row updown-score-row">
+              <span class="bb-score-pills"><span class="${cls}">${text}</span></span>
+            </div>
+          `;
+        } else if (solvedVal) {
+          resultRowHtml = `
+            <div class="bb-history-row updown-score-row">
+              <span class="bb-score-pills"><span class="pill-correct">V</span></span>
+            </div>
+          `;
+        }
 
         upDownDrawerHtml = `
           <div class="hint-section-box updown-drawer-box">
-            <div class="hint-section-title">
-              <span>🔢 [${target.emoji} ${targetName}] 황금비율 Up/Down</span>
-              <span style="font-size:0.68rem; color:#fcd34d;">1 ~ 10 숫자 선택</span>
-            </div>
-            ${feedbackBannerHtml}
             <div class="numpad-1to10">${numpadHtml}</div>
+            ${resultRowHtml}
           </div>
         `;
       }
 
       mainSectionHtml = `
         <div class="hint-section-box">
-          <div class="hint-section-title">
-            <span>🎉 재료 추리 완료! (비율 ? 맞추기)</span>
-            <span style="font-size:0.68rem; color:#6ee7b7;">재료를 눌러 ? 비율을 추리하세요</span>
-          </div>
           <div class="baseball-slots">${solvedSlotsHtml}</div>
-          ${this.selectedUpDownSlotOrder === null ? `
-            <div style="font-size:0.75rem; color:#fcd34d; text-align:center; padding:4px 0; font-weight:700;">
-              👆 위 정답 재료 카드 중 하나를 클릭하면 아래에 비율 Up/Down 추리창이 열립니다!
-            </div>
-          ` : ''}
         </div>
         ${upDownDrawerHtml}
       `;
