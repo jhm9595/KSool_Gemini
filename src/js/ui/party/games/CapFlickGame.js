@@ -23,6 +23,7 @@ class CapFlickGame {
     this.currentPower = 0.2; // 0.0 ~ 1.0
     this.animLoopId = null;
     this.lastHitPower = 'normal'; // 'light' | 'normal' | 'max'
+    this.hitTextTimeout = null;
   }
 
   init() {
@@ -33,6 +34,10 @@ class CapFlickGame {
     if (this.animLoopId) {
       cancelAnimationFrame(this.animLoopId);
       this.animLoopId = null;
+    }
+    if (this.hitTextTimeout) {
+      clearTimeout(this.hitTextTimeout);
+      this.hitTextTimeout = null;
     }
     this.maxFatigue = Math.floor(Math.random() * 11) + 18; // 18 ~ 28회 상당 피로도
     this.currentFatigue = 0;
@@ -133,10 +138,9 @@ class CapFlickGame {
       }
     }
 
-    // 시각 효과: 와이어 스프링 흔들림 & 타격 강도 배지
+    // 시각 효과: 와이어 스프링 흔들림 & 양방향 대칭 타격 텍스트 (톡, 딱!, 빡!)
     const wireGroup = document.getElementById('cap-wire-transform-group');
     const arena = document.getElementById('cap-flick-arena');
-    const feedbackBadge = document.getElementById('flick-feedback-badge');
 
     if (arena) {
       arena.classList.remove('hit-light', 'hit-normal', 'hit-max');
@@ -151,18 +155,34 @@ class CapFlickGame {
       wireGroup.classList.add('spring-shake');
     }
 
-    if (feedbackBadge) {
-      if (powerLevel === 'light') {
-        feedbackBadge.textContent = '🟢 톡! (살살)';
-        feedbackBadge.className = 'flick-feedback-badge light show';
-      } else if (powerLevel === 'normal') {
-        feedbackBadge.textContent = '🟡 딱! (보통)';
-        feedbackBadge.className = 'flick-feedback-badge normal show';
-      } else {
-        feedbackBadge.textContent = '💥 빡!! (풀파워)';
-        feedbackBadge.className = 'flick-feedback-badge max show';
-      }
+    // 괄호 없이 임팩트 있는 톡, 딱!, 빡! 텍스트 (게이지와 뚜껑 사이 대칭 표시)
+    let hitWord = '';
+    let hitClass = '';
+
+    if (powerLevel === 'light') {
+      hitWord = '톡';
+      hitClass = 'tok';
+    } else if (powerLevel === 'normal') {
+      hitWord = '딱!';
+      hitClass = 'ttak';
+    } else {
+      hitWord = '빡!';
+      hitClass = 'ppak';
     }
+
+    const hitWordEls = document.querySelectorAll('.flick-hit-word');
+    hitWordEls.forEach(el => {
+      el.textContent = hitWord;
+      el.className = `flick-hit-word ${hitClass} show`;
+      el.classList.remove('pop-anim');
+      void el.offsetWidth;
+      el.classList.add('pop-anim');
+    });
+
+    clearTimeout(this.hitTextTimeout);
+    this.hitTextTimeout = setTimeout(() => {
+      hitWordEls.forEach(el => el.classList.remove('show'));
+    }, 750);
 
     // 부러짐 판정 체크 (피로도 한계 도달)
     if (this.currentFatigue >= this.maxFatigue) {
@@ -179,10 +199,10 @@ class CapFlickGame {
       setTimeout(() => this.hub.sound.playExplosion(), 120);
       this.hub.vibratePenalty();
 
-      if (feedbackBadge) {
-        feedbackBadge.textContent = '💥 꼬다리 격파! 벌칙 원샷!';
-        feedbackBadge.className = 'flick-feedback-badge max show';
-      }
+      hitWordEls.forEach(el => {
+        el.textContent = '빡!';
+        el.className = 'flick-hit-word ppak show pop-anim';
+      });
 
       // 300ms 후 병뚜껑 가운데 ? 버튼 및 Up & Down 이동 안내 등장
       setTimeout(() => {
@@ -252,12 +272,17 @@ class CapFlickGame {
 
     container.innerHTML = `
       <div class="party-game-box capflick-minimal-box tabletop-symmetrical">
-        <!-- 상단: 대칭 타이밍 파워 게이지 (상대방 플레이어용 180도 회전) -->
+        <!-- 1. 상단: 대칭 타이밍 파워 게이지 (상대방 플레이어용 180도 회전) -->
         <div class="flick-power-section top-symmetrical">
           ${meterHtml}
         </div>
 
-        <!-- 메인 인터랙션 아레나 (중앙 초록 병뚜껑 + 2배 길어진 꼬다리 와이어) -->
+        <!-- 2. 상단 타격 강도 피드백 (게이지와 뚜껑 사이, 대칭 180도 회전, 정중앙 세로줄) -->
+        <div class="flick-hit-slot top-symmetrical">
+          <div class="flick-hit-word" id="flick-hit-top"></div>
+        </div>
+
+        <!-- 3. 메인 인터랙션 아레나 (중앙 초록 병뚜껑 + 2배 길어진 꼬다리 와이어) -->
         <div class="capflick-center-stage" id="cap-flick-arena">
           <svg class="soju-cap-flick-svg" viewBox="0 0 320 380" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -341,9 +366,6 @@ class CapFlickGame {
             </g>
           </svg>
 
-          <!-- 실시간 타격 강도 팝업 배지 -->
-          <div id="flick-feedback-badge" class="flick-feedback-badge"></div>
-
           <!-- 꼬다리 탈락 후 Up & Down 안내 및 계속하기 힌트 -->
           <div id="cap-updown-guide-pill" class="cap-updown-guide-pill ${this.showQuestionMark ? 'show' : ''}">
             <button type="button" class="btn-jump-updown" id="btn-jump-updown">
@@ -355,7 +377,12 @@ class CapFlickGame {
           </div>
         </div>
 
-        <!-- 하단: 대칭 타이밍 파워 게이지 (내 쪽 플레이어용 정방향) -->
+        <!-- 4. 하단 타격 강도 피드백 (뚜껑과 게이지 사이, 정방향 0도, 정중앙 세로줄) -->
+        <div class="flick-hit-slot bottom-symmetrical">
+          <div class="flick-hit-word" id="flick-hit-bottom"></div>
+        </div>
+
+        <!-- 5. 하단: 대칭 타이밍 파워 게이지 (내 쪽 플레이어용 정방향) -->
         <div class="flick-power-section bottom-symmetrical">
           ${meterHtml}
         </div>
@@ -442,6 +469,10 @@ class CapFlickGame {
     if (this.animLoopId) {
       cancelAnimationFrame(this.animLoopId);
       this.animLoopId = null;
+    }
+    if (this.hitTextTimeout) {
+      clearTimeout(this.hitTextTimeout);
+      this.hitTextTimeout = null;
     }
     this.isCharging = false;
     this.showQuestionMark = false;

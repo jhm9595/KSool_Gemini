@@ -825,41 +825,70 @@
   80% { transform: translate(4px, -2px) scale(0.99); }
 }
 
-/* 실시간 타격 피드백 배지 */
-.flick-feedback-badge {
-  position: absolute;
-  top: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 0.95rem;
-  font-weight: 900;
-  color: #ffffff;
+/* 게이지와 뚜껑 사이 대칭 타격 강도 텍스트 슬롯 (정중앙 세로줄 맞춤) */
+.flick-hit-slot {
+  width: 100%;
+  max-width: 360px;
+  height: clamp(34px, 5vh, 44px);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s, transform 0.2s;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-  z-index: 10;
+  z-index: 15;
 }
 
-.flick-feedback-badge.show {
+.flick-hit-slot.top-symmetrical {
+  transform: rotate(180deg);
+}
+
+.flick-hit-word {
+  font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
+  font-size: clamp(2rem, 3.8vh, 2.6rem);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  user-select: none;
+}
+
+.flick-hit-word.show {
   opacity: 1;
-  transform: translateX(-50%) translateY(-4px);
+  transform: scale(1);
 }
-.flick-feedback-badge.light {
-  background: rgba(16, 185, 129, 0.9);
-  border: 1.5px solid #86efac;
+
+.flick-hit-word.pop-anim {
+  animation: flickWordImpact 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.flick-feedback-badge.normal {
-  background: rgba(234, 179, 8, 0.9);
-  border: 1.5px solid #fde047;
-  color: #0f172a;
+
+/* 톡: 청량 에메랄드 그린 */
+.flick-hit-word.tok {
+  color: #4ade80;
+  text-shadow: 0 0 16px rgba(74, 222, 128, 0.8), 0 0 32px rgba(34, 197, 94, 0.5);
 }
-.flick-feedback-badge.max {
-  background: rgba(239, 68, 68, 0.95);
-  border: 2px solid #fca5a5;
-  animation: pulseDot 0.4s infinite alternate;
+
+/* 딱!: 네온 골드 옐로우 */
+.flick-hit-word.ttak {
+  color: #fde047;
+  font-size: clamp(2.3rem, 4.3vh, 3rem);
+  text-shadow: 0 0 20px rgba(253, 224, 71, 0.9), 0 0 40px rgba(234, 179, 8, 0.6);
+}
+
+/* 빡!: 강렬한 크림슨 레드 폭발 */
+.flick-hit-word.ppak {
+  color: #ff4d6d;
+  font-size: clamp(2.6rem, 4.8vh, 3.4rem);
+  text-shadow: 0 0 24px rgba(255, 77, 109, 0.95), 0 0 50px rgba(239, 68, 68, 0.8);
+}
+
+@keyframes flickWordImpact {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.35); opacity: 1; }
+  75% { transform: scale(0.95); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 /* 꼬다리 탈락 후 병뚜껑 가운데 ? 버튼 (SVG 내부) */
@@ -1626,62 +1655,67 @@
   will-change: transform, opacity;
 }
 
-/* 중앙 가벼운 구분선 & 타이머/컨트롤 허브 */
+/* 중앙 가벼운 구분선 & 아이콘 전용 조작 버튼 */
 .hunmin-center-divider-zone {
   width: 100%;
   max-width: 440px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 12px;
   margin: 4px 0;
   z-index: 10;
 }
 
 .hunmin-light-divider {
-  width: 100%;
+  flex: 1;
   height: 1.5px;
   background: linear-gradient(90deg, transparent 0%, rgba(148, 163, 184, 0.35) 20%, rgba(56, 189, 248, 0.6) 50%, rgba(148, 163, 184, 0.35) 80%, transparent 100%);
   box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
 }
 
-.hunmin-center-meta-row {
+.hunmin-center-action-icons {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 12px;
-  padding: 0 4px;
+  gap: 10px;
 }
 
-.hunmin-center-timer {
-  flex: 1;
+.hunmin-icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1.5px solid rgba(56, 189, 248, 0.5);
+  color: #f1f5f9;
+  font-size: 1.15rem;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.hunmin-center-quick-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.hunmin-float-btn.mini {
-  padding: 4px 10px;
-  font-size: 0.75rem;
-  border-radius: 8px;
-  background: rgba(30, 41, 59, 0.85);
-  border: 1px solid rgba(56, 189, 248, 0.4);
-  color: #cbd5e1;
-  font-weight: 700;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
   transition: all 0.15s ease;
 }
 
-.hunmin-float-btn.mini:hover {
-  background: rgba(56, 189, 248, 0.2);
-  color: #ffffff;
+.hunmin-icon-btn:hover {
+  background: rgba(56, 189, 248, 0.25);
   border-color: #38bdf8;
+  transform: scale(1.08);
+}
+
+.hunmin-icon-btn:active {
+  transform: scale(0.92);
+}
+
+/* 양방향 대칭 흘러가는 시간 표시 */
+.hunmin-symmetric-timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto;
+  pointer-events: none;
 }
 
 .hunmin-pure-stage.urgent {

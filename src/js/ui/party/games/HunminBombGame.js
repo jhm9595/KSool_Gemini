@@ -286,45 +286,46 @@ class HunminBombGame {
     const isUnlimited = this.bombTimeSetting === 'unlimited';
     const timePercent = isUnlimited ? 100 : Math.max(0, Math.min(100, (this.remainingBombTime / this.bombTimeSetting) * 100));
     const isUrgent = !isUnlimited && this.remainingBombTime <= 1.5 && !this.isExploded;
+    const timeString = isUnlimited ? '∞ 무제한' : `⏱️ ${this.remainingBombTime.toFixed(1)}초`;
+
+    const timerHtml = `
+      <div class="hunmin-symmetric-timer">
+        <div class="hunmin-time-digits ${isUrgent ? 'danger' : ''}">
+          ${timeString}
+        </div>
+        <div class="hunmin-timer-track">
+          <div class="hunmin-timer-fill ${isUrgent ? 'danger' : ''}" style="width:${timePercent}%;"></div>
+        </div>
+      </div>
+    `;
 
     container.innerHTML = `
       <div class="party-game-box hunmin-pure-stage tabletop-symmetrical ${isUrgent ? 'urgent' : ''}" id="hunmin-touch-screen">
-        <!-- 1. 상단 자음 (상대방 플레이어용 180도 회전 대칭) -->
+        <!-- 1. 상단 자음 & 대칭 타이머 (상대방 플레이어용 180도 회전 대칭) -->
         <div class="hunmin-symmetric-half top-half">
           <div class="pure-chosung-text pop-anim">
             ${this.currentCho}
           </div>
+          ${timerHtml}
         </div>
 
-        <!-- 2. 중앙 영역 구분선 & 타이머/조작 허브 -->
+        <!-- 2. 중앙 영역 구분선 & 아이콘 전용 조작 버튼 (텍스트 제거) -->
         <div class="hunmin-center-divider-zone">
           <div class="hunmin-light-divider"></div>
-
-          <div class="hunmin-center-meta-row">
-            <div class="hunmin-center-timer">
-              <div class="hunmin-timer-track">
-                <div class="hunmin-timer-fill ${isUrgent ? 'danger' : ''}" id="hunmin-timer-fill" style="width:${timePercent}%;"></div>
-              </div>
-              <div class="hunmin-time-digits ${isUrgent ? 'danger' : ''}" id="hunmin-time-digits">
-                ${isUnlimited ? '∞ 무제한' : `⏱️ ${this.remainingBombTime.toFixed(1)}초`}
-              </div>
-            </div>
-
-            <div class="hunmin-center-quick-actions">
-              <button type="button" class="hunmin-float-btn mini" id="btn-shuffle-cho" title="다른 자음 제시">
-                🔀 자음변경
-              </button>
-              <button type="button" class="hunmin-float-btn mini" id="btn-open-setup" title="시간 설정">
-                ⚙️ 시간설정
-              </button>
-            </div>
+          <div class="hunmin-center-action-icons">
+            <button type="button" class="hunmin-icon-btn" id="btn-shuffle-cho" title="자음 변경">
+              🔀
+            </button>
+            <button type="button" class="hunmin-icon-btn" id="btn-open-setup" title="시간 설정">
+              ⚙️
+            </button>
           </div>
-
           <div class="hunmin-light-divider"></div>
         </div>
 
-        <!-- 3. 하단 자음 (내 쪽 플레이어용 정방향 0도) -->
+        <!-- 3. 하단 자음 & 대칭 타이머 (내 쪽 플레이어용 정방향 0도) -->
         <div class="hunmin-symmetric-half bottom-half">
+          ${timerHtml}
           <div class="pure-chosung-text pop-anim">
             ${this.currentCho}
           </div>
@@ -336,8 +337,8 @@ class HunminBombGame {
   }
 
   _updatePlayingUI() {
-    const timeEl = document.getElementById('hunmin-time-digits');
-    const fillEl = document.getElementById('hunmin-timer-fill');
+    const timeEls = document.querySelectorAll('.hunmin-time-digits');
+    const fillEls = document.querySelectorAll('.hunmin-timer-fill');
     const stage = document.getElementById('hunmin-touch-screen');
 
     if (this.bombTimeSetting === 'unlimited') return;
@@ -348,18 +349,22 @@ class HunminBombGame {
       else stage.classList.remove('urgent');
     }
 
-    if (timeEl) {
-      timeEl.textContent = `⏱️ ${this.remainingBombTime.toFixed(1)}초`;
-      if (isUrgent) timeEl.classList.add('danger');
-      else timeEl.classList.remove('danger');
-    }
+    const timeString = isUrgent
+      ? `🚨 ${this.remainingBombTime.toFixed(1)}초`
+      : `⏱️ ${this.remainingBombTime.toFixed(1)}초`;
 
-    if (fillEl) {
-      const timePercent = Math.max(0, Math.min(100, (this.remainingBombTime / this.bombTimeSetting) * 100));
-      fillEl.style.width = `${timePercent}%`;
-      if (isUrgent) fillEl.classList.add('danger');
-      else fillEl.classList.remove('danger');
-    }
+    timeEls.forEach(el => {
+      el.textContent = timeString;
+      if (isUrgent) el.classList.add('danger');
+      else el.classList.remove('danger');
+    });
+
+    const timePercent = Math.max(0, Math.min(100, (this.remainingBombTime / this.bombTimeSetting) * 100));
+    fillEls.forEach(el => {
+      el.style.width = `${timePercent}%`;
+      if (isUrgent) el.classList.add('danger');
+      else el.classList.remove('danger');
+    });
   }
 
   _bindPlayingEvents() {
