@@ -251,24 +251,32 @@ class HintModalView {
   }
 
   _getOptionsForStage(stage) {
+    const unlockedBaseIngs = Array.from(this.recipeBook.baseIngredients.values()).filter(ing =>
+      this.inventory.isIngredientAvailable(ing.ingredient_id)
+    );
+
     if (stage === 1) {
-      return this.recipeBook.categories.map(c => ({
-        token: c.category_id,
-        label: `${c.emoji} ${c.name}`
-      }));
+      return this.recipeBook.categories
+        .filter(c => unlockedBaseIngs.some(ing => ing.category_id === c.category_id))
+        .map(c => ({
+          token: c.category_id,
+          label: `${c.emoji} ${c.name}`
+        }));
     }
     if (stage === 2) {
-      return Array.from(this.recipeBook.baseIngredients.values()).map(ing => ({
+      return unlockedBaseIngs.map(ing => ({
         token: String(ing.ingredient_id),
         label: `${ing.emoji} ${this.brandResolver.resolveName(ing)}`
       }));
     }
-    // Stage 3: 상세 재료 + 기본 대표 재료 후보 표시
-    const detailOpts = Array.from(this.recipeBook.detailIngredients.values()).map(det => ({
-      token: `D:${det.detail_id}`,
-      label: `${det.emoji || '✨'} ${this.brandResolver.resolveName(det)}`
-    }));
-    const baseOpts = Array.from(this.recipeBook.baseIngredients.values()).map(ing => ({
+    // Stage 3: 해금된 대표 재료의 상세 재료 + 기본 대표 재료 후보 표시
+    const detailOpts = Array.from(this.recipeBook.detailIngredients.values())
+      .filter(det => this.inventory.isIngredientAvailable(det.base_ingredient_id))
+      .map(det => ({
+        token: `D:${det.detail_id}`,
+        label: `${det.emoji || '✨'} ${this.brandResolver.resolveName(det)}`
+      }));
+    const baseOpts = unlockedBaseIngs.map(ing => ({
       token: `B:${ing.ingredient_id}`,
       label: `${ing.emoji} ${this.brandResolver.resolveName(ing)}(기본)`
     }));

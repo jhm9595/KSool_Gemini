@@ -41,14 +41,6 @@
     </div>
   </header>
 
-  <!-- 4단 메인 탭 네비게이션 -->
-  <nav class="tab-bar">
-    <button class="tab-btn active" data-tab-target="brew">⚗️ 주조실</button>
-    <button class="tab-btn" data-tab-target="collection">📜 도감·힌트</button>
-    <button class="tab-btn" data-tab-target="fridge">🧊 냉장고추천</button>
-    <button class="tab-btn" data-tab-target="suggestions">👍 조합추천</button>
-  </nav>
-
   <!-- [탭 1] 주조실 (Crafting View) -->
   <section id="view-brew" class="view active">
     <div class="pot-section">
@@ -89,6 +81,26 @@
 
   <!-- [탭 4] 초간단 조합 추천 & 관리자 '딸깍' 뷰 -->
   <section id="view-suggestions" class="view"></section>
+
+  <!-- 모바일 하단 4단 메인 탭 네비게이션 (Bottom Bar) -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab-target="brew">
+      <span style="font-size:1.15rem;">⚗️</span>
+      <span>주조실</span>
+    </button>
+    <button class="tab-btn" data-tab-target="collection">
+      <span style="font-size:1.15rem;">📜</span>
+      <span>도감·힌트</span>
+    </button>
+    <button class="tab-btn" data-tab-target="fridge">
+      <span style="font-size:1.15rem;">🧊</span>
+      <span>냉장고추천</span>
+    </button>
+    <button class="tab-btn" data-tab-target="suggestions">
+      <span style="font-size:1.15rem;">👍</span>
+      <span>조합추천</span>
+    </button>
+  </nav>
 
   <!-- [모달 1] 대표 재료별 전용 상세 재료 선택 모달 (팔도 지도 / 소주 쇼케이스 등) -->
   <div id="detail-picker-modal" class="modal-overlay">

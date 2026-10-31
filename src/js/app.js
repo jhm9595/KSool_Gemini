@@ -72,14 +72,20 @@ class KSoolApp {
     });
 
     this.currentTab = 'brew';
-    this.selectedIngCategory = 'ALL';
+    this.selectedIngCategory = 'BASIC';
     this.selectedRecipeCategory = '전체';
   }
 
   async init() {
     const bundleData = await this._loadHybridData();
+    // 1. 먼저 RecipeBook에 마스터 데이터를 로드해야 스타터(기초) 재료들을 인식할 수 있음
+    this.recipeBook.load(bundleData, []);
+    // 2. InventoryManager 초기화 (모든 리프 기초 재료 강제 해금 보장)
     this.inventory.init();
-    this.recipeBook.load(bundleData, this.inventory.promotedCustomRecipes);
+    if (this.inventory.promotedCustomRecipes.length > 0) {
+      this.recipeBook.load(bundleData, this.inventory.promotedCustomRecipes);
+    }
+    this.inventory.save();
     this.suggestionService.init();
     this.fridgeEngine.init();
 
@@ -224,14 +230,23 @@ class KSoolApp {
     const bar = document.getElementById('ing-cat-bar');
     if (!bar) return;
 
-    const allChip = `<button class="cat-chip ${this.selectedIngCategory === 'ALL' ? 'active' : ''}" data-ing-cat="ALL">전체 재료</button>`;
-    const catChips = this.recipeBook.categories.map(c => `
+    const allBase = Array.from(this.recipeBook.baseIngredients.values());
+
+    // 해금된 재료가 1개 이상 존재하는 재료 유형(Category)만 노출 (미해금 재료 유형 숨김)
+    const visibleCategories = this.recipeBook.categories.filter(c =>
+      allBase.some(ing => ing.category_id === c.category_id && this.inventory.isIngredientAvailable(ing.ingredient_id))
+    );
+
+    const catChips = visibleCategories.map(c => `
       <button class="cat-chip ${this.selectedIngCategory === c.category_id ? 'active' : ''}" data-ing-cat="${c.category_id}">
         ${c.emoji} ${c.name}
       </button>
     `).join('');
 
-    bar.innerHTML = allChip + catChips;
+    // '전체 재료' 탭은 제일 마지막 탭으로 배치
+    const allChip = `<button class="cat-chip ${this.selectedIngCategory === 'ALL' ? 'active' : ''}" data-ing-cat="ALL">📦 전체 재료</button>`;
+
+    bar.innerHTML = catChips + allChip;
     bar.querySelectorAll('[data-ing-cat]').forEach(btn => {
       btn.onclick = () => {
         this.selectedIngCategory = btn.getAttribute('data-ing-cat');
@@ -246,23 +261,20 @@ class KSoolApp {
     const grid = document.getElementById('ingredients-grid');
     if (!grid) return;
 
-    const allBase = Array.from(this.recipeBook.baseIngredients.values());
-    const filtered = this.selectedIngCategory === 'ALL'
-      ? allBase
-      : allBase.filter(i => i.category_id === this.selectedIngCategory);
+    // 미해금된 재료는 화면에 아예 보이지 않도록 필터링
+    const unlockedBase = Array.from(this.recipeBook.baseIngredients.values()).filter(ing =>
+      this.inventory.isIngredientAvailable(ing.ingredient_id)
+    );
 
-    // 해금된 재료를 앞쪽에 정렬
-    filtered.sort((a, b) => {
-      const aAvail = this.inventory.isIngredientAvailable(a.ingredient_id) ? 0 : 1;
-      const bAvail = this.inventory.isIngredientAvailable(b.ingredient_id) ? 0 : 1;
-      if (aAvail !== bAvail) return aAvail - bAvail;
-      return a.ingredient_id - b.ingredient_id;
-    });
+    const filtered = this.selectedIngCategory === 'ALL'
+      ? unlockedBase
+      : unlockedBase.filter(i => i.category_id === this.selectedIngCategory);
+
+    filtered.sort((a, b) => a.ingredient_id - b.ingredient_id);
 
     const potSlots = this.craftingPot.getSlots();
 
     grid.innerHTML = filtered.map(ing => {
-      const isAvail = this.inventory.isIngredientAvailable(ing.ingredient_id);
       const inPotCount = potSlots
         .filter(s => s.baseId === ing.ingredient_id)
         .reduce((acc, s) => acc + s.count, 0);
@@ -280,11 +292,10 @@ class KSoolApp {
       const name = this.brandResolver.resolveName(ing);
 
       return `
-        <div class="ing-card ${inPotCount > 0 ? 'in-pot' : ''} ${isAvail ? '' : 'locked-ing'}"
-             data-base-ing-id="${ing.ingredient_id}"
-             data-avail="${isAvail}">
+        <div class="ing-card ${inPotCount > 0 ? 'in-pot' : ''}"
+             data-base-ing-id="${ing.ingredient_id}">
           ${pickerLabel ? `<span class="ing-picker-indicator">${pickerLabel}</span>` : ''}
-          <span class="ing-emoji">${isAvail ? ing.emoji : '🔒'}</span>
+          <span class="ing-emoji">${ing.emoji}</span>
           <span class="ing-name">${name}</span>
           ${inPotCount > 0 ? `<span class="slot-count-badge">${inPotCount}</span>` : ''}
         </div>
@@ -294,22 +305,9 @@ class KSoolApp {
     grid.querySelectorAll('[data-base-ing-id]').forEach(card => {
       card.onclick = () => {
         const baseId = Number(card.getAttribute('data-base-ing-id'));
-        const isAvail = card.getAttribute('data-avail') === 'true';
         const baseIng = this.recipeBook.getBaseIngredient(baseId);
-
-        if (!isAvail) {
-          this.audio.playFail();
-          const unlockRec = baseIng && baseIng.unlocked_by_recipe_id
-            ? this.recipeBook.getRecipe(baseIng.unlocked_by_recipe_id)
-            : null;
-          const hintMsg = unlockRec
-            ? `'${this.brandResolver.resolveName(baseIng)}' 재료는 먼저 주조실에서 [${this.brandResolver.resolveName(unlockRec)}] 레시피를 합성하면 해금됩니다!\n(또는 상단 '🌱 재료: 연쇄 해금' 버튼을 눌러 전체 재료를 바로 열어볼 수 있습니다.)`
-            : '아직 해금되지 않은 재료입니다.';
-          alert(hintMsg);
-          return;
-        }
-
         const details = this.recipeBook.getDetailsForBase(baseId);
+
         if (details.length > 0 && baseIng.picker_component && baseIng.picker_component !== 'NONE') {
           this.audio.playTap();
           this.openDetailPickerModal(baseIng, details);

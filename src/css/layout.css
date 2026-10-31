@@ -113,32 +113,34 @@ header {
   color: #6ee7b7;
 }
 
-/* 3단 탭 네비게이션 */
+/* 하단 4단 탭 네비게이션 (모바일 퍼스트 Bottom Bar) */
 .tab-bar {
   display: flex;
   background: #0f172a;
-  border-bottom: 2px solid var(--primary);
+  border-top: 2px solid var(--primary);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   flex-shrink: 0;
   width: 100%;
-  z-index: 15;
+  z-index: 20;
 }
 
 .tab-btn {
   flex: 1;
-  min-height: 46px;
-  padding: 8px 6px;
+  min-height: 54px;
+  padding: 6px 4px;
   text-align: center;
-  font-size: 0.86rem;
+  font-size: 0.8rem;
   font-weight: 800;
   color: #94a3b8;
-  background: #162032;
+  background: #131c2e;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 3px;
 }
 
 .tab-btn.active {

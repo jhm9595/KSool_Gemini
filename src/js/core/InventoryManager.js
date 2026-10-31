@@ -69,7 +69,11 @@ class InventoryManager {
 
   isRecipeChallengeable(recipe) {
     if (!recipe) return false;
-    return this.userLevel >= (recipe.required_level || 1);
+    if (this.userLevel < (recipe.required_level || 1)) return false;
+    // 해당 레시피를 구성하는 하위 대표 재료들이 모두 현재 해금되어 있어야 도전/힌트 추리 가능!
+    const reqItems = this.recipeBook.getRecipeItems(recipe.recipe_id);
+    if (!reqItems || reqItems.length === 0) return false;
+    return reqItems.every(it => this.isIngredientAvailable(it.ingredient_id));
   }
 
   unlockRecipe(recipeId) {

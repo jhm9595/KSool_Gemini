@@ -2,52 +2,58 @@ window.KSool = window.KSool || {};
 window.KSool.SeedDataBundle = {
   "categories": [
     {
+      "category_id": "BASIC",
+      "name": "기초재료",
+      "emoji": "🌱",
+      "order": 1
+    },
+    {
       "category_id": "ALCOHOL",
       "name": "주류",
       "emoji": "🍶",
-      "order": 1
+      "order": 2
     },
     {
       "category_id": "NATURE",
       "name": "자연",
       "emoji": "💧",
-      "order": 2
+      "order": 3
     },
     {
       "category_id": "FRUIT",
       "name": "과일",
       "emoji": "🍋",
-      "order": 3
+      "order": 4
     },
     {
       "category_id": "DAIRY",
       "name": "유제품",
       "emoji": "🥛",
-      "order": 4
+      "order": 5
     },
     {
       "category_id": "GRAIN",
       "name": "곡물",
       "emoji": "🌾",
-      "order": 5
+      "order": 6
     },
     {
       "category_id": "DRINK",
       "name": "음료",
       "emoji": "🥤",
-      "order": 6
+      "order": 7
     },
     {
       "category_id": "ETC",
       "name": "기타",
       "emoji": "🍯",
-      "order": 7
+      "order": 8
     },
     {
       "category_id": "DESSERT",
       "name": "디저트",
       "emoji": "🍦",
-      "order": 8
+      "order": 9
     }
   ],
   "ingredients_base": [
@@ -133,7 +139,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 202,
-      "category_id": "NATURE",
+      "category_id": "BASIC",
       "display_name": "물",
       "real_name": "물",
       "is_licensed": false,
@@ -145,7 +151,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 203,
-      "category_id": "NATURE",
+      "category_id": "BASIC",
       "display_name": "불",
       "real_name": "불",
       "is_licensed": false,
@@ -169,7 +175,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 205,
-      "category_id": "NATURE",
+      "category_id": "BASIC",
       "display_name": "공기",
       "real_name": "공기",
       "is_licensed": false,
@@ -181,7 +187,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 206,
-      "category_id": "NATURE",
+      "category_id": "BASIC",
       "display_name": "눈",
       "real_name": "눈",
       "is_licensed": false,
@@ -337,7 +343,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 401,
-      "category_id": "DAIRY",
+      "category_id": "BASIC",
       "display_name": "우유",
       "real_name": "우유",
       "is_licensed": false,
@@ -349,7 +355,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 501,
-      "category_id": "GRAIN",
+      "category_id": "BASIC",
       "display_name": "맥(보리)",
       "real_name": "맥",
       "is_licensed": false,
@@ -361,7 +367,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 502,
-      "category_id": "GRAIN",
+      "category_id": "BASIC",
       "display_name": "쌀",
       "real_name": "쌀",
       "is_licensed": false,
@@ -377,7 +383,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 503,
-      "category_id": "GRAIN",
+      "category_id": "BASIC",
       "display_name": "미숫가루",
       "real_name": "미숫가루",
       "is_licensed": false,
@@ -617,7 +623,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 701,
-      "category_id": "ETC",
+      "category_id": "BASIC",
       "display_name": "설탕",
       "real_name": "설탕",
       "is_licensed": false,

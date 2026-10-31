@@ -14,7 +14,7 @@ class FridgeRecommenderView {
     this.audio = audio;
     this.onShowRecipeDetail = onShowRecipeDetail;
 
-    this.selectedCategory = 'ALL';
+    this.selectedCategory = 'BASIC';
     this.lastRandomWinnerId = null;
   }
 
@@ -27,17 +27,22 @@ class FridgeRecommenderView {
       this.inventory.isIngredientAvailable(ing.ingredient_id)
     );
 
+    // 해금된 재료가 존재하는 재료 유형만 노출하고 '전체 재료'는 제일 마지막 탭으로 배치
+    const visibleCategories = this.recipeBook.categories.filter(c =>
+      unlockedBaseIngs.some(ing => ing.category_id === c.category_id)
+    );
+
     const filteredIngs = this.selectedCategory === 'ALL'
       ? unlockedBaseIngs
       : unlockedBaseIngs.filter(i => i.category_id === this.selectedCategory);
 
     const catChipsHtml = [
-      `<button class="cat-chip ${this.selectedCategory === 'ALL' ? 'active' : ''}" data-fridge-cat="ALL">전체</button>`,
-      ...this.recipeBook.categories.map(c => `
+      ...visibleCategories.map(c => `
         <button class="cat-chip ${this.selectedCategory === c.category_id ? 'active' : ''}" data-fridge-cat="${c.category_id}">
           ${c.emoji} ${c.name}
         </button>
-      `)
+      `),
+      `<button class="cat-chip ${this.selectedCategory === 'ALL' ? 'active' : ''}" data-fridge-cat="ALL">📦 전체 재료</button>`
     ].join('');
 
     const ingGridHtml = filteredIngs.map(ing => {
