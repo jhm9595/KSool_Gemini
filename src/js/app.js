@@ -168,16 +168,10 @@ class KSoolApp {
 
   _renderPotSlots() {
     const slotsGrid = document.getElementById('pot-slots-grid');
-    const countPill = document.getElementById('total-count-pill');
     const mixBtn = document.getElementById('mix-btn');
     if (!slotsGrid) return;
 
     const slots = this.craftingPot.getSlots();
-    const totalCount = this.craftingPot.getTotalCount();
-    const maxCount = this.config.maxTotalCount;
-
-    countPill.textContent = `총 투입 개수: ${totalCount} / ${maxCount}개`;
-    countPill.classList.toggle('full', totalCount >= maxCount);
     slotsGrid.classList.toggle('has-items', slots.length > 0);
     mixBtn.disabled = slots.length < 2;
 
