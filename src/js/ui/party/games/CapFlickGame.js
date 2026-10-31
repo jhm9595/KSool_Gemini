@@ -45,7 +45,8 @@ class CapFlickGame {
     this.showQuestionMark = false;
     this.breakTimestamp = 0;
     this.isCharging = false;
-    this.angle = 14;
+    // 초기 12시 방향에서 살짝 기운 자연스러운 상태
+    this.angle = (Math.random() < 0.5 ? -1 : 1) * (12 + Math.floor(Math.random() * 16));
     this.currentPower = 0.2;
     this.render();
   }
@@ -117,11 +118,25 @@ class CapFlickGame {
   _executeFlickHit(fatigueInc, powerLevel) {
     this.currentFatigue += fatigueInc;
 
-    // 반대 방향으로 꼬다리 꺾임 + 피로도에 따라 휘는 각도 증가
-    const dir = this.angle >= 0 ? -1 : 1;
+    // 손가락이 안 보이므로 시계방향(1) 또는 반시계방향(-1) 50% 랜덤 결정
+    const dir = Math.random() < 0.5 ? 1 : -1;
+
+    // 상호작용 체감 각도 설정:
+    // 톡: 조금 움직임 (약 18° ~ 34°)
+    // 딱: 중간쯤 움직임 (약 65° ~ 95°)
+    // 빡: 거의 180도 가깝게 회전 (약 150° ~ 182°)
+    let deltaAngle = 0;
+    if (powerLevel === 'light') {
+      deltaAngle = dir * (18 + Math.floor(Math.random() * 16));
+    } else if (powerLevel === 'normal') {
+      deltaAngle = dir * (65 + Math.floor(Math.random() * 30));
+    } else {
+      deltaAngle = dir * (150 + Math.floor(Math.random() * 32));
+    }
+
+    // 360도 전방향 회전 누적
+    this.angle = (this.angle || 0) + deltaAngle;
     const strainRatio = Math.min(1, this.currentFatigue / this.maxFatigue);
-    const extraBend = powerLevel === 'max' ? 14 : (powerLevel === 'normal' ? 7 : 0);
-    this.angle = dir * (16 + strainRatio * 42 + extraBend);
 
     // 오디오 & 진동 피드백
     if (powerLevel === 'light') {
@@ -138,7 +153,7 @@ class CapFlickGame {
       }
     }
 
-    // 시각 효과: 와이어 스프링 흔들림 & 양방향 대칭 타격 텍스트 (톡, 딱!, 빡!)
+    // 시각 효과: 와이어 360도 회전 및 진동 애니메이션 & 양방향 대칭 타격 텍스트 (톡, 딱!, 빡!)
     const wireGroup = document.getElementById('cap-wire-transform-group');
     const arena = document.getElementById('cap-flick-arena');
 
@@ -150,9 +165,7 @@ class CapFlickGame {
 
     if (wireGroup) {
       wireGroup.style.transform = `rotate(${this.angle}deg)`;
-      wireGroup.classList.remove('spring-shake');
-      void wireGroup.offsetWidth;
-      wireGroup.classList.add('spring-shake');
+      wireGroup.style.setProperty('--fly-angle', `${this.angle}deg`);
     }
 
     // 괄호 없이 임팩트 있는 톡, 딱!, 빡! 텍스트 (게이지와 뚜껑 사이 대칭 표시)
@@ -191,13 +204,16 @@ class CapFlickGame {
       this.breakTimestamp = performance.now();
 
       if (wireGroup) {
-        wireGroup.classList.remove('spring-shake');
         const flyAngle = this.angle || 0;
-        // 타격 방향으로 일직선 추진 벡터 설정
-        const flyX = flyAngle * 7;
         wireGroup.style.setProperty('--fly-angle', `${flyAngle}deg`);
-        wireGroup.style.setProperty('--fly-x', `${flyX}px`);
         wireGroup.classList.add('broken-fly');
+      }
+
+      // 부러진 단면 스텀프를 꼬다리가 끊어진 그 각도에 표시
+      const stump = document.getElementById('soju-cap-broken-stump');
+      if (stump) {
+        stump.style.transform = `rotate(${this.angle}deg)`;
+        stump.style.opacity = '1';
       }
 
       this.hub.sound.playSnap();
@@ -328,15 +344,17 @@ class CapFlickGame {
             </g>
 
             <!-- 2. 꼬다리가 뜯겨나간 단면 스텀프 (와이어가 일직선으로 날아가도 캡에 남아있는 파단면) -->
-            <g class="soju-cap-broken-stump" style="opacity: ${this.isBroken ? 1 : 0};">
+            <g id="soju-cap-broken-stump" 
+               class="soju-cap-broken-stump" 
+               style="opacity: ${this.isBroken ? 1 : 0}; transform-origin: 160px 275px; transform: rotate(${this.angle || 0}deg);">
               <path d="M152 208 L168 208 L165 200 L155 200 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>
               <circle cx="160" cy="199" r="2.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
             </g>
 
-            <!-- 3. 길고 디테일한 알루미늄 꼬다리 와이어 (회전 중심점: 캡 상단 결합부 160, 206) -->
+            <!-- 3. 길고 디테일한 알루미늄 꼬다리 와이어 (회전 중심점: 캡 중심 160, 275) -->
             <g id="cap-wire-transform-group" 
                class="${this.isBroken ? 'broken-fly' : ''}" 
-               style="transform-origin: 160px 206px; transform: rotate(${this.angle}deg); --fly-angle: ${this.angle || 0}deg; --fly-x: ${(this.angle || 0) * 7}px;">
+               style="transform-origin: 160px 275px; transform: rotate(${this.angle}deg); --fly-angle: ${this.angle || 0}deg;">
               
               <!-- 캡과 이어지는 브래킷 조인트 -->
               <path d="M152 208 L168 208 L165 200 L155 200 Z" fill="#15803d" stroke="#86efac" stroke-width="1.5"/>

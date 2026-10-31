@@ -438,8 +438,9 @@
 }
 
 /* ==========================================================================
-   ① Up & Down 전용 스타일 (오프라인 양방향 대칭 테이블탑 버전)
+   ① Up & Down 전용 스타일
    ========================================================================== */
+.updown-box,
 .updown-box.tabletop-symmetrical {
   display: flex !important;
   flex-direction: column !important;
@@ -449,72 +450,110 @@
   width: 100% !important;
   max-width: 440px;
   margin: 0 auto;
-  padding: 4px 10px 8px;
+  padding: 6px 12px 10px;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
   user-select: none;
 }
 
-/* 플레이어 스테이션 (상단 180도 회전, 하단 정방향 0도) */
-.updown-player-station {
-  width: 100%;
+/* 상단 극사실적 3D 소주 병뚜껑 (CapFlick과 동일한 모양 및 대형 크기) */
+.updown-center-cap-wrap {
+  flex: 0 0 auto;
   display: flex;
-  flex-direction: column;
-  gap: 3px;
   align-items: center;
   justify-content: center;
+  margin: 2px auto 0;
+  position: relative;
+  z-index: 20;
+}
+
+.realistic-cap-container {
+  width: clamp(140px, 20vh, 180px);
+  height: clamp(140px, 20vh, 180px);
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.75));
   transition: transform 0.2s ease;
 }
 
-.updown-player-station.top-station {
-  transform: rotate(180deg);
+.realistic-cap-container.exploded {
+  animation: shakeCap 0.4s infinite;
+  filter: drop-shadow(0 0 28px #ef4444);
 }
 
-/* 병뚜껑과 패드 사이: 대칭 UP / DOWN 큼지막한 세로줄 맞춤 상태 표시 */
-.updown-status-col {
+.soju-cap-center-num {
+  font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
+  font-size: 52px;
+  font-weight: 900;
+  fill: #fde047;
+  filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.9));
+  user-select: none;
+}
+
+/* 뚜껑과 패드 사이 딱 중간 위치의 큼지막한 UP / DOWN 대칭 표시 */
+.updown-middle-status-slot {
+  flex: 1;
+  width: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  text-align: center;
+  min-height: 80px;
+}
+
+.updown-status-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   width: 100%;
-  margin: 1px auto;
+  max-width: 300px;
+  margin: 0 auto;
 }
 
-.updown-status-line {
+.updown-status-row {
   display: grid;
-  grid-template-columns: 55px 75px;
+  grid-template-columns: 1fr 1fr;
   align-items: baseline;
-  justify-content: center;
-  line-height: 1.15;
+  gap: 18px;
+  line-height: 1.1;
 }
 
-.updown-status-line .status-num {
-  font-size: clamp(1.4rem, 2.5vh, 1.75rem);
+.updown-status-row .status-num {
+  font-size: clamp(2.8rem, 6vh, 4.2rem);
   font-weight: 900;
   text-align: right;
-  padding-right: 10px;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
 }
 
-.updown-status-line .status-label {
-  font-size: clamp(1.1rem, 2.1vh, 1.35rem);
+.updown-status-row .status-label {
+  font-size: clamp(2.2rem, 5vh, 3.4rem);
   font-weight: 900;
   text-align: left;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 
-.updown-status-line.up .status-num,
-.updown-status-line.up .status-label {
+.updown-status-row.up .status-num,
+.updown-status-row.up .status-label {
   color: #38bdf8;
-  text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+  text-shadow: 0 0 24px rgba(56, 189, 248, 0.9), 0 0 50px rgba(56, 189, 248, 0.6);
 }
 
-.updown-status-line.down .status-num,
-.updown-status-line.down .status-label {
+.updown-status-row.down .status-num,
+.updown-status-row.down .status-label {
   color: #f43f5e;
-  text-shadow: 0 0 12px rgba(244, 63, 94, 0.6);
+  text-shadow: 0 0 24px rgba(244, 63, 94, 0.9), 0 0 50px rgba(244, 63, 94, 0.6);
+}
+
+/* 하단 컨트롤 영역: 디스플레이 & 패드 */
+.updown-bottom-station {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
 }
 
 /* 입력 번호 디스플레이 (중앙정렬) */
@@ -616,36 +655,7 @@
   transform: scale(0.95);
 }
 
-/* 중앙 극사실적 3D 소주 병뚜껑 래퍼 (CapFlick과 동일한 모양/크기, 꼬다리 떨어진 형태) */
-.updown-center-cap-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 2px auto;
-  position: relative;
-  z-index: 20;
-}
 
-.realistic-cap-container {
-  width: clamp(96px, 14vh, 120px);
-  height: clamp(96px, 14vh, 120px);
-  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.65));
-  transition: transform 0.2s ease;
-}
-
-.realistic-cap-container.exploded {
-  animation: shakeCap 0.4s infinite;
-  filter: drop-shadow(0 0 24px #ef4444);
-}
-
-.soju-cap-center-num {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 44px;
-  font-weight: 900;
-  fill: #fde047;
-  filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.85));
-  user-select: none;
-}
 
 /* 5. 확인 시 즉시 화면에 크게 떴다가 사라지는 UP / DOWN 플래시 애니메이션 */
 .updown-flash-banner {
@@ -774,19 +784,8 @@
 }
 
 #cap-wire-transform-group {
-  transition: transform 0.08s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.32s cubic-bezier(0.2, 1.25, 0.45, 1);
   will-change: transform;
-}
-
-#cap-wire-transform-group.spring-shake {
-  animation: wireSpringFlick 0.35s ease-out;
-}
-
-@keyframes wireSpringFlick {
-  0% { transform: scale(1.04) rotate(var(--cur-angle, 15deg)); }
-  35% { transform: scale(0.96) rotate(calc(var(--cur-angle, 15deg) * -0.6)); }
-  70% { transform: scale(1.02) rotate(calc(var(--cur-angle, 15deg) * 0.3)); }
-  100% { transform: scale(1) rotate(var(--cur-angle, 15deg)); }
 }
 
 #cap-wire-transform-group.broken-fly {
@@ -794,14 +793,14 @@
   will-change: transform, opacity;
 }
 
-/* 꼬다리 탈락 시 원형 회전 없이 타격 방향으로 시원하게 일직선 발사 */
+/* 꼬다리 탈락 시 와이어가 가리키는 방향으로 시원하게 일직선 발사 */
 @keyframes flyWireSnap {
   0% {
-    transform: rotate(var(--fly-angle, 0deg)) translate(0, 0);
+    transform: rotate(var(--fly-angle, 0deg)) translateY(0);
     opacity: 1;
   }
   100% {
-    transform: rotate(var(--fly-angle, 0deg)) translate(var(--fly-x, 0px), -750px);
+    transform: rotate(var(--fly-angle, 0deg)) translateY(-750px);
     opacity: 0;
   }
 }
