@@ -471,6 +471,32 @@ class KSoolApp {
     slotsGrid.classList.toggle('has-items', slots.length > 0);
     mixBtn.disabled = slots.length < 2;
 
+    const noticeEl = document.getElementById('pot-match-notice');
+    if (slots.length >= 2) {
+      const preferredId = this.brewMode === 'QUIZ' ? this.quizTargetRecipeId : null;
+      const matched = this.recipeBook.matchRecipe(slots, this.inventory.unlockedRecipeIds, preferredId);
+      if (matched && this.inventory.isRecipeUnlocked(matched.recipe_id)) {
+        const resolvedName = this.brandResolver.resolveName(matched);
+        mixBtn.textContent = '🔄 다시 빚기 (이미 주조함)';
+        mixBtn.classList.add('already-crafted-btn');
+        if (noticeEl) {
+          noticeEl.innerHTML = `
+            <div class="pot-already-notice">
+              <span>⚠️ 이미 완성했던 조합: <b>[${matched.formatted_number || ''} ${resolvedName} ${matched.emoji}]</b></span>
+            </div>
+          `;
+        }
+      } else {
+        mixBtn.textContent = '⚗️ 조합하기';
+        mixBtn.classList.remove('already-crafted-btn');
+        if (noticeEl) noticeEl.innerHTML = '';
+      }
+    } else {
+      mixBtn.textContent = '⚗️ 조합하기';
+      mixBtn.classList.remove('already-crafted-btn');
+      if (noticeEl) noticeEl.innerHTML = '';
+    }
+
     // 기본적으로 최소 4칸을 보여주되, 4칸 이상 담기면 동적으로 계속 늘어남
     const displaySlotCount = Math.max(this.config.maxUniqueSlots, slots.length + (this.config.unlimitedSlotsMode ? 1 : 0));
 
@@ -788,26 +814,68 @@ class KSoolApp {
         return `${target.emoji}${this.brandResolver.resolveName(target)}(${it.ratio})`;
       }).join(' + ');
 
-      let statusBanner = '';
       if (!isNew) {
-        statusBanner = `
-          <div style="width:100%; background:rgba(100,116,139,0.2); border:1px solid #475569; border-radius:10px; padding:8px 10px; font-size:0.78rem; color:#cbd5e1; font-weight:800; text-align:center;">
-            ✨ 이미 주조 완료된 레시피입니다! (도감에 등록됨)
+        // [CASE A] 이미 주조 완료된 레시피 재주조 (유저가 확실하게 인지할 수 있는 전용 안내 카드)
+        content.innerHTML = `
+          <div style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="diff-badge diff-${rec.difficulty}" style="position:static; font-size:0.7rem; padding:3px 9px;">
+                ${rec.formatted_number || ''} · ${rec.category} · ${rec.difficulty}
+              </span>
+              <span style="background:rgba(234,179,8,0.2); border:1px solid #eab308; color:#fde047; font-size:0.7rem; font-weight:900; padding:2px 8px; border-radius:6px;">
+                ⚠️ 이미 주조했던 조합
+              </span>
+            </div>
+
+            <div style="font-size:3.2rem; filter: grayscale(15%); opacity:0.9;">${rec.emoji}</div>
+            <div style="font-size:1.25rem; font-weight:900; color:#f8fafc;">
+              ${this.brandResolver.resolveName(rec)}
+            </div>
+
+            <div style="width:100%; background:rgba(30,41,59,0.85); border:1px solid #475569; border-radius:12px; padding:12px 14px; text-align:left; display:flex; flex-direction:column; gap:8px;">
+              <div style="font-size:0.82rem; font-weight:800; color:#fde047; display:flex; align-items:center; gap:6px;">
+                <span>ℹ️</span>
+                <span>이미 이 재료들로 완성한 적이 있는 술입니다!</span>
+              </div>
+              <div style="font-size:0.76rem; color:#cbd5e1; line-height:1.5;">
+                투입한 재료 <b>${recipeFormula}</b> 조합은 이미 도감에 <b>[${rec.formatted_number || ''} ${this.brandResolver.resolveName(rec)}]</b>(으)로 등록되어 있습니다.
+              </div>
+              <div style="font-size:0.73rem; color:#94a3b8; background:rgba(15,23,42,0.6); padding:8px 10px; border-radius:8px; border-left:3px solid #38bdf8; line-height:1.45;">
+                💡 <b>안내:</b> 아직 발견하지 못한 새로운 K-술을 찾으시려면 <b>다른 재료</b>를 넣거나 <b>새로운 비율</b>을 시도해보세요!
+              </div>
+            </div>
+
+            <div style="width:100%; display:flex; gap:8px; margin-top:4px;">
+              <button class="mix-btn" id="result-go-collection-btn" style="flex:1; background:#334155; border:1px solid #64748b;">📖 도감에서 보기</button>
+              <button class="mix-btn" id="result-close-btn" style="flex:1;">확인</button>
+            </div>
           </div>
         `;
-      } else if (result.isQuizClear) {
-        statusBanner = `
-          <div style="width:100%; background:rgba(59,130,246,0.2); border:1px solid #3b82f6; border-radius:10px; padding:8px; font-size:0.78rem; color:#93c5fd; font-weight:800; text-align:center;">
-            🎯 [${rec.formatted_number}] 단계별 퀴즈 추리 정답! 다음 번호 과제로 진급합니다!
-          </div>
-        `;
-      } else {
-        statusBanner = `
-          <div style="width:100%; background:rgba(245,158,11,0.18); border:1px solid #f59e0b; border-radius:10px; padding:8px; font-size:0.78rem; color:#fde68a; font-weight:800; text-align:center;">
-            🎉 새로운 조합 발견! 도감에 [${rec.formatted_number}] ${this.brandResolver.resolveName(rec)}이(가) 등록되었습니다!
-          </div>
-        `;
+
+        modal.classList.add('active');
+        const closeBtn = content.querySelector('#result-close-btn');
+        if (closeBtn) closeBtn.onclick = () => modal.classList.remove('active');
+
+        const goCollectionBtn = content.querySelector('#result-go-collection-btn');
+        if (goCollectionBtn) {
+          goCollectionBtn.onclick = () => {
+            modal.classList.remove('active');
+            this.switchTab('collection');
+            this.selectedRecipeCategory = '전체';
+            this.renderCollectionView();
+          };
+        }
+        return;
       }
+
+      // [CASE B] 완전히 새로운 K-술 최초 발견 (화려한 축하 연출)
+      const quizClearBanner = result.isQuizClear
+        ? `<div style="width:100%; background:rgba(59,130,246,0.2); border:1px solid #3b82f6; border-radius:10px; padding:8px; font-size:0.78rem; color:#93c5fd; font-weight:800; text-align:center;">
+             🎯 [${rec.formatted_number}] 단계별 퀴즈 추리 정답! 다음 번호 과제로 진급합니다!
+           </div>`
+        : `<div style="width:100%; background:rgba(245,158,11,0.18); border:1px solid #f59e0b; border-radius:10px; padding:8px; font-size:0.78rem; color:#fde68a; font-weight:800; text-align:center;">
+             🎉 새로운 조합 발견! 도감에 [${rec.formatted_number}] ${this.brandResolver.resolveName(rec)}이(가) 등록되었습니다!
+           </div>`;
 
       let chainUnlockBanner = '';
       if (result.newlyUnlockedIngredient) {
@@ -896,11 +964,7 @@ class KSoolApp {
             <span class="diff-badge diff-${rec.difficulty}" style="position:static; font-size:0.7rem; padding:3px 9px;">
               ${rec.formatted_number || ''} · ${rec.category} · ${rec.difficulty}
             </span>
-            ${
-              isNew
-                ? `<span style="background:rgba(245,158,11,0.22); border:1px solid #f59e0b; color:#fde047; font-size:0.68rem; font-weight:900; padding:2px 7px; border-radius:6px;">🎉 NEW 발견!</span>`
-                : `<span style="background:rgba(100,116,139,0.25); border:1px solid #64748b; color:#94a3b8; font-size:0.68rem; font-weight:900; padding:2px 7px; border-radius:6px;">✨ 이미 주조함</span>`
-            }
+            <span style="background:rgba(245,158,11,0.22); border:1px solid #f59e0b; color:#fde047; font-size:0.68rem; font-weight:900; padding:2px 7px; border-radius:6px;">🎉 NEW 발견!</span>
           </div>
           <div style="font-size:3.4rem;">${rec.emoji}</div>
           <div style="font-size:1.25rem; font-weight:900; color:#f8fafc;">
@@ -912,7 +976,7 @@ class KSoolApp {
           <div style="width:100%; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; font-size:0.8rem; color:#fcd34d; font-weight:800;">
             ${recipeFormula}
           </div>
-          ${statusBanner}
+          ${quizClearBanner}
           ${chainUnlockBanner}
           ${stepUpBanner}
           <button class="mix-btn" id="result-close-btn" style="width:100%; margin-top:4px;">확인</button>

@@ -23,7 +23,12 @@ class AlchemyEngine {
     );
 
     if (matchedRecipe) {
-      this.audio.playSuccess();
+      const isAlreadyUnlocked = this.inventory.isRecipeUnlocked(matchedRecipe.recipe_id);
+      if (isAlreadyUnlocked) {
+        this.audio.playTap();
+      } else {
+        this.audio.playSuccess();
+      }
       const unlockInfo = this.inventory.unlockRecipe(matchedRecipe.recipe_id);
       const usedSlots = [...slots];
       this.craftingPot.clear();
@@ -32,6 +37,7 @@ class AlchemyEngine {
         isSuccess: true,
         recipe: matchedRecipe,
         isNewDiscovery: unlockInfo.isNew,
+        isAlreadyCrafted: isAlreadyUnlocked,
         newlyUnlockedIngredient: unlockInfo.newlyUnlockedIngredient,
         stepUpInfo: unlockInfo.stepUpInfo || null,
         usedSlots
