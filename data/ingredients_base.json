@@ -248,6 +248,16 @@
     "picker_config": null
   },
   {
+    "ingredient_id": 314,
+    "category_id": "FRUIT",
+    "display_name": "석류",
+    "real_name": "석류",
+    "is_licensed": false,
+    "emoji": "🍎",
+    "picker_component": "NONE",
+    "picker_config": null
+  },
+  {
     "ingredient_id": 401,
     "category_id": "DRINK",
     "display_name": "우유",
@@ -288,6 +298,16 @@
     "real_name": "미숫가루",
     "is_licensed": false,
     "emoji": "🥣",
+    "picker_component": "NONE",
+    "picker_config": null
+  },
+  {
+    "ingredient_id": 504,
+    "category_id": "GRAIN",
+    "display_name": "커피콩",
+    "real_name": "커피원두",
+    "is_licensed": false,
+    "emoji": "🫘",
     "picker_component": "NONE",
     "picker_config": null
   },
@@ -482,6 +502,26 @@
     "picker_config": null
   },
   {
+    "ingredient_id": 620,
+    "category_id": "DRINK",
+    "display_name": "아이스 아메리카노",
+    "real_name": "아이스 아메리카노",
+    "is_licensed": false,
+    "emoji": "☕",
+    "picker_component": "NONE",
+    "picker_config": null
+  },
+  {
+    "ingredient_id": 621,
+    "category_id": "DRINK",
+    "display_name": "홍초",
+    "real_name": "홍초",
+    "is_licensed": false,
+    "emoji": "🧪",
+    "picker_component": "NONE",
+    "picker_config": null
+  },
+  {
     "ingredient_id": 701,
     "category_id": "ETC",
     "display_name": "설탕",
@@ -532,6 +572,26 @@
     "picker_config": null
   },
   {
+    "ingredient_id": 706,
+    "category_id": "ETC",
+    "display_name": "식초",
+    "real_name": "양조식초",
+    "is_licensed": false,
+    "emoji": "🍶",
+    "picker_component": "NONE",
+    "picker_config": null
+  },
+  {
+    "ingredient_id": 707,
+    "category_id": "ETC",
+    "display_name": "석류농축액",
+    "real_name": "석류농축액",
+    "is_licensed": false,
+    "emoji": "🍷",
+    "picker_component": "NONE",
+    "picker_config": null
+  },
+  {
     "ingredient_id": 801,
     "category_id": "DESSERT",
     "display_name": "배배꼬인바",
@@ -558,6 +618,36 @@
     "real_name": "탱크보이",
     "is_licensed": false,
     "emoji": "🍧",
+    "picker_component": "NONE",
+    "picker_config": null
+  },
+  {
+    "ingredient_id": 804,
+    "category_id": "DESSERT",
+    "display_name": "올때메론바",
+    "real_name": "메로나",
+    "is_licensed": false,
+    "emoji": "🍈",
+    "picker_component": "NONE",
+    "picker_config": null
+  },
+  {
+    "ingredient_id": 805,
+    "category_id": "DESSERT",
+    "display_name": "상어바",
+    "real_name": "죠스바",
+    "is_licensed": false,
+    "emoji": "🦈",
+    "picker_component": "NONE",
+    "picker_config": null
+  },
+  {
+    "ingredient_id": 806,
+    "category_id": "DESSERT",
+    "display_name": "단팥바",
+    "real_name": "비비빅",
+    "is_licensed": false,
+    "emoji": "🪵",
     "picker_component": "NONE",
     "picker_config": null
   }
