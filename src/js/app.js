@@ -802,11 +802,10 @@ class KSoolApp {
 
         chainUnlockBanner = `
           <div style="width:100%; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.4); border-radius:12px; padding:10px 12px; display:flex; flex-direction:column; gap:7px; text-align:left;">
-            <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center;">
               <span style="font-size:0.76rem; font-weight:900; color:#6ee7b7; display:flex; align-items:center; gap:4px;">
-                🔓 연쇄 크래프팅 재료 해금!
+                🔓 재료 해금
               </span>
-              <span style="font-size:0.68rem; color:#a7f3d0; font-weight:700;">주조실에 추가됨</span>
             </div>
             <div style="display:flex; align-items:center; gap:6px;">
               <span class="cat-chip active" style="font-size:0.7rem; padding:3px 9px; cursor:default; pointer-events:none;">
