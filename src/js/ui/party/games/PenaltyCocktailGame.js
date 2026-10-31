@@ -39,10 +39,15 @@ class PenaltyCocktailGame {
   init() {
     this.state = 'select';
     this.lastResult = null;
+    if (this.mixingTimeout) {
+      clearTimeout(this.mixingTimeout);
+      this.mixingTimeout = null;
+    }
     // 초기 로드 시 해금된 모든 적격 재료를 기본 선택 상태로 구성
     const eligible = this.getEligibleIngredients();
     this.selectedIngIds.clear();
     eligible.forEach(ing => this.selectedIngIds.add(Number(ing.ingredient_id)));
+    this.render();
   }
 
   reset() {
@@ -171,7 +176,11 @@ class PenaltyCocktailGame {
 
     // 4. 조제 믹싱 연출 시작
     this.state = 'mixing';
-    this.hub.sound.playPour();
+    if (this.hub.sound && typeof this.hub.sound.playPour === 'function') {
+      this.hub.sound.playPour();
+    } else if (this.hub.sound && typeof this.hub.sound.playTap === 'function') {
+      this.hub.sound.playTap();
+    }
     this.hub.vibrateShort();
     this.render();
 
@@ -280,7 +289,7 @@ class PenaltyCocktailGame {
             <div class="ing-group">
               <div class="group-label">🍺 주류 (알코올)</div>
               <div class="ing-chips-grid">
-                ${alcoholList.map(ing => {
+                ${alcoholList.length > 0 ? alcoholList.map(ing => {
                   const isChecked = this.selectedIngIds.has(Number(ing.ingredient_id));
                   return `
                     <button type="button" 
@@ -291,7 +300,7 @@ class PenaltyCocktailGame {
                       <span class="chip-check">${isChecked ? '✓' : '+'}</span>
                     </button>
                   `;
-                }).join('')}
+                }).join('') : '<div style="font-size:0.8rem; color:#94a3b8; padding:6px 2px;">해금된 주류가 없습니다. 도감에서 주류를 만들어보세요!</div>'}
               </div>
             </div>
 
@@ -299,7 +308,7 @@ class PenaltyCocktailGame {
             <div class="ing-group">
               <div class="group-label">🥤 음료 & 믹서</div>
               <div class="ing-chips-grid">
-                ${drinkList.map(ing => {
+                ${drinkList.length > 0 ? drinkList.map(ing => {
                   const isChecked = this.selectedIngIds.has(Number(ing.ingredient_id));
                   return `
                     <button type="button" 
@@ -310,7 +319,7 @@ class PenaltyCocktailGame {
                       <span class="chip-check">${isChecked ? '✓' : '+'}</span>
                     </button>
                   `;
-                }).join('')}
+                }).join('') : '<div style="font-size:0.8rem; color:#94a3b8; padding:6px 2px;">해금된 음료가 없습니다.</div>'}
               </div>
             </div>
           </div>

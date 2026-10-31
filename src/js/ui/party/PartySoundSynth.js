@@ -161,6 +161,24 @@ class PartySoundSynth {
     }
   }
 
+  playPour(duration = 0.8) {
+    if (this.isMuted) return;
+    this._initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(360, now);
+    osc.frequency.exponentialRampToValueAtTime(680, now + duration);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + duration + 0.05);
+  }
+
   playCurtainReveal() {
     if (this.isMuted) return;
     this._initContext();
