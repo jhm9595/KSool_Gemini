@@ -22,7 +22,7 @@ class PartyGameHubView {
       {
         key: 'updown',
         emoji: '🧢',
-        title: '숫자 Up & Down',
+        title: 'Up & Down',
         badge: '벌칙자 지목',
         accentColor: '#38bdf8',
         desc: '병뚜껑 속 숫자를 맞히는 게임'
