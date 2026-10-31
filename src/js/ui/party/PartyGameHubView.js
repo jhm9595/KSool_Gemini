@@ -25,9 +25,7 @@ class PartyGameHubView {
         title: '숫자 Up & Down',
         badge: '벌칙자 지목',
         accentColor: '#38bdf8',
-        desc: '병뚜껑 속 숫자를 맞춰라! 정답을 입력하는 순간 폭탄 폭발!',
-        tags: ['1~50 / 1~100', '패스앤플레이', '스릴만점'],
-        players: '2명 이상'
+        desc: '병뚜껑 속 숫자를 맞히는 게임'
       },
       {
         key: 'capflick',
@@ -35,9 +33,7 @@ class PartyGameHubView {
         title: '병뚜껑 꼬다리 치기',
         badge: '릴레이 타격',
         accentColor: '#10b981',
-        desc: '실제 소주 뚜껑 철사 꼬다리를 튕겨 완전히 날려버리는 사람이 승리!',
-        tags: ['알루미늄 피로도', '터치·스와이프 타격', '원샷 벌칙'],
-        players: '2~6명'
+        desc: '병뚜껑 꼬다리를 쳐서 날려버리는 게임'
       },
       {
         key: 'surface',
@@ -45,29 +41,23 @@ class PartyGameHubView {
         title: '표면장력 소주잔 채우기',
         badge: '아웃 카운트',
         accentColor: '#06b6d4',
-        desc: '찰랑찰랑 넘치기 직전까지! 표면장력 한계를 넘기면 술이 쏟아집니다!',
-        tags: ['2D 물리 엔진', '심장박동 사운드', '꾹 눌러 따르기'],
-        players: '2~6명'
+        desc: '소주잔이 넘치기 직전까지 술을 채우는 게임'
       },
       {
         key: 'bottlespin',
         emoji: '🍾',
-        title: '소주병 돌리기 & 손가락 룰렛',
-        badge: '테이블 중앙 거치',
+        title: '소주병 돌리기',
+        badge: '테이블 중앙',
         accentColor: '#f59e0b',
-        desc: '테이블 중앙에 폰을 눕혀두고 진행하는 360° 소주병 회전 & 5인 동시 멀티터치 지목!',
-        tags: ['360° 회전 물리', '5인 멀티터치', '진실게임·흑기사'],
-        players: '2인 이상'
+        desc: '소주병을 돌려 벌칙자를 지목하는 게임'
       },
       {
         key: 'hunmin',
         emoji: '💣',
-        title: '3초 훈민정음 시한폭탄',
+        title: '훈민정음 시한폭탄',
         badge: '폭탄 돌리기',
         accentColor: '#ef4444',
-        desc: '초대형 초성을 보고 3초 안에 육성으로 단어를 외친 뒤 폰을 넘겨라!',
-        tags: ['3.0초 긴급 카운트', '초성 40여 종', '스피드 게임'],
-        players: '2명 이상'
+        desc: '제시된 초성의 단어를 외치며 폭탄을 넘기는 게임'
       }
     ];
 
@@ -288,16 +278,9 @@ class PartyGameHubView {
               <div class="lobby-card-body">
                 <div class="lobby-card-header">
                   <span class="lobby-card-badge" style="color:${g.accentColor}; border-color:${g.accentColor};">${g.badge}</span>
-                  <span class="lobby-card-players">👥 ${g.players}</span>
                 </div>
                 <div class="lobby-card-title">${g.title}</div>
                 <div class="lobby-card-desc">${g.desc}</div>
-                <div class="lobby-card-tags">
-                  ${g.tags.map(t => `<span class="lobby-tag">#${t}</span>`).join('')}
-                </div>
-              </div>
-              <div class="lobby-card-action">
-                <span class="lobby-action-arrow">➔</span>
               </div>
             </div>
           `).join('')}

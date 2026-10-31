@@ -260,56 +260,18 @@
   background: rgba(15, 23, 42, 0.5);
 }
 
-.lobby-card-players {
-  font-size: 0.66rem;
-  color: #94a3b8;
-  font-weight: 700;
-}
-
 .lobby-card-title {
-  font-size: 1rem;
-  font-weight: 900;
+  font-size: 1.05rem;
+  font-weight: 800;
   color: #f8fafc;
   letter-spacing: -0.2px;
 }
 
 .lobby-card-desc {
-  font-size: 0.74rem;
+  font-size: 0.8rem;
   color: #cbd5e1;
-  line-height: 1.35;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.lobby-card-tags {
-  display: flex;
-  gap: 5px;
-  margin-top: 3px;
-  flex-wrap: wrap;
-}
-
-.lobby-tag {
-  font-size: 0.62rem;
-  color: #94a3b8;
-  background: rgba(15, 23, 42, 0.7);
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-weight: 600;
-}
-
-.lobby-card-action {
-  font-size: 1.2rem;
-  color: #64748b;
-  padding-left: 4px;
-  transition: transform 0.2s, color 0.2s;
-  flex-shrink: 0;
-}
-
-.party-lobby-card:hover .lobby-card-action {
-  color: var(--card-accent, #38bdf8);
-  transform: translateX(3px);
+  line-height: 1.4;
+  margin-top: 1px;
 }
 
 /* ==========================================================================
