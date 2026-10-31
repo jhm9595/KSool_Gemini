@@ -161,6 +161,26 @@ class PartySoundSynth {
     }
   }
 
+  playCurtainReveal() {
+    if (this.isMuted) return;
+    this._initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    // 화려하게 올라가는 커튼 오픈 사운드 아르페지오 (도-미-솔-도)
+    [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.045);
+      gain.gain.setValueAtTime(0.18, now + idx * 0.045);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.045 + 0.22);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + idx * 0.045);
+      osc.stop(now + idx * 0.045 + 0.25);
+    });
+  }
+
   playHeartbeat() {
     if (this.isMuted) return;
     this._initContext();

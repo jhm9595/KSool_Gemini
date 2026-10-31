@@ -41,9 +41,9 @@ class PartyGameHubView {
         key: 'surface',
         emoji: '🌊',
         title: '표면장력 소주잔 채우기',
-        badge: '아웃 카운트',
+        badge: '블라인드 서바이벌',
         accentColor: '#06b6d4',
-        desc: '소주잔이 넘치기 직전까지 술을 채우는 게임'
+        desc: '미스터리 가림막을 뚫고 표면장력 한계까지 술 채우기'
       },
       {
         key: 'bottlespin',
