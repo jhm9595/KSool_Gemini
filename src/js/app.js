@@ -882,83 +882,98 @@ class KSoolApp {
              🎉 새로운 조합 발견! 도감에 [${rec.formatted_number}] ${this.brandResolver.resolveName(rec)}이(가) 등록되었습니다!
            </div>`;
 
-      let chainUnlockBanner = '';
-      if (result.newlyUnlockedIngredient) {
-        const newIng = result.newlyUnlockedIngredient;
-        const cat = this.recipeBook.categories.find(c => c.category_id === newIng.category_id);
-        const catLabel = cat ? `${cat.emoji} ${cat.name}` : '📦 재료';
-        const ingName = this.brandResolver.resolveName(newIng);
+      let unifiedUnlockBanner = '';
+      const hasChainUnlock = Boolean(result.newlyUnlockedIngredient);
+      const hasStepUp = Boolean(result.stepUpInfo && result.stepUpInfo.newStepConfig);
 
-        chainUnlockBanner = `
-          <div style="width:100%; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.4); border-radius:12px; padding:10px 12px; display:flex; flex-direction:column; gap:7px; text-align:left;">
-            <div style="display:flex; align-items:center; justify-content:space-between;">
-              <span class="cat-chip active" style="font-size:0.7rem; padding:3px 9px; cursor:default; pointer-events:none;">
-                ${catLabel}
-              </span>
-              <span style="font-size:0.74rem; font-weight:900; color:#6ee7b7; display:inline-flex; align-items:center; gap:4px;">
-                🔓 재료 해금
-              </span>
-            </div>
-            <div style="background:rgba(15,23,42,0.7); border:1px solid #334155; border-radius:9px; padding:8px 10px; display:flex; flex-wrap:wrap; gap:6px;">
-              <span class="bb-option-btn picked" style="font-size:0.75rem; padding:5px 11px; cursor:default; pointer-events:none; border-color:#10b981; background:rgba(16,185,129,0.2); color:#ecfdf5; display:inline-flex; align-items:center; gap:5px;">
-                <span>${newIng.emoji}</span>
-                <span>${ingName}</span>
-              </span>
-            </div>
-          </div>
-        `;
-      }
-
-      let stepUpBanner = '';
-      if (result.stepUpInfo && result.stepUpInfo.newStepConfig) {
-        const stCfg = result.stepUpInfo.newStepConfig;
-        const leafIngs = result.stepUpInfo.newlyUnlockedLeafIngredients || [];
-
-        let leafsHtml = '';
-        if (leafIngs.length > 0) {
-          const byCat = new Map();
-          for (const ing of leafIngs) {
-            const cId = ing.category_id || 'ETC';
-            if (!byCat.has(cId)) byCat.set(cId, []);
-            byCat.get(cId).push(ing);
-          }
-          const catGroupsHtml = Array.from(byCat.entries()).map(([cId, ings]) => {
-            const cat = this.recipeBook.categories.find(c => c.category_id === cId);
-            const catLabel = cat ? `${cat.emoji} ${cat.name}` : '📦 재료';
-            return `
-              <div style="display:flex; flex-direction:column; gap:5px;">
-                <div style="display:flex; align-items:center; gap:6px;">
-                  <span class="cat-chip active" style="font-size:0.68rem; padding:2px 8px; cursor:default; pointer-events:none;">${catLabel}</span>
-                </div>
-                <div style="background:rgba(15,23,42,0.7); border:1px solid #334155; border-radius:9px; padding:6px 8px; display:flex; flex-wrap:wrap; gap:6px;">
-                  ${ings.map(ing => `
-                    <span class="bb-option-btn picked" style="font-size:0.72rem; padding:4px 8px; cursor:default; pointer-events:none; border-color:#f59e0b; background:rgba(245,158,11,0.2); color:#fef3c7; display:inline-flex; align-items:center; gap:4px;">
-                      <span>${ing.emoji}</span>
-                      <span>${this.brandResolver.resolveName(ing)}</span>
-                    </span>
-                  `).join('')}
-                </div>
+      if (hasChainUnlock || hasStepUp) {
+        let stepUpHeaderHtml = '';
+        if (hasStepUp) {
+          const stCfg = result.stepUpInfo.newStepConfig;
+          stepUpHeaderHtml = `
+            <div class="craft-stepup-header">
+              <div class="craft-stepup-title">
+                <span>🎊</span> <span>${stCfg.title} 해금!</span>
               </div>
-            `;
-          }).join('');
-
-          leafsHtml = `
-            <div style="display:flex; flex-direction:column; gap:6px; margin-top:2px;">
-              <div style="font-size:0.71rem; color:#a7f3d0; font-weight:800;">🎁 신규 기초 재료 추가:</div>
-              ${catGroupsHtml}
+              <div class="craft-stepup-sub">
+                ${stCfg.ruleBadge} — ${stCfg.subtitle}
+              </div>
             </div>
           `;
         }
 
-        stepUpBanner = `
-          <div style="width:100%; background:linear-gradient(135deg, rgba(245,158,11,0.22), rgba(168,85,247,0.22)); border:1px solid #f59e0b; border-radius:12px; padding:10px; text-align:left; display:flex; flex-direction:column; gap:5px;">
-            <div style="font-size:0.8rem; font-weight:900; color:#fde047;">
-              🎊 ${stCfg.title} 해금!
+        const groupsHtml = [];
+
+        // 1. [재료 해금] 연쇄 크래프팅 해금 재료 (에메랄드 녹색 테마)
+        if (hasChainUnlock) {
+          const newIng = result.newlyUnlockedIngredient;
+          const cat = this.recipeBook.categories.find(c => c.category_id === newIng.category_id);
+          const catLabel = cat ? `${cat.emoji} ${cat.name}` : '📦 재료';
+          const ingName = this.brandResolver.resolveName(newIng);
+
+          groupsHtml.push(`
+            <div class="craft-unlock-group">
+              <div class="craft-unlock-group-header">
+                <span class="cat-chip active" style="font-size:0.68rem; padding:2px 8px; cursor:default; pointer-events:none;">
+                  ${catLabel}
+                </span>
+                <span class="craft-badge-chain">
+                  🔓 재료 해금
+                </span>
+              </div>
+              <div class="craft-unlock-items-box chain-box">
+                <span class="bb-option-btn picked craft-unlock-chip-chain">
+                  <span>${newIng.emoji}</span>
+                  <span>${ingName}</span>
+                </span>
+              </div>
             </div>
-            <div style="font-size:0.73rem; color:#f8fafc; font-weight:700;">
-              ${stCfg.ruleBadge} — ${stCfg.subtitle}
-            </div>
-            ${leafsHtml}
+          `);
+        }
+
+        // 2. [신규 추가] 단계 진급으로 추가된 기초 재료들 (골드/호박색 테마)
+        if (hasStepUp && result.stepUpInfo.newlyUnlockedLeafIngredients) {
+          const leafIngs = result.stepUpInfo.newlyUnlockedLeafIngredients;
+          if (leafIngs.length > 0) {
+            const byCat = new Map();
+            for (const ing of leafIngs) {
+              const cId = ing.category_id || 'ETC';
+              if (!byCat.has(cId)) byCat.set(cId, []);
+              byCat.get(cId).push(ing);
+            }
+
+            for (const [cId, ings] of byCat.entries()) {
+              const cat = this.recipeBook.categories.find(c => c.category_id === cId);
+              const catLabel = cat ? `${cat.emoji} ${cat.name}` : '📦 재료';
+
+              groupsHtml.push(`
+                <div class="craft-unlock-group">
+                  <div class="craft-unlock-group-header">
+                    <span class="cat-chip active" style="font-size:0.68rem; padding:2px 8px; cursor:default; pointer-events:none;">
+                      ${catLabel}
+                    </span>
+                    <span class="craft-badge-leaf">
+                      🎁 신규 추가
+                    </span>
+                  </div>
+                  <div class="craft-unlock-items-box leaf-box">
+                    ${ings.map(ing => `
+                      <span class="bb-option-btn picked craft-unlock-chip-leaf">
+                        <span>${ing.emoji}</span>
+                        <span>${this.brandResolver.resolveName(ing)}</span>
+                      </span>
+                    `).join('')}
+                  </div>
+                </div>
+              `);
+            }
+          }
+        }
+
+        unifiedUnlockBanner = `
+          <div class="craft-unified-unlock-card">
+            ${stepUpHeaderHtml}
+            ${groupsHtml.join('')}
           </div>
         `;
       }
@@ -984,8 +999,7 @@ class KSoolApp {
             ${recipeFormula}
           </div>
           ${quizClearBanner}
-          ${chainUnlockBanner}
-          ${stepUpBanner}
+          ${unifiedUnlockBanner}
           <button class="mix-btn" id="result-close-btn" style="width:100%; margin-top:4px;">확인</button>
         </div>
       `;

@@ -420,6 +420,128 @@
   padding-left: 12px;
 }
 
+/* 통합 재료 해금/추가 카드 */
+.craft-unified-unlock-card {
+  width: 100%;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid #475569;
+  border-radius: 14px;
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.craft-stepup-header {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(168, 85, 247, 0.2));
+  border: 1px solid rgba(245, 158, 11, 0.55);
+  border-radius: 10px;
+  padding: 9px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+}
+
+.craft-stepup-title {
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: #fde047;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.craft-stepup-sub {
+  font-size: 0.73rem;
+  color: #f8fafc;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.craft-unlock-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.craft-unlock-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.craft-badge-chain {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  padding: 2px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.craft-badge-leaf {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #fde047;
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  padding: 2px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.craft-unlock-items-box {
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 9px;
+  padding: 7px 9px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.craft-unlock-items-box.chain-box {
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.craft-unlock-items-box.leaf-box {
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.craft-unlock-chip-chain {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  cursor: default;
+  pointer-events: none;
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.22);
+  color: #ecfdf5;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.craft-unlock-chip-leaf {
+  font-size: 0.72rem;
+  padding: 4px 9px;
+  cursor: default;
+  pointer-events: none;
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.2);
+  color: #fef3c7;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .clear-pot-btn {
   padding: 0 14px;
   border-radius: 12px;
