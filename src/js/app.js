@@ -462,6 +462,18 @@ class KSoolApp {
     }
   }
 
+  _clearMixBtnAlert() {
+    if (this._mixBtnAlertTimer) {
+      clearTimeout(this._mixBtnAlertTimer);
+      this._mixBtnAlertTimer = null;
+    }
+    const mixBtn = document.getElementById('mix-btn');
+    if (mixBtn) {
+      mixBtn.textContent = '⚗️ 조합하기';
+      mixBtn.classList.remove('already-crafted-alert');
+    }
+  }
+
   _renderPotSlots() {
     const slotsGrid = document.getElementById('pot-slots-grid');
     const mixBtn = document.getElementById('mix-btn');
@@ -471,31 +483,15 @@ class KSoolApp {
     slotsGrid.classList.toggle('has-items', slots.length > 0);
     mixBtn.disabled = slots.length < 2;
 
-    const noticeEl = document.getElementById('pot-match-notice');
-    if (slots.length >= 2) {
-      const preferredId = this.brewMode === 'QUIZ' ? this.quizTargetRecipeId : null;
-      const matched = this.recipeBook.matchRecipe(slots, this.inventory.unlockedRecipeIds, preferredId);
-      if (matched && this.inventory.isRecipeUnlocked(matched.recipe_id)) {
-        const resolvedName = this.brandResolver.resolveName(matched);
-        mixBtn.textContent = '🔄 다시 빚기 (이미 주조함)';
-        mixBtn.classList.add('already-crafted-btn');
-        if (noticeEl) {
-          noticeEl.innerHTML = `
-            <div class="pot-already-notice">
-              <span>⚠️ 이미 완성했던 조합: <b>[${matched.formatted_number || ''} ${resolvedName} ${matched.emoji}]</b></span>
-            </div>
-          `;
-        }
-      } else {
-        mixBtn.textContent = '⚗️ 조합하기';
-        mixBtn.classList.remove('already-crafted-btn');
-        if (noticeEl) noticeEl.innerHTML = '';
-      }
-    } else {
+    if (slots.length < 2) {
+      this._clearMixBtnAlert();
+    } else if (!this._mixBtnAlertTimer) {
       mixBtn.textContent = '⚗️ 조합하기';
-      mixBtn.classList.remove('already-crafted-btn');
-      if (noticeEl) noticeEl.innerHTML = '';
+      mixBtn.classList.remove('already-crafted-alert');
     }
+
+    const noticeEl = document.getElementById('pot-match-notice');
+    if (noticeEl) noticeEl.innerHTML = '';
 
     // 기본적으로 최소 4칸을 보여주되, 4칸 이상 담기면 동적으로 계속 늘어남
     const displaySlotCount = Math.max(this.config.maxUniqueSlots, slots.length + (this.config.unlimitedSlotsMode ? 1 : 0));
@@ -534,6 +530,7 @@ class KSoolApp {
 
     slotsGrid.querySelectorAll('[data-pot-slot-idx]').forEach(el => {
       el.onclick = () => {
+        this._clearMixBtnAlert();
         const idx = Number(el.getAttribute('data-pot-slot-idx'));
         this.craftingPot.decrementSlot(idx);
         this.audio.playTap();
@@ -655,6 +652,7 @@ class KSoolApp {
   }
 
   _addIngredientToPot(baseId, detailId = null) {
+    this._clearMixBtnAlert();
     const stepConfig = this.inventory.getCurrentStepConfig();
     const res = this.craftingPot.tapIngredient(baseId, detailId, stepConfig);
     if (!res.ok) {
@@ -815,21 +813,18 @@ class KSoolApp {
       }).join(' + ');
 
       if (!isNew) {
-        // [CASE A] 이미 주조 완료된 레시피 재주조 (유저가 확실하게 인지할 수 있는 전용 안내 카드)
+        // [도감/힌트 탭에서 레시피 열람] 기존 방식대로 깔끔한 레시피 정보 카드 표시
         content.innerHTML = `
-          <div style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px;">
+          <div style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px;">
             <div style="display:flex; align-items:center; gap:6px;">
               <span class="diff-badge diff-${rec.difficulty}" style="position:static; font-size:0.7rem; padding:3px 9px;">
                 ${rec.formatted_number || ''} · ${rec.category} · ${rec.difficulty}
-              </span>
-              <span style="background:rgba(234,179,8,0.2); border:1px solid #eab308; color:#fde047; font-size:0.7rem; font-weight:900; padding:2px 8px; border-radius:6px;">
-                ⚠️ 이미 주조했던 조합
               </span>
             </div>
 
             <div class="craft-result-info-card">
               <div class="craft-result-left">
-                <div class="craft-result-emoji" style="filter: grayscale(15%); opacity:0.9;">${rec.emoji}</div>
+                <div class="craft-result-emoji">${rec.emoji}</div>
                 <div class="craft-result-name">${this.brandResolver.resolveName(rec)}</div>
               </div>
               <div class="craft-result-desc">
@@ -837,39 +832,17 @@ class KSoolApp {
               </div>
             </div>
 
-            <div style="width:100%; background:rgba(30,41,59,0.85); border:1px solid #475569; border-radius:12px; padding:12px 14px; text-align:left; display:flex; flex-direction:column; gap:8px;">
-              <div style="font-size:0.82rem; font-weight:800; color:#fde047; display:flex; align-items:center; gap:6px;">
-                <span>ℹ️</span>
-                <span>이미 이 재료들로 완성한 적이 있는 술입니다!</span>
-              </div>
-              <div style="font-size:0.76rem; color:#cbd5e1; line-height:1.5;">
-                투입한 재료 <b>${recipeFormula}</b> 조합은 이미 도감에 <b>[${rec.formatted_number || ''} ${this.brandResolver.resolveName(rec)}]</b>(으)로 등록되어 있습니다.
-              </div>
-              <div style="font-size:0.73rem; color:#94a3b8; background:rgba(15,23,42,0.6); padding:8px 10px; border-radius:8px; border-left:3px solid #38bdf8; line-height:1.45;">
-                💡 <b>안내:</b> 아직 발견하지 못한 새로운 K-술을 찾으시려면 <b>다른 재료</b>를 넣거나 <b>새로운 비율</b>을 시도해보세요!
-              </div>
+            <div style="width:100%; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; font-size:0.8rem; color:#fcd34d; font-weight:800;">
+              ${recipeFormula}
             </div>
 
-            <div style="width:100%; display:flex; gap:8px; margin-top:4px;">
-              <button class="mix-btn" id="result-go-collection-btn" style="flex:1; background:#334155; border:1px solid #64748b;">📖 도감에서 보기</button>
-              <button class="mix-btn" id="result-close-btn" style="flex:1;">확인</button>
-            </div>
+            <button class="mix-btn" id="result-close-btn" style="width:100%; margin-top:4px;">확인</button>
           </div>
         `;
 
         modal.classList.add('active');
         const closeBtn = content.querySelector('#result-close-btn');
         if (closeBtn) closeBtn.onclick = () => modal.classList.remove('active');
-
-        const goCollectionBtn = content.querySelector('#result-go-collection-btn');
-        if (goCollectionBtn) {
-          goCollectionBtn.onclick = () => {
-            modal.classList.remove('active');
-            this.switchTab('collection');
-            this.selectedRecipeCategory = '전체';
-            this.renderCollectionView();
-          };
-        }
         return;
       }
 
@@ -1056,7 +1029,30 @@ class KSoolApp {
     const mixBtn = document.getElementById('mix-btn');
     if (mixBtn) {
       mixBtn.onclick = () => {
+        const slots = this.craftingPot.getSlots();
+        if (slots.length < 2) return;
+
         const preferredId = this.brewMode === 'QUIZ' ? this.quizTargetRecipeId : null;
+        const matched = this.recipeBook.matchRecipe(slots, this.inventory.unlockedRecipeIds, preferredId);
+
+        // [이미 제조했던 조합을 다시 조합하려 한 경우 -> 팝업 없이 버튼에 3초간 안내 후 복귀]
+        if (matched && this.inventory.isRecipeUnlocked(matched.recipe_id)) {
+          this.audio.playTap();
+          if (this._mixBtnAlertTimer) {
+            clearTimeout(this._mixBtnAlertTimer);
+          }
+          mixBtn.textContent = '이미 제조했던 조합입니다.';
+          mixBtn.classList.add('already-crafted-alert');
+
+          this._mixBtnAlertTimer = setTimeout(() => {
+            mixBtn.textContent = '⚗️ 조합하기';
+            mixBtn.classList.remove('already-crafted-alert');
+            this._mixBtnAlertTimer = null;
+          }, 3000);
+          return;
+        }
+
+        this._clearMixBtnAlert();
         const res = this.alchemyEngine.executeCraft(preferredId);
         if (!res.ok) {
           alert(res.message);
@@ -1091,6 +1087,7 @@ class KSoolApp {
     const clearBtn = document.getElementById('clear-pot-btn');
     if (clearBtn) {
       clearBtn.onclick = () => {
+        this._clearMixBtnAlert();
         this.craftingPot.clear();
         this.audio.playTap();
         this.renderBrewView();
