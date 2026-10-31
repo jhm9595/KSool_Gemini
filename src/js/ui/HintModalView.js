@@ -189,10 +189,9 @@ class HintModalView {
       const latestRecord = (hintState.history || [])[0];
       const historyHtml = latestRecord ? `
         <div class="bb-history-row">
-          <span>[${latestRecord.stage}단계] ${latestRecord.guessLabels.join(' · ')}</span>
           <span class="bb-score-pills">
             <span class="pill-strike">${latestRecord.strikes}S</span>
-            ${isOrderSensitive ? `<span class="pill-ball">${latestRecord.balls}B</span>` : ''}
+            <span class="pill-ball">${latestRecord.balls}B</span>
             <span class="pill-out">${latestRecord.outs}O</span>
           </span>
         </div>
