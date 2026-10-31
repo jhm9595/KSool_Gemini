@@ -836,7 +836,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍺",
       "category": "소맥/폭탄주",
       "unlocks_ingredient_id": null,
-      "description": "소주와 맥주를 1:1 동등하게 섞은 한국 술자리의 기본 입문 폭탄주!"
+      "description": "소주와 맥주를 1:1 동등하게 섞은 한국 술자리의 기본 입문 폭탄주!",
+      "requires_order": false
     },
     {
       "recipe_id": 2,
@@ -849,7 +850,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍯",
       "category": "소맥/폭탄주",
       "unlocks_ingredient_id": null,
-      "description": "소주 9 : 맥주 1의 마법! 거짓말처럼 달콤한 꿀맛이 난다고 해서 붙여진 전설의 비율."
+      "description": "소주 9 : 맥주 1의 마법! 거짓말처럼 달콤한 꿀맛이 난다고 해서 붙여진 전설의 비율.",
+      "requires_order": false
     },
     {
       "recipe_id": 3,
@@ -862,7 +864,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍈",
       "category": "기초합성",
       "unlocks_ingredient_id": null,
-      "description": "멜론과 우유, 얼음을 얼려 만든 대한민국 국민 멜론 아이스크림."
+      "description": "멜론과 우유, 얼음을 얼려 만든 대한민국 국민 멜론 아이스크림.",
+      "requires_order": false
     },
     {
       "recipe_id": 4,
@@ -875,7 +878,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍺",
       "category": "기초합성",
       "unlocks_ingredient_id": 102,
-      "description": "탄산수와 맥(보리)이 만나 탄생한 시원하고 청량한 황금빛 맥주! 이제 주류 재료로 쓸 수 있습니다."
+      "description": "탄산수와 맥(보리)이 만나 탄생한 시원하고 청량한 황금빛 맥주! 이제 주류 재료로 쓸 수 있습니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 5,
@@ -888,7 +892,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍶",
       "category": "기초합성",
       "unlocks_ingredient_id": 101,
-      "description": "물과 불의 연금술! 뜨거운 증류로 빚어낸 한국인의 소울 주류. 모든 꿀조합의 핵심 재료입니다."
+      "description": "물과 불의 연금술! 뜨거운 증류로 빚어낸 한국인의 소울 주류. 모든 꿀조합의 핵심 재료입니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 6,
@@ -901,7 +906,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🫖",
       "category": "과일/편의점주",
       "unlocks_ingredient_id": null,
-      "description": "향긋한 홍차 2에 소주 1을 더해 알코올 향을 은은하게 감춘 고급스러운 티 칵테일."
+      "description": "향긋한 홍차 2에 소주 1을 더해 알코올 향을 은은하게 감춘 고급스러운 티 칵테일.",
+      "requires_order": false
     },
     {
       "recipe_id": 7,
@@ -914,7 +920,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🗝️",
       "category": "과일/편의점주",
       "unlocks_ingredient_id": null,
-      "description": "TV 방송에서 화제가 된 홍차 3 : 소주 2 : 얼음 1 황금비율! 다음 날 숙취도 깔끔한 인싸 하이볼."
+      "description": "TV 방송에서 화제가 된 홍차 3 : 소주 2 : 얼음 1 황금비율! 다음 날 숙취도 깔끔한 인싸 하이볼.",
+      "requires_order": false
     },
     {
       "recipe_id": 8,
@@ -927,7 +934,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "⚡",
       "category": "소맥/폭탄주",
       "unlocks_ingredient_id": null,
-      "description": "소주 1 : 에너지드링크 2 : 이온음료 2! 빠른 흡수와 각성 효과를 동시에 노린 밤샘용 폭탄주."
+      "description": "소주 1 : 에너지드링크 2 : 이온음료 2! 빠른 흡수와 각성 효과를 동시에 노린 밤샘용 폭탄주.",
+      "requires_order": false
     },
     {
       "recipe_id": 9,
@@ -940,7 +948,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🩵",
       "category": "과일/편의점주",
       "unlocks_ingredient_id": null,
-      "description": "소주와 밀크소다, 블루레몬에이드가 1:1:1로 어우러진 영롱한 바다빛 바캉스 칵테일."
+      "description": "소주와 밀크소다, 블루레몬에이드가 1:1:1로 어우러진 영롱한 바다빛 바캉스 칵테일.",
+      "requires_order": false
     },
     {
       "recipe_id": 10,
@@ -953,7 +962,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍷",
       "category": "소맥/폭탄주",
       "unlocks_ingredient_id": null,
-      "description": "복분자주 2 : 소주 1 : 사이다 1! 달콤한 자주빛 유혹 뒤에 묵직한 한 방이 숨어있는 명작."
+      "description": "복분자주 2 : 소주 1 : 사이다 1! 달콤한 자주빛 유혹 뒤에 묵직한 한 방이 숨어있는 명작.",
+      "requires_order": false
     },
     {
       "recipe_id": 11,
@@ -966,7 +976,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🧊",
       "category": "기초합성",
       "unlocks_ingredient_id": 201,
-      "description": "물과 차가운 눈이 만나 탄생한 투명한 얼음! 시원한 하이볼과 디저트 제작에 필수입니다."
+      "description": "물과 차가운 눈이 만나 탄생한 투명한 얼음! 시원한 하이볼과 디저트 제작에 필수입니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 12,
@@ -979,7 +990,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🫧",
       "category": "기초합성",
       "unlocks_ingredient_id": 204,
-      "description": "물에 공기를 불어넣어 톡 쏘는 기포를 만든 탄산수! 맥주와 에이드의 기본 베이스입니다."
+      "description": "물에 공기를 불어넣어 톡 쏘는 기포를 만든 탄산수! 맥주와 에이드의 기본 베이스입니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 13,
@@ -992,7 +1004,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍹",
       "category": "기초합성",
       "unlocks_ingredient_id": null,
-      "description": "홍차에 얼음과 상큼한 레몬을 띄워 시원하게 즐기는 여름철 인기 음료."
+      "description": "홍차에 얼음과 상큼한 레몬을 띄워 시원하게 즐기는 여름철 인기 음료.",
+      "requires_order": false
     },
     {
       "recipe_id": 14,
@@ -1005,7 +1018,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍋",
       "category": "기초합성",
       "unlocks_ingredient_id": null,
-      "description": "레몬과 탄산수, 설탕이 어우러진 새콤달콤 스파클링 에이드."
+      "description": "레몬과 탄산수, 설탕이 어우러진 새콤달콤 스파클링 에이드.",
+      "requires_order": false
     },
     {
       "recipe_id": 15,
@@ -1018,7 +1032,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🫧",
       "category": "기초합성",
       "unlocks_ingredient_id": 604,
-      "description": "우유와 탄산수, 설탕의 부드럽고 톡 쏘는 만남! 새로운 느낌의 크림 탄산음료 재료가 해금됩니다."
+      "description": "우유와 탄산수, 설탕의 부드럽고 톡 쏘는 만남! 새로운 느낌의 크림 탄산음료 재료가 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 16,
@@ -1031,7 +1046,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🥭",
       "category": "과일/편의점주",
       "unlocks_ingredient_id": null,
-      "description": "맥주에 달콤한 망고 과즙을 더한 열대과일 풍미의 저도수 과일 맥주."
+      "description": "맥주에 달콤한 망고 과즙을 더한 열대과일 풍미의 저도수 과일 맥주.",
+      "requires_order": false
     },
     {
       "recipe_id": 17,
@@ -1044,7 +1060,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍹",
       "category": "과일/편의점주",
       "unlocks_ingredient_id": null,
-      "description": "소주 1 : 맥주 2 : 망고 2! 망고의 달콤함으로 소주의 쓴맛을 완벽히 지운 트로피컬 소맥."
+      "description": "소주 1 : 맥주 2 : 망고 2! 망고의 달콤함으로 소주의 쓴맛을 완벽히 지운 트로피컬 소맥.",
+      "requires_order": false
     },
     {
       "recipe_id": 18,
@@ -1057,7 +1074,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🥤",
       "category": "소맥/폭탄주",
       "unlocks_ingredient_id": null,
-      "description": "소주와 콜라의 1:1 만남! 쓴맛이 싫은 사람도 부담 없이 마시는 달콤 톡쏘는 칵테일."
+      "description": "소주와 콜라의 1:1 만남! 쓴맛이 싫은 사람도 부담 없이 마시는 달콤 톡쏘는 칵테일.",
+      "requires_order": false
     },
     {
       "recipe_id": 19,
@@ -1070,7 +1088,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "💉",
       "category": "소맥/폭탄주",
       "unlocks_ingredient_id": null,
-      "description": "소주병과 매실주병 입구를 맞대어 수액처럼 서서히 섞여들게 만든 시각과 미각의 예술주."
+      "description": "소주병과 매실주병 입구를 맞대어 수액처럼 서서히 섞여들게 만든 시각과 미각의 예술주.",
+      "requires_order": false
     },
     {
       "recipe_id": 20,
@@ -1083,7 +1102,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🟢",
       "category": "기초합성",
       "unlocks_ingredient_id": 104,
-      "description": "소주에 향긋한 청매실을 담아 숙성시킨 전통 과실주! 링겔주의 핵심 재료로 해금됩니다."
+      "description": "소주에 향긋한 청매실을 담아 숙성시킨 전통 과실주! 링겔주의 핵심 재료로 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 21,
@@ -1096,7 +1116,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍅",
       "category": "과일/편의점주",
       "unlocks_ingredient_id": null,
-      "description": "맥주, 사이다, 토마토주스를 1:1:1로 섞은 한국판 레드아이(Red Eye) 해장 칵테일!"
+      "description": "맥주, 사이다, 토마토주스를 1:1:1로 섞은 한국판 레드아이(Red Eye) 해장 칵테일!",
+      "requires_order": false
     },
     {
       "recipe_id": 22,
@@ -1109,7 +1130,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍅",
       "category": "기초합성",
       "unlocks_ingredient_id": 608,
-      "description": "신선한 토마토와 물, 설탕을 갈아 만든 건강 주스! 맥사토 조합 재료로 해금됩니다."
+      "description": "신선한 토마토와 물, 설탕을 갈아 만든 건강 주스! 맥사토 조합 재료로 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 23,
@@ -1122,7 +1144,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍭",
       "category": "기초합성",
       "unlocks_ingredient_id": 801,
-      "description": "사과와 딸기, 얼음을 배배 꼬아 만든 새콤달콤 아이스크림! 아이스크림 소주 재료로 해금됩니다."
+      "description": "사과와 딸기, 얼음을 배배 꼬아 만든 새콤달콤 아이스크림! 아이스크림 소주 재료로 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 24,
@@ -1135,7 +1158,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍭",
       "category": "과일/편의점주",
       "unlocks_ingredient_id": null,
-      "description": "소주 1 : 사이다 2에 배배꼬인바 1개를 풍덩 녹여 먹는 달콤한 딸기·사과 크림 소주."
+      "description": "소주 1 : 사이다 2에 배배꼬인바 1개를 풍덩 녹여 먹는 달콤한 딸기·사과 크림 소주.",
+      "requires_order": false
     },
     {
       "recipe_id": 25,
@@ -1148,7 +1172,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍞",
       "category": "기초합성",
       "unlocks_ingredient_id": 702,
-      "description": "맥(보리)과 물, 공기로 발효시킨 전통 주조의 심장! 막걸리를 빚기 위한 필수 재료가 해금됩니다."
+      "description": "맥(보리)과 물, 공기로 발효시킨 전통 주조의 심장! 막걸리를 빚기 위한 필수 재료가 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 26,
@@ -1161,7 +1186,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍶",
       "category": "기초합성",
       "unlocks_ingredient_id": 105,
-      "description": "쌀과 누룩, 맑은 물로 막 걸러낸 구수한 전통 탁주! 다채로운 막걸리 꿀조합의 베이스가 해금됩니다."
+      "description": "쌀과 누룩, 맑은 물로 막 걸러낸 구수한 전통 탁주! 다채로운 막걸리 꿀조합의 베이스가 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 27,
@@ -1174,7 +1200,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍶",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 2 : 사이다 1의 황금비율! 비 오는 날 파전과 함께 마시는 청량감 끝판왕 주막 칵테일."
+      "description": "막걸리 2 : 사이다 1의 황금비율! 비 오는 날 파전과 함께 마시는 청량감 끝판왕 주막 칵테일.",
+      "requires_order": false
     },
     {
       "recipe_id": 28,
@@ -1187,7 +1214,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍫",
       "category": "기초합성",
       "unlocks_ingredient_id": 802,
-      "description": "카카오와 우유, 설탕을 녹여 굳힌 진한 밀크 초콜릿! 초코우유 제작 재료로 해금됩니다."
+      "description": "카카오와 우유, 설탕을 녹여 굳힌 진한 밀크 초콜릿! 초코우유 제작 재료로 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 29,
@@ -1200,7 +1228,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍫",
       "category": "기초합성",
       "unlocks_ingredient_id": 609,
-      "description": "진한 초콜릿과 신선한 우유가 만난 달콤한 초코우유! 초코방울주 재료로 해금됩니다."
+      "description": "진한 초콜릿과 신선한 우유가 만난 달콤한 초코우유! 초코방울주 재료로 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 30,
@@ -1213,7 +1242,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍫",
       "category": "과일/편의점주",
       "unlocks_ingredient_id": null,
-      "description": "소주와 진한 초코우유를 1:1로 섞어 고급 초콜릿 리큐르(깔루아밀크) 맛을 재현한 편의점 명작."
+      "description": "소주와 진한 초코우유를 1:1로 섞어 고급 초콜릿 리큐르(깔루아밀크) 맛을 재현한 편의점 명작.",
+      "requires_order": false
     },
     {
       "recipe_id": 31,
@@ -1226,7 +1256,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "👑",
       "category": "소맥/폭탄주",
       "unlocks_ingredient_id": null,
-      "description": "소주 3 : 맥주 7! 대한민국 회식 자리에서 가장 목넘김이 부드럽고 청량하다고 공인된 황금비율."
+      "description": "소주 3 : 맥주 7! 대한민국 회식 자리에서 가장 목넘김이 부드럽고 청량하다고 공인된 황금비율.",
+      "requires_order": false
     },
     {
       "recipe_id": 32,
@@ -1239,7 +1270,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍧",
       "category": "기초합성",
       "unlocks_ingredient_id": 803,
-      "description": "달콤한 배와 아삭한 얼음, 설탕으로 만든 배 슬러시 아이스크림! 배즙보이주 재료로 해금됩니다."
+      "description": "달콤한 배와 아삭한 얼음, 설탕으로 만든 배 슬러시 아이스크림! 배즙보이주 재료로 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 33,
@@ -1252,7 +1284,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍧",
       "category": "과일/편의점주",
       "unlocks_ingredient_id": null,
-      "description": "소주 1 : 사이다 2 : 배즙보이 1! 마시면서 동시에 배 성분으로 해장까지 된다는 시원한 슬러시 소주."
+      "description": "소주 1 : 사이다 2 : 배즙보이 1! 마시면서 동시에 배 성분으로 해장까지 된다는 시원한 슬러시 소주.",
+      "requires_order": false
     },
     {
       "recipe_id": 34,
@@ -1265,7 +1298,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍓",
       "category": "기초합성",
       "unlocks_ingredient_id": 610,
-      "description": "상큼한 딸기와 고소한 우유의 만남! 딸기우유 막걸리의 재료로 해금됩니다."
+      "description": "상큼한 딸기와 고소한 우유의 만남! 딸기우유 막걸리의 재료로 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 35,
@@ -1278,7 +1312,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍌",
       "category": "기초합성",
       "unlocks_ingredient_id": 611,
-      "description": "목욕탕 다녀온 뒤 마시는 달콤한 단지형 바나나우유! 바나나 막걸리 재료로 해금됩니다."
+      "description": "목욕탕 다녀온 뒤 마시는 달콤한 단지형 바나나우유! 바나나 막걸리 재료로 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 36,
@@ -1291,7 +1326,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍯",
       "category": "기초합성",
       "unlocks_ingredient_id": 703,
-      "description": "향긋한 유자를 설탕에 절여 숙성시킨 달콤상큼 유자청! 유자 막걸리 재료로 해금됩니다."
+      "description": "향긋한 유자를 설탕에 절여 숙성시킨 달콤상큼 유자청! 유자 막걸리 재료로 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 37,
@@ -1304,7 +1340,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🫙",
       "category": "기초합성",
       "unlocks_ingredient_id": 704,
-      "description": "새콤한 매실과 설탕으로 담근 만능 발효청! 매실 막걸리 재료로 해금됩니다."
+      "description": "새콤한 매실과 설탕으로 담근 만능 발효청! 매실 막걸리 재료로 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 38,
@@ -1317,7 +1354,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍓",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 3 : 딸기우유 2! 핑크빛 비주얼과 부드러운 딸기 크림 맛으로 여심을 사로잡은 칵테일 막걸리."
+      "description": "막걸리 3 : 딸기우유 2! 핑크빛 비주얼과 부드러운 딸기 크림 맛으로 여심을 사로잡은 칵테일 막걸리.",
+      "requires_order": false
     },
     {
       "recipe_id": 39,
@@ -1330,7 +1368,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍯",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 9 : 설탕(단맛) 1! 텁텁함을 잡아주고 입안에 감기는 달콤함을 극대화한 전통 주막 스타일."
+      "description": "막걸리 9 : 설탕(단맛) 1! 텁텁함을 잡아주고 입안에 감기는 달콤함을 극대화한 전통 주막 스타일.",
+      "requires_order": false
     },
     {
       "recipe_id": 40,
@@ -1343,7 +1382,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍊",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 7 : 유자청 1 : 물 2! 상큼한 유자향이 코끝을 맴도는 남도 풍미의 명품 막걸리."
+      "description": "막걸리 7 : 유자청 1 : 물 2! 상큼한 유자향이 코끝을 맴도는 남도 풍미의 명품 막걸리.",
+      "requires_order": false
     },
     {
       "recipe_id": 41,
@@ -1356,7 +1396,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍏",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 7 : 매실청 1 : 물 2! 새콤달콤한 매실의 산미가 더해져 식욕을 돋우는 반주용 막걸리."
+      "description": "막걸리 7 : 매실청 1 : 물 2! 새콤달콤한 매실의 산미가 더해져 식욕을 돋우는 반주용 막걸리.",
+      "requires_order": false
     },
     {
       "recipe_id": 42,
@@ -1369,7 +1410,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🌾",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 3 : 식혜 2! 밥알의 은은한 단맛과 엿기름의 풍미가 막걸리와 찰떡궁합을 이루는 전통 믹스."
+      "description": "막걸리 3 : 식혜 2! 밥알의 은은한 단맛과 엿기름의 풍미가 막걸리와 찰떡궁합을 이루는 전통 믹스.",
+      "requires_order": false
     },
     {
       "recipe_id": 43,
@@ -1382,7 +1424,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🥣",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 5 : 미숫가루 4! 고소한 곡물 향이 폭발하여 한 잔만 마셔도 든든한 별미 막걸리."
+      "description": "막걸리 5 : 미숫가루 4! 고소한 곡물 향이 폭발하여 한 잔만 마셔도 든든한 별미 막걸리.",
+      "requires_order": false
     },
     {
       "recipe_id": 44,
@@ -1395,7 +1438,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍌",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 3 : 바나나우유 2! 달콤하고 크리미한 바나나 향이 막걸리의 산미를 부드럽게 감싸는 조합."
+      "description": "막걸리 3 : 바나나우유 2! 달콤하고 크리미한 바나나 향이 막걸리의 산미를 부드럽게 감싸는 조합.",
+      "requires_order": false
     },
     {
       "recipe_id": 45,
@@ -1408,7 +1452,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍑",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 3 : 복숭아음료 2! 향긋한 복숭아 과즙과 말랑한 젤리가 씹히는 상큼한 대학가 인기주."
+      "description": "막걸리 3 : 복숭아음료 2! 향긋한 복숭아 과즙과 말랑한 젤리가 씹히는 상큼한 대학가 인기주.",
+      "requires_order": false
     },
     {
       "recipe_id": 46,
@@ -1421,7 +1466,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍐",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 3 : 배음료 2! 시원하고 달콤한 배즙이 들어가 숙취까지 덜어주는 꿀떡꿀떡 막걸리."
+      "description": "막걸리 3 : 배음료 2! 시원하고 달콤한 배즙이 들어가 숙취까지 덜어주는 꿀떡꿀떡 막걸리.",
+      "requires_order": false
     },
     {
       "recipe_id": 47,
@@ -1434,7 +1480,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍍",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 3 : 파인애플주스 2! 새콤달콤 열대 파인애플과 유산균 막걸리가 만난 이국적인 풍미."
+      "description": "막걸리 3 : 파인애플주스 2! 새콤달콤 열대 파인애플과 유산균 막걸리가 만난 이국적인 풍미.",
+      "requires_order": false
     },
     {
       "recipe_id": 48,
@@ -1447,7 +1494,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍼",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 3 : 요구르트 2! 유산균과 유산균의 만남으로 새콤달콤함이 두 배가 된 국민 막걸리 칵테일."
+      "description": "막걸리 3 : 요구르트 2! 유산균과 유산균의 만남으로 새콤달콤함이 두 배가 된 국민 막걸리 칵테일.",
+      "requires_order": false
     },
     {
       "recipe_id": 49,
@@ -1460,7 +1508,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍯",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 5 : 미숫가루 3 : 설탕 1! 고소함에 달콤함까지 완벽하게 밸런스를 맞춘 주막 시그니처."
+      "description": "막걸리 5 : 미숫가루 3 : 설탕 1! 고소함에 달콤함까지 완벽하게 밸런스를 맞춘 주막 시그니처.",
+      "requires_order": false
     },
     {
       "recipe_id": 50,
@@ -1473,7 +1522,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🌺",
       "category": "막걸리꿀조합",
       "unlocks_ingredient_id": null,
-      "description": "막걸리 3 : 석류주스 2! 루비빛 고운 색상과 새콤한 석류 과즙이 어우러진 미녀들의 막걸리."
+      "description": "막걸리 3 : 석류주스 2! 루비빛 고운 색상과 새콤한 석류 과즙이 어우러진 미녀들의 막걸리.",
+      "requires_order": false
     },
     {
       "recipe_id": 51,
@@ -1486,7 +1536,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍸",
       "category": "소맥/폭탄주",
       "unlocks_ingredient_id": null,
-      "description": "소주 1 : 토닉워터 2 : 얼음 1 : 레몬 1! 4가지 재료가 완벽히 조화된 한국형 하이볼의 정점."
+      "description": "소주 1 : 토닉워터 2 : 얼음 1 : 레몬 1! 4가지 재료가 완벽히 조화된 한국형 하이볼의 정점.",
+      "requires_order": false
     },
     {
       "recipe_id": 52,
@@ -1499,7 +1550,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍸",
       "category": "기초합성",
       "unlocks_ingredient_id": 618,
-      "description": "탄산수에 설탕과 레몬 향을 가미한 쌉싸름하고 청량한 믹서 음료! 소토닉 재료로 해금됩니다."
+      "description": "탄산수에 설탕과 레몬 향을 가미한 쌉싸름하고 청량한 믹서 음료! 소토닉 재료로 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 53,
@@ -1512,7 +1564,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍋",
       "category": "기초합성",
       "unlocks_ingredient_id": 619,
-      "description": "깔라만시 과일과 물을 농축해 만든 비타민 폭탄 원액! 깔라만시주 재료로 해금됩니다."
+      "description": "깔라만시 과일과 물을 농축해 만든 비타민 폭탄 원액! 깔라만시주 재료로 해금됩니다.",
+      "requires_order": false
     },
     {
       "recipe_id": 54,
@@ -1525,7 +1578,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍋",
       "category": "과일/편의점주",
       "unlocks_ingredient_id": null,
-      "description": "소주와 깔라만시 원액을 1:1로 섞어 짜릿한 신맛으로 알코올 향을 완전히 덮어버린 마성의 술."
+      "description": "소주와 깔라만시 원액을 1:1로 섞어 짜릿한 신맛으로 알코올 향을 완전히 덮어버린 마성의 술.",
+      "requires_order": false
     },
     {
       "recipe_id": 55,
@@ -1538,7 +1592,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "👑",
       "category": "특산명주",
       "unlocks_ingredient_id": null,
-      "description": "[상세재료 필수] 팔도 지도에서 고른 '이천 임금님쌀(2)'과 누룩(1), 물(1)로 빚은 최고급 진상 명주!"
+      "description": "[상세재료 필수] 팔도 지도에서 고른 '이천 임금님쌀(2)'과 누룩(1), 물(1)로 빚은 최고급 진상 명주!",
+      "requires_order": false
     },
     {
       "recipe_id": 56,
@@ -1551,7 +1606,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🌋",
       "category": "특산명주",
       "unlocks_ingredient_id": null,
-      "description": "[상세재료 필수] 주류 냉장고의 '제주 화산암반 21(1)'에 토닉워터(2), 얼음(1)을 더한 제주 감성 칵테일!"
+      "description": "[상세재료 필수] 주류 냉장고의 '제주 화산암반 21(1)'에 토닉워터(2), 얼음(1)을 더한 제주 감성 칵테일!",
+      "requires_order": false
     },
     {
       "recipe_id": 57,
@@ -1564,7 +1620,8 @@ window.KSool.SeedDataBundle = {
       "emoji": "🍷",
       "category": "기초합성",
       "unlocks_ingredient_id": 103,
-      "description": "탐스러운 복분자 열매에 소주와 설탕을 더해 발효·숙성시킨 진한 자주빛 전통 과실주! 복소사 조합의 재료로 해금됩니다."
+      "description": "탐스러운 복분자 열매에 소주와 설탕을 더해 발효·숙성시킨 진한 자주빛 전통 과실주! 복소사 조합의 재료로 해금됩니다.",
+      "requires_order": false
     }
   ],
   "recipe_ingredients": [

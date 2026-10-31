@@ -178,30 +178,32 @@ class RecipeBook {
       const reqItems = this.getRecipeItems(recipe.recipe_id);
       if (reqItems.length !== potSlots.length) continue;
 
+      const isOrderSensitive = Boolean(recipe.requires_order);
+
       if (recipe.requires_detail_ingredient) {
-        // 상세 재료까지 정확히 일치해야 함
-        const reqKey = reqItems
-          .map(i => `${i.ingredient_id}:${i.detail_ingredient_id || 0}@${i.ratio}`)
-          .sort()
-          .join('+');
-        const potKey = potSlots
-          .map(s => `${s.baseId}:${s.detailId || 0}@${s.count}`)
-          .sort()
-          .join('+');
+        // 상세 재료까지 정확히 일치해야 함 (requires_order가 true면 투입 순서까지 일치해야 함)
+        const reqList = reqItems.map(i => `${i.ingredient_id}:${i.detail_ingredient_id || 0}@${i.ratio}`);
+        const potList = potSlots.map(s => `${s.baseId}:${s.detailId || 0}@${s.count}`);
+        const reqKey = (isOrderSensitive ? reqList : [...reqList].sort()).join('+');
+        const potKey = (isOrderSensitive ? potList : [...potList].sort()).join('+');
         if (reqKey === potKey) {
           candidates.push(recipe);
         }
       } else {
-        // 대표 재료 기준 비교 (정확한 비율 또는 기약비 일치)
-        const reqSorted = [...reqItems].sort((a, b) => a.ingredient_id - b.ingredient_id);
-        const potSorted = [...potSlots].sort((a, b) => a.baseId - b.baseId);
+        // 대표 재료 기준 비교 (requires_order가 true면 투입 순서 유지, false면 순서 무관 정렬 비교)
+        const reqTarget = isOrderSensitive
+          ? [...reqItems]
+          : [...reqItems].sort((a, b) => a.ingredient_id - b.ingredient_id);
+        const potTarget = isOrderSensitive
+          ? [...potSlots]
+          : [...potSlots].sort((a, b) => a.baseId - b.baseId);
 
-        const sameBaseIds = reqSorted.every((r, idx) => Number(r.ingredient_id) === Number(potSorted[idx].baseId));
+        const sameBaseIds = reqTarget.every((r, idx) => Number(r.ingredient_id) === Number(potTarget[idx].baseId));
         if (!sameBaseIds) continue;
 
-        const exactRatioMatch = reqSorted.every((r, idx) => Number(r.ratio) === Number(potSorted[idx].count));
-        const normReq = this._normalizeCounts(reqSorted.map(r => Number(r.ratio)));
-        const normPot = this._normalizeCounts(potSorted.map(p => Number(p.count)));
+        const exactRatioMatch = reqTarget.every((r, idx) => Number(r.ratio) === Number(potTarget[idx].count));
+        const normReq = this._normalizeCounts(reqTarget.map(r => Number(r.ratio)));
+        const normPot = this._normalizeCounts(potTarget.map(p => Number(p.count)));
         const normRatioMatch = normReq.every((val, idx) => val === normPot[idx]);
 
         if (exactRatioMatch || (recipe.difficulty === 'EASY' && normRatioMatch)) {
