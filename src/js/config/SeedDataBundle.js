@@ -20,34 +20,28 @@ window.KSool.SeedDataBundle = {
       "order": 3
     },
     {
-      "category_id": "DAIRY",
-      "name": "유제품",
-      "emoji": "🥛",
-      "order": 4
-    },
-    {
       "category_id": "GRAIN",
       "name": "곡물",
       "emoji": "🌾",
-      "order": 5
+      "order": 4
     },
     {
       "category_id": "DRINK",
       "name": "음료",
       "emoji": "🥤",
-      "order": 6
+      "order": 5
     },
     {
       "category_id": "ETC",
       "name": "감미료",
       "emoji": "🍯",
-      "order": 7
+      "order": 6
     },
     {
       "category_id": "DESSERT",
       "name": "디저트",
       "emoji": "🍦",
-      "order": 8
+      "order": 7
     }
   ],
   "ingredients_base": [
@@ -301,7 +295,7 @@ window.KSool.SeedDataBundle = {
     },
     {
       "ingredient_id": 401,
-      "category_id": "DAIRY",
+      "category_id": "DRINK",
       "display_name": "우유",
       "real_name": "우유",
       "is_licensed": false,
