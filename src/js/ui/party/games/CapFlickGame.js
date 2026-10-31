@@ -13,6 +13,8 @@ class CapFlickGame {
     this.maxFatigue = 22; // 18~28 랜덤 피로도 한계
     this.currentFatigue = 0; // 누적 피로도 (유저에게 절대 비공개)
     this.isBroken = false;
+    this.showQuestionMark = false;
+    this.breakTimestamp = 0;
     this.angle = 14; // 현재 꼬다리 각도
 
     // 파워 차징 (왔다갔다 타이밍 조절 엔진)
@@ -35,6 +37,8 @@ class CapFlickGame {
     this.maxFatigue = Math.floor(Math.random() * 11) + 18; // 18 ~ 28회 상당 피로도
     this.currentFatigue = 0;
     this.isBroken = false;
+    this.showQuestionMark = false;
+    this.breakTimestamp = 0;
     this.isCharging = false;
     this.angle = 14;
     this.currentPower = 0.2;
@@ -163,6 +167,8 @@ class CapFlickGame {
     // 부러짐 판정 체크 (피로도 한계 도달)
     if (this.currentFatigue >= this.maxFatigue) {
       this.isBroken = true;
+      this.showQuestionMark = true;
+      this.breakTimestamp = performance.now();
 
       if (wireGroup) {
         wireGroup.classList.remove('spring-shake');
@@ -171,16 +177,34 @@ class CapFlickGame {
 
       this.hub.sound.playSnap();
       setTimeout(() => this.hub.sound.playExplosion(), 120);
+      this.hub.vibratePenalty();
 
-      this.hub.triggerPenalty({
-        title: '격파! 원샷!',
-        subtitle: '꼬다리 탈락',
-        accentColor: '#10b981',
-        icon: '💥'
-      });
+      if (feedbackBadge) {
+        feedbackBadge.textContent = '💥 꼬다리 격파! 벌칙 원샷!';
+        feedbackBadge.className = 'flick-feedback-badge max show';
+      }
+
+      // 300ms 후 병뚜껑 가운데 ? 버튼 및 Up & Down 이동 안내 등장
+      setTimeout(() => {
+        const qBtn = document.getElementById('cap-question-btn');
+        const guidePill = document.getElementById('cap-updown-guide-pill');
+        if (qBtn) qBtn.classList.add('show');
+        if (guidePill) guidePill.classList.add('show');
+      }, 300);
     }
 
     this._updateMeterUI(this.currentPower);
+  }
+
+  /**
+   * 병뚜껑 가운데 ? 클릭 시 Up & Down 게임으로 매끄럽게 전환
+   */
+  _goToUpDown() {
+    this.hub.sound.playTap();
+    this.hub.vibrateShort();
+    this.showQuestionMark = false;
+    this.isBroken = false;
+    this.hub.playGame('updown');
   }
 
   _updateMeterUI(power) {
@@ -299,10 +323,36 @@ class CapFlickGame {
               <!-- 끝부분 비틀림 컬 팁 -->
               <circle cx="172" cy="27" r="3.5" fill="#f8fafc" stroke="#64748b" stroke-width="1"/>
             </g>
+
+            <!-- 3. 병뚜껑 가운데 ? 버튼 (꼬다리 끊어지면 등장하는 숫자게임 바로가기) -->
+            <g id="cap-question-btn" 
+               class="cap-question-btn ${this.showQuestionMark ? 'show' : ''}" 
+               role="button" 
+               aria-label="Up & Down 숫자 게임으로 이동"
+               style="transform-origin: 160px 275px;">
+              <!-- 펄스 회전 글로우 헤일로 -->
+              <circle cx="160" cy="275" r="42" class="q-pulse-halo"/>
+              <!-- 메인 골드 디스크 -->
+              <circle cx="160" cy="275" r="32" class="q-main-disc"/>
+              <!-- 내부 엠보스 림 -->
+              <circle cx="160" cy="275" r="28" class="q-inner-rim"/>
+              <!-- ? 텍스트 -->
+              <text x="160" y="275" text-anchor="middle" dominant-baseline="central" class="q-mark-char">?</text>
+            </g>
           </svg>
 
           <!-- 실시간 타격 강도 팝업 배지 -->
           <div id="flick-feedback-badge" class="flick-feedback-badge"></div>
+
+          <!-- 꼬다리 탈락 후 Up & Down 안내 및 계속하기 힌트 -->
+          <div id="cap-updown-guide-pill" class="cap-updown-guide-pill ${this.showQuestionMark ? 'show' : ''}">
+            <button type="button" class="btn-jump-updown" id="btn-jump-updown">
+              <span class="jump-pill-icon">🎲</span>
+              <span class="jump-pill-text"><strong>?</strong> 터치 시 <strong>Up & Down</strong> 이동!</span>
+              <span class="jump-pill-arrow">›</span>
+            </button>
+            <span class="jump-dismiss-hint">화면을 터치하면 꼬다리 치기 계속</span>
+          </div>
         </div>
 
         <!-- 하단: 대칭 타이밍 파워 게이지 (내 쪽 플레이어용 정방향) -->
@@ -319,14 +369,34 @@ class CapFlickGame {
     const stage = document.querySelector('.capflick-minimal-box') || document.getElementById('cap-flick-arena');
     if (!stage) return;
 
-    // 포인터 다운 (누르기 시작: 파워 차징 시작)
+    // 포인터 다운 (누르기 시작: 파워 차징 시작 또는 ? 버튼 처리)
     const onStart = (e) => {
+      // 1. 병뚜껑 가운데 ? 버튼이나 안내 바 클릭 시 Up & Down 화면으로 즉시 전환
+      if (e.target && (e.target.closest('#cap-question-btn') || e.target.closest('#btn-jump-updown'))) {
+        e.preventDefault();
+        e.stopPropagation();
+        this._goToUpDown();
+        return;
+      }
+
+      // 2. ? 버튼이 떠 있는 상태에서 화면의 다른 곳을 터치하면: ? 사라지고 꼬다리 치기 계속 (리셋)
+      if (this.showQuestionMark) {
+        if (performance.now() - this.breakTimestamp < 350) return;
+        e.preventDefault();
+        e.stopPropagation();
+        this.hub.sound.playTap();
+        this.reset();
+        return;
+      }
+
+      // 3. 정상 상태: 파워 차징 시작
       e.preventDefault();
       this._startCharging();
     };
 
     // 포인터 업 (손 떼기: 파워 결정 및 타격)
     const onEnd = (e) => {
+      if (this.showQuestionMark) return;
       e.preventDefault();
       this._releaseAndFlick();
     };
@@ -343,6 +413,29 @@ class CapFlickGame {
       stage.onmousedown = onStart;
       window.onmouseup = onEnd;
     }
+
+    // SVG ? 버튼 및 가이드 버튼에 직접 클릭 이벤트도 보강
+    const qBtn = document.getElementById('cap-question-btn');
+    if (qBtn) {
+      const handleQ = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this._goToUpDown();
+      };
+      qBtn.onclick = handleQ;
+      qBtn.ontouchend = handleQ;
+    }
+
+    const jumpBtn = document.getElementById('btn-jump-updown');
+    if (jumpBtn) {
+      const handleJump = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this._goToUpDown();
+      };
+      jumpBtn.onclick = handleJump;
+      jumpBtn.ontouchend = handleJump;
+    }
   }
 
   destroy() {
@@ -351,6 +444,15 @@ class CapFlickGame {
       this.animLoopId = null;
     }
     this.isCharging = false;
+    this.showQuestionMark = false;
+    if (window.PointerEvent) {
+      window.onpointerup = null;
+      window.onpointercancel = null;
+    } else {
+      window.ontouchend = null;
+      window.ontouchcancel = null;
+      window.onmouseup = null;
+    }
   }
 }
 
