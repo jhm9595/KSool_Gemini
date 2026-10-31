@@ -87,7 +87,7 @@ window.KSool.SeedDataBundle = {
       "ingredient_id": 104,
       "category_id": "ALCOHOL",
       "display_name": "매실주",
-      "real_name": "매실주",
+      "real_name": "매화수",
       "is_licensed": false,
       "emoji": "🟢",
       "picker_component": "NONE",
@@ -1240,7 +1240,7 @@ window.KSool.SeedDataBundle = {
     {
       "recipe_id": 20,
       "display_name": "매실주",
-      "real_name": "매실주",
+      "real_name": "매화수",
       "is_licensed": false,
       "difficulty": "EASY",
       "required_level": 1,
