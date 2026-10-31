@@ -89,12 +89,6 @@ class BottleSpinGame {
     this.hub.sound.playSpinWhir();
     this.hub.vibrateShort();
 
-    const statusBadge = document.getElementById('spin-status-badge');
-    if (statusBadge) {
-      statusBadge.textContent = '🌀 빙글빙글 회전 중...';
-      statusBadge.classList.add('spinning');
-    }
-
     const bottleEl = document.getElementById('soju-spinning-bottle');
 
     const step = () => {
@@ -110,20 +104,10 @@ class BottleSpinGame {
       if (Math.abs(this.angularVelocity) > 0.18) {
         this.animId = requestAnimationFrame(step);
       } else {
-        // 회전 종료 및 지목
+        // 회전 종료: 팝업 없이 가리키는 방향 그대로 자연스럽게 정지
         this.isSpinning = false;
         this.angularVelocity = 0;
-        this.hub.sound.playExplosion();
-        this.hub.triggerPenalty({
-          title: '🍾 병목이 가리킨 사람 당첨! 🍾',
-          subtitle: '병 주둥이가 향한 쪽 참가자 원샷!',
-          accentColor: '#10b981'
-        });
-
-        if (statusBadge) {
-          statusBadge.textContent = '🎯 지목 완료! 손가락으로 밀어 다시 돌리세요!';
-          statusBadge.classList.remove('spinning');
-        }
+        this.hub.vibrateShort();
       }
     };
 
@@ -144,7 +128,6 @@ class BottleSpinGame {
 
           <!-- 회전하는 브랜드 무관 초록 소주병 -->
           <div class="soju-bottle-wrapper" id="soju-spinning-bottle" style="transform: rotate(${this.bottleAngle}deg);">
-            <div class="soju-bottle-neck-pointer">▲</div>
             <svg class="soju-bottle-svg" viewBox="0 0 70 220" fill="none" xmlns="http://www.w3.org/2000/svg">
               <!-- 병목 & 초록 뚜껑 -->
               <rect x="25" y="4" width="20" height="14" rx="3" fill="#15803D" stroke="#86EFAC" stroke-width="2"/>
@@ -176,11 +159,6 @@ class BottleSpinGame {
               </defs>
             </svg>
           </div>
-        </div>
-
-        <!-- 하단 실시간 가이드 문구 -->
-        <div class="bottle-callout-text" id="spin-status-badge">
-          👆 병을 손가락으로 쓱 밀어서 돌리세요!
         </div>
       </div>
     `;
