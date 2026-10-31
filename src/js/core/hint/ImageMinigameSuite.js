@@ -176,10 +176,12 @@ class ImageMinigameSuite {
     ctx.fillStyle = progressPct >= targetPct ? '#10b981' : '#fcd34d';
     ctx.fillText(`해금률 ${Math.floor(progressPct)}% / 목표 ${targetPct}%`, this.width / 2, 16);
 
-    // 남은 시간
-    ctx.textAlign = 'right';
-    ctx.fillStyle = timeLeftSec <= 10 ? '#ef4444' : '#38bdf8';
-    ctx.fillText(`⏱️ ${Math.ceil(timeLeftSec)}초`, this.width - 10, 16);
+    // 남은 시간 (시간 제한이 있는 게임만 표시)
+    if (typeof timeLeftSec === 'number') {
+      ctx.textAlign = 'right';
+      ctx.fillStyle = timeLeftSec <= 10 ? '#ef4444' : '#38bdf8';
+      ctx.fillText(`⏱️ ${Math.ceil(timeLeftSec)}초`, this.width - 10, 16);
+    }
 
     if (subText) {
       ctx.textAlign = 'center';
@@ -203,8 +205,7 @@ class ImageMinigameSuite {
 
     this.bbState = {
       lives: 3,
-      totalTime: 45,
-      timeLeft: 45,
+      elapsed: 0,
       lastTime: performance.now(),
       targetPct: 85,
       blockAreaBottom: topY + rows * (bh + gap),
@@ -308,14 +309,7 @@ class ImageMinigameSuite {
     const now = performance.now();
     const dt = (now - st.lastTime) / 1000;
     st.lastTime = now;
-    st.timeLeft -= dt;
-
-    if (st.timeLeft <= 0) {
-      this.audio.playFail();
-      this.stop();
-      this.onLose('제한시간(45초)이 초과되었습니다!');
-      return;
-    }
+    st.elapsed += dt;
 
     const p = st.paddle;
     if (p.shrinkTimer > 0) {
@@ -329,7 +323,7 @@ class ImageMinigameSuite {
     }
 
     // 초반에는 적당한 속도(52%)로 시작하여 시간이 흐르거나 블럭 파괴율이 올라갈수록 점점 빨라져 기존 속도(115%)에 도달
-    const timeProgress = Math.min(1, Math.max(0, ((st.totalTime || 45) - st.timeLeft) / 34));
+    const timeProgress = Math.min(1, Math.max(0, st.elapsed / 34));
     const breakProgress = st.brokenCount / Math.max(1, st.totalBreakable);
     const ramp = Math.max(timeProgress * 0.85, breakProgress);
 
@@ -550,7 +544,7 @@ class ImageMinigameSuite {
     const pct = (st.brokenCount / Math.max(1, st.totalBreakable)) * 100;
     this._drawHUD(ctx, {
       lives: st.lives,
-      timeLeftSec: st.timeLeft,
+      timeLeftSec: null,
       progressPct: pct,
       targetPct: st.targetPct,
       subText: ''
@@ -583,8 +577,7 @@ class ImageMinigameSuite {
       cellH,
       grid,
       lives: 3,
-      totalTime: 45,
-      timeLeft: 45,
+      elapsed: 0,
       lastTime: performance.now(),
       targetPct: 75,
       player: {
@@ -783,14 +776,7 @@ class ImageMinigameSuite {
     const now = performance.now();
     const dt = (now - st.lastTime) / 1000;
     st.lastTime = now;
-    st.timeLeft -= dt;
-
-    if (st.timeLeft <= 0) {
-      this.audio.playFail();
-      this.stop();
-      this.onLose('제한시간(45초)이 초과되었습니다!');
-      return;
-    }
+    st.elapsed += dt;
 
     // 플레이어 그리드 이동 (초당 22칸 속도)
     const pl = st.player;
@@ -831,7 +817,7 @@ class ImageMinigameSuite {
 
     // 적 구체 이동 및 선(2) 충돌 검사
     // 초반에는 적당한 속도(40%)로 시작하여 시간이 흐르거나 점령률이 올라갈수록 점점 빨라져 기존 최고 속도(100%)에 도달
-    const timeProgress = Math.min(1, Math.max(0, ((st.totalTime || 45) - st.timeLeft) / 32));
+    const timeProgress = Math.min(1, Math.max(0, st.elapsed / 32));
     const captureProgress = Math.min(1, st.capturedPct / st.targetPct);
     const ramp = Math.max(timeProgress, captureProgress * 0.85);
     const speedMultiplier = 0.40 + 0.60 * ramp;
@@ -934,7 +920,7 @@ class ImageMinigameSuite {
 
     this._drawHUD(ctx, {
       lives: st.lives,
-      timeLeftSec: st.timeLeft,
+      timeLeftSec: null,
       progressPct: st.capturedPct,
       targetPct: st.targetPct,
       subText: ''
