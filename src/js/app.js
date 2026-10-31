@@ -779,6 +779,7 @@ class KSoolApp {
 
     if (result.isSuccess && result.recipe) {
       const rec = result.recipe;
+      const isNew = Boolean(result.isNewDiscovery);
       const items = this.recipeBook.getRecipeItems(rec.recipe_id);
       const recipeFormula = items.map(it => {
         const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
@@ -787,11 +788,26 @@ class KSoolApp {
         return `${target.emoji}${this.brandResolver.resolveName(target)}(${it.ratio})`;
       }).join(' + ');
 
-      const quizClearBanner = result.isQuizClear
-        ? `<div style="width:100%; background:rgba(59,130,246,0.2); border:1px solid #3b82f6; border-radius:10px; padding:8px; font-size:0.78rem; color:#93c5fd; font-weight:800; text-align:center;">
-             🎯 [${rec.formatted_number}] 단계별 퀴즈 추리 정답! 다음 번호 과제로 진급합니다!
-           </div>`
-        : '';
+      let statusBanner = '';
+      if (!isNew) {
+        statusBanner = `
+          <div style="width:100%; background:rgba(100,116,139,0.2); border:1px solid #475569; border-radius:10px; padding:8px 10px; font-size:0.78rem; color:#cbd5e1; font-weight:800; text-align:center;">
+            ✨ 이미 주조 완료된 레시피입니다! (도감에 등록됨)
+          </div>
+        `;
+      } else if (result.isQuizClear) {
+        statusBanner = `
+          <div style="width:100%; background:rgba(59,130,246,0.2); border:1px solid #3b82f6; border-radius:10px; padding:8px; font-size:0.78rem; color:#93c5fd; font-weight:800; text-align:center;">
+            🎯 [${rec.formatted_number}] 단계별 퀴즈 추리 정답! 다음 번호 과제로 진급합니다!
+          </div>
+        `;
+      } else {
+        statusBanner = `
+          <div style="width:100%; background:rgba(245,158,11,0.18); border:1px solid #f59e0b; border-radius:10px; padding:8px; font-size:0.78rem; color:#fde68a; font-weight:800; text-align:center;">
+            🎉 새로운 조합 발견! 도감에 [${rec.formatted_number}] ${this.brandResolver.resolveName(rec)}이(가) 등록되었습니다!
+          </div>
+        `;
+      }
 
       let chainUnlockBanner = '';
       if (result.newlyUnlockedIngredient) {
@@ -802,14 +818,12 @@ class KSoolApp {
 
         chainUnlockBanner = `
           <div style="width:100%; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.4); border-radius:12px; padding:10px 12px; display:flex; flex-direction:column; gap:7px; text-align:left;">
-            <div style="display:flex; align-items:center;">
-              <span style="font-size:0.76rem; font-weight:900; color:#6ee7b7; display:flex; align-items:center; gap:4px;">
-                🔓 재료 해금
-              </span>
-            </div>
-            <div style="display:flex; align-items:center; gap:6px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
               <span class="cat-chip active" style="font-size:0.7rem; padding:3px 9px; cursor:default; pointer-events:none;">
                 ${catLabel}
+              </span>
+              <span style="font-size:0.74rem; font-weight:900; color:#6ee7b7; display:inline-flex; align-items:center; gap:4px;">
+                🔓 재료 해금
               </span>
             </div>
             <div style="background:rgba(15,23,42,0.7); border:1px solid #334155; border-radius:9px; padding:8px 10px; display:flex; flex-wrap:wrap; gap:6px;">
@@ -878,9 +892,16 @@ class KSoolApp {
 
       content.innerHTML = `
         <div style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px;">
-          <span class="diff-badge diff-${rec.difficulty}" style="position:static; font-size:0.7rem; padding:3px 9px;">
-            ${rec.formatted_number || ''} · ${rec.category} · ${rec.difficulty}
-          </span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="diff-badge diff-${rec.difficulty}" style="position:static; font-size:0.7rem; padding:3px 9px;">
+              ${rec.formatted_number || ''} · ${rec.category} · ${rec.difficulty}
+            </span>
+            ${
+              isNew
+                ? `<span style="background:rgba(245,158,11,0.22); border:1px solid #f59e0b; color:#fde047; font-size:0.68rem; font-weight:900; padding:2px 7px; border-radius:6px;">🎉 NEW 발견!</span>`
+                : `<span style="background:rgba(100,116,139,0.25); border:1px solid #64748b; color:#94a3b8; font-size:0.68rem; font-weight:900; padding:2px 7px; border-radius:6px;">✨ 이미 주조함</span>`
+            }
+          </div>
           <div style="font-size:3.4rem;">${rec.emoji}</div>
           <div style="font-size:1.25rem; font-weight:900; color:#f8fafc;">
             ${this.brandResolver.resolveName(rec)}
@@ -891,7 +912,7 @@ class KSoolApp {
           <div style="width:100%; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; font-size:0.8rem; color:#fcd34d; font-weight:800;">
             ${recipeFormula}
           </div>
-          ${quizClearBanner}
+          ${statusBanner}
           ${chainUnlockBanner}
           ${stepUpBanner}
           <button class="mix-btn" id="result-close-btn" style="width:100%; margin-top:4px;">확인</button>
@@ -954,6 +975,7 @@ class KSoolApp {
         }
         if (res.isSuccess && res.recipe) {
           if (
+            res.isNewDiscovery &&
             this.brewMode === 'QUIZ' &&
             Number(res.recipe.recipe_id) === Number(this.quizTargetRecipeId)
           ) {
