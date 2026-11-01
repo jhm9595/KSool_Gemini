@@ -2088,7 +2088,7 @@ window.KSool.SeedDataBundle = {
     "emoji": "🍋",
     "category": "기초합성",
     "unlocks_ingredient_id": 619,
-    "description": "열대 깔라만시 과일을 통째로 짜내어 농축한 비타민 원액. 눈이 번쩍 뜨일 만큼 강렬하고 짜릿한 신맛을 자랑합니다.",
+    "description": "신선한 깔라만시 과즙을 은근한 불로 뭉근하게 졸여내어 응축한 비타민 원액. 눈이 번쩍 뜨일 만큼 강렬하고 짜릿한 신맛을 자랑합니다.",
     "requires_order": false,
     "max_ratio": 1,
     "sum_ratio": 2,
@@ -2097,7 +2097,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 4,
     "recipe_number": 10,
     "formatted_number": "No.10",
-    "unlock_hint": "동남아의 비타민 폭탄이라 불리는 작은 초록빛 시트러스 열매를 맑은 액체에 진하게 착즙한 원액입니다."
+    "unlock_hint": "동남아의 비타민 폭탄이라 불리는 작은 초록빛 시트러스 과즙을 은근한 불에 진하게 졸여낸 고농축 원액입니다."
   },
   {
     "recipe_id": 54,
@@ -3753,7 +3753,7 @@ window.KSool.SeedDataBundle = {
     "id": 130,
     "recipe_id": 53,
     "slot_order": 2,
-    "ingredient_id": 202,
+    "ingredient_id": 203,
     "detail_ingredient_id": null,
     "ratio": 1
   },
