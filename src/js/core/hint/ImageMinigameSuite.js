@@ -1165,7 +1165,7 @@ class ImageMinigameSuite {
         const x = c * cellW;
         const y = topOffset + r * cellH;
         if (val === 0) {
-          ctx.fillStyle = 'rgba(11, 17, 32, 0.94)';
+          ctx.fillStyle = '#070b14'; // 100% 완전 불투명 암전 (흐릿한 실루엣 사전 노출 완벽 차단)
           ctx.fillRect(x - 0.5, y - 0.5, cellW + 1, cellH + 1);
         } else if (val === 2) {
           ctx.fillStyle = '#f59e0b';
