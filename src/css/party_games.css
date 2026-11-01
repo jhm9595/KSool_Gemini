@@ -618,11 +618,13 @@
 }
 
 .updown-status-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: max-content max-content;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: clamp(12px, 3.2vw, 18px);
+  row-gap: 6px;
   width: 100%;
-  max-width: 260px;
   margin: 0 auto;
   animation: statusFadeIn 0.25s ease-out;
 }
@@ -736,26 +738,26 @@
 }
 
 .updown-status-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: baseline;
-  gap: 14px;
-  line-height: 1.1;
+  display: contents;
 }
 
 .updown-status-row .status-num {
   font-size: clamp(2.2rem, 5vh, 3.2rem);
   font-weight: 900;
-  text-align: right;
+  text-align: left;
+  justify-self: start;
   font-variant-numeric: tabular-nums;
   letter-spacing: -1px;
+  line-height: 1.1;
 }
 
 .updown-status-row .status-label {
   font-size: clamp(1.8rem, 4vh, 2.6rem);
   font-weight: 900;
   text-align: left;
+  justify-self: start;
   letter-spacing: 1px;
+  line-height: 1.1;
 }
 
 .updown-status-row.up .status-num,
