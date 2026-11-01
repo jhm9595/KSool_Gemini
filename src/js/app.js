@@ -118,6 +118,16 @@ class KSoolApp {
     this.quizTargetRecipeId = nextQuiz ? nextQuiz.recipe_id : 5;
 
     this._bindGlobalEvents();
+
+    // iOS 사파리 고무줄 바운스(Overscroll Rubber-banding) 원천 차단
+    document.addEventListener('touchmove', (e) => {
+      const scrollable = e.target.closest('.view, .recipe-list, .pot-scroll-inner, .inventory-scroll, .modal-body, .minigame-canvas, .party-view-body, .lobby-grid');
+      if (!scrollable) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+
     this.renderAll();
 
     // 초기 로딩/새로고침 시에는 해금 탭 상태만 동기화하고, 팝업 큐는 실행하지 않습니다.

@@ -1,8 +1,9 @@
 #app-container {
   width: 100%;
   max-width: 480px;
-  height: 100vh;
-  max-height: 920px;
+  height: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
   background: var(--app-bg);
   display: flex;
   flex-direction: column;
@@ -11,6 +12,7 @@
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
   border: 1px solid var(--border);
   transition: max-width 0.25s ease, height 0.25s ease;
+  overscroll-behavior: none;
 }
 
 @media (min-width: 500px) and (max-width: 679px) {
@@ -181,7 +183,7 @@ header {
   display: flex;
   background: #0f172a;
   border-top: 2px solid var(--primary);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
   flex-shrink: 0;
   width: 100%;
   z-index: 20;
