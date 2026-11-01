@@ -98,6 +98,181 @@ class ImageMinigameSuite {
   }
 
   /**
+   * SVG HTML 문자열을 Canvas 2D 컨텍스트에 동기적으로 즉시 정밀 렌더링
+   * (<rect>, <path>, <circle>, <ellipse>, <line> 모두 지원)
+   */
+  _drawSvgToCanvas(ctx, svgStr, x, y, w, h) {
+    if (!svgStr || !ctx) return false;
+
+    const vbMatch = svgStr.match(/viewBox=["']0 0 ([\d\.]+) ([\d\.]+)["']/);
+    const vbW = vbMatch ? parseFloat(vbMatch[1]) : 32;
+    const vbH = vbMatch ? parseFloat(vbMatch[2]) : 32;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(w / vbW, h / vbH);
+
+    let drawn = false;
+
+    // 1. <rect>
+    const rectRegex = /<rect\s+([^>]+)\s*\/?>/g;
+    let m;
+    while ((m = rectRegex.exec(svgStr)) !== null) {
+      const attrs = m[1];
+      const rx = parseFloat((attrs.match(/x=["']([^"']+)["']/) || [])[1] || '0');
+      const ry = parseFloat((attrs.match(/y=["']([^"']+)["']/) || [])[1] || '0');
+      const rw = parseFloat((attrs.match(/width=["']([^"']+)["']/) || [])[1] || '0');
+      const rh = parseFloat((attrs.match(/height=["']([^"']+)["']/) || [])[1] || '0');
+      const fill = (attrs.match(/fill=["']([^"']+)["']/) || [])[1] || '#ffffff';
+      const op = parseFloat((attrs.match(/opacity=["']([^"']+)["']/) || [])[1] || '1');
+      if (rw > 0 && rh > 0) {
+        ctx.globalAlpha = op;
+        ctx.fillStyle = fill;
+        ctx.fillRect(rx, ry, rw, rh);
+        drawn = true;
+      }
+    }
+
+    // 2. <path>
+    const pathRegex = /<path\s+([^>]+)\s*\/?>/g;
+    while ((m = pathRegex.exec(svgStr)) !== null) {
+      const attrs = m[1];
+      const d = (attrs.match(/d=["']([^"']+)["']/) || [])[1];
+      const fill = (attrs.match(/fill=["']([^"']+)["']/) || [])[1];
+      const stroke = (attrs.match(/stroke=["']([^"']+)["']/) || [])[1];
+      const strokeW = parseFloat((attrs.match(/stroke-width=["']([^"']+)["']/) || [])[1] || '1');
+      const op = parseFloat((attrs.match(/opacity=["']([^"']+)["']/) || [])[1] || '1');
+      if (d && typeof Path2D !== 'undefined') {
+        const p2d = new Path2D(d);
+        ctx.globalAlpha = op;
+        if (fill && fill !== 'none') {
+          ctx.fillStyle = fill;
+          ctx.fill(p2d);
+          drawn = true;
+        }
+        if (stroke && stroke !== 'none') {
+          ctx.strokeStyle = stroke;
+          ctx.lineWidth = strokeW;
+          ctx.stroke(p2d);
+          drawn = true;
+        }
+      }
+    }
+
+    // 3. <circle>
+    const circleRegex = /<circle\s+([^>]+)\s*\/?>/g;
+    while ((m = circleRegex.exec(svgStr)) !== null) {
+      const attrs = m[1];
+      const cx = parseFloat((attrs.match(/cx=["']([^"']+)["']/) || [])[1] || '0');
+      const cy = parseFloat((attrs.match(/cy=["']([^"']+)["']/) || [])[1] || '0');
+      const r = parseFloat((attrs.match(/r=["']([^"']+)["']/) || [])[1] || '0');
+      const fill = (attrs.match(/fill=["']([^"']+)["']/) || [])[1] || '#ffffff';
+      const stroke = (attrs.match(/stroke=["']([^"']+)["']/) || [])[1];
+      const strokeW = parseFloat((attrs.match(/stroke-width=["']([^"']+)["']/) || [])[1] || '1');
+      const op = parseFloat((attrs.match(/opacity=["']([^"']+)["']/) || [])[1] || '1');
+      if (r > 0) {
+        ctx.globalAlpha = op;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        if (fill && fill !== 'none') {
+          ctx.fillStyle = fill;
+          ctx.fill();
+        }
+        if (stroke && stroke !== 'none') {
+          ctx.strokeStyle = stroke;
+          ctx.lineWidth = strokeW;
+          ctx.stroke();
+        }
+        drawn = true;
+      }
+    }
+
+    // 4. <ellipse>
+    const ellipseRegex = /<ellipse\s+([^>]+)\s*\/?>/g;
+    while ((m = ellipseRegex.exec(svgStr)) !== null) {
+      const attrs = m[1];
+      const cx = parseFloat((attrs.match(/cx=["']([^"']+)["']/) || [])[1] || '0');
+      const cy = parseFloat((attrs.match(/cy=["']([^"']+)["']/) || [])[1] || '0');
+      const rx = parseFloat((attrs.match(/rx=["']([^"']+)["']/) || [])[1] || '0');
+      const ry = parseFloat((attrs.match(/ry=["']([^"']+)["']/) || [])[1] || '0');
+      const fill = (attrs.match(/fill=["']([^"']+)["']/) || [])[1] || '#ffffff';
+      const op = parseFloat((attrs.match(/opacity=["']([^"']+)["']/) || [])[1] || '1');
+      if (rx > 0 && ry > 0) {
+        ctx.globalAlpha = op;
+        ctx.beginPath();
+        if (ctx.ellipse) {
+          ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+        } else {
+          ctx.arc(cx, cy, Math.max(rx, ry), 0, Math.PI * 2);
+        }
+        ctx.fillStyle = fill;
+        ctx.fill();
+        drawn = true;
+      }
+    }
+
+    // 5. <line>
+    const lineRegex = /<line\s+([^>]+)\s*\/?>/g;
+    while ((m = lineRegex.exec(svgStr)) !== null) {
+      const attrs = m[1];
+      const x1 = parseFloat((attrs.match(/x1=["']([^"']+)["']/) || [])[1] || '0');
+      const y1 = parseFloat((attrs.match(/y1=["']([^"']+)["']/) || [])[1] || '0');
+      const x2 = parseFloat((attrs.match(/x2=["']([^"']+)["']/) || [])[1] || '0');
+      const y2 = parseFloat((attrs.match(/y2=["']([^"']+)["']/) || [])[1] || '0');
+      const stroke = (attrs.match(/stroke=["']([^"']+)["']/) || [])[1] || '#ffffff';
+      const strokeW = parseFloat((attrs.match(/stroke-width=["']([^"']+)["']/) || [])[1] || '1');
+      const op = parseFloat((attrs.match(/opacity=["']([^"']+)["']/) || [])[1] || '1');
+      ctx.globalAlpha = op;
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = strokeW;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      drawn = true;
+    }
+
+    // 6. <polygon>
+    const polyRegex = /<polygon\s+([^>]+)\s*\/?>/g;
+    while ((m = polyRegex.exec(svgStr)) !== null) {
+      const attrs = m[1];
+      const pointsStr = (attrs.match(/points=["']([^"']+)["']/) || [])[1];
+      const fill = (attrs.match(/fill=["']([^"']+)["']/) || [])[1] || '#ffffff';
+      const stroke = (attrs.match(/stroke=["']([^"']+)["']/) || [])[1];
+      const strokeW = parseFloat((attrs.match(/stroke-width=["']([^"']+)["']/) || [])[1] || '1');
+      const op = parseFloat((attrs.match(/opacity=["']([^"']+)["']/) || [])[1] || '1');
+      if (pointsStr) {
+        const pts = pointsStr.trim().split(/\s+/).map(pair => pair.split(',').map(Number));
+        if (pts.length > 1) {
+          ctx.save();
+          ctx.globalAlpha = op;
+          ctx.beginPath();
+          ctx.moveTo(pts[0][0], pts[0][1]);
+          for (let i = 1; i < pts.length; i++) {
+            ctx.lineTo(pts[i][0], pts[i][1]);
+          }
+          ctx.closePath();
+          if (fill && fill !== 'none') {
+            ctx.fillStyle = fill;
+            ctx.fill();
+            drawn = true;
+          }
+          if (stroke && stroke !== 'none') {
+            ctx.strokeStyle = stroke;
+            ctx.lineWidth = strokeW;
+            ctx.stroke();
+            drawn = true;
+          }
+          ctx.restore();
+        }
+      }
+    }
+
+    ctx.restore();
+    return drawn;
+  }
+
+  /**
    * 오프스크린 캔버스에 숨겨진 실제 술 그래픽/일러스트 렌더링
    * 각 게임의 목표 영역(bounds: { x, y, w, h })에 정확히 맞추어 1:1 위치 일치 보장
    */
@@ -126,28 +301,19 @@ class ImageMinigameSuite {
     const targetW = bounds ? bounds.w : 200;
     const targetH = bounds ? bounds.h : 200;
 
-    let hasSvg = false;
+    let drawn = false;
     if (this.recipe && window.KSool?.pixelIcon) {
       try {
-        let svgStr = window.KSool.pixelIcon(this.recipe, Math.max(targetW, targetH));
+        const svgStr = window.KSool.pixelIcon(this.recipe, Math.max(targetW, targetH));
         if (svgStr) {
-          hasSvg = true;
-          if (!svgStr.includes('xmlns=')) {
-            svgStr = svgStr.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
-          }
-          const img = new Image();
-          img.onload = () => {
-            drawBackground();
-            g.drawImage(img, targetX, targetY, targetW, targetH);
-          };
-          img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+          drawn = this._drawSvgToCanvas(g, svgStr, targetX, targetY, targetW, targetH);
         }
       } catch (err) {
-        console.warn('Failed to render pixel icon on canvas:', err);
+        console.warn('Canvas SVG draw error:', err);
       }
     }
 
-    if (!hasSvg) {
+    if (!drawn) {
       g.font = `${Math.floor(Math.min(targetW, targetH) * 0.52)}px sans-serif`;
       g.textAlign = 'center';
       g.textBaseline = 'middle';
@@ -896,8 +1062,6 @@ class ImageMinigameSuite {
   // 2. 📐 외곽 실루엣 땅따먹기 (술의 외곽선 네온 가이드 + 실루엣 100% 점령)
   // =========================================================================
   _initTerritoryQix() {
-    const dotInfo = this._parseDotSprite(this.recipe);
-
     const cols = 52;
     const rows = 52;
     const topOffset = 32;
@@ -911,24 +1075,115 @@ class ImageMinigameSuite {
       )
     );
 
-    // 16x16 도트 스프라이트를 그리드 중앙에 2x2 셀 크기로 매핑 (32x32 구역)
-    const scale = 2;
-    const startC = Math.floor((cols - 16 * scale) / 2); // 10
-    const startR = Math.floor((rows - 16 * scale) / 2); // 10
+    const artSize = 32;
+    const startC = Math.floor((cols - artSize) / 2); // 10
+    const startR = Math.floor((rows - artSize) / 2); // 10
 
     const targetSilhouetteCells = new Set();
     const isSilhouetteGrid = Array.from({ length: rows }, () => new Uint8Array(cols));
 
-    for (let r = 0; r < 16; r++) {
-      for (let c = 0; c < 16; c++) {
-        if (dotInfo.grid[r][c]) {
-          for (let dr = 0; dr < scale; dr++) {
-            for (let dc = 0; dc < scale; dc++) {
-              const gr = startR + r * scale + dr;
-              const gc = startC + c * scale + dc;
-              if (gr >= 0 && gr < rows && gc >= 0 && gc < cols) {
-                isSilhouetteGrid[gr][gc] = 1;
-                targetSilhouetteCells.add(`${gr},${gc}`);
+    // 실제 화면에 렌더링되는 술 SVG 일러스트로부터 1:1 정밀 알파 마스크 추출
+    let hasExactMask = false;
+    if (this.recipe && window.KSool?.pixelIcon) {
+      try {
+        const svgStr = window.KSool.pixelIcon(this.recipe, artSize);
+        if (svgStr) {
+          const maskCanvas = document.createElement('canvas');
+          maskCanvas.width = cols;
+          maskCanvas.height = rows;
+          const maskCtx = maskCanvas.getContext('2d', { willReadFrequently: true });
+          if (maskCtx) {
+            const drawn = this._drawSvgToCanvas(maskCtx, svgStr, startC, startR, artSize, artSize);
+            if (drawn) {
+              const imgData = maskCtx.getImageData(0, 0, cols, rows);
+              const data = imgData.data;
+              const rawMask = Array.from({ length: rows }, () => new Uint8Array(cols));
+              let rawCount = 0;
+
+              for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                  const alpha = data[(r * cols + c) * 4 + 3];
+                  if (alpha > 15) {
+                    rawMask[r][c] = 1;
+                    rawCount++;
+                  }
+                }
+              }
+
+              if (rawCount > 0) {
+                hasExactMask = true;
+                // 실루엣이 실제 그림보다 약간 더 커서(사방 1셀 팽창) 그림 전체를 안전하게 품고,
+                // 잔의 대각선 라인을 따라 계단식(Stepped)으로 자연스럽게 외곽선이 형성되도록 처리
+                const dilatedMask = Array.from({ length: rows }, () => new Uint8Array(cols));
+                for (let r = 0; r < rows; r++) {
+                  for (let c = 0; c < cols; c++) {
+                    if (rawMask[r][c]) {
+                      for (let dr = -1; dr <= 1; dr++) {
+                        for (let dc = -1; dc <= 1; dc++) {
+                          const nr = r + dr;
+                          const nc = c + dc;
+                          if (nr >= 1 && nr < rows - 1 && nc >= 1 && nc < cols - 1) {
+                            dilatedMask[nr][nc] = 1;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+
+                // 술 안쪽의 미세한 틈새(얼음 틈이나 레몬 틈 등)로 인한 구멍 방지:
+                // 바깥 외곽(0,0)에서 Flood Fill하여 '바깥 영역'을 찾고, 바깥이 아닌 모든 영역을 실루엣 내부로 확정
+                const isOutside = Array.from({ length: rows }, () => new Uint8Array(cols));
+                const queue = [[0, 0]];
+                isOutside[0][0] = 1;
+
+                while (queue.length > 0) {
+                  const [qr, qc] = queue.pop();
+                  const nbrs = [
+                    [qr - 1, qc], [qr + 1, qc], [qr, qc - 1], [qr, qc + 1]
+                  ];
+                  for (const [nr, nc] of nbrs) {
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                      if (!isOutside[nr][nc] && !dilatedMask[nr][nc]) {
+                        isOutside[nr][nc] = 1;
+                        queue.push([nr, nc]);
+                      }
+                    }
+                  }
+                }
+
+                for (let r = 0; r < rows; r++) {
+                  for (let c = 0; c < cols; c++) {
+                    if (!isOutside[r][c]) {
+                      isSilhouetteGrid[r][c] = 1;
+                      targetSilhouetteCells.add(`${r},${c}`);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to extract silhouette mask from SVG, falling back to dot grid:', err);
+      }
+    }
+
+    // SVG 파싱 실패 시 레트로 도트 스프라이트(16x16) 폴백 보장
+    if (!hasExactMask || targetSilhouetteCells.size === 0) {
+      const dotInfo = this._parseDotSprite(this.recipe);
+      const scale = 2;
+      for (let r = 0; r < 16; r++) {
+        for (let c = 0; c < 16; c++) {
+          if (dotInfo.grid[r][c]) {
+            for (let dr = 0; dr < scale; dr++) {
+              for (let dc = 0; dc < scale; dc++) {
+                const gr = startR + r * scale + dr;
+                const gc = startC + c * scale + dc;
+                if (gr >= 0 && gr < rows && gc >= 0 && gc < cols) {
+                  isSilhouetteGrid[gr][gc] = 1;
+                  targetSilhouetteCells.add(`${gr},${gc}`);
+                }
               }
             }
           }
@@ -936,7 +1191,7 @@ class ImageMinigameSuite {
       }
     }
 
-    // 도트 실루엣의 가장 바깥 외곽선(Boundary Edges) 산출
+    // 도트 실루엣의 가장 바깥 외곽선(Boundary Edges) 산출 (계단식 경계선)
     const silhouetteEdges = [];
     for (const coord of targetSilhouetteCells) {
       const [gr, gc] = coord.split(',').map(Number);
@@ -958,8 +1213,8 @@ class ImageMinigameSuite {
     // 숨겨진 완성 일러스트를 실루엣 위치에 1:1로 정확히 정렬
     const silX = startC * cellW;
     const silY = topOffset + startR * cellH;
-    const silW = 16 * scale * cellW;
-    const silH = 16 * scale * cellH;
+    const silW = artSize * cellW;
+    const silH = artSize * cellH;
 
     this._renderHiddenArtwork({
       x: silX,
