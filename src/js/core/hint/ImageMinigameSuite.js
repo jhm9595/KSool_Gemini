@@ -663,10 +663,10 @@ class ImageMinigameSuite {
         moveAccum: 0
       },
       enemies: [
-        // 보스 코어 + 고속 추격 구체 2개 (초반 40% 속도로 시작해 점점 100%까지 가속)
-        { c: cols * 0.5, r: rows * 0.5, vc: 13.5, vr: 11.2, isBoss: true },
-        { c: cols * 0.3, r: rows * 0.35, vc: -15.0, vr: 13.0, isBoss: false },
-        { c: cols * 0.7, r: rows * 0.65, vc: 14.2, vr: -14.5, isBoss: false }
+        // 보스 코어 + 기동 추격체 2개 (초반 속도를 대폭 높여 약 2.5배 빠른 팽팽한 아케이드 텐션 제공)
+        { c: cols * 0.5, r: rows * 0.5, vc: 17.5, vr: 14.5, isBoss: true, baseSpeed: 22.7 },
+        { c: cols * 0.3, r: rows * 0.35, vc: -20.5, vr: 17.5, isBoss: false, baseSpeed: 26.9 },
+        { c: cols * 0.7, r: rows * 0.65, vc: 18.5, vr: -20.5, isBoss: false, baseSpeed: 27.6 }
       ],
       capturedPct: 0
     };
@@ -903,35 +903,58 @@ class ImageMinigameSuite {
     }
 
     // 적 구체 이동 및 선(2) 충돌 검사
-    // 초반에는 적당한 속도(40%)로 시작하여 시간이 흐르거나 점령률이 올라갈수록 점점 빨라져 기존 최고 속도(100%)에 도달
-    const timeProgress = Math.min(1, Math.max(0, st.elapsed / 32));
+    // 초반에도 늘어지지 않는 빠른 기본 속도(80%)로 출발하여, 시간 경과 및 그림 점령률에 따라 최대 125%까지 가속
+    const timeProgress = Math.min(1, Math.max(0, st.elapsed / 24));
     const captureProgress = Math.min(1, st.pictureRevealedPct / st.targetPct);
     const ramp = Math.max(timeProgress, captureProgress * 0.85);
-    const speedMultiplier = 0.40 + 0.60 * ramp;
+    const speedMultiplier = 0.80 + 0.45 * ramp;
 
     for (const en of st.enemies) {
-      const nextC = en.c + en.vc * speedMultiplier * dt;
-      const nextR = en.r + en.vr * speedMultiplier * dt;
-      const checkC = Math.max(0, Math.min(st.cols - 1, Math.floor(nextC)));
-      const checkR = Math.max(0, Math.min(st.rows - 1, Math.floor(nextR)));
+      if (!en.baseSpeed) en.baseSpeed = Math.hypot(en.vc, en.vr);
 
-      // 적이 내 선(2)에 닿거나 선을 긋고 있는 플레이어와 부딪히면 피격!
-      if (st.grid[checkR][checkC] === 2 || ( st.grid[pl.r][pl.c] === 2 && Math.hypot(en.c - pl.c, en.r - pl.r) < 1.6 )) {
-        this._onQixPlayerHit();
-        return;
-      }
+      // 고속 이동 시 선(2) 관통(터널링) 방지를 위한 서브스텝 분할 검사
+      const stepDist = Math.max(Math.abs(en.vc), Math.abs(en.vr)) * speedMultiplier * dt;
+      const subSteps = Math.max(1, Math.ceil(stepDist / 0.45));
+      const subDt = dt / subSteps;
 
-      // 점령지(1) 경계 반사
-      if (st.grid[checkR][Math.floor(en.c)] === 1) {
-        en.vr = -en.vr;
-      } else {
-        en.r = nextR;
-      }
+      for (let s = 0; s < subSteps; s++) {
+        const nextC = en.c + en.vc * speedMultiplier * subDt;
+        const nextR = en.r + en.vr * speedMultiplier * subDt;
+        const checkC = Math.max(0, Math.min(st.cols - 1, Math.floor(nextC)));
+        const checkR = Math.max(0, Math.min(st.rows - 1, Math.floor(nextR)));
 
-      if (st.grid[Math.floor(en.r)][checkC] === 1) {
-        en.vc = -en.vc;
-      } else {
-        en.c = nextC;
+        // 적이 내 선(2)에 닿거나 선을 긋고 있는 플레이어와 부딪히면 피격!
+        if (st.grid[checkR][checkC] === 2 || (st.grid[pl.r][pl.c] === 2 && Math.hypot(en.c - pl.c, en.r - pl.r) < 1.6)) {
+          this._onQixPlayerHit();
+          return;
+        }
+
+        let bounced = false;
+        // 점령지(1) 경계 반사 시 약간의 미세 섭동으로 고착 사각 루프 방지
+        if (st.grid[checkR][Math.floor(en.c)] === 1) {
+          en.vr = -en.vr;
+          en.vc += (Math.random() - 0.5) * 1.5;
+          bounced = true;
+        } else {
+          en.r = nextR;
+        }
+
+        if (st.grid[Math.floor(en.r)][checkC] === 1) {
+          en.vc = -en.vc;
+          en.vr += (Math.random() - 0.5) * 1.5;
+          bounced = true;
+        } else {
+          en.c = nextC;
+        }
+
+        // 반사 섭동 후에도 일정한 고유 속력 크기 유지
+        if (bounced) {
+          const curSpd = Math.hypot(en.vc, en.vr);
+          if (curSpd > 0.1) {
+            en.vc = (en.vc / curSpd) * en.baseSpeed;
+            en.vr = (en.vr / curSpd) * en.baseSpeed;
+          }
+        }
       }
     }
   }
@@ -993,10 +1016,13 @@ class ImageMinigameSuite {
     ctx.strokeRect(picX, picY, picW, picH);
     ctx.restore();
 
-    // 3. 적 구체 렌더링
+    // 3. 적 구체 렌더링 (네온 오라 글로우 효과 추가)
     for (const en of st.enemies) {
       const ex = en.c * cellW;
       const ey = topOffset + en.r * cellH;
+      ctx.save();
+      ctx.shadowColor = en.isBoss ? '#ec4899' : '#ef4444';
+      ctx.shadowBlur = 8;
       ctx.beginPath();
       ctx.arc(ex, ey, en.isBoss ? 9 : 6, 0, Math.PI * 2);
       ctx.fillStyle = en.isBoss ? '#ec4899' : '#ef4444';
@@ -1004,6 +1030,7 @@ class ImageMinigameSuite {
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1.5;
       ctx.stroke();
+      ctx.restore();
     }
 
     // 4. 플레이어 네온 커서 렌더링
