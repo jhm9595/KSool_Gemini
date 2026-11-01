@@ -834,37 +834,59 @@ class KSoolApp {
   _setupHorizontalDrag(el) {
     let isDown = false;
     let startX = 0;
-    let scrollLeft = 0;
+    let scrollStartX = 0;
     el.hasDragged = false;
 
-    el.onmousedown = (e) => {
-      if (e.target.closest('[data-open-detail-picker]')) return;
-      isDown = true;
-      el.hasDragged = false;
-      startX = e.pageX - el.offsetLeft;
-      scrollLeft = el.scrollLeft;
-      el.classList.add('is-dragging');
-    };
-
-    const onMouseUp = () => {
+    const onPointerMove = (e) => {
       if (!isDown) return;
-      isDown = false;
-      el.classList.remove('is-dragging');
-      setTimeout(() => { el.hasDragged = false; }, 60);
-    };
-
-    window.addEventListener('mouseup', onMouseUp, { once: true });
-
-    el.onmousemove = (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - el.offsetLeft;
-      const walk = (x - startX) * 1.5;
+      const currentX = e.pageX !== undefined ? e.pageX : (e.touches && e.touches[0] ? e.touches[0].pageX : e.clientX);
+      const walk = (currentX - startX) * 1.5;
       if (Math.abs(walk) > 5) {
         el.hasDragged = true;
       }
-      el.scrollLeft = scrollLeft - walk;
+      el.scrollLeft = scrollStartX - walk;
     };
+
+    const onPointerUp = () => {
+      if (!isDown) return;
+      isDown = false;
+      el.classList.remove('is-dragging');
+
+      // 드래그 종료 시 window 리스너 깔끔하게 해제
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+      window.removeEventListener('mousemove', onPointerMove);
+      window.removeEventListener('mouseup', onPointerUp);
+
+      // 드래그 직후 발생하는 클릭 이벤트로 인한 재료 투입 방지
+      setTimeout(() => {
+        el.hasDragged = false;
+      }, 80);
+    };
+
+    const onPointerDown = (e) => {
+      // 상세 픽커 버튼 클릭 시 드래그 방지
+      if (e.target.closest('[data-open-detail-picker]')) return;
+      // 마우스 우클릭 등 보조 클릭 무시
+      if (e.button !== undefined && e.button !== 0) return;
+
+      isDown = true;
+      el.hasDragged = false;
+      startX = e.pageX !== undefined ? e.pageX : (e.touches && e.touches[0] ? e.touches[0].pageX : e.clientX);
+      scrollStartX = el.scrollLeft;
+      el.classList.add('is-dragging');
+
+      // 마우스/터치가 레인 밖이나 창 밖으로 나가도 release를 정상 감지하도록 window에 바인딩
+      window.addEventListener('pointermove', onPointerMove, { passive: true });
+      window.addEventListener('pointerup', onPointerUp);
+      window.addEventListener('pointercancel', onPointerUp);
+      window.addEventListener('mousemove', onPointerMove);
+      window.addEventListener('mouseup', onPointerUp);
+    };
+
+    el.onpointerdown = onPointerDown;
+    el.onmousedown = onPointerDown;
 
     el.onwheel = (e) => {
       if (e.deltaY !== 0 && el.scrollWidth > el.clientWidth) {
