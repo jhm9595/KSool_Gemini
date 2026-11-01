@@ -381,6 +381,10 @@ class ImageMinigameSuite {
       this._cleanupInputHandlers();
       this._cleanupInputHandlers = null;
     }
+    if (this._cleanupJoystick) {
+      this._cleanupJoystick();
+      this._cleanupJoystick = null;
+    }
   }
 
   start(gameType) {
@@ -429,6 +433,152 @@ class ImageMinigameSuite {
 
     pl.dc = dc;
     pl.dr = dr;
+  }
+
+  stopQixPlayer() {
+    if (!this.isRunning || this.gameType !== 'TERRITORY_QIX' || !this.qixState) return;
+    const pl = this.qixState.player;
+    pl.dc = 0;
+    pl.dr = 0;
+  }
+
+  /**
+   * 탕탕특공대 스타일 가상 조이스틱 바인딩 (땅따먹기 전용)
+   */
+  bindJoystick(padEl, knobEl, zoneEl) {
+    if (this._cleanupJoystick) {
+      this._cleanupJoystick();
+      this._cleanupJoystick = null;
+    }
+    if (!padEl || !knobEl) return;
+
+    let isDragging = false;
+    let activePointerId = null;
+    let centerX = 0;
+    let centerY = 0;
+    const maxRadius = 35; // 썸스틱 최대 이동 거리 (px)
+
+    const arrowUp = padEl.querySelector('.arrow-up');
+    const arrowDown = padEl.querySelector('.arrow-down');
+    const arrowLeft = padEl.querySelector('.arrow-left');
+    const arrowRight = padEl.querySelector('.arrow-right');
+
+    const updateArrows = (dc, dr) => {
+      if (arrowUp) arrowUp.classList.toggle('active', dr === -1);
+      if (arrowDown) arrowDown.classList.toggle('active', dr === 1);
+      if (arrowLeft) arrowLeft.classList.toggle('active', dc === -1);
+      if (arrowRight) arrowRight.classList.toggle('active', dc === 1);
+    };
+
+    const resetKnob = () => {
+      knobEl.style.transform = 'translate(0px, 0px)';
+      padEl.classList.remove('dragging');
+      updateArrows(0, 0);
+      this.stopQixPlayer();
+    };
+
+    const handlePointerMove = (clientX, clientY) => {
+      if (!isDragging) return;
+      const dx = clientX - centerX;
+      const dy = clientY - centerY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist < 8) {
+        // 데드존 (정지)
+        knobEl.style.transform = `translate(${dx}px, ${dy}px)`;
+        updateArrows(0, 0);
+        this.stopQixPlayer();
+        return;
+      }
+
+      // 썸스틱 위치 클램핑
+      const clampedDist = Math.min(dist, maxRadius);
+      const angle = Math.atan2(dy, dx);
+      const knobX = Math.cos(angle) * clampedDist;
+      const knobY = Math.sin(angle) * clampedDist;
+      knobEl.style.transform = `translate(${knobX}px, ${knobY}px)`;
+
+      // 4방향 결정 (오른쪽: -45°~45°, 아래: 45°~135°, 왼쪽: 135°~225°, 위: -135°~-45°)
+      let reqDc = 0, reqDr = 0;
+      if (angle >= -Math.PI / 4 && angle < Math.PI / 4) {
+        reqDc = 1; reqDr = 0; // 우
+      } else if (angle >= Math.PI / 4 && angle < 3 * Math.PI / 4) {
+        reqDc = 0; reqDr = 1; // 하
+      } else if (angle >= 3 * Math.PI / 4 || angle < -3 * Math.PI / 4) {
+        reqDc = -1; reqDr = 0; // 좌
+      } else {
+        reqDc = 0; reqDr = -1; // 상
+      }
+
+      updateArrows(reqDc, reqDr);
+      this.setQixDirection(reqDc, reqDr);
+    };
+
+    const onPointerDown = (e) => {
+      e.preventDefault();
+      isDragging = true;
+      activePointerId = e.pointerId ?? (e.touches ? e.touches[0].identifier : null);
+
+      const rect = padEl.getBoundingClientRect();
+      centerX = rect.left + rect.width / 2;
+      centerY = rect.top + rect.height / 2;
+
+      padEl.classList.add('dragging');
+      const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : centerX);
+      const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : centerY);
+
+      // 게임이 READY면 즉시 시작
+      if (this.gameState === 'READY') {
+        this.setQixDirection(0, 0);
+      }
+
+      handlePointerMove(clientX, clientY);
+    };
+
+    const onPointerMove = (e) => {
+      if (!isDragging) return;
+      if (e.cancelable) e.preventDefault();
+      let clientX, clientY;
+      if (e.touches) {
+        const touch = Array.from(e.touches).find(t => t.identifier === activePointerId) || e.touches[0];
+        if (!touch) return;
+        clientX = touch.clientX;
+        clientY = touch.clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+      handlePointerMove(clientX, clientY);
+    };
+
+    const onPointerUp = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      activePointerId = null;
+      resetKnob();
+    };
+
+    padEl.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+
+    padEl.addEventListener('touchstart', onPointerDown, { passive: false });
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp);
+    window.addEventListener('touchcancel', onPointerUp);
+
+    this._cleanupJoystick = () => {
+      padEl.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+      padEl.removeEventListener('touchstart', onPointerDown);
+      window.removeEventListener('touchmove', onPointerMove);
+      window.removeEventListener('touchend', onPointerUp);
+      window.removeEventListener('touchcancel', onPointerUp);
+      resetKnob();
+    };
   }
 
   _spawnParticles(x, y, color, count = 12) {
@@ -1388,27 +1538,13 @@ class ImageMinigameSuite {
       }
     };
 
-    let isPointerDown = false;
-    const onDown = (e) => {
+    const onClick = (e) => {
       if (handleWinClose()) {
         if (e.cancelable) e.preventDefault();
         return;
       }
-      if (e.cancelable && e.type && e.type.startsWith('touch')) {
-        e.preventDefault();
-      }
-      isPointerDown = true;
-      const pt = e.touches ? e.touches[0] : e;
-      if (pt) steerToward(pt.clientX, pt.clientY);
+      handleQixAction();
     };
-    const onMove = (e) => {
-      if (!isPointerDown && !e.touches) return;
-      if (e.touches) e.preventDefault();
-      const pt = e.touches ? e.touches[0] : e;
-      if (pt) steerToward(pt.clientX, pt.clientY);
-    };
-    const onUp = () => { isPointerDown = false; };
-    const onClick = () => { handleWinClose(); };
 
     const onKeyDown = (e) => {
       if (handleWinClose()) return;
@@ -1424,24 +1560,20 @@ class ImageMinigameSuite {
       this.setQixDirection(reqDc, reqDr);
     };
 
-    this.canvas.addEventListener('mousedown', onDown);
-    this.canvas.addEventListener('mousemove', onMove);
+    const onKeyUp = (e) => {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'a', 'd', 'w', 's'].includes(e.key)) {
+        this.stopQixPlayer();
+      }
+    };
+
     this.canvas.addEventListener('click', onClick);
-    window.addEventListener('mouseup', onUp);
-    this.canvas.addEventListener('touchstart', onDown, { passive: false });
-    this.canvas.addEventListener('touchmove', onMove, { passive: false });
-    window.addEventListener('touchend', onUp);
     window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
 
     this._cleanupInputHandlers = () => {
-      this.canvas.removeEventListener('mousedown', onDown);
-      this.canvas.removeEventListener('mousemove', onMove);
       this.canvas.removeEventListener('click', onClick);
-      window.removeEventListener('mouseup', onUp);
-      this.canvas.removeEventListener('touchstart', onDown);
-      this.canvas.removeEventListener('touchmove', onMove);
-      window.removeEventListener('touchend', onUp);
       window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
     };
   }
 
