@@ -59,6 +59,7 @@ class CapFlickGame {
 
     // 2. 꼬다리 자체의 접점 기준 휨 각도: 초기 0도 부근 자연스러운 상태
     this.bendAngle = (Math.random() < 0.5 ? -1 : 1) * (2 + Math.floor(Math.random() * 6));
+    this.lastDir = Math.random() < 0.5 ? 1 : -1;
 
     this.currentPower = 0.2;
     this.render();
@@ -134,47 +135,26 @@ class CapFlickGame {
     const startAngle = this.bendAngle || 0;
 
     // 1. 타격 방향(Direction) 결정:
-    // - 거의 중립(중심 ±10도 이내)일 때는 좌/우 50% 확률로 결정
-    // - 이미 한쪽으로 휘어 있다면: 70%는 휜 방향으로 더 깊게 꺾고, 30%는 반대편에서 강타하여 반대쪽으로 크게 젖힘
-    let dir = 1;
-    if (Math.abs(startAngle) < 10) {
-      dir = Math.random() < 0.5 ? 1 : -1;
-    } else {
-      const curSign = Math.sign(startAngle);
-      if (Math.random() < 0.7) {
-        dir = curSign; // 순방향 심화
-      } else {
-        dir = -curSign; // 역방향 강타 (대폭 스윙)
-      }
-    }
+    // 이전 방향이 있으면 75% 확률로 그 방향으로 계속 쳐서 회전시키고, 25% 확률로 반대편 강타
+    if (!this.lastDir) this.lastDir = (Math.random() < 0.5 ? 1 : -1);
+    const dir = Math.random() < 0.75 ? this.lastDir : -this.lastDir;
+    this.lastDir = dir;
 
-    // 2. 파워 등급별 [순간 최대 튕김 각도(Peak)] 및 [영구 휨 변형 각도(Permanent Delta)]
-    // - 톡 (light): 순간 18° ~ 26° 가볍게 튕김, 영구 변형 +8° ~ 14°
-    // - 딱 (normal): 순간 52° ~ 74° 탄력 있게 크게 튕김, 영구 변형 +30° ~ 46°
-    // - 빡! (max): 순간 105° ~ 138° (90도 직각 초과!) 사정없이 확 젖힘, 영구 변형 +70° ~ 92°
-    let peakImpulse = 0;
-    let permDelta = 0;
-
+    // 2. 파워 등급별 [360도 자유 꺾임 각도]:
+    // - 톡 (light): 살짝 톡 치면 16° ~ 28° 회전
+    // - 딱 (normal): 보통 딱 치면 55° ~ 85° 회전
+    // - 빡! (max): 풀파워로 치면 150° ~ 220° 회전! (뚜껑 본체를 가로질러 겹치고 반대편까지 팍 넘어감)
+    let deltaAngle = 0;
     if (powerLevel === 'light') {
-      peakImpulse = 18 + Math.floor(Math.random() * 9); // 18° ~ 26°
-      permDelta = 8 + Math.floor(Math.random() * 7);    // 8° ~ 14°
+      deltaAngle = 16 + Math.floor(Math.random() * 13); // 16° ~ 28°
     } else if (powerLevel === 'normal') {
-      peakImpulse = 52 + Math.floor(Math.random() * 23); // 52° ~ 74°
-      permDelta = 30 + Math.floor(Math.random() * 17);   // 30° ~ 46°
+      deltaAngle = 55 + Math.floor(Math.random() * 31); // 55° ~ 85°
     } else {
-      // 풀파워 빡! 90도 직각을 넘어 105° ~ 138°까지 사정없이 홱 꺾임
-      peakImpulse = 105 + Math.floor(Math.random() * 34); // 105° ~ 138°
-      permDelta = 70 + Math.floor(Math.random() * 23);    // 70° ~ 92°
+      deltaAngle = 150 + Math.floor(Math.random() * 71); // 150° ~ 220° (뚜껑 돔 위를 가로지르며 완전히 겹침!)
     }
 
-    // 최종 목표 안착 각도 계산 (현실적인 알루미늄 철사 최대 휨 한계: ±125°)
-    let targetBend = startAngle + (dir * permDelta);
-    targetBend = Math.max(-125, Math.min(125, targetBend));
-    this.bendAngle = Math.round(targetBend);
-
-    // 순간 최대 피크 각도 계산 (최대 ±138°까지 순간 튕김 허용)
-    let peakAngle = startAngle + (dir * peakImpulse);
-    peakAngle = Math.max(-138, Math.min(138, peakAngle));
+    // 접점(100px 25px) 기준 360도 전방향 제한 없이 자유롭게 누적 회전!
+    this.bendAngle = Math.round(startAngle + (dir * deltaAngle));
 
     const strainRatio = Math.min(1, this.currentFatigue / this.maxFatigue);
 
@@ -193,7 +173,7 @@ class CapFlickGame {
       }
     }
 
-    // 시각 효과: 뚜껑 본체는 고정되어 있고, 꼬다리 와이어만 접점(100px 25px)을 축으로 물리 탄성 감쇠 진동!
+    // 시각 효과: 과한 덜컹거림/바운스 없이, 치는 순간 딱 해당 각도로 절도 있게 꺾여 멈춤 (Snappy Realistic Bend)
     const wireGroup = document.getElementById('cap-wire-transform-group');
     const arena = document.getElementById('cap-flick-arena');
 
@@ -212,49 +192,19 @@ class CapFlickGame {
         wireGroup.currentAnimation = null;
       }
 
-      // 파워 레벨별 물리 탄성 감쇠 진동(Spring-Damper Keyframes)
-      let keyframes = [];
-      let duration = 300;
-
-      if (powerLevel === 'light') {
-        // 톡: 0.26초 가볍고 빠른 1.5회 미세 바운스
-        duration = 260;
-        keyframes = [
-          { transform: `rotate(${startAngle}deg)` },
-          { transform: `rotate(${peakAngle}deg)`, offset: 0.3, easing: 'cubic-bezier(0.12, 0.9, 0.3, 1)' },
-          { transform: `rotate(${this.bendAngle - (dir * 3)}deg)`, offset: 0.68 },
-          { transform: `rotate(${this.bendAngle}deg)`, offset: 1.0 }
-        ];
-      } else if (powerLevel === 'normal') {
-        // 딱: 0.42초 탄력 있게 촥 젖혀지며 2회 바운스
-        duration = 420;
-        const overshoot = (peakAngle - this.bendAngle) * 0.45;
-        keyframes = [
-          { transform: `rotate(${startAngle}deg)` },
-          { transform: `rotate(${peakAngle}deg)`, offset: 0.22, easing: 'cubic-bezier(0.08, 0.95, 0.2, 1)' },
-          { transform: `rotate(${this.bendAngle - overshoot}deg)`, offset: 0.52 },
-          { transform: `rotate(${this.bendAngle + overshoot * 0.3}deg)`, offset: 0.78 },
-          { transform: `rotate(${this.bendAngle}deg)`, offset: 1.0 }
-        ];
-      } else {
-        // 빡!: 0.58초 90도 직각을 넘어 105°~138°까지 사정없이 확 젖혀진 후 3회 거칠게 요동치고 깊숙이 꺾임!
-        duration = 580;
-        const overshoot = (peakAngle - this.bendAngle) * 0.55;
-        keyframes = [
-          { transform: `rotate(${startAngle}deg)` },
-          { transform: `rotate(${peakAngle}deg)`, offset: 0.18, easing: 'cubic-bezier(0.05, 0.98, 0.15, 1)' },
-          { transform: `rotate(${this.bendAngle - overshoot}deg)`, offset: 0.45 },
-          { transform: `rotate(${this.bendAngle + overshoot * 0.38}deg)`, offset: 0.68 },
-          { transform: `rotate(${this.bendAngle - overshoot * 0.14}deg)`, offset: 0.85 },
-          { transform: `rotate(${this.bendAngle}deg)`, offset: 1.0 }
-        ];
-      }
+      // 덜컹거림/바운스 없이, 손가락으로 친 순간 딱 목표 각도로 0.12~0.18초 만에 휙 꺾여 안착!
+      const duration = powerLevel === 'light' ? 120 : (powerLevel === 'normal' ? 150 : 180);
+      const keyframes = [
+        { transform: `rotate(${startAngle}deg)` },
+        { transform: `rotate(${this.bendAngle}deg)` }
+      ];
 
       wireGroup.style.setProperty('--fly-angle', `${this.bendAngle}deg`);
 
       try {
         const anim = wireGroup.animate(keyframes, {
           duration: duration,
+          easing: 'cubic-bezier(0.1, 0.95, 0.2, 1)', // 단단하고 절도 있는 금속 꺾임 이징
           fill: 'forwards'
         });
         wireGroup.currentAnimation = anim;
@@ -313,7 +263,7 @@ class CapFlickGame {
           wireGroup.currentAnimation = null;
         }
         wireGroup.style.transformOrigin = '100px 25px';
-        const flyAngle = peakAngle || this.bendAngle || 0;
+        const flyAngle = this.bendAngle || 0;
         wireGroup.style.setProperty('--fly-angle', `${flyAngle}deg`);
         wireGroup.classList.add('broken-fly');
       }

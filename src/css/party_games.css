@@ -892,30 +892,18 @@
 }
 
 .capflick-center-stage.hit-light {
-  animation: capNudge 0.15s ease;
+  animation: capNudge 0.08s ease;
 }
 .capflick-center-stage.hit-normal {
-  animation: capShakeNormal 0.25s ease;
+  animation: capNudge 0.1s ease;
 }
 .capflick-center-stage.hit-max {
-  animation: capShakeHeavy 0.4s ease;
+  animation: capNudge 0.12s ease;
 }
 
 @keyframes capNudge {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(3px); }
-}
-@keyframes capShakeNormal {
-  0%, 100% { transform: translate(0, 0); }
-  25% { transform: translate(-4px, 3px); }
-  75% { transform: translate(4px, -2px); }
-}
-@keyframes capShakeHeavy {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  20% { transform: translate(-8px, 6px) scale(1.04); }
-  40% { transform: translate(8px, -6px) scale(0.98); }
-  60% { transform: translate(-6px, 4px) scale(1.02); }
-  80% { transform: translate(4px, -2px) scale(0.99); }
+  50% { transform: translateY(2px); }
 }
 
 /* 게이지와 뚜껑 사이 대칭 타격 강도 텍스트 슬롯 (정중앙 세로줄 & 뚜껑-게이지 상하 정중앙 flex 배치) */
