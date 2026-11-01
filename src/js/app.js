@@ -652,45 +652,28 @@ class KSoolApp {
     });
   }
 
-  _renderIngredientsGrid() {
-    const grid = document.getElementById('ingredients-grid');
-    if (!grid) return;
+  _createIngredientCardHtml(ing, potSlots = []) {
+    const inPotCount = potSlots
+      .filter(s => s.baseId === ing.ingredient_id)
+      .reduce((acc, s) => acc + s.count, 0);
+    const details = this.recipeBook.getDetailsForBase(ing.ingredient_id);
+    const hasCustomPicker =
+      this.inventory.isDetailPickerUnlocked() &&
+      details.length > 0 &&
+      ing.picker_component &&
+      ing.picker_component !== 'NONE';
 
-    // 미해금된 재료는 화면에 아예 보이지 않도록 필터링
-    const unlockedBase = Array.from(this.recipeBook.baseIngredients.values()).filter(ing =>
-      this.inventory.isIngredientAvailable(ing.ingredient_id)
-    );
+    let pickerLabel = '';
+    if (hasCustomPicker) {
+      if (ing.picker_component === 'KOREA_MAP_PICKER') pickerLabel = '🗺️팔도지도';
+      else if (ing.picker_component === 'SOJU_BRAND_PICKER') pickerLabel = '🍾브랜드';
+      else if (ing.picker_component === 'BEER_TAP_PICKER') pickerLabel = '🍺브루어리';
+      else pickerLabel = '✨상세';
+    }
 
-    const filtered = this.selectedIngCategory === 'ALL'
-      ? unlockedBase
-      : unlockedBase.filter(i => i.category_id === this.selectedIngCategory);
+    const name = this.brandResolver.resolveName(ing);
 
-    filtered.sort((a, b) => a.ingredient_id - b.ingredient_id);
-
-    const potSlots = this.craftingPot.getSlots();
-
-    grid.innerHTML = filtered.map(ing => {
-      const inPotCount = potSlots
-        .filter(s => s.baseId === ing.ingredient_id)
-        .reduce((acc, s) => acc + s.count, 0);
-      const details = this.recipeBook.getDetailsForBase(ing.ingredient_id);
-      const hasCustomPicker =
-        this.inventory.isDetailPickerUnlocked() &&
-        details.length > 0 &&
-        ing.picker_component &&
-        ing.picker_component !== 'NONE';
-
-      let pickerLabel = '';
-      if (hasCustomPicker) {
-        if (ing.picker_component === 'KOREA_MAP_PICKER') pickerLabel = '🗺️팔도지도';
-        else if (ing.picker_component === 'SOJU_BRAND_PICKER') pickerLabel = '🍾브랜드';
-        else if (ing.picker_component === 'BEER_TAP_PICKER') pickerLabel = '🍺브루어리';
-        else pickerLabel = '✨상세';
-      }
-
-      const name = this.brandResolver.resolveName(ing);
-
-      return `
+    return `
         <div class="ing-card ${inPotCount > 0 ? 'in-pot' : ''} ${hasCustomPicker ? 'has-picker' : ''}"
              data-base-ing-id="${ing.ingredient_id}"
              title="클릭하여 가마솥에 담기">
@@ -700,27 +683,151 @@ class KSoolApp {
           ${inPotCount > 1 ? `<span class="slot-count-badge">${inPotCount}</span>` : ''}
         </div>
       `;
-    }).join('');
+  }
 
-    // 상세재료 버튼(브랜드/브루어리/팔도지도) 클릭 시에만 상세 선택 모달 오픈
-    grid.querySelectorAll('[data-open-detail-picker]').forEach(btn => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        const baseId = Number(btn.getAttribute('data-open-detail-picker'));
-        const baseIng = this.recipeBook.getBaseIngredient(baseId);
-        const details = this.recipeBook.getDetailsForBase(baseId);
-        this.audio.playTap();
-        this.openDetailPickerModal(baseIng, details);
-      };
-    });
+  _renderIngredientsGrid() {
+    const grid = document.getElementById('ingredients-grid');
+    const liquorShelf = document.getElementById('pot-liquor-shelf');
+    const lanesContainer = document.getElementById('ingredients-lanes');
+    if (!grid && !liquorShelf && !lanesContainer) return;
 
-    // 대표 재료 카드(아이콘/영역) 클릭 시 즉시 기본 재료로 가마솥에 투입
-    grid.querySelectorAll('[data-base-ing-id]').forEach(card => {
-      card.onclick = () => {
-        const baseId = Number(card.getAttribute('data-base-ing-id'));
-        this._addIngredientToPot(baseId, null);
-      };
-    });
+    // 미해금된 재료는 화면에 아예 보이지 않도록 필터링
+    const unlockedBase = Array.from(this.recipeBook.baseIngredients.values()).filter(ing =>
+      this.inventory.isIngredientAvailable(ing.ingredient_id)
+    );
+
+    const potSlots = this.craftingPot.getSlots();
+
+    // 1. 모바일 전용: 카테고리 필터링 그리드
+    if (grid) {
+      const filtered = this.selectedIngCategory === 'ALL'
+        ? unlockedBase
+        : unlockedBase.filter(i => i.category_id === this.selectedIngCategory);
+
+      filtered.sort((a, b) => a.ingredient_id - b.ingredient_id);
+      grid.innerHTML = filtered.map(ing => this._createIngredientCardHtml(ing, potSlots)).join('');
+    }
+
+    // 2. 대화면 전용: 조합창 바로 아래 [주류 선반] 상시 노출
+    if (liquorShelf) {
+      const liquorItems = unlockedBase
+        .filter(i => i.category_id === 'ALCOHOL')
+        .sort((a, b) => a.ingredient_id - b.ingredient_id);
+
+      liquorShelf.innerHTML = `
+        <div class="shelf-header">
+          <span class="shelf-title">🍶 주류 베이스</span>
+          <span class="shelf-badge">${liquorItems.length}종</span>
+        </div>
+        <div class="shelf-grid">
+          ${liquorItems.map(ing => this._createIngredientCardHtml(ing, potSlots)).join('')}
+        </div>
+      `;
+    }
+
+    // 3. 대화면 전용: 우측 재료유형별 가로 드래그 레인
+    if (lanesContainer) {
+      const nonAlcoholCats = this.recipeBook.categories.filter(c =>
+        c.category_id !== 'ALCOHOL' &&
+        unlockedBase.some(ing => ing.category_id === c.category_id)
+      );
+
+      lanesContainer.innerHTML = nonAlcoholCats.map(c => {
+        const catItems = unlockedBase
+          .filter(ing => ing.category_id === c.category_id)
+          .sort((a, b) => a.ingredient_id - b.ingredient_id);
+
+        return `
+          <div class="lane-section" data-lane-cat="${c.category_id}">
+            <div class="lane-header">
+              <div class="lane-title-group">
+                <span class="lane-emoji">${c.emoji}</span>
+                <span class="lane-title">${c.name}</span>
+              </div>
+              <span class="lane-count">${catItems.length}종</span>
+            </div>
+            <div class="lane-scroll-container">
+              <div class="lane-cards-row">
+                ${catItems.map(ing => this._createIngredientCardHtml(ing, potSlots)).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 가로 드래그 앤 드롭 및 휠 가로 스크롤 적용
+      lanesContainer.querySelectorAll('.lane-scroll-container').forEach(el => {
+        this._setupHorizontalDrag(el);
+      });
+    }
+
+    // 4. 공통 이벤트 바인딩 (주류 선반 / 레인 / 모바일 그리드 통합)
+    const brewView = document.getElementById('view-brew');
+    if (brewView) {
+      brewView.querySelectorAll('[data-open-detail-picker]').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const baseId = Number(btn.getAttribute('data-open-detail-picker'));
+          const baseIng = this.recipeBook.getBaseIngredient(baseId);
+          const details = this.recipeBook.getDetailsForBase(baseId);
+          this.audio.playTap();
+          this.openDetailPickerModal(baseIng, details);
+        };
+      });
+
+      brewView.querySelectorAll('[data-base-ing-id]').forEach(card => {
+        card.onclick = (e) => {
+          if (e.target.closest('[data-open-detail-picker]')) return;
+          const container = card.closest('.lane-scroll-container');
+          if (container && container.hasDragged) return;
+          const baseId = Number(card.getAttribute('data-base-ing-id'));
+          this._addIngredientToPot(baseId, null);
+        };
+      });
+    }
+  }
+
+  _setupHorizontalDrag(el) {
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+    el.hasDragged = false;
+
+    el.onmousedown = (e) => {
+      if (e.target.closest('[data-open-detail-picker]')) return;
+      isDown = true;
+      el.hasDragged = false;
+      startX = e.pageX - el.offsetLeft;
+      scrollLeft = el.scrollLeft;
+      el.classList.add('is-dragging');
+    };
+
+    const onMouseUp = () => {
+      if (!isDown) return;
+      isDown = false;
+      el.classList.remove('is-dragging');
+      setTimeout(() => { el.hasDragged = false; }, 60);
+    };
+
+    window.addEventListener('mouseup', onMouseUp, { once: true });
+
+    el.onmousemove = (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - el.offsetLeft;
+      const walk = (x - startX) * 1.5;
+      if (Math.abs(walk) > 5) {
+        el.hasDragged = true;
+      }
+      el.scrollLeft = scrollLeft - walk;
+    };
+
+    el.onwheel = (e) => {
+      if (e.deltaY !== 0 && el.scrollWidth > el.clientWidth) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }
+    };
   }
 
   _addIngredientToPot(baseId, detailId = null) {
