@@ -63,6 +63,7 @@ class HintModalView {
     this.isScratchingActive = false;
     this.scratchCardInstance = null;
     this._clearActiveRecipeHistory();
+    document.getElementById('hint-modal-content')?.classList.remove('minigame-card-expanded');
     document.getElementById('hint-modal').classList.remove('active');
   }
 
@@ -98,7 +99,10 @@ class HintModalView {
     const recipe = this.recipeBook.getRecipe(this.activeRecipeId);
     if (!recipe || !container) return;
 
-    if (this.viewMode !== 'MINIGAME_PLAY') {
+    if (this.viewMode === 'MINIGAME_PLAY') {
+      container.classList.add('minigame-card-expanded');
+    } else {
+      container.classList.remove('minigame-card-expanded');
       this._stopMinigame();
     }
 
@@ -308,11 +312,11 @@ class HintModalView {
             </div>
             <div class="mg-card-body">
               <div class="mg-card-title-row">
-                <span class="mg-card-title">1. 벽돌깨기</span>
-                <span class="mg-diff-pill hard">100% 클리어</span>
+                <span class="mg-card-title">1. 벽돌깨기 (도트 스테이지)</span>
+                <span class="mg-diff-pill hard">도트 블록 100% 격파</span>
               </div>
               <div class="mg-card-desc">
-                단단한 벽돌과 강철 범퍼를 돌파하세요! 깨진 벽돌에서 떨어지는 <b>☠️독방울(라이프 감소)</b>과 <b>❄️냉기(패들 축소)</b>를 피해야 합니다.
+                이 술의 <b>실제 도트 모양과 색상 그대로 배치된 벽돌 스테이지</b>를 격파하세요! 단단한 강철 범퍼와 떨어지는 <b>☠️독방울(라이프 감소)</b>, <b>❄️냉기(패들 축소)</b>를 피해 모두 파괴하면 해금!
               </div>
             </div>
             <button class="mg-play-btn">도전 ➔</button>
@@ -324,11 +328,11 @@ class HintModalView {
             </div>
             <div class="mg-card-body">
               <div class="mg-card-title-row">
-                <span class="mg-card-title">2. 땅따먹기</span>
-                <span class="mg-diff-pill vhard">100% 점령</span>
+                <span class="mg-card-title">2. 땅따먹기 (실루엣 점령)</span>
+                <span class="mg-diff-pill vhard">외곽 실루엣 100% 점령</span>
               </div>
               <div class="mg-card-desc">
-                어둠 속을 질주하는 <b>보스 코어 + 고속 화염구 2기</b>가 내 궤적(선)에 닿기 전에 안전지대로 복귀해 <b>뒤에 숨겨진 그림 영역을 뚫어 완전히 드러내세요!</b>
+                완전 암전된 영역 속에서 <b>술의 외곽선 네온 실루엣</b>을 따라 영역을 온전히 도려내세요! <b>보스 코어와 고속 탄막</b>을 피해 <b>실루엣 내부를 100% 점령</b>하면 즉시 해금!
               </div>
             </div>
             <button class="mg-play-btn">도전 ➔</button>
@@ -345,11 +349,9 @@ class HintModalView {
     // =========================================================================
     if (this.viewMode === 'MINIGAME_PLAY') {
       const gameTitles = {
-        BRICK_BREAKER: '🧱 벽돌깨기',
-        TERRITORY_QIX: '📐 땅따먹기'
+        BRICK_BREAKER: '🧱 벽돌깨기 (도트 스테이지)',
+        TERRITORY_QIX: '📐 땅따먹기 (실루엣 점령)'
       };
-
-      const canvasHeight = 440;
 
       container.innerHTML = `
         <div class="hint-top-header">
@@ -361,7 +363,7 @@ class HintModalView {
         </div>
 
         <div class="arcade-cabinet-box">
-          <canvas id="minigame-canvas" width="380" height="${canvasHeight}" class="minigame-canvas"></canvas>
+          <canvas id="minigame-canvas" width="420" height="520" class="minigame-canvas"></canvas>
         </div>
       `;
 

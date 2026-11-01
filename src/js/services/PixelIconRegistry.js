@@ -1907,6 +1907,14 @@ const SPRITE_DATA_HD = {
       return !!(key && SPRITE_DATA_HD[key]);
     },
 
+        /**
+     * Get raw 16x16 Dot sprite definition { key, name, innerSvg } for an item or key
+     */
+    getDotSprite: function(item) {
+      const key = this.resolveKey(item);
+      return (key && SPRITE_DATA_DOT[key]) ? SPRITE_DATA_DOT[key] : null;
+    },
+
     /**
      * Get all registered keys
      */
