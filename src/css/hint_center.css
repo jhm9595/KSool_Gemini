@@ -626,7 +626,7 @@
   word-break: keep-all;
 }
 
-/* 3종 고난도 미니게임 선택 화면 */
+/* 그림 해금 아케이드 미니게임 선택 화면 */
 .minigame-select-intro {
   font-size: 0.75rem;
   color: #cbd5e1;
@@ -671,13 +671,6 @@
 }
 .minigame-select-card.mg-card-qix:hover {
   box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
-}
-
-.minigame-select-card.mg-card-hammer {
-  border-color: rgba(245, 158, 11, 0.55);
-}
-.minigame-select-card.mg-card-hammer:hover {
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
 }
 
 .mg-card-left {
@@ -847,29 +840,6 @@
   background: #10b981;
   border-color: #10b981;
   color: #090d16;
-}
-
-.mg-hammer-bar {
-  display: flex;
-  gap: 8px;
-  width: 100%;
-}
-
-.mg-hammer-strike-btn {
-  flex: 1;
-  padding: 12px;
-  border-radius: 10px;
-  border: 2px solid #fbbf24;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: #090d16;
-  font-size: 0.9rem;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
-}
-
-.mg-hammer-strike-btn:active {
-  transform: scale(0.97);
 }
 
 .mg-result-banner {

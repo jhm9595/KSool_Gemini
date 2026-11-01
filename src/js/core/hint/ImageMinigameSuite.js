@@ -1,10 +1,9 @@
 window.KSool = window.KSool || {};
 
 /**
- * 도감 그림(아이콘/일러스트) 선해금을 위한 3종 고난도 아케이드 미니게임 엔진
+ * 도감 그림(아이콘/일러스트) 선해금을 위한 아케이드 미니게임 엔진
  * 1) BRICK_BREAKER : 🧱 아이스 브레이커 (다중 체력 얼음블럭 + 함정 낙하물 회피 블럭깨기)
- * 2) TERRITORY_QIX : 📐 네온 땅따먹기 (BFS 영역 점령 + 보스 탄막 & 테두리 감시자 회피)
- * 3) CRITICAL_HAMMER: 🔨 크리티컬 아이스 해머 (5단계 가속·함정 구간 타이밍 격파)
+ * 2) TERRITORY_QIX : 📐 네온 땅따먹기 (그림 영역 점령 + 보스 탄막 & 감시자 회피)
  */
 class ImageMinigameSuite {
   constructor(canvas, recipe, audio, onWin, onLose) {
@@ -23,7 +22,7 @@ class ImageMinigameSuite {
     this.particles = [];
     this.shakeTicks = 0;
 
-    // 오프스크린에 숨겨진 완성 술 일러스트 렌더링 (깨진 블럭/땅따먹기 영역만큼 마스킹 노출용)
+    // 오프스크린에 숨겨진 실제 술 그래픽/일러스트 렌더링
     this.hiddenArtCanvas = document.createElement('canvas');
     this.hiddenArtCanvas.width = this.width;
     this.hiddenArtCanvas.height = this.height;
@@ -38,33 +37,97 @@ class ImageMinigameSuite {
     const w = c.width;
     const h = c.height;
 
-    const rad = g.createRadialGradient(w / 2, h / 2, 10, w / 2, h / 2, w * 0.6);
-    rad.addColorStop(0, '#1e3a8a');
+    const cx = w / 2;
+    const cy = (h + 32) / 2;
+
+    // 1. 네온 펍 무드의 깊이감 있는 그라데이션 배경
+    const rad = g.createRadialGradient(cx, cy, 20, cx, cy, w * 0.72);
+    rad.addColorStop(0, '#1e293b');
     rad.addColorStop(0.55, '#0f172a');
-    rad.addColorStop(1, '#090d16');
+    rad.addColorStop(1, '#050811');
     g.fillStyle = rad;
     g.fillRect(0, 0, w, h);
 
-    // 후광 링
-    g.strokeStyle = 'rgba(245, 158, 11, 0.35)';
-    g.lineWidth = 4;
+    // 미세 모눈 격자
+    g.strokeStyle = 'rgba(56, 189, 248, 0.07)';
+    g.lineWidth = 1;
+    for (let x = 0; x < w; x += 18) {
+      g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke();
+    }
+    for (let y = 0; y < h; y += 18) {
+      g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke();
+    }
+
+    // 신비로운 후광 글로우
+    const glow = g.createRadialGradient(cx, cy, 10, cx, cy, 115);
+    glow.addColorStop(0, 'rgba(250, 204, 21, 0.32)');
+    glow.addColorStop(0.6, 'rgba(56, 189, 248, 0.16)');
+    glow.addColorStop(1, 'rgba(15, 23, 42, 0)');
+    g.fillStyle = glow;
     g.beginPath();
-    g.arc(w / 2, h / 2, 82, 0, Math.PI * 2);
+    g.arc(cx, cy, 115, 0, Math.PI * 2);
+    g.fill();
+
+    // 골드 & 네온 링 프레임
+    g.strokeStyle = 'rgba(250, 204, 21, 0.45)';
+    g.lineWidth = 2.5;
+    g.beginPath();
+    g.arc(cx, cy, 88, 0, Math.PI * 2);
     g.stroke();
 
-    g.strokeStyle = 'rgba(56, 189, 248, 0.25)';
-    g.lineWidth = 2;
+    g.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+    g.lineWidth = 1.5;
     g.beginPath();
-    g.arc(w / 2, h / 2, 104, 0, Math.PI * 2);
+    g.arc(cx, cy, 108, 0, Math.PI * 2);
     g.stroke();
 
-    // 중앙 대형 술/재료 그림
-    g.font = '112px sans-serif';
+    // 2. 실제 픽셀/HD 아이콘 SVG 렌더링
+    const iconSize = 170;
+    const ix = cx - iconSize / 2;
+    const iy = cy - iconSize / 2;
+
+    // 이미지 로드 전 즉시 이모지 렌더링 (fallback)
+    g.font = '84px sans-serif';
     g.textAlign = 'center';
     g.textBaseline = 'middle';
-    g.shadowColor = 'rgba(245, 158, 11, 0.7)';
-    g.shadowBlur = 24;
-    g.fillText(this.recipe ? this.recipe.emoji : '🍶', w / 2, h / 2);
+    g.shadowColor = 'rgba(250, 204, 21, 0.6)';
+    g.shadowBlur = 18;
+    g.fillText(this.recipe ? this.recipe.emoji : '🍶', cx, cy);
+    g.shadowBlur = 0;
+
+    // 실제 SVG 픽셀 아이콘 비동기 로드 및 실시간 덮어쓰기
+    if (this.recipe && window.KSool?.pixelIcon) {
+      try {
+        let svgStr = window.KSool.pixelIcon(this.recipe, iconSize);
+        if (svgStr) {
+          if (!svgStr.includes('xmlns=')) {
+            svgStr = svgStr.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
+          }
+          const img = new Image();
+          img.onload = () => {
+            g.save();
+            g.clearRect(ix - 5, iy - 5, iconSize + 10, iconSize + 10);
+            g.fillStyle = glow;
+            g.beginPath();
+            g.arc(cx, cy, 115, 0, Math.PI * 2);
+            g.fill();
+            g.drawImage(img, ix, iy, iconSize, iconSize);
+            g.restore();
+          };
+          img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+        }
+      } catch (err) {
+        console.warn('Failed to render pixel icon on canvas:', err);
+      }
+    }
+
+    // 하단에 칵테일 이름 텍스트
+    g.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    g.textAlign = 'center';
+    g.fillStyle = '#fde047';
+    g.shadowColor = 'rgba(0,0,0,0.8)';
+    g.shadowBlur = 6;
+    g.fillText(this.recipe?.display_name || this.recipe?.real_name || '', cx, cy + 96);
     g.shadowBlur = 0;
   }
 
@@ -91,8 +154,6 @@ class ImageMinigameSuite {
       this._initBrickBreaker();
     } else if (gameType === 'TERRITORY_QIX') {
       this._initTerritoryQix();
-    } else if (gameType === 'CRITICAL_HAMMER') {
-      this._initCriticalHammer();
     }
 
     const loop = () => {
@@ -108,11 +169,6 @@ class ImageMinigameSuite {
     if (!this.isRunning || this.gameType !== 'TERRITORY_QIX' || !this.qixState) return;
     this.qixState.player.dc = dc;
     this.qixState.player.dr = dr;
-  }
-
-  triggerHammerStrike() {
-    if (!this.isRunning || this.gameType !== 'CRITICAL_HAMMER' || !this.chState) return;
-    this._handleHammerStrike();
   }
 
   _spawnParticles(x, y, color, count = 12) {
@@ -153,7 +209,7 @@ class ImageMinigameSuite {
     ctx.globalAlpha = 1;
   }
 
-  _drawHUD(ctx, { lives, timeLeftSec, progressPct, targetPct, subText }) {
+  _drawHUD(ctx, { lives, timeLeftSec, progressPct, targetPct, labelText, subText }) {
     ctx.fillStyle = 'rgba(9, 13, 24, 0.88)';
     ctx.fillRect(0, 0, this.width, 32);
     ctx.strokeStyle = '#334155';
@@ -174,7 +230,8 @@ class ImageMinigameSuite {
     // 해금 진행률
     ctx.textAlign = 'center';
     ctx.fillStyle = progressPct >= targetPct ? '#10b981' : '#fcd34d';
-    ctx.fillText(`해금률 ${Math.floor(progressPct)}% / 목표 ${targetPct}%`, this.width / 2, 16);
+    const displayLabel = labelText || `해금률 ${Math.floor(progressPct)}% / 목표 ${targetPct}%`;
+    ctx.fillText(displayLabel, this.width / 2, 16);
 
     // 남은 시간 (시간 제한이 있는 게임만 표시)
     if (typeof timeLeftSec === 'number') {
@@ -569,6 +626,18 @@ class ImageMinigameSuite {
       )
     );
 
+    // 중앙의 실제 그림(아이콘) 영역 계산 (그림을 온전히 뚫었는지 판정하는 목표 구역)
+    const cx = this.width / 2;
+    const cy = (this.height + topOffset) / 2;
+    const picHalfW = 85;
+    const picHalfH = 92;
+
+    const picMinC = Math.max(1, Math.floor((cx - picHalfW) / cellW));
+    const picMaxC = Math.min(cols - 2, Math.ceil((cx + picHalfW) / cellW));
+    const picMinR = Math.max(1, Math.floor((cy - picHalfH - topOffset) / cellH));
+    const picMaxR = Math.min(rows - 2, Math.ceil((cy + picHalfH - topOffset) / cellH));
+    const totalPicCells = (picMaxR - picMinR + 1) * (picMaxC - picMinC + 1);
+
     this.qixState = {
       cols,
       rows,
@@ -579,7 +648,13 @@ class ImageMinigameSuite {
       lives: 3,
       elapsed: 0,
       lastTime: performance.now(),
-      targetPct: 75,
+      targetPct: 90, // 그림 구역을 90% 이상 뚫어 온전히 드러내야 승리!
+      picMinC,
+      picMaxC,
+      picMinR,
+      picMaxR,
+      totalPicCells,
+      pictureRevealedPct: 0,
       player: {
         c: Math.floor(cols / 2),
         r: rows - 1,
@@ -750,7 +825,18 @@ class ImageMinigameSuite {
       }
     }
 
-    // 5. 전체 점령률 집계
+    // 5. 그림 영역 노출도(점령률) 집계: "뒤의 그림이 다 보이게끔 뚫었는가!"
+    let revealedPicCells = 0;
+    for (let r = st.picMinR; r <= st.picMaxR; r++) {
+      for (let c = st.picMinC; c <= st.picMaxC; c++) {
+        if (grid[r][c] === 1) {
+          revealedPicCells++;
+        }
+      }
+    }
+    st.pictureRevealedPct = (revealedPicCells / Math.max(1, st.totalPicCells)) * 100;
+
+    // 전체 점령률 집계 (참고용)
     let capturedCells = 0;
     const totalInnerCells = (rows - 2) * (cols - 2);
     for (let r = 1; r < rows - 1; r++) {
@@ -805,7 +891,8 @@ class ImageMinigameSuite {
           pl.dc = 0;
           pl.dr = 0;
           this._floodFillCaptureQix();
-          if (st.capturedPct >= st.targetPct) {
+          // 그림 영역을 목표치(90%) 이상 뚫어 그림이 온전히 드러났으면 승리!
+          if (st.pictureRevealedPct >= st.targetPct) {
             this.audio.playSuccess();
             this.stop();
             this.onWin();
@@ -818,7 +905,7 @@ class ImageMinigameSuite {
     // 적 구체 이동 및 선(2) 충돌 검사
     // 초반에는 적당한 속도(40%)로 시작하여 시간이 흐르거나 점령률이 올라갈수록 점점 빨라져 기존 최고 속도(100%)에 도달
     const timeProgress = Math.min(1, Math.max(0, st.elapsed / 32));
-    const captureProgress = Math.min(1, st.capturedPct / st.targetPct);
+    const captureProgress = Math.min(1, st.pictureRevealedPct / st.targetPct);
     const ramp = Math.max(timeProgress, captureProgress * 0.85);
     const speedMultiplier = 0.40 + 0.60 * ramp;
 
@@ -894,6 +981,18 @@ class ImageMinigameSuite {
       }
     }
 
+    // 2-1. 목표인 중앙 그림(아이콘) 영역 가이드라인 (점선 표시)
+    const picX = st.picMinC * cellW;
+    const picY = topOffset + st.picMinR * cellH;
+    const picW = (st.picMaxC - st.picMinC + 1) * cellW;
+    const picH = (st.picMaxR - st.picMinR + 1) * cellH;
+    ctx.save();
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = st.pictureRevealedPct >= st.targetPct ? '#10b981' : 'rgba(250, 204, 21, 0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(picX, picY, picW, picH);
+    ctx.restore();
+
     // 3. 적 구체 렌더링
     for (const en of st.enemies) {
       const ex = en.c * cellW;
@@ -921,230 +1020,10 @@ class ImageMinigameSuite {
     this._drawHUD(ctx, {
       lives: st.lives,
       timeLeftSec: null,
-      progressPct: st.capturedPct,
+      progressPct: st.pictureRevealedPct,
       targetPct: st.targetPct,
+      labelText: `그림 노출 ${Math.floor(st.pictureRevealedPct)}% / 목표 ${st.targetPct}%`,
       subText: ''
-    });
-  }
-
-  // =========================================================================
-  // 3. 🔨 크리티컬 아이스 해머 (5단계 가속·함정 타이밍 격파)
-  // =========================================================================
-  _initCriticalHammer() {
-    this.chState = {
-      lives: 3,
-      timeLeft: 22,
-      lastTime: performance.now(),
-      maxStage: 5,
-      clearedStages: 0,
-      needlePos: 0.5, // 0.0 ~ 1.0
-      needleDir: 1,
-      needleSpeed: 1.15, // 단계마다 급가속
-      critCenter: 0.5,
-      critWidth: 0.14,
-      dangerLeft: 0.30,
-      dangerRight: 0.70,
-      dangerWidth: 0.11,
-      feedbackText: '노란 CRITICAL 구간에 바늘이 올 때 화면을 탭하세요!',
-      feedbackColor: '#fcd34d'
-    };
-
-    this._randomizeHammerZones();
-
-    const onStrike = (e) => {
-      if (e.cancelable) e.preventDefault();
-      this._handleHammerStrike();
-    };
-
-    const onKeyDown = (e) => {
-      if (e.code === 'Space' || e.code === 'Enter') {
-        e.preventDefault();
-        this._handleHammerStrike();
-      }
-    };
-
-    this.canvas.addEventListener('mousedown', onStrike);
-    this.canvas.addEventListener('touchstart', onStrike, { passive: false });
-    window.addEventListener('keydown', onKeyDown);
-
-    this._cleanupInputHandlers = () => {
-      this.canvas.removeEventListener('mousedown', onStrike);
-      this.canvas.removeEventListener('touchstart', onStrike);
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  }
-
-  _randomizeHammerZones() {
-    const st = this.chState;
-    const stageIdx = st.clearedStages; // 0 ~ 4
-    // 단계가 올라갈수록 크리티컬 폭은 좁아지고 바늘 속도는 빨라짐
-    st.critWidth = Math.max(0.075, 0.14 - stageIdx * 0.015);
-    st.needleSpeed = 1.2 + stageIdx * 0.34;
-    st.critCenter = 0.25 + Math.random() * 0.5;
-    st.dangerWidth = 0.10;
-    st.dangerLeft = Math.max(0.06, st.critCenter - st.critWidth / 2 - st.dangerWidth / 2 - 0.01);
-    st.dangerRight = Math.min(0.94, st.critCenter + st.critWidth / 2 + st.dangerWidth / 2 + 0.01);
-  }
-
-  _handleHammerStrike() {
-    const st = this.chState;
-    const pos = st.needlePos;
-    const halfCrit = st.critWidth / 2;
-    const halfDanger = st.dangerWidth / 2;
-
-    if (Math.abs(pos - st.critCenter) <= halfCrit) {
-      // CRITICAL 정타 성공!
-      st.clearedStages++;
-      this.shakeTicks = 10;
-      this.audio.playSuccess();
-      this._spawnParticles(this.width / 2, this.height / 2 - 20, '#38bdf8', 26);
-      st.feedbackText = `💥 CRITICAL 정타! (${st.clearedStages} / ${st.maxStage} 단계 격파!)`;
-      st.feedbackColor = '#10b981';
-
-      if (st.clearedStages >= st.maxStage) {
-        this.stop();
-        this.onWin();
-        return;
-      }
-      this._randomizeHammerZones();
-    } else if (
-      Math.abs(pos - st.dangerLeft) <= halfDanger ||
-      Math.abs(pos - st.dangerRight) <= halfDanger
-    ) {
-      // 붉은 함정(DANGER) 구간 타격 -> 라이프 감소 + 얼음 1단계 재생!
-      st.lives--;
-      st.clearedStages = Math.max(0, st.clearedStages - 1);
-      this.shakeTicks = 14;
-      this.audio.playFail();
-      this._spawnParticles(this.width / 2, this.height / 2 - 20, '#ef4444', 22);
-      st.feedbackText = '💀 붉은 함정 타격! 라이프 -1 & 통얼음이 1단계 재생되었습니다!';
-      st.feedbackColor = '#ef4444';
-      this._randomizeHammerZones();
-    } else {
-      // 일반 빗나감 (MISS) -> 라이프 감소
-      st.lives--;
-      this.shakeTicks = 8;
-      this.audio.playFail();
-      st.feedbackText = '❌ 타이밍 MISS! 라이프가 1 감소했습니다!';
-      st.feedbackColor = '#f59e0b';
-    }
-
-    if (st.lives <= 0) {
-      this.stop();
-      this.onLose('타이밍 타격 실패로 모든 라이프를 잃었습니다!');
-    }
-  }
-
-  _updateCriticalHammer() {
-    const st = this.chState;
-    const now = performance.now();
-    const dt = (now - st.lastTime) / 1000;
-    st.lastTime = now;
-    st.timeLeft -= dt;
-
-    if (st.timeLeft <= 0) {
-      this.audio.playFail();
-      this.stop();
-      this.onLose('제한시간이 초과되었습니다!');
-      return;
-    }
-
-    st.needlePos += st.needleDir * st.needleSpeed * dt;
-    if (st.needlePos >= 1) {
-      st.needlePos = 1;
-      st.needleDir = -1;
-    } else if (st.needlePos <= 0) {
-      st.needlePos = 0;
-      st.needleDir = 1;
-    }
-  }
-
-  _drawCriticalHammer(ctx) {
-    const st = this.chState;
-    const pct = (st.clearedStages / st.maxStage) * 100;
-
-    // 1. 배경에 숨겨진 완성 술 일러스트를 그림
-    ctx.drawImage(this.hiddenArtCanvas, 0, 0);
-
-    // 2. 아직 남은 얼음 결정 층만큼 중앙 그림을 두꺼운 빙결 레이어로 가림
-    const remainRatio = 1 - st.clearedStages / st.maxStage;
-    if (remainRatio > 0) {
-      ctx.fillStyle = `rgba(11, 17, 32, ${Math.min(0.96, 0.35 + remainRatio * 0.62)})`;
-      ctx.fillRect(0, 32, this.width, this.height - 32);
-
-      // 중앙 통얼음 결정 블록
-      const iceSize = 128;
-      const ix = this.width / 2 - iceSize / 2;
-      const iy = 52;
-      ctx.fillStyle = `rgba(56, 189, 248, ${0.25 + remainRatio * 0.55})`;
-      ctx.strokeStyle = '#bae6fd';
-      ctx.lineWidth = 3;
-      ctx.fillRect(ix, iy, iceSize, iceSize);
-      ctx.strokeRect(ix, iy, iceSize, iceSize);
-
-      // 균열 선 그리기
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      for (let i = 0; i < st.clearedStages; i++) {
-        ctx.beginPath();
-        ctx.moveTo(ix + 15 + i * 22, iy + 10);
-        ctx.lineTo(ix + iceSize / 2, iy + iceSize / 2);
-        ctx.lineTo(ix + iceSize - 15 - i * 18, iy + iceSize - 12);
-        ctx.stroke();
-      }
-
-      ctx.font = 'bold 14px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#f8fafc';
-      ctx.fillText(`🧊 빙결 내구도: ${st.maxStage - st.clearedStages} / ${st.maxStage}`, this.width / 2, iy + iceSize / 2);
-    }
-
-    // 3. 피드백 메시지
-    ctx.font = 'bold 12px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = st.feedbackColor;
-    ctx.fillText(st.feedbackText, this.width / 2, 198);
-
-    // 4. 하단 고속 타이밍 바
-    const barX = 24;
-    const barY = 212;
-    const barW = this.width - 48;
-    const barH = 26;
-
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(barX, barY, barW, barH);
-    ctx.strokeStyle = '#475569';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(barX, barY, barW, barH);
-
-    // 붉은 함정 구간 (좌/우)
-    const drawZone = (center, width, color, label) => {
-      const zx = barX + (center - width / 2) * barW;
-      const zw = width * barW;
-      ctx.fillStyle = color;
-      ctx.fillRect(zx, barY, zw, barH);
-      if (label) {
-        ctx.font = 'bold 9px sans-serif';
-        ctx.fillStyle = '#0f172a';
-        ctx.fillText(label, zx + zw / 2, barY + barH / 2 + 1);
-      }
-    };
-
-    drawZone(st.dangerLeft, st.dangerWidth, 'rgba(239, 68, 68, 0.85)', '💀');
-    drawZone(st.dangerRight, st.dangerWidth, 'rgba(239, 68, 68, 0.85)', '💀');
-    drawZone(st.critCenter, st.critWidth, '#f59e0b', 'CRIT');
-
-    // 바늘
-    const nx = barX + st.needlePos * barW;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(nx - 3, barY - 5, 6, barH + 10);
-
-    this._drawHUD(ctx, {
-      lives: st.lives,
-      timeLeftSec: st.timeLeft,
-      progressPct: pct,
-      targetPct: 100,
-      subText: '화면을 탭(또는 스페이스바)하여 노란 CRIT 구간을 5회 연속 적중하세요!'
     });
   }
 
@@ -1152,7 +1031,6 @@ class ImageMinigameSuite {
     this._updateParticles();
     if (this.gameType === 'BRICK_BREAKER') this._updateBrickBreaker();
     else if (this.gameType === 'TERRITORY_QIX') this._updateTerritoryQix();
-    else if (this.gameType === 'CRITICAL_HAMMER') this._updateCriticalHammer();
   }
 
   _draw() {
@@ -1167,7 +1045,6 @@ class ImageMinigameSuite {
     ctx.clearRect(0, 0, this.width, this.height);
     if (this.gameType === 'BRICK_BREAKER') this._drawBrickBreaker(ctx);
     else if (this.gameType === 'TERRITORY_QIX') this._drawTerritoryQix(ctx);
-    else if (this.gameType === 'CRITICAL_HAMMER') this._drawCriticalHammer(ctx);
 
     this._drawParticles(ctx);
     ctx.restore();

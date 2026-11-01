@@ -13,7 +13,7 @@ class HintModalView {
 
     this.activeRecipeId = null;
     this.viewMode = 'CHOICE'; // 'CHOICE' | 'BASEBALL' | 'MINIGAME_SELECT' | 'MINIGAME_PLAY'
-    this.selectedMinigameType = 'BRICK_BREAKER'; // 'BRICK_BREAKER' | 'TERRITORY_QIX' | 'CRITICAL_HAMMER'
+    this.selectedMinigameType = 'BRICK_BREAKER'; // 'BRICK_BREAKER' | 'TERRITORY_QIX'
     this.minigameStatus = 'PLAYING'; // 'PLAYING' | 'WIN' | 'LOSE'
     this.minigameInstance = null;
 
@@ -169,10 +169,10 @@ class HintModalView {
           </button>
 
           <button class="hint-big-choice-btn choice-minigame" id="choice-minigame-btn">
-            <span class="choice-badge-tag ${isImageUnlocked ? 'cleared' : ''}">${isImageUnlocked ? '✅ 해금됨' : '🎮 3종 아케이드'}</span>
+            <span class="choice-badge-tag ${isImageUnlocked ? 'cleared' : ''}">${isImageUnlocked ? '✅ 해금됨' : '🎮 아케이드'}</span>
             <span class="choice-big-icon">${isImageUnlocked ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 32) : recipe.emoji) : '🕹️'}</span>
             <span class="choice-big-title">그림 해금 게임</span>
-            <span class="choice-big-sub">블럭깨기 · 땅따먹기 · 통얼음 격파</span>
+            <span class="choice-big-sub">블럭깨기 · 네온 땅따먹기</span>
           </button>
 
           ${extHintCardHtml}
@@ -184,20 +184,20 @@ class HintModalView {
     }
 
     // =========================================================================
-    // [모드 2] 3종 고난도 그림 해금 미니게임 선택 화면
+    // [모드 2] 그림 해금 미니게임 선택 화면
     // =========================================================================
     if (this.viewMode === 'MINIGAME_SELECT') {
       container.innerHTML = `
         <div class="hint-top-header">
           <div style="display:flex; align-items:center; gap:6px;">
             <button class="hint-back-choice-btn" id="hint-back-choice-btn" title="선택 화면으로">←</button>
-            <div class="modal-title">🕹️ 그림 해금 아케이드 (3종)</div>
+            <div class="modal-title">🕹️ 그림 해금 아케이드</div>
           </div>
           <button class="modal-close-x" id="hint-close-btn">✕</button>
         </div>
 
         <div class="minigame-select-intro">
-          3가지 미니게임 중 <b>원하는 게임 1개만 클리어</b>해도 도감에서 <b>❓ 대신 실제 술 그림(${isImageUnlocked ? recipe.emoji : '🖼️'})</b>이 즉시 해금됩니다!
+          미니게임 중 <b>원하는 게임을 클리어</b>해도 도감에서 <b>❓ 대신 실제 술 그림(${isImageUnlocked ? recipe.emoji : '🖼️'})</b>이 즉시 해금됩니다!
         </div>
 
         <div class="minigame-cards-list">
@@ -223,27 +223,11 @@ class HintModalView {
             </div>
             <div class="mg-card-body">
               <div class="mg-card-title-row">
-                <span class="mg-card-title">2. 네온 땅따먹기 (영역 점령)</span>
-                <span class="mg-diff-pill vhard">VERY HARD · 75%</span>
+                <span class="mg-card-title">2. 네온 땅따먹기 (그림 영역 점령)</span>
+                <span class="mg-diff-pill vhard">VERY HARD · 그림 90%</span>
               </div>
               <div class="mg-card-desc">
-                어둠 속을 질주하는 <b>보스 코어 + 고속 화염구 2기</b>가 내 궤적(선)에 닿기 전에 안전지대로 복귀해 숨겨진 그림 영역을 포위 점령하세요!
-              </div>
-            </div>
-            <button class="mg-play-btn">도전 ➔</button>
-          </div>
-
-          <div class="minigame-select-card mg-card-hammer" data-start-minigame="CRITICAL_HAMMER">
-            <div class="mg-card-left">
-              <span class="mg-card-icon">🔨</span>
-            </div>
-            <div class="mg-card-body">
-              <div class="mg-card-title-row">
-                <span class="mg-card-title">3. 크리티컬 아이스 해머</span>
-                <span class="mg-diff-pill extreme">EXTREME · 5연타</span>
-              </div>
-              <div class="mg-card-desc">
-                단계마다 급가속되는 바늘이 <b>노란 CRITICAL 구간</b>에 올 때만 타격하세요! 양옆 <b>💀함정 구간</b>을 치면 통얼음이 다시 재생됩니다!
+                어둠 속을 질주하는 <b>보스 코어 + 고속 화염구 2기</b>가 내 궤적(선)에 닿기 전에 안전지대로 복귀해 <b>뒤에 숨겨진 그림 영역을 뚫어 완전히 드러내세요!</b>
               </div>
             </div>
             <button class="mg-play-btn">도전 ➔</button>
@@ -261,8 +245,7 @@ class HintModalView {
     if (this.viewMode === 'MINIGAME_PLAY') {
       const gameTitles = {
         BRICK_BREAKER: '🧱 아이스 브레이커',
-        TERRITORY_QIX: '📐 네온 땅따먹기',
-        CRITICAL_HAMMER: '🔨 크리티컬 아이스 해머'
+        TERRITORY_QIX: '📐 네온 땅따먹기'
       };
 
       let controlsHtml = '';
@@ -306,17 +289,10 @@ class HintModalView {
               <button class="mg-mini-retry-btn" id="mg-retry-btn">🔄 재시작</button>
             </div>
           `;
-        } else if (this.selectedMinigameType === 'CRITICAL_HAMMER') {
-          controlsHtml = `
-            <div class="mg-hammer-bar">
-              <button class="mg-hammer-strike-btn" id="mg-hammer-strike-btn">🔨 지금 내려치기! (STRIKE / SPACE)</button>
-              <button class="mg-mini-retry-btn" id="mg-retry-btn">🔄</button>
-            </div>
-          `;
         }
       }
 
-      const canvasHeight = (this.selectedMinigameType === 'BRICK_BREAKER' || this.selectedMinigameType === 'TERRITORY_QIX') ? 430 : 320;
+      const canvasHeight = 430;
 
       container.innerHTML = `
         <div class="hint-top-header">
@@ -855,7 +831,7 @@ class HintModalView {
       };
     }
 
-    // 3종 미니게임 카드 클릭 -> 해당 미니게임 즉시 시작
+    // 미니게임 카드 클릭 -> 해당 미니게임 즉시 시작
     container.querySelectorAll('[data-start-minigame]').forEach(card => {
       card.onclick = () => {
         this.selectedMinigameType = card.getAttribute('data-start-minigame');
@@ -866,7 +842,7 @@ class HintModalView {
       };
     });
 
-    // 미니게임 플레이 화면 -> 3종 미니게임 목록으로 돌아가기
+    // 미니게임 플레이 화면 -> 미니게임 목록으로 돌아가기
     const backSelectTopBtn = container.querySelector('#mg-back-select-top-btn');
     if (backSelectTopBtn) {
       backSelectTopBtn.onclick = () => {
@@ -919,19 +895,6 @@ class HintModalView {
       btn.onmousedown = handleDir;
       btn.ontouchstart = handleDir;
     });
-
-    // 크리티컬 아이스 해머 대형 타격 버튼
-    const hammerStrikeBtn = container.querySelector('#mg-hammer-strike-btn');
-    if (hammerStrikeBtn) {
-      const handleStrike = (e) => {
-        if (e.cancelable) e.preventDefault();
-        if (this.minigameInstance) {
-          this.minigameInstance.triggerHammerStrike();
-        }
-      };
-      hammerStrikeBtn.onmousedown = handleStrike;
-      hammerStrikeBtn.ontouchstart = handleStrike;
-    }
 
     // 2단계 카테고리 탭 전환
     container.querySelectorAll('[data-bb-stage2-cat]').forEach(btn => {
