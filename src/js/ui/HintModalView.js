@@ -451,6 +451,13 @@ class HintModalView {
 
       const canSubmit = this.currentGuessSlots.length > 0 && this.currentGuessSlots.every(s => s !== null);
 
+      const stageTitles = {
+        1: '재료유형 추리',
+        2: '대표재료 추리',
+        3: '상세재료 추리'
+      };
+      const stageTitle = stageTitles[currentStage] || '재료 추리';
+
       const latestRecord = (hintState.history || [])[0];
       const historyHtml = latestRecord ? `
         <div class="bb-history-row">
@@ -465,6 +472,10 @@ class HintModalView {
       mainSectionHtml = `
         <div class="hint-section-box">
           <div class="baseball-slots">${slotsHtml}</div>
+          <div class="bb-stage-subtitle-bar">
+            <span class="bb-stage-num-badge">${currentStage}단계</span>
+            <span class="bb-stage-subtitle-title">${stageTitle}</span>
+          </div>
           ${stage2CatBarHtml}
           <div class="bb-options-row">
             ${optionsPoolHtml}
@@ -600,18 +611,20 @@ class HintModalView {
             💡 모든 재료의 비율을 맞추면 완벽한 레시피가 완성됩니다!
           </div>
         ` : `
-          <div style="font-size:0.86rem; color:#fde047; font-weight:900; margin-bottom:5px;">
+          <div style="font-size:0.86rem; color:#fde047; font-weight:900; margin-bottom:6px;">
             ⚾ 숫자야구(베이스볼) 규칙
           </div>
-          <div style="line-height:1.55; font-size:0.78rem; color:#cbd5e1;">
-            • <b>S (스트라이크)</b>: 재료와 슬롯 위치(순서)가 모두 일치<br>
-            • <b>B (볼)</b>: 레시피에 포함되지만 슬롯 위치가 다름<br>
-            • <b>O (아웃)</b>: 레시피에 아예 들어가지 않는 재료
+          <div style="line-height:1.6; font-size:0.78rem; color:#cbd5e1;">
+            • <b style="color:#60a5fa;">S (스트라이크)</b>: 재료와 슬롯 위치(순서)가 모두 일치<br>
+            • <b style="color:#fbbf24;">B (볼)</b>: 레시피에 포함되지만 슬롯 위치가 다름 <span style="color:#fde047; font-weight:700;">(※ 순서가 중요한 경우에만 발생)</span><br>
+            • <b style="color:#f87171;">O (아웃)</b>: 레시피에 아예 들어가지 않는 전혀 다른 재료 (정답에 미포함)
           </div>
-          <div style="background:rgba(15,23,42,0.85); border:1px solid #334155; border-radius:6px; padding:6px 8px; margin-top:6px; font-size:0.73rem; color:#93c5fd; line-height:1.45;">
-            <b>📌 예시</b> (정답이 [소주 · 맥주 · 콜라]일 때)<br>
+          <div style="background:rgba(15,23,42,0.85); border:1px solid #334155; border-radius:8px; padding:7px 10px; margin-top:8px; font-size:0.73rem; color:#93c5fd; line-height:1.5;">
+            <b>📌 판정 예시</b> (정답이 [소주 · 맥주 · 콜라]일 때)<br>
             내가 [<b>소주</b> · 사이다 · <b>맥주</b>]를 추리했다면?<br>
-            👉 소주(1번째 일치=<b>1S</b>), 맥주(포함되나 위치 다름=<b>1B</b>) ➔ <b>1S 1B</b>
+            👉 소주(1번 위치 일치 = <b style="color:#60a5fa;">1S</b>), 맥주(포함되나 위치 다름 = <b style="color:#fbbf24;">1B</b>), 사이다(정답에 없음 = <b style="color:#f87171;">1O</b>)<br>
+            ➔ 판정 결과: <b style="color:#ffffff;">1S 1B 1O</b><br>
+            <span style="color:#94a3b8; font-size:0.7rem;">※ 순서가 무관한 일반 레시피는 포함된 재료는 모두 S(스트라이크), 없는 재료는 O(아웃)으로 판정됩니다.</span>
           </div>
         `}
       </div>

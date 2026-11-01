@@ -211,6 +211,35 @@
   border-radius: 14px;
 }
 
+/* 베이스볼 단계별 소제목 바 (재료유형 추리 / 대표재료 추리 / 상세재료 추리) */
+.bb-stage-subtitle-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 4px;
+  margin-top: 1px;
+}
+
+.bb-stage-num-badge {
+  font-size: 0.68rem;
+  font-weight: 900;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: -0.2px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.bb-stage-subtitle-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: -0.2px;
+}
+
 .bb-go-brew-btn {
   width: 100%;
   margin-top: 2px;
