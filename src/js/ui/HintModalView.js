@@ -153,18 +153,7 @@ class HintModalView {
       const needsRatioGameChoice = this.ratioProvider.requiresRatioGame(this.activeRecipeId);
       const isUpAndDownChoice = isBaseballDoneChoice && needsRatioGameChoice;
 
-      // 1. 순차적 3단계 진행 인디케이터 (보라 -> 골드 -> 사이언 색상 테마)
-      const stepIndicatorHtml = `
-        <div class="hint-step-indicator">
-          <span class="step-pill pill-purple ${isImageUnlocked ? 'done' : 'curr'}">1.외형${isImageUnlocked ? '✓' : ''}</span>
-          <span class="step-pill-arrow">➔</span>
-          <span class="step-pill pill-gold ${isDescUnlocked ? 'done' : (isImageUnlocked ? 'curr' : 'locked')}">2.설명${isDescUnlocked ? '✓' : ''}</span>
-          <span class="step-pill-arrow">➔</span>
-          <span class="step-pill pill-cyan ${isRecipeUnlocked ? 'done' : (isBaseballUnlocked ? 'curr' : 'locked')}">3.추리${isRecipeUnlocked ? '✓' : ''}</span>
-        </div>
-      `;
-
-      // 2. 외부 힌트 (있을 경우만)
+      // 1. 외부 힌트 (있을 경우만)
       let extHintCardHtml = '';
       if (hasExtHint) {
         const primaryHint = extHints[0];
@@ -268,11 +257,10 @@ class HintModalView {
 
         <div class="bb-target-info-card" style="margin-bottom:10px;">
           <div class="bb-target-title-row">
-            <div style="display:flex; align-items:center; gap:6px;">
+            <div style="display:flex; align-items:center; gap:8px;">
               <span class="bb-target-num">${recipe.formatted_number || ''}</span>
               <span class="bb-target-name">${resolvedName}</span>
             </div>
-            ${stepIndicatorHtml}
           </div>
         </div>
 
