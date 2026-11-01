@@ -607,3 +607,242 @@ header {
 body.admin-mode .header-toolbar {
   display: flex !important;
 }
+
+
+/* =========================================================================
+   ⚙️ 우측 상단 설정 아이콘 버튼 & 환경설정 모달
+   ========================================================================= */
+.header-settings-btn {
+  background: #1e293b;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+
+.header-settings-btn:hover {
+  background: #334155;
+  border-color: #38bdf8;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+  transform: rotate(30deg);
+}
+
+.header-settings-btn:active {
+  transform: scale(0.92);
+}
+
+.settings-modal-card {
+  max-width: 440px;
+  padding: 18px 20px;
+}
+
+.settings-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.settings-section {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-section-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.settings-desc {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.settings-theme-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.settings-theme-chip {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: #cbd5e1;
+}
+
+.settings-theme-chip:hover {
+  border-color: #38bdf8;
+  background: #24344d;
+}
+
+.settings-theme-chip.active {
+  background: rgba(14, 165, 233, 0.18);
+  border-color: #0284c7;
+  color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+.theme-chip-icon {
+  font-size: 1.25rem;
+}
+
+.theme-chip-label {
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.theme-chip-sub {
+  font-size: 0.65rem;
+  color: #64748b;
+}
+
+.settings-theme-chip.active .theme-chip-sub {
+  color: #7dd3fc;
+}
+
+.settings-sub-action-btn {
+  width: 100%;
+  background: #1e293b;
+  border: 1px dashed #475569;
+  color: #94a3b8;
+  border-radius: 8px;
+  padding: 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.settings-sub-action-btn:hover {
+  border-color: #38bdf8;
+  color: #f1f5f9;
+}
+
+.settings-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+.settings-toggle-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.settings-toggle-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.settings-toggle-sub {
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.settings-pill-btn {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #cbd5e1;
+  font-weight: 800;
+  font-size: 0.72rem;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.settings-pill-btn.active {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #6ee7b7;
+}
+
+.settings-danger-section {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(30, 20, 28, 0.6);
+}
+
+.settings-reset-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.settings-reset-card:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.settings-reset-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #fca5a5;
+}
+
+.settings-reset-desc {
+  font-size: 0.66rem;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.settings-danger-btn {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  font-weight: 800;
+  font-size: 0.72rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.settings-danger-btn:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.settings-danger-btn.full-reset {
+  background: rgba(220, 38, 38, 0.25);
+  border-color: #dc2626;
+  color: #f87171;
+}
+
+.settings-danger-btn.full-reset:hover {
+  background: #dc2626;
+  color: #ffffff;
+}

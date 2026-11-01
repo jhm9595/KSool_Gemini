@@ -89,6 +89,9 @@ class KSoolApp {
     if (window.KSool?.IconCompareModalView) {
       this.iconCompareModalView = new window.KSool.IconCompareModalView('icon-compare-modal', 'icon-compare-content', this);
     }
+    if (window.KSool?.SettingsModalView) {
+      this.settingsModalView = new window.KSool.SettingsModalView('settings-modal', 'settings-modal-content', this);
+    }
 
     this.currentTab = 'brew';
     this.brewMode = 'QUIZ'; // 'QUIZ' (단계별 넘버링 추리 퀴즈) | 'FREE' (자유 주조)
@@ -489,9 +492,9 @@ class KSoolApp {
       <div class="brew-quiz-card">
         <div class="quiz-question-row">
           <div class="quiz-icon-col">
-            <div class="quiz-mystery-icon ${isImageAvailable ? 'is-unlocked' : 'is-locked'}"
+            <div class="quiz-mystery-icon ${isImageAvailable ? 'is-unlocked' : 'is-locked'} ${showHintBtn && !isImageAvailable ? 'is-clickable' : ''}"
                  id="quiz-mystery-icon"
-                 ${isImageAvailable ? '' : 'title="❓ 클릭하여 그림 해금 미니게임 도전"'}>
+                 ${isImageAvailable ? '' : (showHintBtn ? 'title="❓ 클릭하여 그림 해금 미니게임 도전"' : 'title="도감·힌트 기능 해금 후 그림 미니게임이 열립니다"')}>
               ${isImageAvailable ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(targetRec, 36) : targetRec.emoji) : '❓'}
             </div>
             ${showHintBtn ? `<button type="button" class="quiz-infer-btn" id="quiz-open-hint-btn">힌트</button>` : ''}
@@ -560,7 +563,11 @@ class KSoolApp {
     const mysteryIcon = container.querySelector('#quiz-mystery-icon');
     if (mysteryIcon && targetRec) {
       const isImageAvailable = this.inventory.isRecipeUnlocked(targetRec.recipe_id) || this.inventory.isRecipeImageUnlocked(targetRec.recipe_id);
-      if (!isImageAvailable) {
+      const isCollectionUnlocked = this.inventory.isTabUnlocked('collection');
+      const showHintBtn = !this.inventory.isRecipeUnlocked(targetRec.recipe_id) && isCollectionUnlocked;
+
+      // 힌트 버튼이 열리는 시점(showHintBtn)과 동일하게 그림 미니게임 기능 오픈!
+      if (!isImageAvailable && showHintBtn) {
         mysteryIcon.style.cursor = 'pointer';
         mysteryIcon.onclick = () => {
           this.audio.playTap();
@@ -1364,6 +1371,17 @@ class KSoolApp {
           window.KSool.PixelIconRegistry.toggleTheme();
           this.audio.playTap();
           this.renderAll();
+        }
+      };
+    }
+
+    // 우측 상단 ⚙️ 설정 버튼
+    const openSettingsBtn = document.getElementById('open-settings-btn');
+    if (openSettingsBtn) {
+      openSettingsBtn.onclick = () => {
+        this.audio.playTap();
+        if (this.settingsModalView) {
+          this.settingsModalView.open();
         }
       };
     }

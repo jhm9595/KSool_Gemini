@@ -110,11 +110,15 @@
 }
 
 .quiz-mystery-icon.is-locked {
-  cursor: pointer;
+  cursor: default;
   border: 1px dashed #475569;
 }
 
-.quiz-mystery-icon.is-locked:hover {
+.quiz-mystery-icon.is-locked.is-clickable {
+  cursor: pointer;
+}
+
+.quiz-mystery-icon.is-locked.is-clickable:hover {
   border-color: #38bdf8;
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
   transform: scale(1.05);
