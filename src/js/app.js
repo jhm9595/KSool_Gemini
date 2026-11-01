@@ -377,6 +377,13 @@ class KSoolApp {
       unlockedEl.textContent = `${unlockedCount} / ${totalRecipes}`;
     }
 
+    const iconThemeBtn = document.getElementById('toggle-icon-theme-btn');
+    if (iconThemeBtn) {
+      const isPixel = window.KSool?.PixelIconRegistry?.getTheme() !== 'emoji';
+      iconThemeBtn.classList.toggle('active', isPixel);
+      iconThemeBtn.textContent = isPixel ? '🎨 도트 픽셀' : '✨ 기본 이모지';
+    }
+
     const licenseBtn = document.getElementById('toggle-license-btn');
     if (licenseBtn) {
       licenseBtn.classList.toggle('active', this.config.globalLicenseOverride);
@@ -1154,6 +1161,18 @@ class KSoolApp {
         this.audio.playTap();
         this.renderBrewView();
         this.suggestionBoardView.render();
+      };
+    }
+
+    // 상단 토글 0: 🎨 레트로 도트 <-> ✨ 기본 이모지 아이콘 테마 전환
+    const iconThemeBtn = document.getElementById('toggle-icon-theme-btn');
+    if (iconThemeBtn) {
+      iconThemeBtn.onclick = () => {
+        if (window.KSool?.PixelIconRegistry) {
+          window.KSool.PixelIconRegistry.toggleTheme();
+          this.audio.playTap();
+          this.renderAll();
+        }
       };
     }
 
