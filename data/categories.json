@@ -8,13 +8,13 @@
   {
     "category_id": "NATURE",
     "name": "자연",
-    "emoji": "💧",
+    "emoji": "🌿",
     "order": 2
   },
   {
     "category_id": "FRUIT",
     "name": "과일",
-    "emoji": "🍋",
+    "emoji": "🍎",
     "order": 3
   },
   {
@@ -30,15 +30,15 @@
     "order": 5
   },
   {
-    "category_id": "ETC",
-    "name": "감미료",
-    "emoji": "🍯",
+    "category_id": "DESSERT",
+    "name": "디저트",
+    "emoji": "🍨",
     "order": 6
   },
   {
-    "category_id": "DESSERT",
-    "name": "디저트",
-    "emoji": "🍦",
+    "category_id": "ETC",
+    "name": "기타",
+    "emoji": "🍬",
     "order": 7
   }
 ]

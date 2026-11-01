@@ -15,10 +15,10 @@
   <meta property="og:url" content="https://jhm9595.github.io/KSool_Gemini/">
   <!-- 모듈형 스타일시트 -->
   <link rel="stylesheet" href="./src/css/variables.css?v=20261101_4">
-  <link rel="stylesheet" href="./src/css/layout.css?v=20261101_8">
-  <link rel="stylesheet" href="./src/css/brew.css?v=20261101_16">
+  <link rel="stylesheet" href="./src/css/layout.css?v=20261101_12">
+  <link rel="stylesheet" href="./src/css/brew.css?v=20261101_21">
   <link rel="stylesheet" href="./src/css/pickers/picker_common.css?v=20261101_3">
-  <link rel="stylesheet" href="./src/css/hint_center.css?v=20261101_5">
+  <link rel="stylesheet" href="./src/css/hint_center.css?v=20261101_11">
   <link rel="stylesheet" href="./src/css/fridge_recommender.css?v=20261101_12">
   <link rel="stylesheet" href="./src/css/suggestion_board.css?v=20261101_5">
   <link rel="stylesheet" href="./src/css/party_games.css?v=20261101_26">
@@ -38,11 +38,11 @@
           <span class="brand-inline-sub">한국의 술자리 연금술</span>
         </div>
       </div>
+      <button id="open-settings-btn" class="header-settings-btn" aria-label="설정" title="게임 설정">⚙️</button>
     </div>
 
     <div class="header-toolbar">
       <button id="toggle-icon-theme-btn" class="toolbar-toggle" title="아이콘 스타일 전환: 💎 고급형태 ➔ 👾 도트형태 ➔ ✨ 기본이모지">💎 고급형태</button>
-      <button id="open-icon-compare-btn" class="toolbar-toggle" title="아이콘 3종 스타일(이모지/도트/고급) 한눈에 비교하기">🔍 스타일비교</button>
       <button id="toggle-slots-btn" class="toolbar-toggle" title="초안 4슬롯 <-> 무제한 확장 전환">📦 슬롯:4칸</button>
       <button id="toggle-license-btn" class="toolbar-toggle" title="패러디 가짜명 <-> 제휴 실제명 전환">🎭 패러디명</button>
       <button id="toggle-sandbox-btn" class="toolbar-toggle" title="연쇄 해금 <-> 전체 재료 열기">🌱 연쇄해금</button>
@@ -144,43 +144,45 @@
     <div id="tab-intro-content" class="modal-card"></div>
   </div>
 
-  <!-- [모달 5] 아이콘 3종 스타일 비교 & 선택 모달 (이모지 vs 16px 도트 vs 32px 고급형) -->
-  <div id="icon-compare-modal" class="modal-overlay">
-    <div id="icon-compare-content" class="modal-card icon-compare-modal-card"></div>
+  <!-- [모달 6] 게임 환경설정 모달 (아이콘 스타일 / 기능 설정 / 초기화) -->
+  <div id="settings-modal" class="modal-overlay">
+    <div id="settings-modal-content" class="modal-card settings-modal-card"></div>
   </div>
 </div>
 
 <!-- OOP 모듈 로드 (오프라인/로컬 file:// 및 웹서버 100% 호환) -->
-<script src="./src/js/config/SeedDataBundle.js?v=20261101_25"></script>
-<script src="./src/js/services/PixelIconRegistry.js?v=20261101_15"></script>
+<script src="./src/js/config/SeedDataBundle.js?v=20261101_31"></script>
+<script src="./src/js/services/PixelIconRegistry.js?v=20261101_17"></script>
 <script src="./src/js/config/GameConfig.js?v=20261101_7"></script>
 <script src="./src/js/services/BrandResolver.js?v=20261101_7"></script>
-<script src="./src/js/services/StorageService.js?v=20261101_7"></script>
+<script src="./src/js/services/StorageService.js?v=20261101_9"></script>
+<script src="./src/js/services/AdService.js?v=20261101_1"></script>
 <script src="./src/js/core/CraftingPot.js?v=20261101_7"></script>
-<script src="./src/js/core/ProgressionEngine.js?v=20261101_7"></script>
-<script src="./src/js/core/RecipeBook.js?v=20261101_7"></script>
-<script src="./src/js/core/InventoryManager.js?v=20261101_15"></script>
+<script src="./src/js/core/ProgressionEngine.js?v=20261101_9"></script>
+<script src="./src/js/core/RecipeBook.js?v=20261101_8"></script>
+<script src="./src/js/core/InventoryManager.js?v=20261101_16"></script>
 <script src="./src/js/core/hint/FeedbackHintStrategy.js?v=20261101_7"></script>
 <script src="./src/js/core/hint/BaseballHintEngine.js?v=20261101_7"></script>
 <script src="./src/js/core/hint/RatioHintProvider.js?v=20261101_7"></script>
-<script src="./src/js/core/hint/ImageMinigameSuite.js?v=20261101_13"></script>
+<script src="./src/js/core/hint/ImageMinigameSuite.js?v=20261101_22"></script>
 <script src="./src/js/core/fridge/FridgeMatcherEngine.js?v=20261101_7"></script>
 <script src="./src/js/core/suggestion/SuggestionService.js?v=20261101_10"></script>
 <script src="./src/js/core/AlchemyEngine.js?v=20261101_7"></script>
 <script src="./src/js/ui/pickers/DetailPickerRegistry.js?v=20261101_7"></script>
-<script src="./src/js/ui/HintModalView.js?v=20261101_13"></script>
-<script src="./src/js/ui/FridgeRecommenderView.js?v=20261101_12"></script>
+<script src="./src/js/ui/ScratchCardView.js?v=20261101_4"></script>
+<script src="./src/js/ui/HintModalView.js?v=20261101_23"></script>
+<script src="./src/js/ui/FridgeRecommenderView.js?v=20261101_13"></script>
 <script src="./src/js/ui/SuggestionBoardView.js?v=20261101_8"></script>
-<script src="./src/js/ui/IconCompareModalView.js?v=20261101_3"></script>
-<script src="./src/js/ui/party/PartySoundSynth.js?v=20261101_8"></script>
+<script src="./src/js/ui/SettingsModalView.js?v=20261101_4"></script>
+<script src="./src/js/ui/party/PartySoundSynth.js?v=20261101_10"></script>
 <script src="./src/js/ui/party/games/UpAndDownGame.js?v=20261101_9"></script>
 <script src="./src/js/ui/party/games/CapFlickGame.js?v=20261101_16"></script>
-<script src="./src/js/ui/party/games/SurfaceTensionGame.js?v=20261101_8"></script>
+<script src="./src/js/ui/party/games/SurfaceTensionGame.js?v=20261101_9"></script>
 <script src="./src/js/ui/party/games/BottleSpinGame.js?v=20261101_7"></script>
 <script src="./src/js/ui/party/games/HunminBombGame.js?v=20261101_7"></script>
 <script src="./src/js/ui/party/games/PenaltyCocktailGame.js?v=20261101_8"></script>
 <script src="./src/js/ui/party/games/FridgePartyGame.js?v=20261101_7"></script>
-<script src="./src/js/ui/party/PartyGameHubView.js?v=20261101_16"></script>
-<script src="./src/js/app.js?v=20261101_25"></script>
+<script src="./src/js/ui/party/PartyGameHubView.js?v=20261101_17"></script>
+<script src="./src/js/app.js?v=20261101_39"></script>
 </body>
 </html>

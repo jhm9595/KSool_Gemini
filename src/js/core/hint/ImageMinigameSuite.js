@@ -2,17 +2,19 @@ window.KSool = window.KSool || {};
 
 /**
  * 도감 그림(아이콘/일러스트) 선해금을 위한 아케이드 미니게임 엔진
- * 1) BRICK_BREAKER : 🧱 벽돌깨기 (다중 체력 벽돌 + 함정 낙하물 회피)
- * 2) TERRITORY_QIX : 📐 땅따먹기 (그림 영역 점령 + 보스 탄막 & 감시자 회피)
+ * 1) BRICK_BREAKER : 🧱 도트 아트 벽돌깨기 (각 술의 16x16 레트로 도트 모양/색상 블록 + 전략적 강철 범퍼)
+ * 2) TERRITORY_QIX : 📐 외곽 실루엣 땅따먹기 (100% 암전 속 술의 고유 외곽선을 네온으로 표시 + 실루엣 100% 점령 시 클리어)
  */
 class ImageMinigameSuite {
-  constructor(canvas, recipe, audio, onWin, onLose) {
+  constructor(canvas, recipe, audio, onWin, onLose, onClose) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.recipe = recipe;
     this.audio = audio;
     this.onWin = onWin;
     this.onLose = onLose;
+    this.onClose = onClose;
+    this.winTimestamp = 0;
 
     this.width = canvas.width;
     this.height = canvas.height;
@@ -22,7 +24,7 @@ class ImageMinigameSuite {
     this.particles = [];
     this.shakeTicks = 0;
 
-    // 오프스크린에 숨겨진 실제 술 그래픽/일러스트 렌더링
+    // 오프스크린에 숨겨진 실제 술 그래픽/일러스트 렌더링용 캔버스
     this.hiddenArtCanvas = document.createElement('canvas');
     this.hiddenArtCanvas.width = this.width;
     this.hiddenArtCanvas.height = this.height;
@@ -31,7 +33,252 @@ class ImageMinigameSuite {
     this._cleanupInputHandlers = null;
   }
 
-  _renderHiddenArtwork() {
+  /**
+   * 레트로 16x16 도트 스프라이트 파싱
+   * SVG <rect> 요소들을 분석하여 16x16 그리드 및 유효 픽셀 목록, 바운딩 박스를 추출
+   */
+  _parseDotSprite(recipe) {
+    const sprite = window.KSool?.PixelIconRegistry?.getDotSprite
+      ? window.KSool.PixelIconRegistry.getDotSprite(recipe)
+      : null;
+    const grid = Array.from({ length: 16 }, () => Array(16).fill(null));
+
+    if (!sprite || !sprite.innerSvg) {
+      // 스프라이트가 없는 경우 기본 술병 모양 자동 생성
+      for (let r = 2; r <= 5; r++) { grid[r][7] = '#38bdf8'; grid[r][8] = '#38bdf8'; }
+      for (let r = 6; r <= 14; r++) {
+        for (let c = 5; c <= 10; c++) grid[r][c] = '#38bdf8';
+      }
+    } else {
+      const rectRegex = /<rect\s+([^>]+)\s*\/?>/g;
+      let rm;
+      while ((rm = rectRegex.exec(sprite.innerSvg)) !== null) {
+        const attrs = rm[1];
+        const xMatch = attrs.match(/x="(\d+)"/);
+        const yMatch = attrs.match(/y="(\d+)"/);
+        const wMatch = attrs.match(/width="(\d+)"/);
+        const hMatch = attrs.match(/height="(\d+)"/);
+        const fMatch = attrs.match(/fill="([^"]+)"/);
+        if (!xMatch || !yMatch || !wMatch || !hMatch || !fMatch) continue;
+        const x = parseInt(xMatch[1], 10);
+        const y = parseInt(yMatch[1], 10);
+        const w = parseInt(wMatch[1], 10);
+        const h = parseInt(hMatch[1], 10);
+        const fill = fMatch[1];
+        for (let r = y; r < y + h; r++) {
+          for (let c = x; c < x + w; c++) {
+            if (r < 16 && c < 16) {
+              grid[r][c] = fill;
+            }
+          }
+        }
+      }
+    }
+
+    const activePixels = [];
+    let minR = 16, maxR = -1, minC = 16, maxC = -1;
+    for (let r = 0; r < 16; r++) {
+      for (let c = 0; c < 16; c++) {
+        if (grid[r][c]) {
+          activePixels.push({ r, c, color: grid[r][c] });
+          if (r < minR) minR = r;
+          if (r > maxR) maxR = r;
+          if (c < minC) minC = c;
+          if (c > maxC) maxC = c;
+        }
+      }
+    }
+
+    return {
+      grid,
+      activePixels,
+      minR: minR === 16 ? 0 : minR,
+      maxR: maxR === -1 ? 15 : maxR,
+      minC: minC === 16 ? 0 : minC,
+      maxC: maxC === -1 ? 15 : maxC
+    };
+  }
+
+  /**
+   * SVG HTML 문자열을 Canvas 2D 컨텍스트에 동기적으로 즉시 정밀 렌더링
+   * (<rect>, <path>, <circle>, <ellipse>, <line> 모두 지원)
+   */
+  _drawSvgToCanvas(ctx, svgStr, x, y, w, h) {
+    if (!svgStr || !ctx) return false;
+
+    const vbMatch = svgStr.match(/viewBox=["']0 0 ([\d\.]+) ([\d\.]+)["']/);
+    const vbW = vbMatch ? parseFloat(vbMatch[1]) : 32;
+    const vbH = vbMatch ? parseFloat(vbMatch[2]) : 32;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(w / vbW, h / vbH);
+
+    let drawn = false;
+
+    // 1. <rect>
+    const rectRegex = /<rect\s+([^>]+)\s*\/?>/g;
+    let m;
+    while ((m = rectRegex.exec(svgStr)) !== null) {
+      const attrs = m[1];
+      const rx = parseFloat((attrs.match(/x=["']([^"']+)["']/) || [])[1] || '0');
+      const ry = parseFloat((attrs.match(/y=["']([^"']+)["']/) || [])[1] || '0');
+      const rw = parseFloat((attrs.match(/width=["']([^"']+)["']/) || [])[1] || '0');
+      const rh = parseFloat((attrs.match(/height=["']([^"']+)["']/) || [])[1] || '0');
+      const fill = (attrs.match(/fill=["']([^"']+)["']/) || [])[1] || '#ffffff';
+      const op = parseFloat((attrs.match(/opacity=["']([^"']+)["']/) || [])[1] || '1');
+      if (rw > 0 && rh > 0) {
+        ctx.globalAlpha = op;
+        ctx.fillStyle = fill;
+        ctx.fillRect(rx, ry, rw, rh);
+        drawn = true;
+      }
+    }
+
+    // 2. <path>
+    const pathRegex = /<path\s+([^>]+)\s*\/?>/g;
+    while ((m = pathRegex.exec(svgStr)) !== null) {
+      const attrs = m[1];
+      const d = (attrs.match(/d=["']([^"']+)["']/) || [])[1];
+      const fill = (attrs.match(/fill=["']([^"']+)["']/) || [])[1];
+      const stroke = (attrs.match(/stroke=["']([^"']+)["']/) || [])[1];
+      const strokeW = parseFloat((attrs.match(/stroke-width=["']([^"']+)["']/) || [])[1] || '1');
+      const op = parseFloat((attrs.match(/opacity=["']([^"']+)["']/) || [])[1] || '1');
+      if (d && typeof Path2D !== 'undefined') {
+        const p2d = new Path2D(d);
+        ctx.globalAlpha = op;
+        if (fill && fill !== 'none') {
+          ctx.fillStyle = fill;
+          ctx.fill(p2d);
+          drawn = true;
+        }
+        if (stroke && stroke !== 'none') {
+          ctx.strokeStyle = stroke;
+          ctx.lineWidth = strokeW;
+          ctx.stroke(p2d);
+          drawn = true;
+        }
+      }
+    }
+
+    // 3. <circle>
+    const circleRegex = /<circle\s+([^>]+)\s*\/?>/g;
+    while ((m = circleRegex.exec(svgStr)) !== null) {
+      const attrs = m[1];
+      const cx = parseFloat((attrs.match(/cx=["']([^"']+)["']/) || [])[1] || '0');
+      const cy = parseFloat((attrs.match(/cy=["']([^"']+)["']/) || [])[1] || '0');
+      const r = parseFloat((attrs.match(/r=["']([^"']+)["']/) || [])[1] || '0');
+      const fill = (attrs.match(/fill=["']([^"']+)["']/) || [])[1] || '#ffffff';
+      const stroke = (attrs.match(/stroke=["']([^"']+)["']/) || [])[1];
+      const strokeW = parseFloat((attrs.match(/stroke-width=["']([^"']+)["']/) || [])[1] || '1');
+      const op = parseFloat((attrs.match(/opacity=["']([^"']+)["']/) || [])[1] || '1');
+      if (r > 0) {
+        ctx.globalAlpha = op;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        if (fill && fill !== 'none') {
+          ctx.fillStyle = fill;
+          ctx.fill();
+        }
+        if (stroke && stroke !== 'none') {
+          ctx.strokeStyle = stroke;
+          ctx.lineWidth = strokeW;
+          ctx.stroke();
+        }
+        drawn = true;
+      }
+    }
+
+    // 4. <ellipse>
+    const ellipseRegex = /<ellipse\s+([^>]+)\s*\/?>/g;
+    while ((m = ellipseRegex.exec(svgStr)) !== null) {
+      const attrs = m[1];
+      const cx = parseFloat((attrs.match(/cx=["']([^"']+)["']/) || [])[1] || '0');
+      const cy = parseFloat((attrs.match(/cy=["']([^"']+)["']/) || [])[1] || '0');
+      const rx = parseFloat((attrs.match(/rx=["']([^"']+)["']/) || [])[1] || '0');
+      const ry = parseFloat((attrs.match(/ry=["']([^"']+)["']/) || [])[1] || '0');
+      const fill = (attrs.match(/fill=["']([^"']+)["']/) || [])[1] || '#ffffff';
+      const op = parseFloat((attrs.match(/opacity=["']([^"']+)["']/) || [])[1] || '1');
+      if (rx > 0 && ry > 0) {
+        ctx.globalAlpha = op;
+        ctx.beginPath();
+        if (ctx.ellipse) {
+          ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+        } else {
+          ctx.arc(cx, cy, Math.max(rx, ry), 0, Math.PI * 2);
+        }
+        ctx.fillStyle = fill;
+        ctx.fill();
+        drawn = true;
+      }
+    }
+
+    // 5. <line>
+    const lineRegex = /<line\s+([^>]+)\s*\/?>/g;
+    while ((m = lineRegex.exec(svgStr)) !== null) {
+      const attrs = m[1];
+      const x1 = parseFloat((attrs.match(/x1=["']([^"']+)["']/) || [])[1] || '0');
+      const y1 = parseFloat((attrs.match(/y1=["']([^"']+)["']/) || [])[1] || '0');
+      const x2 = parseFloat((attrs.match(/x2=["']([^"']+)["']/) || [])[1] || '0');
+      const y2 = parseFloat((attrs.match(/y2=["']([^"']+)["']/) || [])[1] || '0');
+      const stroke = (attrs.match(/stroke=["']([^"']+)["']/) || [])[1] || '#ffffff';
+      const strokeW = parseFloat((attrs.match(/stroke-width=["']([^"']+)["']/) || [])[1] || '1');
+      const op = parseFloat((attrs.match(/opacity=["']([^"']+)["']/) || [])[1] || '1');
+      ctx.globalAlpha = op;
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = strokeW;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      drawn = true;
+    }
+
+    // 6. <polygon>
+    const polyRegex = /<polygon\s+([^>]+)\s*\/?>/g;
+    while ((m = polyRegex.exec(svgStr)) !== null) {
+      const attrs = m[1];
+      const pointsStr = (attrs.match(/points=["']([^"']+)["']/) || [])[1];
+      const fill = (attrs.match(/fill=["']([^"']+)["']/) || [])[1] || '#ffffff';
+      const stroke = (attrs.match(/stroke=["']([^"']+)["']/) || [])[1];
+      const strokeW = parseFloat((attrs.match(/stroke-width=["']([^"']+)["']/) || [])[1] || '1');
+      const op = parseFloat((attrs.match(/opacity=["']([^"']+)["']/) || [])[1] || '1');
+      if (pointsStr) {
+        const pts = pointsStr.trim().split(/\s+/).map(pair => pair.split(',').map(Number));
+        if (pts.length > 1) {
+          ctx.save();
+          ctx.globalAlpha = op;
+          ctx.beginPath();
+          ctx.moveTo(pts[0][0], pts[0][1]);
+          for (let i = 1; i < pts.length; i++) {
+            ctx.lineTo(pts[i][0], pts[i][1]);
+          }
+          ctx.closePath();
+          if (fill && fill !== 'none') {
+            ctx.fillStyle = fill;
+            ctx.fill();
+            drawn = true;
+          }
+          if (stroke && stroke !== 'none') {
+            ctx.strokeStyle = stroke;
+            ctx.lineWidth = strokeW;
+            ctx.stroke();
+            drawn = true;
+          }
+          ctx.restore();
+        }
+      }
+    }
+
+    ctx.restore();
+    return drawn;
+  }
+
+  /**
+   * 오프스크린 캔버스에 숨겨진 실제 술 그래픽/일러스트 렌더링
+   * 각 게임의 목표 영역(bounds: { x, y, w, h })에 정확히 맞추어 1:1 위치 일치 보장
+   */
+  _renderHiddenArtwork(bounds = null) {
     const c = this.hiddenArtCanvas;
     const g = c.getContext('2d');
     const w = c.width;
@@ -41,8 +288,7 @@ class ImageMinigameSuite {
     const cy = (h + 32) / 2;
 
     const drawBackground = () => {
-      // 심플하고 깔끔한 다크 그라데이션 배경 (원형 링 및 격자무늬 일체 제거)
-      const rad = g.createRadialGradient(cx, cy, 20, cx, cy, w * 0.72);
+      const rad = g.createRadialGradient(cx, cy, 20, cx, cy, w * 0.75);
       rad.addColorStop(0, '#1e293b');
       rad.addColorStop(0.55, '#0f172a');
       rad.addColorStop(1, '#050811');
@@ -52,41 +298,76 @@ class ImageMinigameSuite {
 
     drawBackground();
 
-    // 2. 실제 픽셀/HD 아이콘 렌더링 (순수 일러스트/그림만 렌더링하고 글자는 일체 배제)
-    const iconSize = 160;
-    const ix = cx - iconSize / 2;
-    const iy = cy - iconSize / 2;
+    const targetX = bounds ? bounds.x : (cx - 100);
+    const targetY = bounds ? bounds.y : (cy - 100);
+    const targetW = bounds ? bounds.w : 200;
+    const targetH = bounds ? bounds.h : 200;
 
-    let hasSvg = false;
+    let drawn = false;
     if (this.recipe && window.KSool?.pixelIcon) {
       try {
-        let svgStr = window.KSool.pixelIcon(this.recipe, iconSize);
+        const svgStr = window.KSool.pixelIcon(this.recipe, Math.max(targetW, targetH));
         if (svgStr) {
-          hasSvg = true;
-          if (!svgStr.includes('xmlns=')) {
-            svgStr = svgStr.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
-          }
-          const img = new Image();
-          img.onload = () => {
-            // 이미지 로드 완료 시 배경 재도색 후 순수 아이콘만 정중앙 렌더링
-            drawBackground();
-            g.drawImage(img, ix, iy, iconSize, iconSize);
-          };
-          img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+          drawn = this._drawSvgToCanvas(g, svgStr, targetX, targetY, targetW, targetH);
         }
       } catch (err) {
-        console.warn('Failed to render pixel icon on canvas:', err);
+        console.warn('Canvas SVG draw error:', err);
       }
     }
 
-    if (!hasSvg) {
-      g.font = '84px sans-serif';
+    if (!drawn) {
+      g.font = `${Math.floor(Math.min(targetW, targetH) * 0.52)}px sans-serif`;
       g.textAlign = 'center';
       g.textBaseline = 'middle';
       g.shadowColor = 'rgba(250, 204, 21, 0.6)';
       g.shadowBlur = 18;
-      g.fillText(this.recipe ? this.recipe.emoji : '🍶', cx, cy);
+      g.fillText(this.recipe ? this.recipe.emoji : '🍶', targetX + targetW / 2, targetY + targetH / 2);
       g.shadowBlur = 0;
+    }
+  }
+
+  /**
+   * 벽돌깨기 전용: 도트 스프라이트 좌표계와 1:1로 완벽히 정렬된 숨겨진 실제 술 아트 렌더링
+   * 각 블록의 원래 고유 색상(p.color)을 블록 좌표 (padX + c*pitchX, topY + r*pitchY, bw, bh)에 1픽셀 오차 없이 정밀 렌더링
+   */
+  _renderBrickHiddenArtwork(dotInfo, { padX, topY, bw, bh, pitchX, pitchY }) {
+    const c = this.hiddenArtCanvas;
+    const g = c.getContext('2d');
+    const w = c.width;
+    const h = c.height;
+
+    // 1. 세련된 방사형 배경
+    const cx = w / 2;
+    const cy = topY + 8 * pitchY;
+    const rad = g.createRadialGradient(cx, cy, 20, cx, cy, w * 0.75);
+    rad.addColorStop(0, '#1a2333');
+    rad.addColorStop(0.55, '#0b1120');
+    rad.addColorStop(1, '#050811');
+    g.fillStyle = rad;
+    g.fillRect(0, 0, w, h);
+
+    // 2. 각 도트 픽셀의 실제 색상을 블록 좌표에 1:1로 정확하게 렌더링
+    for (const p of dotInfo.activePixels) {
+      const bx = padX + p.c * pitchX;
+      const by = topY + p.r * pitchY;
+
+      // 본체 실제 술 색상
+      g.fillStyle = p.color;
+      g.fillRect(bx, by, bw, bh);
+
+      // 입체적인 픽셀 하이라이트 & 쉐도우 (도트 아트의 질감 극대화)
+      g.fillStyle = 'rgba(255, 255, 255, 0.22)';
+      g.fillRect(bx, by, bw, 1.5);
+      g.fillRect(bx, by, 1.5, bh);
+
+      g.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      g.fillRect(bx, by + bh - 1.5, bw, 1.5);
+      g.fillRect(bx + bw - 1.5, by, 1.5, bh);
+
+      // 은은한 외곽 경계선
+      g.strokeStyle = 'rgba(0, 0, 0, 0.35)';
+      g.lineWidth = 1;
+      g.strokeRect(bx, by, bw, bh);
     }
   }
 
@@ -127,8 +408,27 @@ class ImageMinigameSuite {
 
   setQixDirection(dc, dr) {
     if (!this.isRunning || this.gameType !== 'TERRITORY_QIX' || !this.qixState) return;
-    this.qixState.player.dc = dc;
-    this.qixState.player.dr = dr;
+    if (this.gameState === 'READY') {
+      this.gameState = 'PLAYING';
+      this.qixState.lastTime = performance.now();
+      this.qixState.player.moveAccum = 0;
+      this.audio.playTap();
+    }
+    const pl = this.qixState.player;
+    const grid = this.qixState.grid;
+    const isDrawing = grid[pl.r] && grid[pl.r][pl.c] === 2;
+    const isReverse = (pl.dc !== 0 && dc === -pl.dc) || (pl.dr !== 0 && dr === -pl.dr);
+    const nc = pl.c + dc;
+    const nr = pl.r + dr;
+    const nextCell = grid[nr] ? grid[nr][nc] : null;
+
+    // 1. 자기 자신의 선(2)으로 돌진하는 것은 즉사이므로 원천 차단
+    if (nextCell === 2) return;
+    // 2. 선을 긋고 있는 도중 180도 역주행 완전 차단 (직각 회전만 허용)
+    if (isDrawing && isReverse) return;
+
+    pl.dc = dc;
+    pl.dr = dr;
   }
 
   _spawnParticles(x, y, color, count = 12) {
@@ -180,21 +480,36 @@ class ImageMinigameSuite {
       ctx.fillRect(0, 32, this.width, this.height - 32);
     }
 
-    const boxW = 210;
-    const boxH = 46;
+    const isWin = (text === 'Clear!');
+    const boxW = isWin ? 150 : (subText ? 220 : 180);
+    const boxH = subText ? 46 : 40;
     const boxX = cx - boxW / 2;
     const boxY = cy - boxH / 2;
 
-    ctx.shadowColor = isOver ? 'rgba(239, 68, 68, 0.7)' : 'rgba(56, 189, 248, 0.7)';
+    let glowColor = 'rgba(56, 189, 248, 0.7)';
+    let strokeColor = `rgba(56, 189, 248, ${0.85 * pulse})`;
+    let textColor = '#38bdf8';
+
+    if (isOver) {
+      glowColor = 'rgba(239, 68, 68, 0.7)';
+      strokeColor = `rgba(239, 68, 68, ${0.75 * pulse})`;
+      textColor = '#fca5a5';
+    } else if (isWin) {
+      glowColor = 'rgba(52, 211, 153, 0.85)';
+      strokeColor = `rgba(52, 211, 153, ${0.9 * pulse})`;
+      textColor = '#34d399';
+    }
+
+    ctx.shadowColor = glowColor;
     ctx.shadowBlur = 12 * pulse;
 
     ctx.fillStyle = isOver ? 'rgba(30, 20, 35, 0.94)' : 'rgba(15, 23, 42, 0.94)';
-    ctx.strokeStyle = isOver ? `rgba(239, 68, 68, ${0.75 * pulse})` : `rgba(56, 189, 248, ${0.85 * pulse})`;
+    ctx.strokeStyle = strokeColor;
     ctx.lineWidth = 2;
 
     ctx.beginPath();
     if (ctx.roundRect) {
-      ctx.roundRect(boxX, boxY, boxW, boxH, 23);
+      ctx.roundRect(boxX, boxY, boxW, boxH, boxH / 2);
     } else {
       ctx.rect(boxX, boxY, boxW, boxH);
     }
@@ -202,10 +517,12 @@ class ImageMinigameSuite {
     ctx.stroke();
 
     ctx.shadowBlur = 0;
-    ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.font = isWin
+      ? 'bold 20px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif'
+      : 'bold 16px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = isOver ? '#fca5a5' : '#38bdf8';
+    ctx.fillStyle = textColor;
     ctx.fillText(text, cx, cy + (subText ? -7 : 0));
 
     if (subText) {
@@ -216,8 +533,8 @@ class ImageMinigameSuite {
     ctx.restore();
   }
 
-  _drawHUD(ctx, { lives, timeLeftSec, progressPct, targetPct, labelText, subText }) {
-    ctx.fillStyle = 'rgba(9, 13, 24, 0.88)';
+  _drawHUD(ctx, { lives, progressPct, labelText }) {
+    ctx.fillStyle = 'rgba(9, 13, 24, 0.92)';
     ctx.fillRect(0, 0, this.width, 32);
     ctx.strokeStyle = '#334155';
     ctx.lineWidth = 1;
@@ -226,118 +543,190 @@ class ImageMinigameSuite {
     ctx.lineTo(this.width, 32);
     ctx.stroke();
 
-    // 라이프
+    // 라이프 표시
     ctx.font = 'bold 12px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    const hearts = '❤️'.repeat(Math.max(0, lives)) + '🖤'.repeat(Math.max(0, 3 - lives));
-    ctx.fillStyle = '#f8fafc';
+    let hearts = '';
+    for (let i = 0; i < 3; i++) {
+      hearts += i < lives ? '❤️' : '🖤';
+    }
     ctx.fillText(hearts, 10, 16);
 
-    // 해금 진행률
-    ctx.textAlign = 'center';
-    ctx.fillStyle = progressPct >= targetPct ? '#10b981' : '#fcd34d';
-    const displayLabel = labelText || `해금률 ${Math.floor(progressPct)}% / 목표 ${targetPct}%`;
-    ctx.fillText(displayLabel, this.width / 2, 16);
+    // 진행도 텍스트 (우측)
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.fillStyle = '#fde047';
+    ctx.fillText(labelText || `${Math.floor(progressPct)}%`, this.width - 10, 16);
 
-    // 남은 시간 (시간 제한이 있는 게임만 표시)
-    if (typeof timeLeftSec === 'number') {
-      ctx.textAlign = 'right';
-      ctx.fillStyle = timeLeftSec <= 10 ? '#ef4444' : '#38bdf8';
-      ctx.fillText(`⏱️ ${Math.ceil(timeLeftSec)}초`, this.width - 10, 16);
-    }
+    // 중앙 상단 진행 바
+    const barW = Math.min(130, this.width - 180);
+    const barH = 7;
+    const barX = this.width / 2 - barW / 2;
+    const barY = 13;
 
-    if (subText) {
-      ctx.textAlign = 'center';
-      ctx.font = 'bold 11px sans-serif';
-      ctx.fillStyle = 'rgba(226, 232, 240, 0.85)';
-      ctx.fillText(subText, this.width / 2, this.height - 8);
-    }
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(barX, barY, barW, barH);
+    ctx.strokeStyle = '#475569';
+    ctx.strokeRect(barX, barY, barW, barH);
+
+    const fillW = Math.max(0, Math.min(barW, barW * (progressPct / 100)));
+    const grad = ctx.createLinearGradient(barX, barY, barX + fillW, barY);
+    grad.addColorStop(0, '#3b82f6');
+    grad.addColorStop(1, '#10b981');
+    ctx.fillStyle = grad;
+    ctx.fillRect(barX, barY, fillW, barH);
   }
 
   // =========================================================================
-  // 1. 🧱 아이스 브레이커 (고난도 블럭깨기)
+  // 1. 🧱 도트 아트 벽돌깨기 (술 모양 도트 벽돌 + 전략적 강철 범퍼)
   // =========================================================================
   _initBrickBreaker() {
-    const cols = 6;
-    const rows = 6;
-    const padX = 12;
-    const topY = 40;
-    const gap = 4;
-    const bw = (this.width - padX * 2 - gap * (cols - 1)) / cols;
-    const bh = 28;
+    const dotInfo = this._parseDotSprite(this.recipe);
+
+    // 16x16 도트 좌표계 기준 벽돌 레이아웃 구성
+    const cols = 16;
+    const rows = 16;
+    const bw = 20;
+    const bh = 13;
+    const gapX = 2;
+    const gapY = 2;
+    const pitchX = bw + gapX; // 22px
+    const pitchY = bh + gapY; // 15px
+
+    const stageW = cols * pitchX - gapX; // 350px
+    const stageH = rows * pitchY - gapY; // 238px
+    const padX = Math.floor((this.width - stageW) / 2); // 좌우 여백 (420 - 350) / 2 = 35px
+    const topY = 44; // 상단 여백 (HUD 32px 아래)
+
+    // 숨겨진 실제 도트 아트를 벽돌 그리드 좌표계와 1:1로 완벽히 일치하도록 렌더링
+    this._renderBrickHiddenArtwork(dotInfo, {
+      padX,
+      topY,
+      bw,
+      bh,
+      pitchX,
+      pitchY
+    });
 
     this.bbState = {
       lives: 3,
       elapsed: 0,
       lastTime: performance.now(),
       targetPct: 100,
-      blockAreaBottom: topY + rows * (bh + gap),
+      blockAreaBottom: topY + stageH,
       paddle: {
-        x: this.width / 2 - 40,
-        y: this.height - 24,
-        w: 80,
-        baseW: 80,
+        x: this.width / 2 - 44,
+        y: this.height - 28,
+        w: 88,
+        baseW: 88,
         h: 12,
         shrinkTimer: 0,
         keyDir: 0
       },
       ball: {
         x: this.width / 2,
-        y: this.height - 38,
+        y: this.height - 44,
         vx: 0,
         vy: 0,
         r: 7,
-        speedMultiplier: 0.52
+        speedMultiplier: 0.65
       },
       blocks: [],
-      hazards: [], // 위에서 떨어지는 독방울(☠️) / 빙결함정(❄️)
+      hazards: [], // 낙하 독방울(☠️) / 빙결함정(❄️)
       totalBreakable: 0,
       brokenCount: 0
     };
 
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        // 중앙 코어는 HP 3, 상단은 HP 2, 일부 칸은 파괴불가 강철 범퍼(고난도 궤적 교란)
-        let hp = 1;
-        let isSteel = false;
-        if (r === 3 && (c === 1 || c === 4)) {
-          isSteel = true;
-          hp = 999;
-        } else if ((r === 1 || r === 2) && (c === 2 || c === 3)) {
-          hp = 3;
-        } else if (r <= 2) {
-          hp = 2;
-        }
+    // 전략적 강철 블록(파괴 불가 범퍼) 위치 선정
+    const centerC = Math.round((dotInfo.minC + dotInfo.maxC) / 2);
+    const shoulderR = dotInfo.minR + Math.floor((dotInfo.maxR - dotInfo.minR) * 0.35);
 
-        if (!isSteel) this.bbState.totalBreakable++;
-
-        this.bbState.blocks.push({
-          x: padX + c * (bw + gap),
-          y: topY + r * (bh + gap),
-          w: bw,
-          h: bh,
-          hp,
-          maxHp: hp,
-          isSteel,
-          alive: true
-        });
+    const steelCoords = new Set();
+    // 1. 상단 병뚜껑/마개 중앙 (1~2개)
+    for (const p of dotInfo.activePixels) {
+      if (p.r === dotInfo.minR && (p.c === centerC || p.c === centerC - 1)) {
+        steelCoords.add(`${p.r},${p.c}`);
+        if (steelCoords.size >= 2) break;
       }
     }
+    // 2. 어깨 부위 범퍼 (1개)
+    if (steelCoords.size < 3 && dotInfo.maxR - dotInfo.minR >= 7) {
+      for (const p of dotInfo.activePixels) {
+        if (p.r === shoulderR && (p.c === dotInfo.minC || p.c === dotInfo.maxC)) {
+          steelCoords.add(`${p.r},${p.c}`);
+          if (steelCoords.size >= 3) break;
+        }
+      }
+    }
+    // 예외 안전장치: 최소 1개 강철 범퍼 보장
+    if (steelCoords.size === 0 && dotInfo.activePixels.length > 0) {
+      steelCoords.add(`${dotInfo.activePixels[0].r},${dotInfo.activePixels[0].c}`);
+    }
+
+    const labelMinR = dotInfo.minR + (dotInfo.maxR - dotInfo.minR) * 0.4;
+    const labelMaxR = dotInfo.minR + (dotInfo.maxR - dotInfo.minR) * 0.65;
+
+    // 각 활성 도트 픽셀을 고유 블록으로 생성
+    for (const p of dotInfo.activePixels) {
+      const coordKey = `${p.r},${p.c}`;
+      const isSteel = steelCoords.has(coordKey);
+      let hp = 1;
+
+      if (isSteel) {
+        hp = 999;
+      } else {
+        // 중앙 라벨/코어 부위는 HP 2
+        if (p.r >= labelMinR && p.r <= labelMaxR && p.c > dotInfo.minC && p.c < dotInfo.maxC) {
+          hp = 2;
+        }
+        this.bbState.totalBreakable++;
+      }
+
+      this.bbState.blocks.push({
+        r: p.r,
+        c: p.c,
+        x: padX + p.c * pitchX,
+        y: topY + p.r * pitchY,
+        w: bw,
+        h: bh,
+        color: p.color,
+        hp,
+        maxHp: hp,
+        isSteel,
+        alive: true
+      });
+    }
+
+    const handleWinClose = () => {
+      if (this.gameState === 'WIN' && performance.now() - this.winTimestamp > 250) {
+        this.audio?.playTap?.();
+        if (this.onClose) {
+          this.onClose();
+        } else {
+          document.getElementById('hint-close-btn')?.click();
+        }
+        return true;
+      }
+      return false;
+    };
 
     const launchBall = () => {
+      if (handleWinClose()) return;
       if (this.gameState === 'READY') {
         this.gameState = 'PLAYING';
+        this.bbState.lastTime = performance.now();
         this.audio.playTap();
         const b = this.bbState.ball;
-        b.vy = -3.9;
+        b.vy = -4.2;
         b.vx = (Math.random() > 0.5 ? 1 : -1) * (2.8 + Math.random() * 0.8);
       } else if (this.gameState === 'OVER') {
         this.audio.playTap();
         this.start('BRICK_BREAKER');
         this.gameState = 'PLAYING';
+        this.bbState.lastTime = performance.now();
         const b = this.bbState.ball;
-        b.vy = -3.9;
+        b.vy = -4.2;
         b.vx = (Math.random() > 0.5 ? 1 : -1) * (2.8 + Math.random() * 0.8);
       }
     };
@@ -355,6 +744,7 @@ class ImageMinigameSuite {
     };
 
     const onMouseDown = (e) => {
+      if (handleWinClose()) return;
       movePaddle(e.clientX);
       launchBall();
     };
@@ -364,6 +754,10 @@ class ImageMinigameSuite {
     };
 
     const onTouchStart = (e) => {
+      if (handleWinClose()) {
+        if (e.cancelable) e.preventDefault();
+        return;
+      }
       if (e.touches && e.touches[0]) {
         e.preventDefault();
         movePaddle(e.touches[0].clientX);
@@ -379,6 +773,7 @@ class ImageMinigameSuite {
     };
 
     const onKeyDown = (e) => {
+      if (handleWinClose()) return;
       if (e.key === 'ArrowLeft' || e.key === 'a') {
         this.bbState.paddle.keyDir = -1;
         launchBall();
@@ -419,7 +814,7 @@ class ImageMinigameSuite {
   _updateBrickBreaker() {
     const st = this.bbState;
     const now = performance.now();
-    const dt = (now - st.lastTime) / 1000;
+    const dt = Math.min((now - st.lastTime) / 1000, 0.05);
     st.lastTime = now;
     st.elapsed += dt;
 
@@ -431,16 +826,16 @@ class ImageMinigameSuite {
       }
     }
     if (p.keyDir !== 0) {
-      p.x = Math.max(6, Math.min(this.width - p.w - 6, p.x + p.keyDir * 320 * dt));
+      p.x = Math.max(6, Math.min(this.width - p.w - 6, p.x + p.keyDir * 340 * dt));
     }
 
-    // 초반에는 적당한 속도(52%)로 시작하여 시간이 흐르거나 블럭 파괴율이 올라갈수록 점점 빨라져 기존 속도(115%)에 도달
-    const timeProgress = Math.min(1, Math.max(0, st.elapsed / 34));
+    // 초반에는 안정적인 속도(65%)로 출발하여, 진행도에 따라 최대 118%까지 시원하게 가속
+    const timeProgress = Math.min(1, Math.max(0, st.elapsed / 32));
     const breakProgress = st.brokenCount / Math.max(1, st.totalBreakable);
-    const ramp = Math.max(timeProgress * 0.85, breakProgress);
+    const ramp = Math.max(timeProgress * 0.8, breakProgress);
 
     const b = st.ball;
-    b.speedMultiplier = 0.52 + 0.63 * ramp;
+    b.speedMultiplier = 0.65 + 0.53 * ramp;
     b.x += b.vx * b.speedMultiplier;
     b.y += b.vy * b.speedMultiplier;
 
@@ -476,7 +871,7 @@ class ImageMinigameSuite {
       this.audio.playTap();
     }
 
-    // 블럭 충돌
+    // 블럭 충돌 검사
     for (const blk of st.blocks) {
       if (!blk.alive) continue;
       if (
@@ -508,20 +903,20 @@ class ImageMinigameSuite {
           if (blk.hp <= 0) {
             blk.alive = false;
             st.brokenCount++;
-            this.shakeTicks = 6;
-            this._spawnParticles(blk.x + blk.w / 2, blk.y + blk.h / 2, '#38bdf8', 15);
+            this.shakeTicks = 5;
+            this._spawnParticles(blk.x + blk.w / 2, blk.y + blk.h / 2, blk.color, 14);
 
-            // 38% 확률로 함정 낙하물(☠️ 독방울 또는 ❄️ 패들축소) 생성 -> 난이도 상승!
-            if (Math.random() < 0.38) {
+            // 15% 확률로 함정 낙하물(☠️ 독방울 또는 ❄️ 패들축소) 생성
+            if (Math.random() < 0.15) {
               st.hazards.push({
                 x: blk.x + blk.w / 2,
                 y: blk.y + blk.h / 2,
-                vy: 2.3 + Math.random() * 1.4,
-                type: Math.random() < 0.55 ? 'POISON' : 'FREEZE'
+                vy: 2.2 + Math.random() * 1.2,
+                type: Math.random() < 0.5 ? 'POISON' : 'FREEZE'
               });
             }
           } else {
-            this._spawnParticles(b.x, b.y, '#fcd34d', 8);
+            this._spawnParticles(b.x, b.y, '#fcd34d', 7);
           }
         }
         break;
@@ -550,9 +945,9 @@ class ImageMinigameSuite {
             return;
           }
         } else {
-          // FREEZE: 패들 폭 절반 축소
-          p.w = Math.max(42, p.baseW * 0.58);
-          p.shrinkTimer = 6.0;
+          // FREEZE: 패들 폭 40% 축소
+          p.w = Math.max(46, p.baseW * 0.6);
+          p.shrinkTimer = 5.5;
           this._spawnParticles(hz.x, p.y, '#38bdf8', 14);
         }
         continue;
@@ -579,10 +974,11 @@ class ImageMinigameSuite {
       b.vy = 0;
     }
 
-    // 승리 판정 (깰 수 있는 벽돌을 100% 모두 깨야 해금)
+    // 승리 판정 (파괴 가능한 블록을 100% 모두 깨거나, 96% 이상 격파 시 승리!)
     const pct = (st.brokenCount / Math.max(1, st.totalBreakable)) * 100;
-    if (st.brokenCount >= st.totalBreakable) {
+    if (st.brokenCount >= st.totalBreakable || (st.totalBreakable - st.brokenCount <= 2 && pct >= 96)) {
       this.gameState = 'WIN';
+      this.winTimestamp = performance.now();
       this.audio.playSuccess();
       if (this.onWin) this.onWin();
     }
@@ -590,37 +986,65 @@ class ImageMinigameSuite {
 
   _drawBrickBreaker(ctx) {
     const st = this.bbState;
-    // 1. 전체 캔버스 암막 배경 + 블럭 영역 바로 뒤에 숨겨진 완성 술 일러스트 배치
+
+    // 1. 전체 캔버스 배경 및 숨겨진 완성 일러스트 (깨진 블럭 자리로 1:1 완벽 정밀 노출)
     ctx.fillStyle = '#070b14';
     ctx.fillRect(0, 0, this.width, this.height);
-    const artH = Math.min(this.height - 34, (st.blockAreaBottom || 240) + 20);
-    ctx.drawImage(this.hiddenArtCanvas, 0, 0, this.width, this.height, 0, 32, this.width, artH);
+    ctx.drawImage(this.hiddenArtCanvas, 0, 0);
 
-    // 2. 아직 안 깨진 블럭 영역은 불투명한 빙결 장막으로 가림
+    // 2. 살아있는 도트 블럭 렌더링 (스포일러 방지 신비로운 네온 블루 덮개)
     for (const blk of st.blocks) {
       if (!blk.alive) continue;
-      // 뒤쪽 그림 가리기용 암막
-      ctx.fillStyle = '#0b1120';
-      ctx.fillRect(blk.x - 2, blk.y - 2, blk.w + 4, blk.h + 4);
+
+      // 미파괴 블럭 뒤쪽 그림 가리기용 암막 (1px 여유로 완전 차단)
+      ctx.fillStyle = '#070b14';
+      ctx.fillRect(blk.x - 1, blk.y - 1, blk.w + 2, blk.h + 2);
 
       if (blk.isSteel) {
-        // 강철: 글자/아이콘 없이 깔끔한 단색 회색
-        ctx.fillStyle = '#475569';
-        ctx.strokeStyle = '#64748b';
-      } else if (blk.hp === 3) {
-        ctx.fillStyle = '#d97706';
-        ctx.strokeStyle = '#fde68a';
-      } else if (blk.hp === 2) {
-        ctx.fillStyle = '#1d4ed8';
-        ctx.strokeStyle = '#93c5fd';
-      } else {
-        ctx.fillStyle = '#0284c7';
-        ctx.strokeStyle = '#bae6fd';
-      }
+        // 강철 범퍼: 메탈릭 티타늄 그레이 + 리벳 장식
+        const steelGrad = ctx.createLinearGradient(blk.x, blk.y, blk.x, blk.y + blk.h);
+        steelGrad.addColorStop(0, '#475569');
+        steelGrad.addColorStop(1, '#1e293b');
+        ctx.fillStyle = steelGrad;
+        ctx.fillRect(blk.x, blk.y, blk.w, blk.h);
 
-      ctx.lineWidth = 1.5;
-      ctx.fillRect(blk.x, blk.y, blk.w, blk.h);
-      ctx.strokeRect(blk.x, blk.y, blk.w, blk.h);
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(blk.x + 2, blk.y + 1, blk.w - 4, 1.5);
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(blk.x, blk.y, blk.w, blk.h);
+      } else if (blk.hp === 2) {
+        // 라벨/코어 2HP 블록: 짙은 사파이어 블루 + 골드 네온 테두리 (2회 타격 필요)
+        const hp2Grad = ctx.createLinearGradient(blk.x, blk.y, blk.x, blk.y + blk.h);
+        hp2Grad.addColorStop(0, '#1e3a8a');
+        hp2Grad.addColorStop(1, '#0f172a');
+        ctx.fillStyle = hp2Grad;
+        ctx.fillRect(blk.x, blk.y, blk.w, blk.h);
+
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(blk.x, blk.y, blk.w, blk.h);
+
+        ctx.fillStyle = '#fde047';
+        ctx.fillRect(blk.x + blk.w / 2 - 3, blk.y + blk.h / 2 - 1, 6, 2);
+      } else {
+        // 일반 블록: 스포일러 방지 신비로운 사이언/네온 블루 덮개!
+        const blockGrad = ctx.createLinearGradient(blk.x, blk.y, blk.x, blk.y + blk.h);
+        blockGrad.addColorStop(0, '#0284c7');
+        blockGrad.addColorStop(0.5, '#0369a1');
+        blockGrad.addColorStop(1, '#075985');
+        ctx.fillStyle = blockGrad;
+        ctx.fillRect(blk.x, blk.y, blk.w, blk.h);
+
+        // 상단 3D 하이라이트
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+        ctx.fillRect(blk.x + 1, blk.y + 1, blk.w - 2, 1.5);
+
+        // 사이언 네온 테두리
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.55)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(blk.x, blk.y, blk.w, blk.h);
+      }
     }
 
     // 3. 낙하 함정 그리기
@@ -652,42 +1076,175 @@ class ImageMinigameSuite {
     const pct = (st.brokenCount / Math.max(1, st.totalBreakable)) * 100;
     this._drawHUD(ctx, {
       lives: st.lives,
-      timeLeftSec: null,
       progressPct: pct,
-      targetPct: st.targetPct,
-      subText: ''
+      labelText: `${Math.floor(pct)}% / 100%`
     });
   }
 
   // =========================================================================
-  // 2. 📐 네온 땅따먹기 (고난도 BFS 영역 점령)
+  // 2. 📐 외곽 실루엣 땅따먹기 (술의 외곽선 네온 가이드 + 실루엣 100% 점령)
   // =========================================================================
   _initTerritoryQix() {
     const cols = 52;
-    const rows = 48;
+    const rows = 52;
     const topOffset = 32;
-    const bottomPad = 0;
     const cellW = this.width / cols;
-    const cellH = (this.height - topOffset - bottomPad) / rows;
+    const cellH = (this.height - topOffset) / rows;
 
-    // 0: 미점령(어둠), 1: 안전지대/점령완료, 2: 현재 긋고 있는 선(Trail)
+    // 0: 미점령(100% 암전), 1: 안전지대/점령완료, 2: 현재 긋고 있는 선(Trail)
     const grid = Array.from({ length: rows }, (_, r) =>
       Array.from({ length: cols }, (__, c) =>
         r === 0 || r === rows - 1 || c === 0 || c === cols - 1 ? 1 : 0
       )
     );
 
-    // 중앙의 실제 그림(아이콘) 영역 계산 (그림을 온전히 뚫었는지 판정하는 목표 구역)
-    const cx = this.width / 2;
-    const cy = (this.height + topOffset) / 2;
-    const picHalfW = 90;
-    const picHalfH = 90;
+    const artSize = 32;
+    const startC = Math.floor((cols - artSize) / 2); // 10
+    const startR = Math.floor((rows - artSize) / 2); // 10
 
-    const picMinC = Math.max(1, Math.floor((cx - picHalfW) / cellW));
-    const picMaxC = Math.min(cols - 2, Math.ceil((cx + picHalfW) / cellW));
-    const picMinR = Math.max(1, Math.floor((cy - picHalfH - topOffset) / cellH));
-    const picMaxR = Math.min(rows - 2, Math.ceil((cy + picHalfH - topOffset) / cellH));
-    const totalPicCells = (picMaxR - picMinR + 1) * (picMaxC - picMinC + 1);
+    const targetSilhouetteCells = new Set();
+    const isSilhouetteGrid = Array.from({ length: rows }, () => new Uint8Array(cols));
+
+    // 실제 화면에 렌더링되는 술 SVG 일러스트로부터 1:1 정밀 알파 마스크 추출
+    let hasExactMask = false;
+    if (this.recipe && window.KSool?.pixelIcon) {
+      try {
+        const svgStr = window.KSool.pixelIcon(this.recipe, artSize);
+        if (svgStr) {
+          const maskCanvas = document.createElement('canvas');
+          maskCanvas.width = cols;
+          maskCanvas.height = rows;
+          const maskCtx = maskCanvas.getContext('2d', { willReadFrequently: true });
+          if (maskCtx) {
+            const drawn = this._drawSvgToCanvas(maskCtx, svgStr, startC, startR, artSize, artSize);
+            if (drawn) {
+              const imgData = maskCtx.getImageData(0, 0, cols, rows);
+              const data = imgData.data;
+              const rawMask = Array.from({ length: rows }, () => new Uint8Array(cols));
+              let rawCount = 0;
+
+              for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                  const alpha = data[(r * cols + c) * 4 + 3];
+                  if (alpha > 15) {
+                    rawMask[r][c] = 1;
+                    rawCount++;
+                  }
+                }
+              }
+
+              if (rawCount > 0) {
+                hasExactMask = true;
+                // 실루엣이 실제 그림보다 약간 더 커서(사방 1셀 팽창) 그림 전체를 안전하게 품고,
+                // 잔의 대각선 라인을 따라 계단식(Stepped)으로 자연스럽게 외곽선이 형성되도록 처리
+                const dilatedMask = Array.from({ length: rows }, () => new Uint8Array(cols));
+                for (let r = 0; r < rows; r++) {
+                  for (let c = 0; c < cols; c++) {
+                    if (rawMask[r][c]) {
+                      for (let dr = -1; dr <= 1; dr++) {
+                        for (let dc = -1; dc <= 1; dc++) {
+                          const nr = r + dr;
+                          const nc = c + dc;
+                          if (nr >= 1 && nr < rows - 1 && nc >= 1 && nc < cols - 1) {
+                            dilatedMask[nr][nc] = 1;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+
+                // 술 안쪽의 미세한 틈새(얼음 틈이나 레몬 틈 등)로 인한 구멍 방지:
+                // 바깥 외곽(0,0)에서 Flood Fill하여 '바깥 영역'을 찾고, 바깥이 아닌 모든 영역을 실루엣 내부로 확정
+                const isOutside = Array.from({ length: rows }, () => new Uint8Array(cols));
+                const queue = [[0, 0]];
+                isOutside[0][0] = 1;
+
+                while (queue.length > 0) {
+                  const [qr, qc] = queue.pop();
+                  const nbrs = [
+                    [qr - 1, qc], [qr + 1, qc], [qr, qc - 1], [qr, qc + 1]
+                  ];
+                  for (const [nr, nc] of nbrs) {
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                      if (!isOutside[nr][nc] && !dilatedMask[nr][nc]) {
+                        isOutside[nr][nc] = 1;
+                        queue.push([nr, nc]);
+                      }
+                    }
+                  }
+                }
+
+                for (let r = 0; r < rows; r++) {
+                  for (let c = 0; c < cols; c++) {
+                    if (!isOutside[r][c]) {
+                      isSilhouetteGrid[r][c] = 1;
+                      targetSilhouetteCells.add(`${r},${c}`);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to extract silhouette mask from SVG, falling back to dot grid:', err);
+      }
+    }
+
+    // SVG 파싱 실패 시 레트로 도트 스프라이트(16x16) 폴백 보장
+    if (!hasExactMask || targetSilhouetteCells.size === 0) {
+      const dotInfo = this._parseDotSprite(this.recipe);
+      const scale = 2;
+      for (let r = 0; r < 16; r++) {
+        for (let c = 0; c < 16; c++) {
+          if (dotInfo.grid[r][c]) {
+            for (let dr = 0; dr < scale; dr++) {
+              for (let dc = 0; dc < scale; dc++) {
+                const gr = startR + r * scale + dr;
+                const gc = startC + c * scale + dc;
+                if (gr >= 0 && gr < rows && gc >= 0 && gc < cols) {
+                  isSilhouetteGrid[gr][gc] = 1;
+                  targetSilhouetteCells.add(`${gr},${gc}`);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // 도트 실루엣의 가장 바깥 외곽선(Boundary Edges) 산출 (계단식 경계선)
+    const silhouetteEdges = [];
+    for (const coord of targetSilhouetteCells) {
+      const [gr, gc] = coord.split(',').map(Number);
+      const x1 = gc * cellW;
+      const x2 = (gc + 1) * cellW;
+      const y1 = topOffset + gr * cellH;
+      const y2 = topOffset + (gr + 1) * cellH;
+
+      // 상단 경계
+      if (!isSilhouetteGrid[gr - 1]?.[gc]) silhouetteEdges.push({ x1, y1, x2, y2: y1 });
+      // 하단 경계
+      if (!isSilhouetteGrid[gr + 1]?.[gc]) silhouetteEdges.push({ x1, y1: y2, x2, y2 });
+      // 좌측 경계
+      if (!isSilhouetteGrid[gr]?.[gc - 1]) silhouetteEdges.push({ x1, y1, x2: x1, y2 });
+      // 우측 경계
+      if (!isSilhouetteGrid[gr]?.[gc + 1]) silhouetteEdges.push({ x1: x2, y1, x2, y2 });
+    }
+
+    // 숨겨진 완성 일러스트를 실루엣 위치에 1:1로 정확히 정렬
+    const silX = startC * cellW;
+    const silY = topOffset + startR * cellH;
+    const silW = artSize * cellW;
+    const silH = artSize * cellH;
+
+    this._renderHiddenArtwork({
+      x: silX,
+      y: silY,
+      w: silW,
+      h: silH
+    });
 
     this.qixState = {
       cols,
@@ -699,13 +1256,12 @@ class ImageMinigameSuite {
       lives: 3,
       elapsed: 0,
       lastTime: performance.now(),
-      targetPct: 100, // 네모칸 구역 전체(100%)를 모두 뚫어 온전히 드러내야 승리!
-      picMinC,
-      picMaxC,
-      picMinR,
-      picMaxR,
-      totalPicCells,
-      pictureRevealedPct: 0,
+      targetPct: 100, // 술의 외곽 실루엣 내부 영역을 100% 모두 도려내야 승리!
+      targetSilhouetteCells,
+      totalSilhouetteCells: targetSilhouetteCells.size,
+      capturedSilhouetteCount: 0,
+      silhouetteRevealedPct: 0,
+      silhouetteEdges,
       player: {
         c: Math.floor(cols / 2),
         r: rows - 1,
@@ -713,28 +1269,89 @@ class ImageMinigameSuite {
         dr: 0,
         moveAccum: 0
       },
-      enemies: [
-        // 보스 코어 + 기동 추격체 2개 (초반 속도를 대폭 높여 약 2.5배 빠른 팽팽한 아케이드 텐션 제공)
-        { c: cols * 0.5, r: rows * 0.5, vc: 17.5, vr: 14.5, isBoss: true, baseSpeed: 22.7 },
-        { c: cols * 0.3, r: rows * 0.35, vc: -20.5, vr: 17.5, isBoss: false, baseSpeed: 26.9 },
-        { c: cols * 0.7, r: rows * 0.65, vc: 18.5, vr: -20.5, isBoss: false, baseSpeed: 27.6 }
-      ],
+      enemies: (() => {
+        const configs = [
+          { isBoss: true, baseSpeed: 23.5 },
+          { isBoss: false, baseSpeed: 27.5 },
+          { isBoss: false, baseSpeed: 28.2 }
+        ];
+
+        // 플레이어 시작 지점과 떨어진 상/중단 구역 배치
+        const zones = [
+          { minC: cols * 0.12, maxC: cols * 0.38, minR: rows * 0.14, maxR: rows * 0.52 },
+          { minC: cols * 0.38, maxC: cols * 0.62, minR: rows * 0.14, maxR: rows * 0.48 },
+          { minC: cols * 0.62, maxC: cols * 0.88, minR: rows * 0.14, maxR: rows * 0.52 }
+        ];
+
+        zones.sort(() => Math.random() - 0.5);
+
+        return configs.map((cfg, idx) => {
+          const z = zones[idx];
+          const c = z.minC + Math.random() * (z.maxC - z.minC);
+          const r = z.minR + Math.random() * (z.maxR - z.minR);
+
+          let angle;
+          do {
+            angle = Math.random() * Math.PI * 2;
+          } while (Math.abs(Math.cos(angle)) < 0.35 || Math.abs(Math.sin(angle)) < 0.35);
+
+          return {
+            c,
+            r,
+            vc: Math.cos(angle) * cfg.baseSpeed,
+            vr: Math.sin(angle) * cfg.baseSpeed,
+            isBoss: cfg.isBoss,
+            baseSpeed: cfg.baseSpeed
+          };
+        });
+      })(),
       capturedPct: 0
     };
 
+    let qixIgnoreInputUntil = 0;
+
+    const handleWinClose = () => {
+      if (this.gameState === 'WIN' && performance.now() - this.winTimestamp > 250) {
+        this.audio?.playTap?.();
+        if (this.onClose) {
+          this.onClose();
+        } else {
+          document.getElementById('hint-close-btn')?.click();
+        }
+        return true;
+      }
+      return false;
+    };
+
     const handleQixAction = () => {
+      if (handleWinClose()) return true;
       if (this.gameState === 'READY') {
         this.gameState = 'PLAYING';
+        this.qixState.lastTime = performance.now();
+        this.qixState.player.moveAccum = 0;
+        this.qixState.player.dc = 0;
+        this.qixState.player.dr = 0;
+        qixIgnoreInputUntil = performance.now() + 280;
         this.audio.playTap();
+        return true;
       } else if (this.gameState === 'OVER') {
         this.audio.playTap();
         this.start('TERRITORY_QIX');
         this.gameState = 'PLAYING';
+        this.qixState.lastTime = performance.now();
+        this.qixState.player.moveAccum = 0;
+        this.qixState.player.dc = 0;
+        this.qixState.player.dr = 0;
+        qixIgnoreInputUntil = performance.now() + 280;
+        return true;
       }
+      return false;
     };
 
     const steerToward = (clientX, clientY) => {
-      handleQixAction();
+      const wasStarting = handleQixAction();
+      if (wasStarting || performance.now() < qixIgnoreInputUntil) return;
+
       const rect = this.canvas.getBoundingClientRect();
       const x = (clientX - rect.left) * (this.width / rect.width);
       const y = (clientY - rect.top) * (this.height / rect.height) - topOffset;
@@ -744,17 +1361,42 @@ class ImageMinigameSuite {
       const dx = targetC - pl.c;
       const dy = targetR - pl.r;
       if (Math.abs(dx) < 0.8 && Math.abs(dy) < 0.8) return;
-      if (Math.abs(dx) > Math.abs(dy)) {
-        pl.dc = dx > 0 ? 1 : -1;
-        pl.dr = 0;
+
+      const candidates = [];
+      if (Math.abs(dx) >= Math.abs(dy)) {
+        if (Math.abs(dx) >= 0.8) candidates.push({ dc: dx > 0 ? 1 : -1, dr: 0 });
+        if (Math.abs(dy) >= 0.8) candidates.push({ dc: 0, dr: dy > 0 ? 1 : -1 });
       } else {
-        pl.dc = 0;
-        pl.dr = dy > 0 ? 1 : -1;
+        if (Math.abs(dy) >= 0.8) candidates.push({ dc: 0, dr: dy > 0 ? 1 : -1 });
+        if (Math.abs(dx) >= 0.8) candidates.push({ dc: dx > 0 ? 1 : -1, dr: 0 });
+      }
+
+      const isDrawing = grid[pl.r] && grid[pl.r][pl.c] === 2;
+
+      for (const cand of candidates) {
+        const isReverse = (pl.dc !== 0 && cand.dc === -pl.dc) || (pl.dr !== 0 && cand.dr === -pl.dr);
+        const nc = pl.c + cand.dc;
+        const nr = pl.r + cand.dr;
+        const nextCell = grid[nr] ? grid[nr][nc] : null;
+
+        if (nextCell === 2) continue;
+        if (isDrawing && isReverse) continue;
+
+        pl.dc = cand.dc;
+        pl.dr = cand.dr;
+        return;
       }
     };
 
     let isPointerDown = false;
     const onDown = (e) => {
+      if (handleWinClose()) {
+        if (e.cancelable) e.preventDefault();
+        return;
+      }
+      if (e.cancelable && e.type && e.type.startsWith('touch')) {
+        e.preventDefault();
+      }
       isPointerDown = true;
       const pt = e.touches ? e.touches[0] : e;
       if (pt) steerToward(pt.clientX, pt.clientY);
@@ -766,19 +1408,25 @@ class ImageMinigameSuite {
       if (pt) steerToward(pt.clientX, pt.clientY);
     };
     const onUp = () => { isPointerDown = false; };
+    const onClick = () => { handleWinClose(); };
 
     const onKeyDown = (e) => {
+      if (handleWinClose()) return;
       handleQixAction();
-      const pl = this.qixState.player;
-      if (e.key === 'ArrowLeft' || e.key === 'a') { pl.dc = -1; pl.dr = 0; }
-      else if (e.key === 'ArrowRight' || e.key === 'd') { pl.dc = 1; pl.dr = 0; }
-      else if (e.key === 'ArrowUp' || e.key === 'w') { pl.dc = 0; pl.dr = -1; }
-      else if (e.key === 'ArrowDown' || e.key === 's') { pl.dc = 0; pl.dr = 1; }
-      else if (e.key === ' ' || e.key === 'Enter') { handleQixAction(); }
+      let reqDc = 0, reqDr = 0;
+      if (e.key === 'ArrowLeft' || e.key === 'a') reqDc = -1;
+      else if (e.key === 'ArrowRight' || e.key === 'd') reqDc = 1;
+      else if (e.key === 'ArrowUp' || e.key === 'w') reqDr = -1;
+      else if (e.key === 'ArrowDown' || e.key === 's') reqDr = 1;
+      else if (e.key === ' ' || e.key === 'Enter') { handleQixAction(); return; }
+      else return;
+
+      this.setQixDirection(reqDc, reqDr);
     };
 
     this.canvas.addEventListener('mousedown', onDown);
     this.canvas.addEventListener('mousemove', onMove);
+    this.canvas.addEventListener('click', onClick);
     window.addEventListener('mouseup', onUp);
     this.canvas.addEventListener('touchstart', onDown, { passive: false });
     this.canvas.addEventListener('touchmove', onMove, { passive: false });
@@ -788,6 +1436,7 @@ class ImageMinigameSuite {
     this._cleanupInputHandlers = () => {
       this.canvas.removeEventListener('mousedown', onDown);
       this.canvas.removeEventListener('mousemove', onMove);
+      this.canvas.removeEventListener('click', onClick);
       window.removeEventListener('mouseup', onUp);
       this.canvas.removeEventListener('touchstart', onDown);
       this.canvas.removeEventListener('touchmove', onMove);
@@ -809,7 +1458,7 @@ class ImageMinigameSuite {
     const st = this.qixState;
     const { grid, rows, cols } = st;
 
-    // 1. 먼저 모든 선(2)을 점령지(1)로 변경
+    // 1. 모든 선(2)을 점령지(1)로 변경
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (grid[r][c] === 2) grid[r][c] = 1;
@@ -848,7 +1497,7 @@ class ImageMinigameSuite {
       }
     }
 
-    // 3. 각 분리된 영역에 속한 적 구체 수 집계
+    // 3. 각 분할 영역에 속한 적 구체 수 집계
     for (const en of st.enemies) {
       const er = Math.max(1, Math.min(rows - 2, Math.floor(en.r)));
       const ec = Math.max(1, Math.min(cols - 2, Math.floor(en.c)));
@@ -858,16 +1507,13 @@ class ImageMinigameSuite {
       }
     }
 
-    // 4. 땅따먹기 핵심 룰 적용:
-    // 영역이 2개 이상으로 갈라졌을 때, 적이 양쪽에 나뉘어 있더라도 반드시 한쪽(더 작은 영역들)은 100% 점령되고
-    // 단 1개의 메인 미점령 영역(적이 있는 가장 큰 영역)만 남도록 보장!
+    // 4. 영역 분할 시 1개의 메인 미점령 영역만 남기고 나머지 영역은 100% 점령
     if (components.length > 0) {
       const compsWithEnemies = components.filter(comp => comp.enemyCount > 0);
       const pool = compsWithEnemies.length > 0 ? compsWithEnemies : components;
       pool.sort((a, b) => b.cells.length - a.cells.length);
       const survivorComp = pool[0];
 
-      // 살아남은 단 1개의 영역을 제외한 모든 분할 영역을 점령지(1)로 전환!
       for (const comp of components) {
         if (comp.id !== survivorComp.id) {
           for (const [cr, cc] of comp.cells) {
@@ -876,7 +1522,6 @@ class ImageMinigameSuite {
         }
       }
 
-      // 점령된 영역에 갇혀 있던 적 구체는 남은 미점령 영역 중심으로 재배치
       if (survivorComp.cells.length > 0) {
         const fallbackCell = survivorComp.cells[Math.floor(survivorComp.cells.length / 2)];
         for (const en of st.enemies) {
@@ -890,30 +1535,18 @@ class ImageMinigameSuite {
       }
     }
 
-    // 5. 그림 영역 노출도(점령률) 집계: "뒤의 그림이 다 보이게끔 뚫었는가!"
-    let revealedPicCells = 0;
-    for (let r = st.picMinR; r <= st.picMaxR; r++) {
-      for (let c = st.picMinC; c <= st.picMaxC; c++) {
-        if (grid[r][c] === 1) {
-          revealedPicCells++;
-        }
-      }
-    }
-    st.revealedPicCells = revealedPicCells;
-    st.pictureRevealedPct = (revealedPicCells / Math.max(1, st.totalPicCells)) * 100;
-
-    // 전체 점령률 집계 (참고용)
-    let capturedCells = 0;
-    const totalInnerCells = (rows - 2) * (cols - 2);
-    for (let r = 1; r < rows - 1; r++) {
-      for (let c = 1; c < cols - 1; c++) {
-        if (grid[r][c] === 1) {
-          capturedCells++;
-        }
+    // 5. 도트 실루엣 영역 점령률 집계: "외곽 실루엣 내부를 100% 완전히 땄는가!"
+    let capturedCount = 0;
+    for (const coord of st.targetSilhouetteCells) {
+      const [gr, gc] = coord.split(',').map(Number);
+      if (grid[gr][gc] === 1) {
+        capturedCount++;
       }
     }
 
-    st.capturedPct = (capturedCells / Math.max(1, totalInnerCells)) * 100;
+    st.capturedSilhouetteCount = capturedCount;
+    st.silhouetteRevealedPct = (capturedCount / Math.max(1, st.totalSilhouetteCells)) * 100;
+
     this.audio.playTap();
     this._spawnParticles(
       st.player.c * st.cellW,
@@ -926,11 +1559,11 @@ class ImageMinigameSuite {
   _updateTerritoryQix() {
     const st = this.qixState;
     const now = performance.now();
-    const dt = (now - st.lastTime) / 1000;
+    const dt = Math.min((now - st.lastTime) / 1000, 0.05);
     st.lastTime = now;
     st.elapsed += dt;
 
-    // 플레이어 그리드 이동 (초당 22칸 속도)
+    // 플레이어 이동 (초당 22칸)
     const pl = st.player;
     pl.moveAccum += dt * 22;
     while (pl.moveAccum >= 1) {
@@ -941,7 +1574,7 @@ class ImageMinigameSuite {
         const prevState = st.grid[pl.r][pl.c];
         const nextState = st.grid[nr][nc];
 
-        // 자기 자신의 선(2)을 다시 밟으면 라이프 차감!
+        // 자기 자신의 선(2)을 밟으면 라이프 차감
         if (nextState === 2 && (nr !== pl.r || nc !== pl.c)) {
           this._onQixPlayerHit();
           return;
@@ -951,15 +1584,17 @@ class ImageMinigameSuite {
         pl.r = nr;
 
         if (nextState === 0) {
-          st.grid[nr][nc] = 2; // 새로운 선 긋기
+          st.grid[nr][nc] = 2; // 새로운 궤적 긋기
         } else if (nextState === 1 && prevState === 2) {
-          // 안전지대에 복귀 성공 -> 영역 점령!
+          // 안전지대 복귀 -> 영역 점령!
           pl.dc = 0;
           pl.dr = 0;
           this._floodFillCaptureQix();
-          // 네모 점선 영역 전체(100%)를 모두 땅따먹었을 때만 승리!
-          if (st.revealedPicCells >= st.totalPicCells || st.pictureRevealedPct >= 100) {
+
+          // 술의 외곽 실루엣 내부를 100% 모두 점령했을 때 승리!
+          if (st.capturedSilhouetteCount >= st.totalSilhouetteCells || st.silhouetteRevealedPct >= 100) {
             this.gameState = 'WIN';
+            this.winTimestamp = performance.now();
             this.audio.playSuccess();
             if (this.onWin) this.onWin();
             return;
@@ -969,16 +1604,14 @@ class ImageMinigameSuite {
     }
 
     // 적 구체 이동 및 선(2) 충돌 검사
-    // 초반에도 늘어지지 않는 빠른 기본 속도(80%)로 출발하여, 시간 경과 및 그림 점령률에 따라 최대 125%까지 가속
     const timeProgress = Math.min(1, Math.max(0, st.elapsed / 24));
-    const captureProgress = Math.min(1, st.pictureRevealedPct / st.targetPct);
+    const captureProgress = Math.min(1, st.silhouetteRevealedPct / st.targetPct);
     const ramp = Math.max(timeProgress, captureProgress * 0.85);
-    const speedMultiplier = 0.80 + 0.45 * ramp;
+    const speedMultiplier = 0.82 + 0.44 * ramp;
 
     for (const en of st.enemies) {
       if (!en.baseSpeed) en.baseSpeed = Math.hypot(en.vc, en.vr);
 
-      // 고속 이동 시 선(2) 관통(터널링) 방지를 위한 서브스텝 분할 검사
       const stepDist = Math.max(Math.abs(en.vc), Math.abs(en.vr)) * speedMultiplier * dt;
       const subSteps = Math.max(1, Math.ceil(stepDist / 0.45));
       const subDt = dt / subSteps;
@@ -989,14 +1622,13 @@ class ImageMinigameSuite {
         const checkC = Math.max(0, Math.min(st.cols - 1, Math.floor(nextC)));
         const checkR = Math.max(0, Math.min(st.rows - 1, Math.floor(nextR)));
 
-        // 적이 내 선(2)에 닿거나 선을 긋고 있는 플레이어와 부딪히면 피격!
+        // 적이 내 선(2)에 닿거나 선을 긋고 있는 플레이어와 부딪히면 피격
         if (st.grid[checkR][checkC] === 2 || (st.grid[pl.r][pl.c] === 2 && Math.hypot(en.c - pl.c, en.r - pl.r) < 1.6)) {
           this._onQixPlayerHit();
           return;
         }
 
         let bounced = false;
-        // 점령지(1) 경계 반사 시 약간의 미세 섭동으로 고착 사각 루프 방지
         if (st.grid[checkR][Math.floor(en.c)] === 1) {
           en.vr = -en.vr;
           en.vc += (Math.random() - 0.5) * 1.5;
@@ -1013,7 +1645,6 @@ class ImageMinigameSuite {
           en.c = nextC;
         }
 
-        // 반사 섭동 후에도 일정한 고유 속력 크기 유지
         if (bounced) {
           const curSpd = Math.hypot(en.vc, en.vr);
           if (curSpd > 0.1) {
@@ -1041,6 +1672,8 @@ class ImageMinigameSuite {
     st.player.r = st.rows - 1;
     st.player.dc = 0;
     st.player.dr = 0;
+    st.player.moveAccum = 0;
+    st.lastTime = performance.now();
 
     if (st.lives <= 0) {
       this.gameState = 'OVER';
@@ -1052,10 +1685,11 @@ class ImageMinigameSuite {
 
   _drawTerritoryQix(ctx) {
     const st = this.qixState;
-    // 1. 먼저 숨겨진 완성 술 일러스트를 전체에 그림
+
+    // 1. 숨겨진 완성 일러스트를 전체 캔버스에 렌더링
     ctx.drawImage(this.hiddenArtCanvas, 0, 0);
 
-    // 2. 아직 점령하지 못한 칸(0)과 현재 긋는 선(2) 위에 어둠의 안개를 덮음
+    // 2. 미점령 영역(0)을 100% 완전 불투명 암전으로 가려 사전 유출을 원천 차단
     const { grid, rows, cols, cellW, cellH, topOffset } = st;
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
@@ -1063,28 +1697,35 @@ class ImageMinigameSuite {
         const x = c * cellW;
         const y = topOffset + r * cellH;
         if (val === 0) {
-          ctx.fillStyle = 'rgba(11, 17, 32, 0.94)';
+          ctx.fillStyle = '#070b14'; // 100% 완전 불투명 암전
           ctx.fillRect(x - 0.5, y - 0.5, cellW + 1, cellH + 1);
         } else if (val === 2) {
-          ctx.fillStyle = '#f59e0b';
+          ctx.fillStyle = '#f59e0b'; // 선 긋기 트레일
           ctx.fillRect(x, y, cellW + 1, cellH + 1);
         }
       }
     }
 
-    // 2-1. 목표인 중앙 그림(아이콘) 영역 가이드라인 (점선 표시)
-    const picX = st.picMinC * cellW;
-    const picY = topOffset + st.picMinR * cellH;
-    const picW = (st.picMaxC - st.picMinC + 1) * cellW;
-    const picH = (st.picMaxR - st.picMinR + 1) * cellH;
-    ctx.save();
-    ctx.setLineDash([4, 4]);
-    ctx.strokeStyle = st.pictureRevealedPct >= 100 ? '#10b981' : 'rgba(250, 204, 21, 0.75)';
-    ctx.lineWidth = 1.8;
-    ctx.strokeRect(picX, picY, picW, picH);
-    ctx.restore();
+    // 3. 목표인 술의 고유 외곽 실루엣을 네온 가이드라인으로 렌더링
+    if (st.silhouetteEdges && st.silhouetteEdges.length > 0) {
+      const pulse = 0.82 + 0.18 * Math.sin(performance.now() * 0.006);
+      ctx.save();
+      ctx.shadowColor = st.silhouetteRevealedPct >= 100 ? '#10b981' : '#38bdf8';
+      ctx.shadowBlur = 8 * pulse;
+      ctx.strokeStyle = st.silhouetteRevealedPct >= 100
+        ? `rgba(16, 185, 129, ${0.9 * pulse})`
+        : `rgba(56, 189, 248, ${0.85 * pulse})`;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (const e of st.silhouetteEdges) {
+        ctx.moveTo(e.x1, e.y1);
+        ctx.lineTo(e.x2, e.y2);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
 
-    // 3. 적 구체 렌더링 (네온 오라 글로우 효과 추가)
+    // 4. 적 구체 렌더링 (네온 오라)
     for (const en of st.enemies) {
       const ex = en.c * cellW;
       const ey = topOffset + en.r * cellH;
@@ -1101,7 +1742,7 @@ class ImageMinigameSuite {
       ctx.restore();
     }
 
-    // 4. 플레이어 네온 커서 렌더링
+    // 5. 플레이어 네온 커서 렌더링
     const px = st.player.c * cellW + cellW / 2;
     const py = topOffset + st.player.r * cellH + cellH / 2;
     ctx.beginPath();
@@ -1114,11 +1755,8 @@ class ImageMinigameSuite {
 
     this._drawHUD(ctx, {
       lives: st.lives,
-      timeLeftSec: null,
-      progressPct: st.pictureRevealedPct,
-      targetPct: st.targetPct,
-      labelText: `해금률 ${Math.floor(st.pictureRevealedPct)}% / 목표 100%`,
-      subText: ''
+      progressPct: st.silhouetteRevealedPct,
+      labelText: `${Math.floor(st.silhouetteRevealedPct)}% / 100%`
     });
   }
 
@@ -1155,7 +1793,7 @@ class ImageMinigameSuite {
     } else if (this.gameState === 'OVER') {
       this._drawOverlayPrompt(ctx, '👆 터치하여 다시 시작', '', true);
     } else if (this.gameState === 'WIN') {
-      this._drawOverlayPrompt(ctx, '🎉 그림 해금 완료!', '우측 상단 ✕ 버튼으로 닫기');
+      this._drawOverlayPrompt(ctx, 'Clear!', '');
     }
 
     ctx.restore();

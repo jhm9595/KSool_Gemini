@@ -33,7 +33,12 @@ class KSoolApp {
       ratioProvider: this.ratioProvider,
       brandResolver: this.brandResolver,
       audio: this.audio,
+      app: this,
       onImageUnlocked: () => {
+        this.renderBrewView();
+        this.renderCollectionView();
+      },
+      onDescUnlocked: () => {
         this.renderBrewView();
         this.renderCollectionView();
       },
@@ -86,8 +91,8 @@ class KSoolApp {
       audio: this.audio
     });
 
-    if (window.KSool?.IconCompareModalView) {
-      this.iconCompareModalView = new window.KSool.IconCompareModalView('icon-compare-modal', 'icon-compare-content', this);
+    if (window.KSool?.SettingsModalView) {
+      this.settingsModalView = new window.KSool.SettingsModalView('settings-modal', 'settings-modal-content', this);
     }
 
     this.currentTab = 'brew';
@@ -121,7 +126,7 @@ class KSoolApp {
 
     // iOS 사파리 고무줄 바운스(Overscroll Rubber-banding) 원천 차단
     document.addEventListener('touchmove', (e) => {
-      const scrollable = e.target.closest('.view, .recipe-list, .pot-scroll-inner, .inventory-scroll, .modal-body, .minigame-canvas, .party-view-body, .lobby-grid');
+      const scrollable = e.target.closest('.view, .recipe-list, .pot-scroll-inner, .inventory-scroll, .modal-body, .minigame-canvas, .party-view-body, .lobby-grid, .settings-modal-body, .settings-modal-card, input[type="range"]');
       if (!scrollable) {
         e.preventDefault();
       }
@@ -146,11 +151,11 @@ class KSoolApp {
     try {
       const [categories, ingredients_base, ingredients_detail, recipes, recipe_ingredients, external_hints] =
         await Promise.all([
-          fetch('./data/categories.json?v=20261101_25').then(r => r.json()),
-          fetch('./data/ingredients_base.json?v=20261101_25').then(r => r.json()),
+          fetch('./data/categories.json?v=20261101_27').then(r => r.json()),
+          fetch('./data/ingredients_base.json?v=20261101_26').then(r => r.json()),
           fetch('./data/ingredients_detail.json?v=20261101_25').then(r => r.json()),
-          fetch('./data/recipes.json?v=20261101_25').then(r => r.json()),
-          fetch('./data/recipe_ingredients.json?v=20261101_25').then(r => r.json()),
+          fetch('./data/recipes.json?v=20261101_28').then(r => r.json()),
+          fetch('./data/recipe_ingredients.json?v=20261101_28').then(r => r.json()),
           fetch('./data/external_hints.json?v=20261101_25').then(r => r.json())
         ]);
       return { categories, ingredients_base, ingredients_detail, recipes, recipe_ingredients, external_hints };
@@ -479,6 +484,7 @@ class KSoolApp {
     const hasNext = navIdx >= 0 && navIdx < navigableRecipes.length - 1;
     const isUnlocked = this.inventory.isRecipeUnlocked(targetRec.recipe_id);
     const isImageUnlocked = this.inventory.isRecipeImageUnlocked(targetRec.recipe_id);
+    const isDescUnlocked = this.inventory.isRecipeDescUnlocked(targetRec.recipe_id);
     const isImageAvailable = isUnlocked || isImageUnlocked;
     const resolvedName = this.brandResolver.resolveName(targetRec);
     const isCollectionUnlocked = this.inventory.isTabUnlocked('collection');
@@ -489,9 +495,9 @@ class KSoolApp {
       <div class="brew-quiz-card">
         <div class="quiz-question-row">
           <div class="quiz-icon-col">
-            <div class="quiz-mystery-icon ${isImageAvailable ? 'is-unlocked' : 'is-locked'}"
+            <div class="quiz-mystery-icon ${isImageAvailable ? 'is-unlocked' : 'is-locked'} ${showHintBtn && !isImageAvailable ? 'is-clickable' : ''}"
                  id="quiz-mystery-icon"
-                 ${isImageAvailable ? '' : 'title="❓ 클릭하여 그림 해금 미니게임 도전"'}>
+                 ${isImageAvailable ? '' : (showHintBtn ? 'title="❓ 클릭하여 그림 해금 미니게임 도전"' : 'title="도감·힌트 기능 해금 후 그림 미니게임이 열립니다"')}>
               ${isImageAvailable ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(targetRec, 36) : targetRec.emoji) : '❓'}
             </div>
             ${showHintBtn ? `<button type="button" class="quiz-infer-btn" id="quiz-open-hint-btn">힌트</button>` : ''}
@@ -507,7 +513,18 @@ class KSoolApp {
                 <button type="button" class="quiz-nav-btn" id="quiz-next-btn" ${hasNext ? '' : 'disabled'} title="다음 번호">▶</button>
               </div>
             </div>
-            <div class="quiz-desc-text">${isUnlocked ? targetRec.description : (targetRec.unlock_hint || '')}</div>
+            <div class="quiz-desc-text">
+              ${isUnlocked
+                ? targetRec.description
+                : (isDescUnlocked
+                    ? `<span class="hint-bulb">💡</span> ${targetRec.unlock_hint || ''}`
+                    : `<div class="quiz-desc-locked" id="quiz-locked-desc-btn" title="클릭하여 설명 힌트 해금 (단계별 힌트)">
+                         <span class="quiz-lock-icon">🔒</span>
+                         <span class="quiz-lock-label">설명 힌트 잠김</span>
+                       </div>`
+                  )
+              }
+            </div>
           </div>
         </div>
       </div>
@@ -557,10 +574,23 @@ class KSoolApp {
       };
     }
 
+    const lockedDescBtn = container.querySelector('#quiz-locked-desc-btn');
+    if (lockedDescBtn && targetRec) {
+      lockedDescBtn.onclick = (e) => {
+        e.stopPropagation();
+        this.audio.playTap();
+        this.hintModalView.open(targetRec.recipe_id);
+      };
+    }
+
     const mysteryIcon = container.querySelector('#quiz-mystery-icon');
     if (mysteryIcon && targetRec) {
       const isImageAvailable = this.inventory.isRecipeUnlocked(targetRec.recipe_id) || this.inventory.isRecipeImageUnlocked(targetRec.recipe_id);
-      if (!isImageAvailable) {
+      const isCollectionUnlocked = this.inventory.isTabUnlocked('collection');
+      const showHintBtn = !this.inventory.isRecipeUnlocked(targetRec.recipe_id) && isCollectionUnlocked;
+
+      // 힌트 버튼이 열리는 시점(showHintBtn)과 동일하게 그림 미니게임 기능 오픈!
+      if (!isImageAvailable && showHintBtn) {
         mysteryIcon.style.cursor = 'pointer';
         mysteryIcon.onclick = () => {
           this.audio.playTap();
@@ -674,12 +704,12 @@ class KSoolApp {
 
     const catChips = visibleCategories.map(c => `
       <button class="cat-chip ${this.selectedIngCategory === c.category_id ? 'active' : ''}" data-ing-cat="${c.category_id}">
-        ${c.emoji} ${c.name}
+        ${c.name}
       </button>
     `).join('');
 
-    // '전체 재료' 탭은 제일 마지막 탭으로 배치
-    const allChip = `<button class="cat-chip ${this.selectedIngCategory === 'ALL' ? 'active' : ''}" data-ing-cat="ALL">📦 전체 재료</button>`;
+    // 'ALL' 탭은 제일 마지막 탭으로 배치 (아이콘 없이 순수 텍스트 ALL)
+    const allChip = `<button class="cat-chip ${this.selectedIngCategory === 'ALL' ? 'active' : ''}" data-ing-cat="ALL">ALL</button>`;
 
     bar.innerHTML = catChips + allChip;
     bar.querySelectorAll('[data-ing-cat]').forEach(btn => {
@@ -756,7 +786,7 @@ class KSoolApp {
 
       liquorShelf.innerHTML = `
         <div class="shelf-header">
-          <span class="shelf-title">🍶 주류 베이스</span>
+          <span class="shelf-title">주류 베이스</span>
           <span class="shelf-badge">${liquorItems.length}종</span>
         </div>
         <div class="shelf-grid">
@@ -781,7 +811,6 @@ class KSoolApp {
           <div class="lane-section" data-lane-cat="${c.category_id}">
             <div class="lane-header">
               <div class="lane-title-group">
-                <span class="lane-emoji">${c.emoji}</span>
                 <span class="lane-title">${c.name}</span>
               </div>
               <span class="lane-count">${catItems.length}종</span>
@@ -1097,14 +1126,6 @@ class KSoolApp {
       }
 
       // [CASE B] 완전히 새로운 K-술 최초 발견 (화려한 축하 연출)
-      const quizClearBanner = result.isQuizClear
-        ? `<div style="width:100%; background:rgba(59,130,246,0.2); border:1px solid #3b82f6; border-radius:10px; padding:8px; font-size:0.78rem; color:#93c5fd; font-weight:800; text-align:center;">
-             🎯 [${rec.formatted_number}] 단계별 퀴즈 추리 정답! 다음 번호 과제로 진급합니다!
-           </div>`
-        : `<div style="width:100%; background:rgba(245,158,11,0.18); border:1px solid #f59e0b; border-radius:10px; padding:8px; font-size:0.78rem; color:#fde68a; font-weight:800; text-align:center;">
-             🎉 새로운 조합 발견! 도감에 [${rec.formatted_number}] ${this.brandResolver.resolveName(rec)}이(가) 등록되었습니다!
-           </div>`;
-
       let unifiedUnlockBanner = '';
       const hasChainUnlock = Boolean(result.newlyUnlockedIngredient);
       const hasStepUp = Boolean(result.stepUpInfo && result.stepUpInfo.newStepConfig);
@@ -1116,7 +1137,7 @@ class KSoolApp {
         if (hasChainUnlock) {
           const newIng = result.newlyUnlockedIngredient;
           const cat = this.recipeBook.categories.find(c => c.category_id === newIng.category_id);
-          const catLabel = cat ? `${cat.emoji} ${cat.name}` : '📦 재료';
+          const catLabel = cat ? cat.name : '기타';
           const ingName = this.brandResolver.resolveName(newIng);
 
           groupsHtml.push(`
@@ -1152,7 +1173,7 @@ class KSoolApp {
 
             for (const [cId, ings] of byCat.entries()) {
               const cat = this.recipeBook.categories.find(c => c.category_id === cId);
-              const catLabel = cat ? `${cat.emoji} ${cat.name}` : '📦 재료';
+              const catLabel = cat ? cat.name : '기타';
 
               groupsHtml.push(`
                 <div class="craft-unlock-group">
@@ -1193,7 +1214,7 @@ class KSoolApp {
             <span class="diff-badge diff-${rec.difficulty}" style="position:static; font-size:0.7rem; padding:3px 9px;">
               ${rec.formatted_number || ''} · ${rec.category} · ${rec.difficulty}
             </span>
-            <span style="background:rgba(245,158,11,0.22); border:1px solid #f59e0b; color:#fde047; font-size:0.68rem; font-weight:900; padding:2px 7px; border-radius:6px;">🎉 NEW 발견!</span>
+            <span style="background:rgba(245,158,11,0.22); border:1px solid #f59e0b; color:#fde047; font-size:0.68rem; font-weight:900; padding:2px 7px; border-radius:6px;">NEW</span>
           </div>
           <div class="craft-result-info-card">
             <div class="craft-result-left">
@@ -1207,7 +1228,6 @@ class KSoolApp {
           <div style="width:100%; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; font-size:0.8rem; color:#fcd34d; font-weight:800;">
             ${recipeFormula}
           </div>
-          ${quizClearBanner}
           ${unifiedUnlockBanner}
           <button class="mix-btn" id="result-close-btn" style="width:100%; margin-top:4px;">확인</button>
         </div>
@@ -1368,13 +1388,13 @@ class KSoolApp {
       };
     }
 
-    // 아이콘 3종 스타일 한눈에 비교하기 모달 오픈
-    const iconCompareBtn = document.getElementById('open-icon-compare-btn');
-    if (iconCompareBtn) {
-      iconCompareBtn.onclick = () => {
-        if (this.iconCompareModalView) {
-          this.iconCompareModalView.open('featured');
-          this.audio.playTap();
+    // 우측 상단 ⚙️ 설정 버튼
+    const openSettingsBtn = document.getElementById('open-settings-btn');
+    if (openSettingsBtn) {
+      openSettingsBtn.onclick = () => {
+        this.audio.playTap();
+        if (this.settingsModalView) {
+          this.settingsModalView.open();
         }
       };
     }

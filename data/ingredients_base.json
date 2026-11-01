@@ -322,6 +322,26 @@
     "picker_config": null
   },
   {
+    "ingredient_id": 505,
+    "category_id": "GRAIN",
+    "display_name": "팥",
+    "real_name": "팥",
+    "is_licensed": false,
+    "emoji": "🫘",
+    "picker_component": "NONE",
+    "picker_config": null
+  },
+  {
+    "ingredient_id": 506,
+    "category_id": "GRAIN",
+    "display_name": "원두",
+    "real_name": "볶은원두",
+    "is_licensed": false,
+    "emoji": "☕",
+    "picker_component": "NONE",
+    "picker_config": null
+  },
+  {
     "ingredient_id": 601,
     "category_id": "DRINK",
     "display_name": "홍차",
@@ -658,6 +678,16 @@
     "real_name": "비비빅",
     "is_licensed": false,
     "emoji": "🪵",
+    "picker_component": "NONE",
+    "picker_config": null
+  },
+  {
+    "ingredient_id": 807,
+    "category_id": "DESSERT",
+    "display_name": "단팥죽",
+    "real_name": "단팥죽",
+    "is_licensed": false,
+    "emoji": "🥣",
     "picker_component": "NONE",
     "picker_config": null
   }

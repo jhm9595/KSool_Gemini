@@ -1,7 +1,7 @@
 window.KSool = window.KSool || {};
 
 class HintModalView {
-  constructor({ recipeBook, inventory, baseballEngine, ratioProvider, brandResolver, audio, onImageUnlocked, onAutoSetupBrew }) {
+  constructor({ recipeBook, inventory, baseballEngine, ratioProvider, brandResolver, audio, onImageUnlocked, onDescUnlocked, onAutoSetupBrew }) {
     this.recipeBook = recipeBook;
     this.inventory = inventory;
     this.baseballEngine = baseballEngine;
@@ -9,6 +9,7 @@ class HintModalView {
     this.brandResolver = brandResolver;
     this.audio = audio;
     this.onImageUnlocked = onImageUnlocked || null;
+    this.onDescUnlocked = onDescUnlocked || null;
     this.onAutoSetupBrew = onAutoSetupBrew || null;
 
     this.activeRecipeId = null;
@@ -32,14 +33,38 @@ class HintModalView {
     this.selectedStage2Category = null;
     this.showHelpGuide = false;
     this.minigameStatus = 'PLAYING';
+    this.isScratchingActive = false;
+    this.scratchCardInstance = null;
     this._resetGuessSlots();
     this._clearActiveRecipeHistory();
 
-    // initialMode가 지정된 경우 해당 모드로 직행 ('MINIGAME_SELECT' 등)
+    // initialMode가 지정된 경우 해당 모드로 직행 ('MINIGAME_SELECT', 'SCRATCH' 등)
     if (initialMode === 'MINIGAME_SELECT' || initialMode === 'minigame') {
       this.viewMode = 'MINIGAME_SELECT';
+    } else if (initialMode === 'SCRATCH' || initialMode === 'scratch') {
+      this.viewMode = 'CHOICE';
+      const isImageUnlocked = this.inventory.isRecipeUnlocked(this.activeRecipeId) || this.inventory.isRecipeImageUnlocked(this.activeRecipeId);
+      const isDescUnlocked = this.inventory.isRecipeDescUnlocked(this.activeRecipeId);
+      if (isImageUnlocked && !isDescUnlocked) {
+        // 1단계 그림이 이미 해금된 상태면 보상형 광고 모달 띄우고 바로 복권 긁기 오픈
+        if (window.KSool?.AdService) {
+          window.KSool.AdService.showRewardedAd({
+            rewardType: 'HINT_SCRATCH',
+            recipeId: this.activeRecipeId,
+            audio: this.audio,
+            onRewarded: () => {
+              this.isScratchingActive = true;
+              this.render();
+            }
+          });
+        } else {
+          this.isScratchingActive = true;
+        }
+      }
     } else if (initialMode === 'BASEBALL' || initialMode === 'baseball') {
-      this.viewMode = 'BASEBALL';
+      const isDescUnlocked = this.inventory.isRecipeDescUnlocked(this.activeRecipeId);
+      const isRecipeUnlocked = this.inventory.isRecipeUnlocked(this.activeRecipeId);
+      this.viewMode = (isDescUnlocked || isRecipeUnlocked) ? 'BASEBALL' : 'CHOICE';
     } else {
       // 도감에서 미해금 카드를 누르면 [⚾ 베이스볼 / 🎮 그림 해금 게임 / (있을 경우 📺 힌트보기)] 선택 화면부터 노출
       // 전체 해금 모드(unlockAllSandboxMode)일 때는 즉시 100% 해금된 베이스볼 & 황금비율 화면으로 직행
@@ -56,8 +81,17 @@ class HintModalView {
 
   close() {
     this._stopMinigame();
+    this.isScratchingActive = false;
+    this.scratchCardInstance = null;
     this._clearActiveRecipeHistory();
+    document.getElementById('hint-modal-content')?.classList.remove('minigame-card-expanded');
     document.getElementById('hint-modal').classList.remove('active');
+    if (this.onDescUnlocked) {
+      this.onDescUnlocked();
+    }
+    if (this.onImageUnlocked) {
+      this.onImageUnlocked();
+    }
   }
 
   _clearActiveRecipeHistory() {
@@ -92,7 +126,10 @@ class HintModalView {
     const recipe = this.recipeBook.getRecipe(this.activeRecipeId);
     if (!recipe || !container) return;
 
-    if (this.viewMode !== 'MINIGAME_PLAY') {
+    if (this.viewMode === 'MINIGAME_PLAY') {
+      container.classList.add('minigame-card-expanded');
+    } else {
+      container.classList.remove('minigame-card-expanded');
       this._stopMinigame();
     }
 
@@ -104,82 +141,203 @@ class HintModalView {
     const targetBadgeHtml = `<span style="color:#60a5fa; font-weight:900; font-size:0.78rem;">${recipe.formatted_number || ''}</span> <span style="color:#fde047; font-weight:900; font-size:0.84rem;">${resolvedName}</span>`;
 
     // =========================================================================
-    // [모드 1] 진입 선택 화면 (⚾ 베이스볼 or 🎯 업앤다운 / 🎮 그림 해금 미니게임 / 📺 외부 힌트)
+    // [모드 1] 순차적 3단계 힌트 추리 선택 화면 (1단계: 그림 ➔ 2단계: 설명 복권 ➔ 3단계: 베이스볼)
     // =========================================================================
     if (this.viewMode === 'CHOICE') {
+      const isImageUnlocked = this.inventory.isRecipeImageUnlocked(this.activeRecipeId);
+      const isDescUnlocked = this.inventory.isRecipeDescUnlocked(this.activeRecipeId);
+      const isRecipeUnlocked = this.inventory.isRecipeUnlocked(this.activeRecipeId);
+      const isBaseballUnlocked = isDescUnlocked || isRecipeUnlocked;
+
       const isBaseballDoneChoice = this.baseballEngine.isAllStagesCleared(this.activeRecipeId);
       const needsRatioGameChoice = this.ratioProvider.requiresRatioGame(this.activeRecipeId);
       const isUpAndDownChoice = isBaseballDoneChoice && needsRatioGameChoice;
 
+      // 1. 외부 힌트 (있을 경우만)
       let extHintCardHtml = '';
       if (hasExtHint) {
         const primaryHint = extHints[0];
         const isVideo = primaryHint.platform === 'YOUTUBE';
         const hintIcon = isVideo ? '📺' : '📝';
         const hintSubLabel = isVideo
-          ? `영상 힌트 보러가기 (${window.KSool.ExternalHintLinker.formatTimestamp(primaryHint.start_time_sec)})`
+          ? `영상 힌트 (${window.KSool.ExternalHintLinker.formatTimestamp(primaryHint.start_time_sec)})`
           : '힌트 글 보러가기';
 
         extHintCardHtml = `
-          <button class="hint-big-choice-btn choice-ext-hint choice-span-full" id="choice-ext-hint-btn">
-            <span class="choice-big-icon">${hintIcon}</span>
-            <span class="choice-big-title">힌트보기</span>
-            <span class="choice-big-sub">${hintSubLabel}</span>
+          <button class="hint-ext-hint-bar" id="choice-ext-hint-btn">
+            <span class="ext-icon">${hintIcon}</span>
+            <span class="ext-label">외부 힌트: ${hintSubLabel}</span>
+            <span class="ext-arrow">➔</span>
           </button>
         `;
       }
 
-      const unlockedPreviewBanner = isImageUnlocked ? `
-        <div class="unlocked-img-preview-banner">
-          <span class="unlocked-img-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 32) : recipe.emoji}</span>
-          <div class="unlocked-img-text">
-            <div style="font-weight:900; color:#e9d5ff; font-size:0.82rem;">🖼️ 그림 힌트 해금 완료!</div>
-            <div style="font-size:0.7rem; color:#cbd5e1;">이 술의 외형(그림)이 도감에 공개되었습니다. 이제 베이스볼로 재료를 추리해보세요!</div>
+      // 3. STEP 2 카드 내부 HTML 구성 (잠김 / 복권 대기 / 스크래치 중 / 완료)
+      let step2CardInnerHtml = '';
+      let step2CardClass = 'hint-step-card step-gold';
+
+      if (!isImageUnlocked && !isRecipeUnlocked) {
+        // [잠김 상태] 1단계 미완료
+        step2CardClass += ' step-locked';
+        step2CardInnerHtml = `
+          <div class="step-card-icon-col">
+            <span class="step-main-icon">🔒</span>
           </div>
-        </div>
-      ` : '';
+          <div class="step-card-main-col">
+            <div class="step-card-header">
+              <div class="step-title-group">
+                <span class="step-order-badge">STEP 2</span>
+                <span class="step-main-title">설명 힌트</span>
+              </div>
+              <span class="step-status-tag tag-locked">🔒 1단계 필요</span>
+            </div>
+            <div class="step-main-desc">1단계 그림 해금 후 복권이 도착합니다</div>
+          </div>
+        `;
+      } else if (this.isScratchingActive) {
+        // [스크래치 실행 중] 캔버스 마운트
+        step2CardClass += ' step-scratching';
+        step2CardInnerHtml = `
+          <div style="width:100%; display:flex; flex-direction:column; gap:6px;">
+            <div class="step-card-header" style="margin-bottom:2px;">
+              <div class="step-title-group">
+                <span class="step-order-badge">STEP 2</span>
+                <span class="step-main-title">은박 복권 긁기</span>
+              </div>
+              <span class="step-status-tag tag-scratching">🪙 긁는 중...</span>
+            </div>
+            <div id="scratch-card-mount-area" style="width:100%;"></div>
+          </div>
+        `;
+      } else if (isDescUnlocked || isRecipeUnlocked) {
+        // [완료 상태] 설명글 노출
+        step2CardClass += ' step-done';
+        step2CardInnerHtml = `
+          <div style="width:100%; display:flex; flex-direction:column; gap:6px;">
+            <div class="step-card-header">
+              <div class="step-title-group">
+                <span class="step-order-badge">STEP 2</span>
+                <span class="step-main-title">설명 힌트</span>
+              </div>
+              <span class="step-status-tag tag-done">Clear</span>
+            </div>
+            <div class="step-revealed-hint">
+              <span class="hint-bulb">💡</span> ${recipe.unlock_hint || '레시피 힌트가 없습니다.'}
+            </div>
+          </div>
+        `;
+      } else {
+        // [대기 상태] 1단계 완료, 복권 긁기 대기
+        step2CardClass += ' step-active';
+        step2CardInnerHtml = `
+          <div class="step-card-icon-col">
+            <span class="step-main-icon ticket-bounce">🎫</span>
+          </div>
+          <div class="step-card-main-col">
+            <div class="step-card-header">
+              <div class="step-title-group">
+                <span class="step-order-badge">STEP 2</span>
+                <span class="step-main-title">설명 힌트</span>
+              </div>
+              <button type="button" class="btn-step-scratch" id="btn-start-scratch">
+                <span class="ad-tag">AD</span>
+                <span>복권 긁기 ➔</span>
+              </button>
+            </div>
+            <div class="step-main-desc">은박 복권을 긁어 재료 힌트를 확인하세요</div>
+          </div>
+        `;
+      }
 
       container.innerHTML = `
         <div class="hint-top-header">
-          <div class="modal-title">🕵️ 추리</div>
+          <div class="modal-title">🕵️ 단계별 힌트 추리</div>
           <button class="modal-close-x" id="hint-close-btn">✕</button>
         </div>
 
-        <div class="bb-target-info-card" style="margin-bottom:8px;">
+        <div class="bb-target-info-card" style="margin-bottom:10px;">
           <div class="bb-target-title-row">
-            <div style="display:flex; align-items:center; gap:6px;">
+            <div style="display:flex; align-items:center; gap:8px;">
               <span class="bb-target-num">${recipe.formatted_number || ''}</span>
               <span class="bb-target-name">${resolvedName}</span>
             </div>
           </div>
-          ${recipe.unlock_hint ? `
-            <div class="bb-target-hint">
-              <span class="hint-bulb">💡</span> ${recipe.unlock_hint}
-            </div>
-          ` : ''}
         </div>
 
-        ${unlockedPreviewBanner}
+        <div class="hint-steps-stack">
+          <!-- STEP 1: 외형 그림 (퍼플 테마) -->
+          <div class="hint-step-card step-purple ${isImageUnlocked ? 'step-done' : 'step-active'}" id="choice-minigame-btn" role="button" tabindex="0">
+            <div class="step-card-icon-col">
+              <span class="step-main-icon">${isImageUnlocked ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 32) : recipe.emoji) : '🎮'}</span>
+            </div>
+            <div class="step-card-main-col">
+              <div class="step-card-header">
+                <div class="step-title-group">
+                  <span class="step-order-badge">STEP 1</span>
+                  <span class="step-main-title">외형 그림</span>
+                </div>
+                <span class="step-status-tag ${isImageUnlocked ? 'tag-done' : 'tag-active'}">
+                  ${isImageUnlocked ? 'Clear' : '도전 ➔'}
+                </span>
+              </div>
+              <div class="step-main-desc">벽돌깨기 · 땅따먹기 아케이드</div>
+            </div>
+          </div>
 
-        <div class="hint-choice-grid">
-          <button class="hint-big-choice-btn choice-baseball" id="choice-baseball-btn">
-            <span class="choice-big-icon">${isUpAndDownChoice ? '🎯' : '⚾'}</span>
-            <span class="choice-big-title">${isUpAndDownChoice ? '업앤다운' : '베이스볼'}</span>
-            <span class="choice-big-sub">${isUpAndDownChoice ? '황금비율 추리 게임' : '재료 & 황금비율 추리 게임'}</span>
-          </button>
+          <!-- STEP 2: 설명 힌트 (골드 테마) -->
+          <div class="${step2CardClass}" id="choice-scratch-btn" role="button" tabindex="0">
+            ${step2CardInnerHtml}
+          </div>
 
-          <button class="hint-big-choice-btn choice-minigame" id="choice-minigame-btn">
-            <span class="choice-badge-tag ${isImageUnlocked ? 'cleared' : ''}">${isImageUnlocked ? '✅ 해금됨' : '🎮 아케이드'}</span>
-            <span class="choice-big-icon">${isImageUnlocked ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 32) : recipe.emoji) : '🕹️'}</span>
-            <span class="choice-big-title">그림 해금 게임</span>
-            <span class="choice-big-sub">벽돌깨기 · 땅따먹기</span>
-          </button>
+          <!-- STEP 3: 베이스볼 / 업앤다운 추리 (사이언 테마) -->
+          <div class="hint-step-card step-cyan ${isBaseballUnlocked ? (isRecipeUnlocked ? 'step-done' : 'step-active') : 'step-locked'}" id="choice-baseball-btn" role="button" tabindex="0">
+            <div class="step-card-icon-col">
+              <span class="step-main-icon">${isBaseballUnlocked ? (isUpAndDownChoice ? '🎯' : '⚾') : '🔒'}</span>
+            </div>
+            <div class="step-card-main-col">
+              <div class="step-card-header">
+                <div class="step-title-group">
+                  <span class="step-order-badge">STEP 3</span>
+                  <span class="step-main-title">${isUpAndDownChoice ? '업앤다운' : '베이스볼 추리'}</span>
+                </div>
+                <span class="step-status-tag ${isBaseballUnlocked ? (isRecipeUnlocked ? 'tag-done' : 'tag-active') : 'tag-locked'}">
+                  ${isBaseballUnlocked ? (isRecipeUnlocked ? 'Clear' : '입장 ➔') : '🔒 2단계 필요'}
+                </span>
+              </div>
+              <div class="step-main-desc">${isBaseballUnlocked ? (isUpAndDownChoice ? '황금비율 추리 게임' : '재료 & 황금비율 추리 게임') : '2단계 설명 복권을 긁어야 입장 가능'}</div>
+            </div>
+          </div>
 
           ${extHintCardHtml}
         </div>
       `;
 
       this._bindEvents(container);
+
+      // 만약 복권 긁기 모드가 활성화되어 있다면 ScratchCardView 마운트
+      if (this.isScratchingActive) {
+        const mountEl = container.querySelector('#scratch-card-mount-area');
+        if (mountEl && window.KSool?.ScratchCardView) {
+          this.scratchCardInstance = new window.KSool.ScratchCardView({
+            containerId: 'scratch-card-box',
+            secretText: recipe.unlock_hint,
+            audio: this.audio,
+            threshold: 0.80,
+            onComplete: () => {
+              this.inventory.unlockRecipeDesc(this.activeRecipeId);
+              if (this.onDescUnlocked) {
+                this.onDescUnlocked();
+              }
+              // 은박지가 서서히 투명해지는 페이드아웃 애니메이션(0.65초) 후 모달 뷰 갱신
+              setTimeout(() => {
+                this.isScratchingActive = false;
+                this.render();
+              }, 700);
+            }
+          });
+          this.scratchCardInstance.render(mountEl);
+        }
+      }
       return;
     }
 
@@ -208,10 +366,10 @@ class HintModalView {
             <div class="mg-card-body">
               <div class="mg-card-title-row">
                 <span class="mg-card-title">1. 벽돌깨기</span>
-                <span class="mg-diff-pill hard">100% 클리어</span>
+                <span class="mg-diff-pill hard">도트 블록 100% 격파</span>
               </div>
               <div class="mg-card-desc">
-                단단한 벽돌과 강철 범퍼를 돌파하세요! 깨진 벽돌에서 떨어지는 <b>☠️독방울(라이프 감소)</b>과 <b>❄️냉기(패들 축소)</b>를 피해야 합니다.
+                이 술의 <b>실제 도트 모양과 색상 그대로 배치된 벽돌 스테이지</b>를 격파하세요! 단단한 강철 범퍼와 떨어지는 <b>☠️독방울(라이프 감소)</b>, <b>❄️냉기(패들 축소)</b>를 피해 모두 파괴하면 해금!
               </div>
             </div>
             <button class="mg-play-btn">도전 ➔</button>
@@ -224,10 +382,10 @@ class HintModalView {
             <div class="mg-card-body">
               <div class="mg-card-title-row">
                 <span class="mg-card-title">2. 땅따먹기</span>
-                <span class="mg-diff-pill vhard">100% 점령</span>
+                <span class="mg-diff-pill vhard">외곽 실루엣 100% 점령</span>
               </div>
               <div class="mg-card-desc">
-                어둠 속을 질주하는 <b>보스 코어 + 고속 화염구 2기</b>가 내 궤적(선)에 닿기 전에 안전지대로 복귀해 <b>뒤에 숨겨진 그림 영역을 뚫어 완전히 드러내세요!</b>
+                완전 암전된 영역 속에서 <b>술의 외곽선 네온 실루엣</b>을 따라 영역을 온전히 도려내세요! <b>보스 코어와 고속 탄막</b>을 피해 <b>실루엣 내부를 100% 점령</b>하면 즉시 해금!
               </div>
             </div>
             <button class="mg-play-btn">도전 ➔</button>
@@ -248,8 +406,6 @@ class HintModalView {
         TERRITORY_QIX: '📐 땅따먹기'
       };
 
-      const canvasHeight = 440;
-
       container.innerHTML = `
         <div class="hint-top-header">
           <div style="display:flex; align-items:center; gap:6px;">
@@ -260,7 +416,7 @@ class HintModalView {
         </div>
 
         <div class="arcade-cabinet-box">
-          <canvas id="minigame-canvas" width="380" height="${canvasHeight}" class="minigame-canvas"></canvas>
+          <canvas id="minigame-canvas" width="420" height="520" class="minigame-canvas"></canvas>
         </div>
       `;
 
@@ -369,7 +525,7 @@ class HintModalView {
           <div class="cat-filter-bar">
             ${solvedCategories.map(c => `
               <button class="cat-chip ${this.selectedStage2Category === c.category_id ? 'active' : ''}" data-bb-stage2-cat="${c.category_id}">
-                ${c.emoji} ${c.name}
+                ${c.name}
               </button>
             `).join('')}
           </div>
@@ -629,6 +785,9 @@ class HintModalView {
       () => {
         this.minigameStatus = 'LOSE';
         this._updateMinigameControlsOnly(recipe);
+      },
+      () => {
+        this.close();
       }
     );
     this.minigameInstance.start(this.selectedMinigameType);
@@ -701,6 +860,15 @@ class HintModalView {
     const closeBtn = container.querySelector('#hint-close-btn');
     if (closeBtn) closeBtn.onclick = () => this.close();
 
+    const cabinetBox = container.querySelector('.arcade-cabinet-box');
+    if (cabinetBox) {
+      cabinetBox.onclick = () => {
+        if (this.minigameStatus === 'WIN') {
+          this.close();
+        }
+      };
+    }
+
     const helpBtn = container.querySelector('#bb-help-toggle-btn');
     if (helpBtn) {
       helpBtn.onclick = () => {
@@ -710,23 +878,74 @@ class HintModalView {
       };
     }
 
-    // 초기 선택 화면: [베이스볼] 버튼 클릭
-    const choiceBaseballBtn = container.querySelector('#choice-baseball-btn');
-    if (choiceBaseballBtn) {
-      choiceBaseballBtn.onclick = () => {
-        this._clearActiveRecipeHistory();
-        this._resetGuessSlots();
-        this.viewMode = 'BASEBALL';
+    // 1단계: [그림 해금 게임] 버튼 클릭 -> 3종 미니게임 선택 화면
+    const choiceMinigameBtn = container.querySelector('#choice-minigame-btn');
+    if (choiceMinigameBtn) {
+      choiceMinigameBtn.onclick = () => {
+        this.viewMode = 'MINIGAME_SELECT';
         this.audio.playTap();
         this.render();
       };
     }
 
-    // 초기 선택 화면: [그림 해금 게임] 버튼 클릭 -> 3종 미니게임 선택 화면
-    const choiceMinigameBtn = container.querySelector('#choice-minigame-btn');
-    if (choiceMinigameBtn) {
-      choiceMinigameBtn.onclick = () => {
-        this.viewMode = 'MINIGAME_SELECT';
+    // 2단계: 복권 긁기 시작 핸들러
+    const triggerScratch = async () => {
+      this.audio.playTap();
+      // 광고 요청 훅 (AdService)
+      if (window.KSool?.AdService) {
+        await window.KSool.AdService.showRewardedAd({
+          placement: 'scratch_desc',
+          recipeId: this.activeRecipeId,
+          title: this.brandResolver.resolveName(this.recipeBook.getRecipe(this.activeRecipeId))
+        });
+      }
+      this.isScratchingActive = true;
+      this.render();
+    };
+
+    const startScratchBtn = container.querySelector('#btn-start-scratch');
+    if (startScratchBtn) {
+      startScratchBtn.onclick = triggerScratch;
+    }
+
+    const choiceScratchBtn = container.querySelector('#choice-scratch-btn');
+    if (choiceScratchBtn) {
+      choiceScratchBtn.onclick = () => {
+        const isImageUnlocked = this.inventory.isRecipeImageUnlocked(this.activeRecipeId);
+        const isDescUnlocked = this.inventory.isRecipeDescUnlocked(this.activeRecipeId);
+        const isRecipeUnlocked = this.inventory.isRecipeUnlocked(this.activeRecipeId);
+
+        if (!isImageUnlocked && !isRecipeUnlocked) {
+          this.audio.playTap();
+          alert('🔒 1단계 그림 해금 게임을 먼저 클리어해야 복권을 긁을 수 있습니다!');
+          return;
+        }
+
+        if (isDescUnlocked || isRecipeUnlocked) {
+          this.audio.playTap();
+          return;
+        }
+
+        triggerScratch();
+      };
+    }
+
+    // 3단계: [베이스볼] 버튼 클릭 (2단계 설명 힌트 해금 필수!)
+    const choiceBaseballBtn = container.querySelector('#choice-baseball-btn');
+    if (choiceBaseballBtn) {
+      choiceBaseballBtn.onclick = () => {
+        const isDescUnlocked = this.inventory.isRecipeDescUnlocked(this.activeRecipeId);
+        const isRecipeUnlocked = this.inventory.isRecipeUnlocked(this.activeRecipeId);
+
+        if (!isDescUnlocked && !isRecipeUnlocked) {
+          this.audio.playTap();
+          alert('🔒 2단계 설명 힌트 복권을 먼저 긁어 해금해주세요!');
+          return;
+        }
+
+        this._clearActiveRecipeHistory();
+        this._resetGuessSlots();
+        this.viewMode = 'BASEBALL';
         this.audio.playTap();
         this.render();
       };

@@ -64,10 +64,10 @@ class FridgeRecommenderView {
     const catChipsHtml = [
       ...visibleCategories.map(c => `
         <button class="cat-chip ${this.selectedCategory === c.category_id ? 'active' : ''}" data-fridge-cat="${c.category_id}">
-          ${c.emoji} ${c.name}
+          ${c.name}
         </button>
       `),
-      `<button class="cat-chip ${this.selectedCategory === 'ALL' ? 'active' : ''}" data-fridge-cat="ALL">📦 전체 재료</button>`
+      `<button class="cat-chip ${this.selectedCategory === 'ALL' ? 'active' : ''}" data-fridge-cat="ALL">ALL</button>`
     ].join('');
 
     const ingGridHtml = filteredIngs.length > 0 ? filteredIngs.map(ing => {

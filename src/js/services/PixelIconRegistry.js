@@ -1372,6 +1372,18 @@ const SPRITE_DATA_HD = {
   "커피콩": "coffee_beans",
   "ing_504": "coffee_beans",
   "커피원두": "coffee_beans",
+  "팥": "coffee_beans",
+  "red_bean": "coffee_beans",
+  "ing_505": "coffee_beans",
+  "원두": "coffee_beans",
+  "볶은원두": "coffee_beans",
+  "roasted_beans": "coffee_beans",
+  "ing_506": "coffee_beans",
+  "rec_84": "coffee_beans",
+  "단팥죽": "misutgaru",
+  "red_bean_porridge": "misutgaru",
+  "ing_807": "misutgaru",
+  "rec_85": "misutgaru",
   "black_tea": "black_tea",
   "홍차": "black_tea",
   "ing_601": "black_tea",
@@ -1905,6 +1917,14 @@ const SPRITE_DATA_HD = {
     hasHd: function(item) {
       const key = this.resolveKey(item);
       return !!(key && SPRITE_DATA_HD[key]);
+    },
+
+        /**
+     * Get raw 16x16 Dot sprite definition { key, name, innerSvg } for an item or key
+     */
+    getDotSprite: function(item) {
+      const key = this.resolveKey(item);
+      return (key && SPRITE_DATA_DOT[key]) ? SPRITE_DATA_DOT[key] : null;
     },
 
     /**

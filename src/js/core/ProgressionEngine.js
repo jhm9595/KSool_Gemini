@@ -58,21 +58,21 @@ class ProgressionEngine {
         allowDetailPicker: false,
         ruleBadge: '⚖️ 1:1:1 3재료 조합 (재료당 최대 1개)',
         ruleNotice: '이제 3가지 재료를 1개씩(1:1:1) 조합하는 레시피가 등장합니다!',
-        unlockLeafIds: [301, 601, 302, 306, 309, 314, 504, 315], // 레몬, 홍차, 멜론, 사과, 배, 석류, 커피콩, 오렌지
-        canonicalRecipeOrder: [13, 14, 52, 15, 9, 3, 23, 32, 59, 63, 65, 66, 67, 73, 78, 80, 81, 83] // No.17 ~ No.34
+        unlockLeafIds: [301, 601, 302, 306, 309, 314, 504, 315, 505], // 레몬, 홍차, 멜론, 사과, 배, 석류, 커피콩, 오렌지, 팥
+        canonicalRecipeOrder: [13, 14, 52, 15, 9, 59, 3, 23, 32, 66, 63, 84, 65, 85, 67, 73, 78, 80, 81, 83] // No.17 ~ No.36
       },
       {
         step_id: 4,
         code: 'STEP 4',
-        title: '연쇄 연금술과 전통 막걸리 탄생',
-        subtitle: '직접 만든 재료를 다시 조합해 식혜·막걸리·식초·홍초·태극주를 완성하세요',
+        title: '연쇄 연금술과 주막 막걸리 하우스',
+        subtitle: '직접 빚은 막걸리에 과일·음료를 1:1로 섞은 달콤한 과일 막걸리 7종과 식초·홍초·태극주를 완성하세요',
         maxCountPerSlot: 1,
         maxTotalCount: 4,
         allowDetailPicker: false,
         ruleBadge: '⚖️ 연쇄 1:1 조합 (재료당 최대 1개)',
         ruleNotice: '조합으로 얻은 재료를 다시 재료로 활용하는 연쇄 연금술 단계입니다!',
-        unlockLeafIds: [308, 305, 313, 502], // 카카오, 토마토, 복분자, 쌀
-        canonicalRecipeOrder: [28, 29, 30, 22, 21, 57, 25, 26, 60, 62, 64, 77] // No.35 ~ No.46
+        unlockLeafIds: [308, 305, 313, 502, 616, 613, 615], // 카카오, 토마토, 복분자, 쌀, 요구르트, 복숭아음료, 파인애플주스
+        canonicalRecipeOrder: [28, 29, 30, 22, 21, 57, 25, 26, 38, 44, 46, 60, 42, 48, 45, 47, 62, 64, 77]
       },
       {
         step_id: 5,
@@ -85,33 +85,33 @@ class ProgressionEngine {
         ruleBadge: '⚖️ 비율 해금: 재료당 최대 2개',
         ruleNotice: '비율 시스템이 해금되었습니다! 같은 재료를 두 번 눌러 최대 2개까지 투입해보세요.',
         unlockLeafIds: [602, 603], // 에너지드링크, 이온음료
-        canonicalRecipeOrder: [6, 27, 10, 24, 33, 17, 8, 51, 74, 75, 76, 79, 82] // No.47 ~ No.59
+        canonicalRecipeOrder: [6, 27, 10, 75, 76, 8, 79, 82]
       },
       {
         step_id: 6,
         code: 'STEP 6',
-        title: '주막 막걸리 하우스 (최대 3개 해금!)',
-        subtitle: '재료당 최대 3개까지 투입 가능! [3:2] 과일·음료 막걸리와 기범주에 도전하세요',
+        title: '인기 편의점주 & 시그니처 칵테일 (최대 3개 해금!)',
+        subtitle: '빙과류와 토닉워터, 맥주를 활용한 2:1~3:2 황금비율 시그니처 폭탄주와 기범주에 도전하세요',
         maxCountPerSlot: 3,
         maxTotalCount: 8,
         allowDetailPicker: false,
         ruleBadge: '⚖️ 비율 확장: 재료당 최대 3개',
-        ruleNotice: '이제 한 재료를 최대 3개까지 투입하여 3:2, 3:2:1 황금비율을 빚을 수 있습니다!',
-        unlockLeafIds: [616, 613, 615, 617], // 요구르트, 복숭아음료, 파인애플주스, 석류주스
-        canonicalRecipeOrder: [7, 38, 44, 42, 48, 45, 46, 47, 50] // No.60 ~ No.68
+        ruleNotice: '이제 한 재료를 최대 3개까지 투입하여 2:1, 3:2, 3:2:1 황금비율을 빚을 수 있습니다!',
+        unlockLeafIds: [],
+        canonicalRecipeOrder: [24, 33, 17, 51, 74, 7]
       },
       {
         step_id: 7,
         code: 'STEP 7',
         title: '전설의 황금비율 & 특산 명주 (최대 10개 해금!)',
-        subtitle: '비율 해제 및 신규 감미료(꿀), 전설의 브랜드 소맥(테슬라·테진아·카스처럼)과 특산 명주가 열렸습니다!',
+        subtitle: '비율 해제 및 신규 재료(꿀), 전설의 브랜드 소맥(테슬라·테진아·카스처럼)과 특산 명주가 열렸습니다!',
         maxCountPerSlot: 10,
         maxTotalCount: 10,
         allowDetailPicker: true,
         ruleBadge: '👑 마스터 비율: 최대 10개 + 특산재료',
         ruleNotice: '모든 비율 제한(총합 10개)과 특산 상세재료, 신규 꿀이 해금되었습니다!',
         unlockLeafIds: [705], // 꿀
-        canonicalRecipeOrder: [61, 43, 49, 31, 40, 41, 2, 39, 68, 69, 70, 71, 72, 55, 56] // No.69 ~ No.83
+        canonicalRecipeOrder: [61, 43, 49, 31, 50, 40, 41, 2, 39, 68, 69, 70, 71, 72, 55, 56]
       }
     ];
   }

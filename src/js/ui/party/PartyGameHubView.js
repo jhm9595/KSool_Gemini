@@ -365,11 +365,8 @@ class PartyGameHubView {
 
     container.innerHTML = `
       <div class="party-lobby-container">
-        <!-- 상단 헤더: 설명 제거, 한 줄 콤팩트 헤더 -->
+        <!-- 상단 헤더: 한 줄 콤팩트 헤더 -->
         <div class="party-lobby-header">
-          <button type="button" class="party-sound-toggle-btn" id="party-sound-toggle" title="효과음 On/Off" aria-label="효과음 On/Off">
-            ${this.sound.isMuted ? '🔇' : '🔊'}
-          </button>
           <h2 class="party-lobby-title">🍻 술자리 미니게임 모음</h2>
         </div>
 
@@ -420,14 +417,6 @@ class PartyGameHubView {
         this.playGame(key);
       };
     });
-
-    const soundBtn = container.querySelector('#party-sound-toggle');
-    if (soundBtn) {
-      soundBtn.onclick = () => {
-        this.sound.isMuted = !this.sound.isMuted;
-        soundBtn.textContent = this.sound.isMuted ? '🔇' : '🔊';
-      };
-    }
   }
 
   /**
@@ -439,7 +428,7 @@ class PartyGameHubView {
 
     container.innerHTML = `
       <div class="party-fullscreen-wrapper party-game-${this.activeGameKey}" data-game="${this.activeGameKey}">
-        <!-- 상단 미니 탑바: 뒤로가기 버튼 + 현재 게임 뱃지 + 사운드 토글 -->
+        <!-- 상단 미니 탑바: 뒤로가기 버튼 + 현재 게임 뱃지 -->
         <div class="party-game-top-bar">
           <button type="button" class="party-back-btn" id="party-back-btn">
             <span class="back-icon">‹</span>
@@ -449,9 +438,6 @@ class PartyGameHubView {
             <span class="pill-emoji">${meta.emoji}</span>
             <span class="pill-title">${meta.title}</span>
           </div>
-          <button type="button" class="party-sound-toggle-btn" id="party-sound-toggle">
-            ${this.sound.isMuted ? '🔇' : '🔊'}
-          </button>
         </div>
 
         <!-- 전체화면 가득 찬 게임 실행 영역 -->
@@ -468,14 +454,6 @@ class PartyGameHubView {
           e.stopPropagation();
         }
         this.openLobby(true);
-      };
-    }
-
-    const soundBtn = container.querySelector('#party-sound-toggle');
-    if (soundBtn) {
-      soundBtn.onclick = () => {
-        this.sound.isMuted = !this.sound.isMuted;
-        soundBtn.textContent = this.sound.isMuted ? '🔇' : '🔊';
       };
     }
 

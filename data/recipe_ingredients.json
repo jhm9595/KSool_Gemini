@@ -627,7 +627,7 @@
     "id": 79,
     "recipe_id": 32,
     "slot_order": 1,
-    "ingredient_id": 309,
+    "ingredient_id": 614,
     "detail_ingredient_id": null,
     "ratio": 1
   },
@@ -636,14 +636,6 @@
     "recipe_id": 32,
     "slot_order": 2,
     "ingredient_id": 201,
-    "detail_ingredient_id": null,
-    "ratio": 1
-  },
-  {
-    "id": 81,
-    "recipe_id": 32,
-    "slot_order": 3,
-    "ingredient_id": 701,
     "detail_ingredient_id": null,
     "ratio": 1
   },
@@ -736,22 +728,6 @@
     "ratio": 1
   },
   {
-    "id": 93,
-    "recipe_id": 38,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 94,
-    "recipe_id": 38,
-    "slot_order": 2,
-    "ingredient_id": 610,
-    "detail_ingredient_id": null,
-    "ratio": 2
-  },
-  {
     "id": 95,
     "recipe_id": 39,
     "slot_order": 1,
@@ -816,22 +792,6 @@
     "ratio": 2
   },
   {
-    "id": 103,
-    "recipe_id": 42,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 104,
-    "recipe_id": 42,
-    "slot_order": 2,
-    "ingredient_id": 612,
-    "detail_ingredient_id": null,
-    "ratio": 2
-  },
-  {
     "id": 105,
     "recipe_id": 43,
     "slot_order": 1,
@@ -846,86 +806,6 @@
     "ingredient_id": 503,
     "detail_ingredient_id": null,
     "ratio": 4
-  },
-  {
-    "id": 107,
-    "recipe_id": 44,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 108,
-    "recipe_id": 44,
-    "slot_order": 2,
-    "ingredient_id": 611,
-    "detail_ingredient_id": null,
-    "ratio": 2
-  },
-  {
-    "id": 109,
-    "recipe_id": 45,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 110,
-    "recipe_id": 45,
-    "slot_order": 2,
-    "ingredient_id": 613,
-    "detail_ingredient_id": null,
-    "ratio": 2
-  },
-  {
-    "id": 111,
-    "recipe_id": 46,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 112,
-    "recipe_id": 46,
-    "slot_order": 2,
-    "ingredient_id": 614,
-    "detail_ingredient_id": null,
-    "ratio": 2
-  },
-  {
-    "id": 113,
-    "recipe_id": 47,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 114,
-    "recipe_id": 47,
-    "slot_order": 2,
-    "ingredient_id": 615,
-    "detail_ingredient_id": null,
-    "ratio": 2
-  },
-  {
-    "id": 115,
-    "recipe_id": 48,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 116,
-    "recipe_id": 48,
-    "slot_order": 2,
-    "ingredient_id": 616,
-    "detail_ingredient_id": null,
-    "ratio": 2
   },
   {
     "id": 117,
@@ -950,22 +830,6 @@
     "ingredient_id": 705,
     "detail_ingredient_id": null,
     "ratio": 1
-  },
-  {
-    "id": 120,
-    "recipe_id": 50,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 121,
-    "recipe_id": 50,
-    "slot_order": 2,
-    "ingredient_id": 617,
-    "detail_ingredient_id": null,
-    "ratio": 2
   },
   {
     "id": 122,
@@ -1035,7 +899,7 @@
     "id": 130,
     "recipe_id": 53,
     "slot_order": 2,
-    "ingredient_id": 202,
+    "ingredient_id": 203,
     "detail_ingredient_id": null,
     "ratio": 1
   },
@@ -1248,17 +1112,9 @@
     "ratio": 1
   },
   {
-    "id": 157,
-    "recipe_id": 63,
-    "slot_order": 2,
-    "ingredient_id": 701,
-    "detail_ingredient_id": null,
-    "ratio": 1
-  },
-  {
     "id": 158,
     "recipe_id": 63,
-    "slot_order": 3,
+    "slot_order": 2,
     "ingredient_id": 203,
     "detail_ingredient_id": null,
     "ratio": 1
@@ -1291,7 +1147,7 @@
     "id": 162,
     "recipe_id": 65,
     "slot_order": 1,
-    "ingredient_id": 504,
+    "ingredient_id": 506,
     "detail_ingredient_id": null,
     "ratio": 1
   },
@@ -1347,7 +1203,7 @@
     "id": 169,
     "recipe_id": 67,
     "slot_order": 2,
-    "ingredient_id": 701,
+    "ingredient_id": 807,
     "detail_ingredient_id": null,
     "ratio": 1
   },
@@ -1459,7 +1315,7 @@
     "id": 183,
     "recipe_id": 73,
     "slot_order": 3,
-    "ingredient_id": 606,
+    "ingredient_id": 604,
     "detail_ingredient_id": null,
     "ratio": 1
   },
@@ -1684,6 +1540,174 @@
     "recipe_id": 83,
     "slot_order": 4,
     "ingredient_id": 701,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 212,
+    "recipe_id": 84,
+    "slot_order": 1,
+    "ingredient_id": 504,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 213,
+    "recipe_id": 84,
+    "slot_order": 2,
+    "ingredient_id": 203,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 214,
+    "recipe_id": 85,
+    "slot_order": 1,
+    "ingredient_id": 505,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 215,
+    "recipe_id": 85,
+    "slot_order": 2,
+    "ingredient_id": 202,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 216,
+    "recipe_id": 85,
+    "slot_order": 3,
+    "ingredient_id": 701,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1076,
+    "recipe_id": 38,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1077,
+    "recipe_id": 38,
+    "slot_order": 2,
+    "ingredient_id": 610,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1084,
+    "recipe_id": 42,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1085,
+    "recipe_id": 42,
+    "slot_order": 2,
+    "ingredient_id": 612,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1088,
+    "recipe_id": 44,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1089,
+    "recipe_id": 44,
+    "slot_order": 2,
+    "ingredient_id": 611,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1090,
+    "recipe_id": 45,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1091,
+    "recipe_id": 45,
+    "slot_order": 2,
+    "ingredient_id": 613,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1092,
+    "recipe_id": 46,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1093,
+    "recipe_id": 46,
+    "slot_order": 2,
+    "ingredient_id": 614,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1094,
+    "recipe_id": 47,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1095,
+    "recipe_id": 47,
+    "slot_order": 2,
+    "ingredient_id": 615,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1096,
+    "recipe_id": 48,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1097,
+    "recipe_id": 48,
+    "slot_order": 2,
+    "ingredient_id": 616,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1100,
+    "recipe_id": 50,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 7
+  },
+  {
+    "id": 1101,
+    "recipe_id": 50,
+    "slot_order": 2,
+    "ingredient_id": 707,
     "detail_ingredient_id": null,
     "ratio": 1
   }

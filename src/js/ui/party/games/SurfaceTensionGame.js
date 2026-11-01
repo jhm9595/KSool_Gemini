@@ -96,8 +96,13 @@ class SurfaceTensionGame {
     this.pourInterval = setInterval(() => {
       if (!this.isPouring || this.isOverflowed) return;
 
-      // 누르고 있는 동안 점진적으로 술이 차오름 (초당 약 8.75%)
-      this.currentLevel += 0.35;
+      // 가림막 하단 경계 수위 계산 (캔버스 높이 390px 중 상단 52% 가림막: 202.8px)
+      const blindBottomY = 390 * 0.52;
+      const blindThreshold = ((this.glassBottomY - blindBottomY) / this.glassHeight) * 100;
+
+      // 가림막에 닿기 전에는 약 2배 빠른 속도(0.70), 가림막 영역 진입 후에는 쫄깃한 심리전을 위해 기본 속도(0.35)
+      const fillStep = (this.currentLevel < blindThreshold) ? 0.70 : 0.35;
+      this.currentLevel += fillStep;
       this.hub.sound.updatePour(this.currentLevel / 100);
 
       // 무한정 계속 누르고 있어서 표면장력 한계를 10% 이상 극단적으로 초과하면 즉시 폭발 넘침

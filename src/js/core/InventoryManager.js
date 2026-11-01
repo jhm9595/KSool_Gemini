@@ -10,6 +10,7 @@ class InventoryManager {
     this.unlockedRecipeIds = new Set();
     this.unlockedIngredientIds = new Set();
     this.unlockedImageRecipeIds = new Set(); // 미니게임 클리어로 그림(아이콘)만 선해금된 레시피 ID 집합
+    this.unlockedDescRecipeIds = new Set(); // 복권 긁기 완료로 설명 힌트만 선해금된 레시피 ID 집합
     this.hintProgressByRecipe = {}; // recipeId -> { stageCleared: [bool, bool, bool], solvedRatios: { ingId: ratio } }
     this.promotedCustomRecipes = [];
     this.craftFailCount = 0; // 주조실 조합 실패 횟수 (10회 이상 시 도감·힌트 탭 오픈)
@@ -26,6 +27,7 @@ class InventoryManager {
     this.unlockedRecipeIds.clear();
     this.unlockedIngredientIds.clear();
     this.unlockedImageRecipeIds.clear();
+    this.unlockedDescRecipeIds.clear();
     this.unlockedStepId = 1;
     this.craftFailCount = 0;
     this.shownTabIntros = {
@@ -47,6 +49,9 @@ class InventoryManager {
       }
       if (Array.isArray(saved.unlockedImageRecipeIds)) {
         saved.unlockedImageRecipeIds.forEach(id => this.unlockedImageRecipeIds.add(Number(id)));
+      }
+      if (Array.isArray(saved.unlockedDescRecipeIds)) {
+        saved.unlockedDescRecipeIds.forEach(id => this.unlockedDescRecipeIds.add(Number(id)));
       }
       if (saved.hintProgressByRecipe && typeof saved.hintProgressByRecipe === 'object') {
         this.hintProgressByRecipe = saved.hintProgressByRecipe;
@@ -167,6 +172,20 @@ class InventoryManager {
     const rId = Number(recipeId);
     const isNew = !this.unlockedImageRecipeIds.has(rId);
     this.unlockedImageRecipeIds.add(rId);
+    this.save();
+    return isNew;
+  }
+
+  isRecipeDescUnlocked(recipeId) {
+    if (this.unlockAllSandboxMode) return true;
+    const rId = Number(recipeId);
+    return this.unlockedRecipeIds.has(rId) || this.unlockedDescRecipeIds.has(rId);
+  }
+
+  unlockRecipeDesc(recipeId) {
+    const rId = Number(recipeId);
+    const isNew = !this.unlockedDescRecipeIds.has(rId);
+    this.unlockedDescRecipeIds.add(rId);
     this.save();
     return isNew;
   }
@@ -323,6 +342,7 @@ class InventoryManager {
       unlockedRecipeIds: Array.from(this.unlockedRecipeIds),
       unlockedIngredientIds: Array.from(this.unlockedIngredientIds),
       unlockedImageRecipeIds: Array.from(this.unlockedImageRecipeIds),
+      unlockedDescRecipeIds: Array.from(this.unlockedDescRecipeIds),
       hintProgressByRecipe: this.hintProgressByRecipe,
       promotedCustomRecipes: this.promotedCustomRecipes,
       craftFailCount: this.craftFailCount,
