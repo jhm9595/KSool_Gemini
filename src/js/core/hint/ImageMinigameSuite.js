@@ -24,10 +24,16 @@ class ImageMinigameSuite {
     this.particles = [];
     this.shakeTicks = 0;
 
-    // 오프스크린에 숨겨진 실제 술 그래픽/일러스트 렌더링용 캔버스
+    // 오프스크린에 숨겨진 실제 술 그래픽/일러스트 렌더링용 캔버스 (클리어 시 풀컬러 대공개)
     this.hiddenArtCanvas = document.createElement('canvas');
     this.hiddenArtCanvas.width = this.width;
     this.hiddenArtCanvas.height = this.height;
+
+    // 게임 플레이 도중 노출할 다크 섀도우 실루엣 캔버스 (벽돌과 헷갈리지 않는 차분한 단색 실루엣)
+    this.hiddenSilhouetteCanvas = document.createElement('canvas');
+    this.hiddenSilhouetteCanvas.width = this.width;
+    this.hiddenSilhouetteCanvas.height = this.height;
+
     this._renderHiddenArtwork();
 
     this._cleanupInputHandlers = null;
@@ -368,6 +374,38 @@ class ImageMinigameSuite {
       g.strokeStyle = 'rgba(0, 0, 0, 0.35)';
       g.lineWidth = 1;
       g.strokeRect(bx, by, bw, bh);
+    }
+
+    // 3. 플레이 도중 깨진 자리에 보여줄 다크 섀도우 실루엣 캔버스 렌더링
+    // 벽돌(밝은 네온블루)과 확실히 대비되는 어두운 단색 실루엣(#1e293b)으로 표현하여 시각적 혼동 100% 해소!
+    if (!this.hiddenSilhouetteCanvas) {
+      this.hiddenSilhouetteCanvas = document.createElement('canvas');
+      this.hiddenSilhouetteCanvas.width = w;
+      this.hiddenSilhouetteCanvas.height = h;
+    }
+    const sc = this.hiddenSilhouetteCanvas;
+    const sg = sc.getContext('2d');
+    sg.fillStyle = '#050811';
+    sg.fillRect(0, 0, w, h);
+
+    const srad = sg.createRadialGradient(cx, cy, 20, cx, cy, w * 0.75);
+    srad.addColorStop(0, '#0f172a');
+    srad.addColorStop(1, '#050811');
+    sg.fillStyle = srad;
+    sg.fillRect(0, 0, w, h);
+
+    for (const p of dotInfo.activePixels) {
+      const bx = padX + p.c * pitchX;
+      const by = topY + p.r * pitchY;
+
+      // 차분한 다크 슬레이트 실루엣
+      sg.fillStyle = '#1e293b';
+      sg.fillRect(bx, by, bw, bh);
+
+      // 은은한 실루엣 테두리 음영
+      sg.strokeStyle = 'rgba(51, 65, 85, 0.45)';
+      sg.lineWidth = 1;
+      sg.strokeRect(bx, by, bw, bh);
     }
   }
 
@@ -1124,9 +1162,9 @@ class ImageMinigameSuite {
       b.vy = 0;
     }
 
-    // 승리 판정 (파괴 가능한 블록을 100% 모두 깨거나, 96% 이상 격파 시 승리!)
+    // 승리 판정: 파괴 가능한 블록을 예외 없이 100% 모두 깨야만 승리! (단 1개라도 남으면 클리어 불가)
     const pct = (st.brokenCount / Math.max(1, st.totalBreakable)) * 100;
-    if (st.brokenCount >= st.totalBreakable || (st.totalBreakable - st.brokenCount <= 2 && pct >= 96)) {
+    if (st.brokenCount >= st.totalBreakable) {
       this.gameState = 'WIN';
       this.winTimestamp = performance.now();
       this.audio.playSuccess();
@@ -1137,10 +1175,18 @@ class ImageMinigameSuite {
   _drawBrickBreaker(ctx) {
     const st = this.bbState;
 
-    // 1. 전체 캔버스 배경 및 숨겨진 완성 일러스트 (깨진 블럭 자리로 1:1 완벽 정밀 노출)
+    // 1. 전체 캔버스 배경 및 숨겨진 아트 렌더링:
+    // 플레이 도중: 어두운 실루엣(#1e293b)만 노출 (살아있는 네온블루 벽돌과 확연한 명도/색상 대비!)
+    // 클리어 승리 시: 화려한 원본 풀컬러 도트 일러스트 전체 대공개!
     ctx.fillStyle = '#070b14';
     ctx.fillRect(0, 0, this.width, this.height);
-    ctx.drawImage(this.hiddenArtCanvas, 0, 0);
+    if (this.gameState === 'WIN') {
+      ctx.drawImage(this.hiddenArtCanvas, 0, 0);
+    } else if (this.hiddenSilhouetteCanvas) {
+      ctx.drawImage(this.hiddenSilhouetteCanvas, 0, 0);
+    } else {
+      ctx.drawImage(this.hiddenArtCanvas, 0, 0);
+    }
 
     // 2. 살아있는 도트 블럭 렌더링 (스포일러 방지 신비로운 네온 블루 덮개)
     for (const blk of st.blocks) {
@@ -1224,10 +1270,11 @@ class ImageMinigameSuite {
     ctx.stroke();
 
     const pct = (st.brokenCount / Math.max(1, st.totalBreakable)) * 100;
+    const remaining = Math.max(0, st.totalBreakable - st.brokenCount);
     this._drawHUD(ctx, {
       lives: st.lives,
       progressPct: pct,
-      labelText: `${Math.floor(pct)}% / 100%`
+      labelText: remaining === 0 ? '100% 완료!' : `${st.brokenCount}/${st.totalBreakable} (${Math.floor(pct)}%)`
     });
   }
 
