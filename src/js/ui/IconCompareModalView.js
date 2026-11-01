@@ -19,10 +19,10 @@
   ];
 
   const CATEGORY_MAP = {
-    featured: { label: '🔥 리디자인 19종', filter: (k, reg) => reg.hasHd(k) || FEATURED_KEYS.includes(k) },
-    liquor: { label: '🍶 주류', filter: (k) => ['soju', 'beer', 'maesilju', 'mango_ringo', 'bokbunjaju', 'makgeolli', 'cheongju', 'wine', 'whiskey', 'vodka', 'rum', 'gin', 'tequila', 'kaoliang'].includes(k) },
-    drinks: { label: '🥛 음료·유제품', filter: (k) => ['milk', 'strawberry_milk', 'banana_milk', 'yakult', 'cider', 'cola', 'tonic', 'coffee', 'greentea', 'milkis', 'pocari', 'bongbong', 'sikhye', 'sujeonggwa'].includes(k) },
-    flavor: { label: '🍬 감미료·빙과·과일', filter: (k) => ['screwbar', 'tankboy', 'mango', 'misutgaru', 'honey', 'chocolate', 'ice', 'air', 'lemon', 'lime', 'grapefruit', 'orange', 'apple', 'strawberry', 'sugar', 'salt', 'mint', 'cinnamon'].includes(k) },
+    featured: { label: '💎 고급(HD) 71종', filter: (k, reg) => reg.hasHd(k) || FEATURED_KEYS.includes(k) },
+    liquor: { label: '🍶 주류', filter: (k) => ['soju', 'beer', 'maesilju', 'mango_ringo', 'bokbunjaju', 'makgeolli'].includes(k) },
+    drinks: { label: '🥤 음료·믹서', filter: (k) => ['milk', 'strawberry_milk', 'banana_milk', 'choco_milk', 'yakult', 'cider', 'cola', 'tonic_water', 'sparkling_water', 'black_tea', 'milksoda', 'energy_drink', 'ion_drink', 'sikhye', 'peach_drink', 'pear_drink', 'pineapple_juice', 'pomegranate_juice', 'calamansi_pouch', 'iced_americano', 'hongcho'].includes(k) },
+    flavor: { label: '🍬 과일·빙과·기타', filter: (k) => ['screwbar', 'tankboy', 'melona', 'jawsbar', 'bibibig', 'chocolate', 'ice', 'air', 'snow', 'lemon', 'melon', 'mango', 'maesil', 'tomato', 'apple', 'strawberry', 'cacao', 'pear', 'banana', 'yuzu', 'calamansi', 'bokbunja', 'pomegranate', 'orange', 'barley', 'rice', 'misutgaru', 'coffee_beans', 'sugar', 'nuruk', 'yuzu_cheong', 'maesil_cheong', 'honey', 'vinegar', 'pomegranate_concentrate'].includes(k) },
     recipes: { label: '📜 대표 칵테일', filter: (k) => k.startsWith('rec_') },
     all: { label: '전체 보기', filter: () => true }
   };
