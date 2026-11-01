@@ -306,11 +306,11 @@ class PenaltyCocktailGame {
           </button>
         </div>
 
-        <!-- 2. 테이블 재료 선택 (주류 & 음료) -->
+        <!-- 2. 재료 등록 (주류 & 음료) -->
         <div class="cocktail-section-card ing-selector-card">
           <div class="cocktail-section-header">
             <div class="title-with-count">
-              <span class="cocktail-section-title">🧊 테이블 재료 등록</span>
+              <span class="cocktail-section-title">🧊 재료 등록</span>
               <span class="ing-count-pill">${selectedCount}개 선택됨</span>
             </div>
           </div>
@@ -326,9 +326,8 @@ class PenaltyCocktailGame {
                     <button type="button" 
                             class="fridge-ing-chip alcohol ${isChecked ? 'selected' : ''}" 
                             data-ing-id="${ing.ingredient_id}">
-                      <span class="chip-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(ing, 22) : (ing.emoji || '🍺')}</span>
+                      <span class="chip-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(ing, 26) : (ing.emoji || '🍺')}</span>
                       <span class="chip-name">${ing.display_name}</span>
-                      <span class="chip-check">${isChecked ? '✓' : '+'}</span>
                     </button>
                   `;
                 }).join('') : '<div style="font-size:0.8rem; color:#94a3b8; padding:6px 2px;">해금된 주류가 없습니다. 도감에서 주류를 만들어보세요!</div>'}
@@ -345,9 +344,8 @@ class PenaltyCocktailGame {
                     <button type="button" 
                             class="fridge-ing-chip drink ${isChecked ? 'selected' : ''}" 
                             data-ing-id="${ing.ingredient_id}">
-                      <span class="chip-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(ing, 22) : (ing.emoji || '🥤')}</span>
+                      <span class="chip-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(ing, 26) : (ing.emoji || '🥤')}</span>
                       <span class="chip-name">${ing.display_name}</span>
-                      <span class="chip-check">${isChecked ? '✓' : '+'}</span>
                     </button>
                   `;
                 }).join('') : '<div style="font-size:0.8rem; color:#94a3b8; padding:6px 2px;">해금된 음료가 없습니다.</div>'}

@@ -2197,6 +2197,7 @@
 .penalty-cocktail-box {
   display: flex !important;
   flex-direction: column !important;
+  align-items: stretch !important;
   justify-content: space-between !important;
   height: 100% !important;
   width: 100% !important;
@@ -2210,6 +2211,8 @@
 
 /* 카드 공통 스타일 */
 .cocktail-section-card {
+  width: 100%;
+  box-sizing: border-box;
   background: rgba(15, 23, 42, 0.85);
   border: 1.5px solid rgba(148, 163, 184, 0.25);
   border-radius: 16px;
@@ -2353,65 +2356,73 @@
   letter-spacing: 0.3px;
 }
 
-.ing-chips-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.penalty-cocktail-box .ing-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 8px;
+  width: 100%;
 }
 
-.fridge-ing-chip {
+.penalty-cocktail-box .fridge-ing-chip {
   background: #1e293b;
   border: 1.5px solid #334155;
-  border-radius: 10px;
-  padding: 6px 10px;
+  border-radius: 12px;
+  padding: 10px 4px 8px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 5px;
+  min-height: 70px;
+  width: 100%;
+  box-sizing: border-box;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all 0.15s ease;
   color: #cbd5e1;
   user-select: none;
 }
 
-.fridge-ing-chip .chip-emoji {
-  font-size: 1.1rem;
-}
-
-.fridge-ing-chip .chip-name {
-  font-size: 0.82rem;
-  font-weight: 800;
-}
-
-.fridge-ing-chip .chip-check {
-  font-size: 0.82rem;
-  font-weight: 900;
-  color: #64748b;
-  margin-left: 2px;
-}
-
-.fridge-ing-chip.selected {
-  background: rgba(30, 41, 59, 0.95);
+.penalty-cocktail-box .fridge-ing-chip:hover {
+  border-color: #64748b;
+  background: #273549;
   transform: translateY(-1px);
 }
 
-.fridge-ing-chip.alcohol.selected {
+.penalty-cocktail-box .fridge-ing-chip .chip-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.penalty-cocktail-box .fridge-ing-chip .chip-name {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.penalty-cocktail-box .fridge-ing-chip.selected {
+  transform: translateY(-2px);
+}
+
+.penalty-cocktail-box .fridge-ing-chip.alcohol.selected {
   border-color: #f59e0b;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.12);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
   color: #fef3c7;
 }
 
-.fridge-ing-chip.alcohol.selected .chip-check {
-  color: #f59e0b;
-}
-
-.fridge-ing-chip.drink.selected {
+.penalty-cocktail-box .fridge-ing-chip.drink.selected {
   border-color: #06b6d4;
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.35);
+  background: rgba(6, 182, 212, 0.12);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
   color: #cffafe;
-}
-
-.fridge-ing-chip.drink.selected .chip-check {
-  color: #06b6d4;
 }
 
 /* 3. 벌칙주 조제 실행 버튼 */
