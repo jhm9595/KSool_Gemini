@@ -40,79 +40,61 @@ class ImageMinigameSuite {
     const cx = w / 2;
     const cy = (h + 32) / 2;
 
-    // 1. 네온 펍 무드의 깊이감 있는 그라데이션 배경
-    const rad = g.createRadialGradient(cx, cy, 20, cx, cy, w * 0.72);
-    rad.addColorStop(0, '#1e293b');
-    rad.addColorStop(0.55, '#0f172a');
-    rad.addColorStop(1, '#050811');
-    g.fillStyle = rad;
-    g.fillRect(0, 0, w, h);
+    const drawBackground = () => {
+      // 1. 네온 펍 무드의 깊이감 있는 그라데이션 배경 (원형/링 불필요 아티팩트 완전 제거)
+      const rad = g.createRadialGradient(cx, cy, 20, cx, cy, w * 0.72);
+      rad.addColorStop(0, '#1e293b');
+      rad.addColorStop(0.55, '#0f172a');
+      rad.addColorStop(1, '#050811');
+      g.fillStyle = rad;
+      g.fillRect(0, 0, w, h);
 
-    // 미세 모눈 격자
-    g.strokeStyle = 'rgba(56, 189, 248, 0.07)';
-    g.lineWidth = 1;
-    for (let x = 0; x < w; x += 18) {
-      g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke();
-    }
-    for (let y = 0; y < h; y += 18) {
-      g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke();
-    }
+      // 미세 모눈 격자
+      g.strokeStyle = 'rgba(56, 189, 248, 0.07)';
+      g.lineWidth = 1;
+      for (let x = 0; x < w; x += 18) {
+        g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke();
+      }
+      for (let y = 0; y < h; y += 18) {
+        g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke();
+      }
+    };
 
-    // 신비로운 후광 글로우
-    const glow = g.createRadialGradient(cx, cy, 10, cx, cy, 115);
-    glow.addColorStop(0, 'rgba(250, 204, 21, 0.32)');
-    glow.addColorStop(0.6, 'rgba(56, 189, 248, 0.16)');
-    glow.addColorStop(1, 'rgba(15, 23, 42, 0)');
-    g.fillStyle = glow;
-    g.beginPath();
-    g.arc(cx, cy, 115, 0, Math.PI * 2);
-    g.fill();
+    drawBackground();
 
-    // 골드 & 네온 링 프레임
-    g.strokeStyle = 'rgba(250, 204, 21, 0.45)';
-    g.lineWidth = 2.5;
-    g.beginPath();
-    g.arc(cx, cy, 88, 0, Math.PI * 2);
-    g.stroke();
-
-    g.strokeStyle = 'rgba(56, 189, 248, 0.3)';
-    g.lineWidth = 1.5;
-    g.beginPath();
-    g.arc(cx, cy, 108, 0, Math.PI * 2);
-    g.stroke();
-
-    // 2. 실제 픽셀/HD 아이콘 SVG 렌더링
-    const iconSize = 170;
+    // 2. 실제 픽셀/HD 아이콘 및 하단 이름 텍스트 렌더링
+    const iconSize = 144;
     const ix = cx - iconSize / 2;
-    const iy = cy - iconSize / 2;
+    const iy = cy - iconSize / 2 - 16;
+    const textY = cy + 76;
+    const recipeName = this.recipe?.display_name || this.recipe?.real_name || this.recipe?.name || '';
 
-    // 이미지 로드 전 즉시 이모지 렌더링 (fallback)
-    g.font = '84px sans-serif';
-    g.textAlign = 'center';
-    g.textBaseline = 'middle';
-    g.shadowColor = 'rgba(250, 204, 21, 0.6)';
-    g.shadowBlur = 18;
-    g.fillText(this.recipe ? this.recipe.emoji : '🍶', cx, cy);
-    g.shadowBlur = 0;
+    const drawTitle = () => {
+      g.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillStyle = '#fde047';
+      g.shadowColor = 'rgba(0,0,0,0.95)';
+      g.shadowBlur = 8;
+      g.fillText(recipeName, cx, textY);
+      g.shadowBlur = 0;
+    };
 
-    // 실제 SVG 픽셀 아이콘 비동기 로드 및 실시간 덮어쓰기
+    let hasSvg = false;
     if (this.recipe && window.KSool?.pixelIcon) {
       try {
         let svgStr = window.KSool.pixelIcon(this.recipe, iconSize);
         if (svgStr) {
+          hasSvg = true;
           if (!svgStr.includes('xmlns=')) {
             svgStr = svgStr.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
           }
           const img = new Image();
           img.onload = () => {
-            g.save();
-            g.clearRect(ix - 5, iy - 5, iconSize + 10, iconSize + 10);
-            g.fillStyle = glow;
-            g.beginPath();
-            g.arc(cx, cy, 115, 0, Math.PI * 2);
-            g.fill();
+            // 이미지 로드 시 배경 전체를 매끄럽게 재도색 후 아이콘과 텍스트를 칼정렬 렌더링 (검은 사각형 컷아웃 제거)
+            drawBackground();
             g.drawImage(img, ix, iy, iconSize, iconSize);
-            g.restore();
+            drawTitle();
           };
           img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
         }
@@ -121,14 +103,16 @@ class ImageMinigameSuite {
       }
     }
 
-    // 하단에 칵테일 이름 텍스트
-    g.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
-    g.textAlign = 'center';
-    g.fillStyle = '#fde047';
-    g.shadowColor = 'rgba(0,0,0,0.8)';
-    g.shadowBlur = 6;
-    g.fillText(this.recipe?.display_name || this.recipe?.real_name || '', cx, cy + 96);
-    g.shadowBlur = 0;
+    if (!hasSvg) {
+      g.font = '72px sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.shadowColor = 'rgba(250, 204, 21, 0.6)';
+      g.shadowBlur = 18;
+      g.fillText(this.recipe ? this.recipe.emoji : '🍶', cx, cy - 16);
+      g.shadowBlur = 0;
+      drawTitle();
+    }
   }
 
   stop() {
@@ -629,8 +613,8 @@ class ImageMinigameSuite {
     // 중앙의 실제 그림(아이콘) 영역 계산 (그림을 온전히 뚫었는지 판정하는 목표 구역)
     const cx = this.width / 2;
     const cy = (this.height + topOffset) / 2;
-    const picHalfW = 85;
-    const picHalfH = 92;
+    const picHalfW = 90;
+    const picHalfH = 104;
 
     const picMinC = Math.max(1, Math.floor((cx - picHalfW) / cellW));
     const picMaxC = Math.min(cols - 2, Math.ceil((cx + picHalfW) / cellW));
@@ -648,7 +632,7 @@ class ImageMinigameSuite {
       lives: 3,
       elapsed: 0,
       lastTime: performance.now(),
-      targetPct: 90, // 그림 구역을 90% 이상 뚫어 온전히 드러내야 승리!
+      targetPct: 100, // 네모칸 구역 전체(100%)를 모두 뚫어 온전히 드러내야 승리!
       picMinC,
       picMaxC,
       picMinR,
@@ -891,7 +875,7 @@ class ImageMinigameSuite {
           pl.dc = 0;
           pl.dr = 0;
           this._floodFillCaptureQix();
-          // 그림 영역을 목표치(90%) 이상 뚫어 그림이 온전히 드러났으면 승리!
+          // 네모칸 전체(100%)를 모두 땅따먹어 그림이 온전히 드러났으면 승리!
           if (st.pictureRevealedPct >= st.targetPct) {
             this.audio.playSuccess();
             this.stop();
@@ -1011,8 +995,8 @@ class ImageMinigameSuite {
     const picH = (st.picMaxR - st.picMinR + 1) * cellH;
     ctx.save();
     ctx.setLineDash([4, 4]);
-    ctx.strokeStyle = st.pictureRevealedPct >= st.targetPct ? '#10b981' : 'rgba(250, 204, 21, 0.6)';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = st.pictureRevealedPct >= 100 ? '#10b981' : 'rgba(250, 204, 21, 0.75)';
+    ctx.lineWidth = 1.8;
     ctx.strokeRect(picX, picY, picW, picH);
     ctx.restore();
 
@@ -1049,7 +1033,7 @@ class ImageMinigameSuite {
       timeLeftSec: null,
       progressPct: st.pictureRevealedPct,
       targetPct: st.targetPct,
-      labelText: `그림 노출 ${Math.floor(st.pictureRevealedPct)}% / 목표 ${st.targetPct}%`,
+      labelText: `그림 점령 ${Math.floor(st.pictureRevealedPct)}% / 목표 100%`,
       subText: ''
     });
   }
