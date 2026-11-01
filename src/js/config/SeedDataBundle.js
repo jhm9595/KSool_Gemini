@@ -14,13 +14,13 @@ window.KSool.SeedDataBundle = {
   {
     "category_id": "NATURE",
     "name": "자연",
-    "emoji": "💧",
+    "emoji": "🌿",
     "order": 2
   },
   {
     "category_id": "FRUIT",
     "name": "과일",
-    "emoji": "🍋",
+    "emoji": "🍎",
     "order": 3
   },
   {
@@ -38,13 +38,13 @@ window.KSool.SeedDataBundle = {
   {
     "category_id": "DESSERT",
     "name": "디저트",
-    "emoji": "🍦",
+    "emoji": "🍨",
     "order": 6
   },
   {
     "category_id": "ETC",
     "name": "기타",
-    "emoji": "🍯",
+    "emoji": "🍬",
     "order": 7
   }
 ],
@@ -1002,7 +1002,7 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 10,
     "item_count": 2,
     "step_id": 7,
-    "step_order": 7,
+    "step_order": 8,
     "recipe_number": 77,
     "formatted_number": "No.77",
     "unlock_hint": "투명한 증류주 잔을 거의 끝까지 채우고 황금빛 발효주를 단 한 방울만 떨어뜨리면 거짓말처럼 달콤한 맛이 나는 전설의 술입니다."
@@ -1091,8 +1091,8 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 5,
     "step_order": 1,
-    "recipe_number": 49,
-    "formatted_number": "No.49",
+    "recipe_number": 56,
+    "formatted_number": "No.56",
     "unlock_hint": "은은하게 우려낸 붉은 찻물을 넉넉히 붓고 투명한 증류주를 살짝 더해, 술맛 대신 향긋한 티 향을 살린 비율주입니다."
   },
   {
@@ -1112,9 +1112,9 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 6,
     "item_count": 3,
     "step_id": 6,
-    "step_order": 1,
-    "recipe_number": 62,
-    "formatted_number": "No.62",
+    "step_order": 6,
+    "recipe_number": 69,
+    "formatted_number": "No.69",
     "unlock_hint": "예능 프로그램에서 화제가 된 황금비율! 향긋한 붉은 찻물과 투명한 증류주, 차가운 결정체를 계단식 비율로 완성합니다."
   },
   {
@@ -1134,9 +1134,9 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 5,
     "item_count": 3,
     "step_id": 5,
-    "step_order": 7,
-    "recipe_number": 55,
-    "formatted_number": "No.55",
+    "step_order": 6,
+    "recipe_number": 61,
+    "formatted_number": "No.61",
     "unlock_hint": "밤샘 파티를 위해 투명한 증류주에 카페인 각성 음료와 빠른 수분 흡수용 스포츠 음료를 두 배씩 배합한 폭탄주입니다."
   },
   {
@@ -1179,8 +1179,8 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 5,
     "step_order": 3,
-    "recipe_number": 51,
-    "formatted_number": "No.51",
+    "recipe_number": 58,
+    "formatted_number": "No.58",
     "unlock_hint": "진한 자주빛 과실주를 베이스로 투명한 증류주와 달콤한 투명 탄산음료를 더한, 달콤함 뒤에 묵직함이 숨은 폭탄주입니다."
   },
   {
@@ -1331,10 +1331,10 @@ window.KSool.SeedDataBundle = {
     "max_ratio": 2,
     "sum_ratio": 5,
     "item_count": 3,
-    "step_id": 5,
-    "step_order": 6,
-    "recipe_number": 54,
-    "formatted_number": "No.54",
+    "step_id": 6,
+    "step_order": 3,
+    "recipe_number": 66,
+    "formatted_number": "No.66",
     "unlock_hint": "투명한 증류주의 쓴맛을 감추기 위해 황금빛 발효주와 달콤한 노란 열대과일을 두 배씩 듬뿍 넣은 트로피컬 폭탄주입니다."
   },
   {
@@ -1485,10 +1485,10 @@ window.KSool.SeedDataBundle = {
     "max_ratio": 2,
     "sum_ratio": 4,
     "item_count": 3,
-    "step_id": 5,
-    "step_order": 4,
-    "recipe_number": 52,
-    "formatted_number": "No.52",
+    "step_id": 6,
+    "step_order": 1,
+    "recipe_number": 64,
+    "formatted_number": "No.64",
     "unlock_hint": "투명한 증류주와 두 배의 투명 탄산음료를 섞은 잔에, 배배 꼬인 붉은 막대 아이스크림을 통째로 녹여 마시는 달콤주입니다."
   },
   {
@@ -1553,8 +1553,8 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 5,
     "step_order": 2,
-    "recipe_number": 50,
-    "formatted_number": "No.50",
+    "recipe_number": 57,
+    "formatted_number": "No.57",
     "unlock_hint": "비 오는 날 파전의 단짝! 뽀얀 전통 탁주 두 잔에 투명한 달콤 탄산음료 한 잔을 섞어 청량감을 끌어올린 주막 칵테일입니다."
   },
   {
@@ -1641,8 +1641,8 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 7,
     "step_order": 4,
-    "recipe_number": 74,
-    "formatted_number": "No.74",
+    "recipe_number": 73,
+    "formatted_number": "No.73",
     "unlock_hint": "대한민국 애주가들이 공인한 가장 부드럽고 청량한 목넘김! 투명한 증류주와 황금빛 발효주를 황금비율로 정교하게 맞췄습니다."
   },
   {
@@ -1683,10 +1683,10 @@ window.KSool.SeedDataBundle = {
     "max_ratio": 2,
     "sum_ratio": 4,
     "item_count": 3,
-    "step_id": 5,
-    "step_order": 5,
-    "recipe_number": 53,
-    "formatted_number": "No.53",
+    "step_id": 6,
+    "step_order": 2,
+    "recipe_number": 65,
+    "formatted_number": "No.65",
     "unlock_hint": "투명한 증류주와 넉넉한 투명 탄산음료에 시원한 가을 과일 슬러시 아이스크림을 짜 넣어 마시며 해장하는 술입니다."
   },
   {
@@ -1779,25 +1779,25 @@ window.KSool.SeedDataBundle = {
   },
   {
     "recipe_id": 38,
-    "display_name": "딸기우유 막걸리",
-    "real_name": "딸기우유 막걸리",
+    "display_name": "딸기 막걸리",
+    "real_name": "딸기 막걸리",
     "is_licensed": false,
-    "difficulty": "NORMAL",
+    "difficulty": "EASY",
     "required_level": 3,
     "requires_detail_ingredient": false,
     "emoji": "🍓",
     "category": "막걸리꿀조합",
     "unlocks_ingredient_id": null,
-    "description": "막걸리 3 : 딸기우유 2! 핑크빛 비주얼과 부드러운 딸기 크림 맛으로 여심을 사로잡은 칵테일 막걸리.",
+    "description": "갓 빚은 부드러운 막걸리에 달콤한 딸기우유를 1:1 동량으로 블렌딩한 부드럽고 달콤한 핑크빛 과일 막걸리.",
     "requires_order": false,
-    "max_ratio": 3,
-    "sum_ratio": 5,
+    "max_ratio": 1,
+    "sum_ratio": 2,
     "item_count": 2,
-    "step_id": 6,
-    "step_order": 2,
-    "recipe_number": 63,
-    "formatted_number": "No.63",
-    "unlock_hint": "뽀얀 전통 탁주에 분홍빛 베리 목장 음료를 황금비율로 섞어 부드럽고 달콤한 핑크빛으로 완성한 주막 칵테일입니다."
+    "step_id": 4,
+    "step_order": 9,
+    "recipe_number": 45,
+    "formatted_number": "No.45",
+    "unlock_hint": "뽀얀 전통 쌀 발효주에 분홍빛 달콤한 딸기 우유를 반반씩 섞어 완성한 달콤한 과일 막걸리입니다."
   },
   {
     "recipe_id": 39,
@@ -1816,7 +1816,7 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 10,
     "item_count": 2,
     "step_id": 7,
-    "step_order": 8,
+    "step_order": 9,
     "recipe_number": 78,
     "formatted_number": "No.78",
     "unlock_hint": "전통 탁주 아홉에 달콤한 황금빛 꿀을 더해, 특유의 텁텁함은 잡고 입안에 감기는 달콤함을 극대화한 주막 스타일입니다."
@@ -1838,7 +1838,7 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 10,
     "item_count": 3,
     "step_id": 7,
-    "step_order": 5,
+    "step_order": 6,
     "recipe_number": 75,
     "formatted_number": "No.75",
     "unlock_hint": "전통 탁주를 넉넉한 베이스로 삼고 향긋한 겨울 감귤류 발효청과 맑은 액체를 더해 남도의 상큼한 풍미를 살린 명주입니다."
@@ -1860,7 +1860,7 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 10,
     "item_count": 3,
     "step_id": 7,
-    "step_order": 6,
+    "step_order": 7,
     "recipe_number": 76,
     "formatted_number": "No.76",
     "unlock_hint": "전통 탁주 베이스에 새콤한 초록 열매 발효청과 맑은 액체를 황금비율로 희석해 식욕을 돋우는 깔끔한 반주용 탁주입니다."
@@ -1870,22 +1870,22 @@ window.KSool.SeedDataBundle = {
     "display_name": "식혜 막걸리",
     "real_name": "식혜 막걸리",
     "is_licensed": false,
-    "difficulty": "NORMAL",
+    "difficulty": "EASY",
     "required_level": 3,
     "requires_detail_ingredient": false,
     "emoji": "🌾",
     "category": "막걸리꿀조합",
     "unlocks_ingredient_id": null,
-    "description": "막걸리 3 : 식혜 2! 밥알의 은은한 단맛과 엿기름의 풍미가 막걸리와 찰떡궁합을 이루는 전통 믹스.",
+    "description": "전통 쌀 발효주 막걸리와 달콤한 전통 음료 식혜를 1:1 동량으로 섞어 은은한 곡물 단맛을 살린 전통 퓨전 막걸리.",
     "requires_order": false,
-    "max_ratio": 3,
-    "sum_ratio": 5,
+    "max_ratio": 1,
+    "sum_ratio": 2,
     "item_count": 2,
-    "step_id": 6,
-    "step_order": 4,
-    "recipe_number": 65,
-    "formatted_number": "No.65",
-    "unlock_hint": "뽀얀 전통 탁주에 밥알이 동동 띄워진 달콤한 전통 엿기름 음료를 섞어 구수한 단맛을 살린 옛날식 믹스주입니다."
+    "step_id": 4,
+    "step_order": 13,
+    "recipe_number": 49,
+    "formatted_number": "No.49",
+    "unlock_hint": "발효된 전통 막걸리에 밥알과 엿기름이 어우러진 달콤한 전통 음료를 반반씩 섞어 빚은 퓨전 막걸리입니다."
   },
   {
     "recipe_id": 43,
@@ -1905,8 +1905,8 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 7,
     "step_order": 2,
-    "recipe_number": 72,
-    "formatted_number": "No.72",
+    "recipe_number": 71,
+    "formatted_number": "No.71",
     "unlock_hint": "전통 탁주와 볶은 곡물 가루를 넉넉한 비율로 듬뿍 섞어 한 잔만 마셔도 든든한 고소한 별미주입니다."
   },
   {
@@ -1914,110 +1914,110 @@ window.KSool.SeedDataBundle = {
     "display_name": "바나나우유 막걸리",
     "real_name": "바나나우유 막걸리",
     "is_licensed": false,
-    "difficulty": "NORMAL",
+    "difficulty": "EASY",
     "required_level": 3,
     "requires_detail_ingredient": false,
     "emoji": "🍌",
     "category": "막걸리꿀조합",
     "unlocks_ingredient_id": null,
-    "description": "막걸리 3 : 바나나우유 2! 달콤하고 크리미한 바나나 향이 막걸리의 산미를 부드럽게 감싸는 조합.",
+    "description": "부드러운 막걸리와 향긋하고 달콤한 바나나우유를 1:1로 섞어 목넘김이 부드러운 노란빛 과일 막걸리.",
     "requires_order": false,
-    "max_ratio": 3,
-    "sum_ratio": 5,
+    "max_ratio": 1,
+    "sum_ratio": 2,
     "item_count": 2,
-    "step_id": 6,
-    "step_order": 3,
-    "recipe_number": 64,
-    "formatted_number": "No.64",
-    "unlock_hint": "전통 탁주의 산미를 부드럽게 감싸주도록 달콤한 노란 열대과일 목장 음료를 황금비율로 블렌딩한 술입니다."
+    "step_id": 4,
+    "step_order": 10,
+    "recipe_number": 46,
+    "formatted_number": "No.46",
+    "unlock_hint": "구수한 전통 막걸리에 달콤하고 향긋한 바나나 우유를 1:1 동량으로 블렌딩한 달콤한 막걸리입니다."
   },
   {
     "recipe_id": 45,
     "display_name": "복숭아 막걸리",
     "real_name": "복숭아 막걸리",
     "is_licensed": false,
-    "difficulty": "NORMAL",
+    "difficulty": "EASY",
     "required_level": 3,
     "requires_detail_ingredient": false,
     "emoji": "🍑",
     "category": "막걸리꿀조합",
     "unlocks_ingredient_id": null,
-    "description": "막걸리 3 : 복숭아음료 2! 향긋한 복숭아 과즙과 말랑한 젤리가 씹히는 상큼한 대학가 인기주.",
+    "description": "향긋하고 달콤한 복숭아 음료를 막걸리와 1:1로 섞어 향긋한 복숭아 풍미를 가득 담아낸 핑크빛 막걸리.",
     "requires_order": false,
-    "max_ratio": 3,
-    "sum_ratio": 5,
+    "max_ratio": 1,
+    "sum_ratio": 2,
     "item_count": 2,
-    "step_id": 6,
-    "step_order": 6,
-    "recipe_number": 67,
-    "formatted_number": "No.67",
-    "unlock_hint": "뽀얀 전통 탁주와 탱글한 알갱이가 씹히는 분홍빛 과즙 음료를 섞어 대학가 주점에서 사랑받는 달콤주입니다."
+    "step_id": 4,
+    "step_order": 15,
+    "recipe_number": 51,
+    "formatted_number": "No.51",
+    "unlock_hint": "구수한 쌀 막걸리에 달콤하고 향긋한 복숭아 과채 음료를 1:1로 섞어 빚어낸 과일 막걸리입니다."
   },
   {
     "recipe_id": 46,
     "display_name": "배 막걸리",
     "real_name": "배 막걸리",
     "is_licensed": false,
-    "difficulty": "NORMAL",
+    "difficulty": "EASY",
     "required_level": 3,
     "requires_detail_ingredient": false,
     "emoji": "🍐",
     "category": "막걸리꿀조합",
     "unlocks_ingredient_id": null,
-    "description": "막걸리 3 : 배음료 2! 시원하고 달콤한 배즙이 들어가 숙취까지 덜어주는 꿀떡꿀떡 막걸리.",
+    "description": "시원하고 달콤한 갈아만든 배음료를 막걸리와 1:1로 섞어 청량함과 아삭한 단맛을 더한 과일 막걸리.",
     "requires_order": false,
-    "max_ratio": 3,
-    "sum_ratio": 5,
+    "max_ratio": 1,
+    "sum_ratio": 2,
     "item_count": 2,
-    "step_id": 6,
-    "step_order": 7,
-    "recipe_number": 68,
-    "formatted_number": "No.68",
-    "unlock_hint": "전통 탁주에 숙취 해소에 유명한 시원한 가을 과일 음료를 섞어 목넘김이 꿀떡꿀떡 넘어가는 조합입니다."
+    "step_id": 4,
+    "step_order": 11,
+    "recipe_number": 47,
+    "formatted_number": "No.47",
+    "unlock_hint": "구수한 막걸리에 시원하고 달콤한 가을 과일 배 음료를 1:1로 섞어 완성한 청량한 과일 막걸리입니다."
   },
   {
     "recipe_id": 47,
     "display_name": "파인애플 막걸리",
     "real_name": "파인애플 막걸리",
     "is_licensed": false,
-    "difficulty": "NORMAL",
+    "difficulty": "EASY",
     "required_level": 3,
     "requires_detail_ingredient": false,
     "emoji": "🍍",
     "category": "막걸리꿀조합",
     "unlocks_ingredient_id": null,
-    "description": "막걸리 3 : 파인애플주스 2! 새콤달콤 열대 파인애플과 유산균 막걸리가 만난 이국적인 풍미.",
+    "description": "상큼하고 달콤한 파인애플 주스를 막걸리와 1:1로 섞어 열대 과일의 청량한 산미를 더한 과일 막걸리.",
     "requires_order": false,
-    "max_ratio": 3,
-    "sum_ratio": 5,
+    "max_ratio": 1,
+    "sum_ratio": 2,
     "item_count": 2,
-    "step_id": 6,
-    "step_order": 8,
-    "recipe_number": 69,
-    "formatted_number": "No.69",
-    "unlock_hint": "구수한 전통 탁주에 새콤달콤한 노란 열대 과일 주스를 배합해 상큼한 이국적 풍미를 낸 퓨전 탁주입니다."
+    "step_id": 4,
+    "step_order": 16,
+    "recipe_number": 52,
+    "formatted_number": "No.52",
+    "unlock_hint": "뽀얀 막걸리에 새콤달콤한 열대 과일 파인애플 과즙을 반반씩 섞어 완성한 트로피컬 막걸리입니다."
   },
   {
     "recipe_id": 48,
     "display_name": "요구르트 막걸리",
     "real_name": "요구르트 막걸리",
     "is_licensed": false,
-    "difficulty": "NORMAL",
+    "difficulty": "EASY",
     "required_level": 3,
     "requires_detail_ingredient": false,
     "emoji": "🍼",
     "category": "막걸리꿀조합",
     "unlocks_ingredient_id": null,
-    "description": "막걸리 3 : 요구르트 2! 유산균과 유산균의 만남으로 새콤달콤함이 두 배가 된 국민 막걸리 칵테일.",
+    "description": "새콤달콤한 요구르트를 막걸리와 1:1로 섞어 톡 쏘는 유산균의 풍미와 부드러운 단맛을 살린 국민 칵테일 막걸리.",
     "requires_order": false,
-    "max_ratio": 3,
-    "sum_ratio": 5,
+    "max_ratio": 1,
+    "sum_ratio": 2,
     "item_count": 2,
-    "step_id": 6,
-    "step_order": 5,
-    "recipe_number": 66,
-    "formatted_number": "No.66",
-    "unlock_hint": "유산균이 살아있는 전통 탁주에 새콤달콤한 소형 발효유를 더해 감칠맛을 두 배로 끌어올린 국민 조합입니다."
+    "step_id": 4,
+    "step_order": 14,
+    "recipe_number": 50,
+    "formatted_number": "No.50",
+    "unlock_hint": "뽀얀 전통 막걸리에 새콤달콤한 유산균 음료를 반반씩 블렌딩해 상큼하게 즐기는 칵테일 막걸리입니다."
   },
   {
     "recipe_id": 49,
@@ -2037,8 +2037,8 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 7,
     "step_order": 3,
-    "recipe_number": 73,
-    "formatted_number": "No.73",
+    "recipe_number": 72,
+    "formatted_number": "No.72",
     "unlock_hint": "전통 탁주와 고소한 볶은 곡물 가루 조합에 진한 꿀 한 스푼을 더해 고소함과 단맛의 균형을 완성한 시그니처입니다."
   },
   {
@@ -2052,16 +2052,16 @@ window.KSool.SeedDataBundle = {
     "emoji": "🌺",
     "category": "막걸리꿀조합",
     "unlocks_ingredient_id": null,
-    "description": "막걸리 3 : 석류주스 2! 루비빛 고운 색상과 새콤한 석류 과즙이 어우러진 미녀들의 막걸리.",
+    "description": "진하게 졸여낸 고농축 석류농축액에 막걸리를 [7:1] 황금비율로 넉넉하게 섞어 매혹적인 붉은 빛과 깊은 새콤달콤함을 선사하는 프리미엄 막걸리.",
     "requires_order": false,
-    "max_ratio": 3,
-    "sum_ratio": 5,
+    "max_ratio": 7,
+    "sum_ratio": 8,
     "item_count": 2,
-    "step_id": 6,
-    "step_order": 9,
-    "recipe_number": 70,
-    "formatted_number": "No.70",
-    "unlock_hint": "뽀얀 전통 탁주에 미녀들이 즐겨 찾는 붉은 보석 과일 주스를 섞어 고운 루비빛을 낸 새콤한 탁주입니다."
+    "step_id": 7,
+    "step_order": 5,
+    "recipe_number": 74,
+    "formatted_number": "No.74",
+    "unlock_hint": "뽀얀 전통 막걸리 7잔에 불로 진하게 졸여낸 붉은 석류 농축액 1잔을 절묘하게 배합한 7:1 비율의 매혹적인 붉은 막걸리입니다."
   },
   {
     "recipe_id": 51,
@@ -2079,10 +2079,10 @@ window.KSool.SeedDataBundle = {
     "max_ratio": 2,
     "sum_ratio": 5,
     "item_count": 4,
-    "step_id": 5,
-    "step_order": 8,
-    "recipe_number": 56,
-    "formatted_number": "No.56",
+    "step_id": 6,
+    "step_order": 4,
+    "recipe_number": 67,
+    "formatted_number": "No.67",
     "unlock_hint": "투명한 증류주에 쌉싸름한 믹서 워터를 두 배로 채우고, 차가운 결정체와 노란 시트러스 조각을 띄운 한국형 하이볼의 정석입니다."
   },
   {
@@ -2168,7 +2168,7 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 4,
     "item_count": 3,
     "step_id": 7,
-    "step_order": 14,
+    "step_order": 15,
     "recipe_number": 84,
     "formatted_number": "No.84",
     "unlock_hint": "[특산 재료 필수] 팔도 지도에서 고른 경기도 임금님 진상 곡식을 두 배로 넣고 전통 발효제와 맑은 액체로 빚은 최고급 탁주입니다."
@@ -2190,7 +2190,7 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 4,
     "item_count": 3,
     "step_id": 7,
-    "step_order": 15,
+    "step_order": 16,
     "recipe_number": 85,
     "formatted_number": "No.85",
     "unlock_hint": "[특산 재료 필수] 주류 냉장고에서 고른 남쪽 섬의 화산암반 증류주에 쌉싸름한 믹서 워터 두 배와 차가운 결정을 더했습니다."
@@ -2278,9 +2278,9 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 3,
     "item_count": 3,
     "step_id": 4,
-    "step_order": 9,
-    "recipe_number": 45,
-    "formatted_number": "No.45",
+    "step_order": 12,
+    "recipe_number": 48,
+    "formatted_number": "No.48",
     "unlock_hint": "하얀 주식 곡물에 구수한 보리 싹과 달콤한 결정을 더해 따뜻하게 삭혀 만든 밥알 동동 전통 음료입니다."
   },
   {
@@ -2301,8 +2301,8 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 7,
     "step_order": 1,
-    "recipe_number": 71,
-    "formatted_number": "No.71",
+    "recipe_number": 70,
+    "formatted_number": "No.70",
     "unlock_hint": "주식인 쌀과 구수한 보리를 뜨거운 불길에 골고루 볶아 곱게 빻아낸 여름철 전통 영양 곡물 가루입니다."
   },
   {
@@ -2322,10 +2322,10 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 3,
     "item_count": 3,
     "step_id": 4,
-    "step_order": 10,
+    "step_order": 17,
     "unlock_hint": "탁주를 항아리에 담고 맑은 기운과 따스한 온기로 오랜 시간 초산 발효를 시킨 새콤한 양념입니다.",
-    "recipe_number": 46,
-    "formatted_number": "No.46"
+    "recipe_number": 53,
+    "formatted_number": "No.53"
   },
   {
     "recipe_id": 63,
@@ -2366,10 +2366,10 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 3,
     "item_count": 3,
     "step_id": 4,
-    "step_order": 11,
+    "step_order": 18,
     "unlock_hint": "새콤한 발효 식초에 달콤한 석류 엑기스와 감미료를 절묘하게 배합해 마시기 좋게 만든 붉은 과채 식초 음료입니다.",
-    "recipe_number": 47,
-    "formatted_number": "No.47"
+    "recipe_number": 54,
+    "formatted_number": "No.54"
   },
   {
     "recipe_id": 65,
@@ -2454,7 +2454,7 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 3,
     "item_count": 2,
     "step_id": 7,
-    "step_order": 9,
+    "step_order": 10,
     "unlock_hint": "[브랜드 상세 필수] 맥주 탭에서 청정라거 테라피 두 배와 주류 냉장고의 참방울 후레쉬를 황금비율로 말아 올렸습니다.",
     "recipe_number": 79,
     "formatted_number": "No.79"
@@ -2476,7 +2476,7 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 3,
     "item_count": 2,
     "step_id": 7,
-    "step_order": 10,
+    "step_order": 11,
     "unlock_hint": "[브랜드 상세 필수] 청정라거 테라피 두 배에 돌아온 레트로 하늘색 두꺼비를 더해 시원하게 꺾어 마시는 조합입니다.",
     "recipe_number": 80,
     "formatted_number": "No.80"
@@ -2498,7 +2498,7 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 3,
     "item_count": 2,
     "step_id": 7,
-    "step_order": 11,
+    "step_order": 12,
     "unlock_hint": "[브랜드 상세 필수] 짜릿한 카아스 프레시 두 배에 처음부터 부드러운 소주를 더한 원조 스테디셀러 소맥입니다.",
     "recipe_number": 81,
     "formatted_number": "No.81"
@@ -2520,7 +2520,7 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 3,
     "item_count": 2,
     "step_id": 7,
-    "step_order": 12,
+    "step_order": 13,
     "unlock_hint": "[브랜드 상세 필수] 더블 숙성 앰버 라거 두 배에 두꺼비 이즈백을 더해 묵직함과 부드러움을 동시에 잡았습니다.",
     "recipe_number": 82,
     "formatted_number": "No.82"
@@ -2542,7 +2542,7 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 2,
     "item_count": 2,
     "step_id": 7,
-    "step_order": 13,
+    "step_order": 14,
     "unlock_hint": "[브랜드 상세 필수] 라이벌 관계인 카아스 프레시와 청정라거 테라피 두 맥주를 1:1로 섞어 카스텔라 빵처럼 부드러운 거품을 냅니다.",
     "recipe_number": 83,
     "formatted_number": "No.83"
@@ -2585,11 +2585,11 @@ window.KSool.SeedDataBundle = {
     "max_ratio": 2,
     "sum_ratio": 4,
     "item_count": 3,
-    "step_id": 5,
-    "step_order": 9,
+    "step_id": 6,
+    "step_order": 5,
     "unlock_hint": "맥주 두 배에 소주 하나, 검은 탄산 하나를 겹쳐 첫 모금은 쓴 소맥, 끝 모금은 달콤한 콜라가 반겨주는 술입니다.",
-    "recipe_number": 57,
-    "formatted_number": "No.57"
+    "recipe_number": 68,
+    "formatted_number": "No.68"
   },
   {
     "recipe_id": 75,
@@ -2608,10 +2608,10 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 2,
     "item_count": 2,
     "step_id": 5,
-    "step_order": 10,
+    "step_order": 4,
     "unlock_hint": "기초 증류주와 수분 흡수를 돕는 파란 이온음료를 반반 섞어 마시는 순간 훅 가는 앉은뱅이술입니다.",
-    "recipe_number": 58,
-    "formatted_number": "No.58"
+    "recipe_number": 59,
+    "formatted_number": "No.59"
   },
   {
     "recipe_id": 76,
@@ -2630,10 +2630,10 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 3,
     "item_count": 3,
     "step_id": 5,
-    "step_order": 11,
+    "step_order": 5,
     "unlock_hint": "소주에 고카페인 타우린 드링크와 푸른 이온음료를 1:1:1로 섞은 눈부신 형광 에메랄드빛 각성 폭탄주입니다.",
-    "recipe_number": 59,
-    "formatted_number": "No.59"
+    "recipe_number": 60,
+    "formatted_number": "No.60"
   },
   {
     "recipe_id": 77,
@@ -2652,10 +2652,10 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 3,
     "item_count": 3,
     "step_id": 4,
-    "step_order": 12,
+    "step_order": 19,
     "unlock_hint": "소주에 붉은 과채 식초와 푸른 레몬 에이드를 비중 차이로 층분리시켜 잔 속에 태극 문양을 띄운 예술주입니다.",
-    "recipe_number": 48,
-    "formatted_number": "No.48"
+    "recipe_number": 55,
+    "formatted_number": "No.55"
   },
   {
     "recipe_id": 78,
@@ -2696,10 +2696,10 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 3,
     "item_count": 2,
     "step_id": 5,
-    "step_order": 12,
+    "step_order": 7,
     "unlock_hint": "시원한 황금 라거 두 배에 아이스 아메리카노 하나를 부어 수제 흑맥주 풍미를 낸 커피 맥주입니다.",
-    "recipe_number": 60,
-    "formatted_number": "No.60"
+    "recipe_number": 62,
+    "formatted_number": "No.62"
   },
   {
     "recipe_id": 80,
@@ -2762,10 +2762,10 @@ window.KSool.SeedDataBundle = {
     "sum_ratio": 4,
     "item_count": 3,
     "step_id": 5,
-    "step_order": 13,
+    "step_order": 8,
     "unlock_hint": "구수한 전통 탁주 두 배에 고소한 목장 우유와 단팥 아이스바를 녹여 팥빙수처럼 걸쭉하게 즐기는 막걸리입니다.",
-    "recipe_number": 61,
-    "formatted_number": "No.61"
+    "recipe_number": 63,
+    "formatted_number": "No.63"
   },
   {
     "recipe_id": 83,
@@ -3564,22 +3564,6 @@ window.KSool.SeedDataBundle = {
     "ratio": 1
   },
   {
-    "id": 93,
-    "recipe_id": 38,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 94,
-    "recipe_id": 38,
-    "slot_order": 2,
-    "ingredient_id": 610,
-    "detail_ingredient_id": null,
-    "ratio": 2
-  },
-  {
     "id": 95,
     "recipe_id": 39,
     "slot_order": 1,
@@ -3644,22 +3628,6 @@ window.KSool.SeedDataBundle = {
     "ratio": 2
   },
   {
-    "id": 103,
-    "recipe_id": 42,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 104,
-    "recipe_id": 42,
-    "slot_order": 2,
-    "ingredient_id": 612,
-    "detail_ingredient_id": null,
-    "ratio": 2
-  },
-  {
     "id": 105,
     "recipe_id": 43,
     "slot_order": 1,
@@ -3674,86 +3642,6 @@ window.KSool.SeedDataBundle = {
     "ingredient_id": 503,
     "detail_ingredient_id": null,
     "ratio": 4
-  },
-  {
-    "id": 107,
-    "recipe_id": 44,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 108,
-    "recipe_id": 44,
-    "slot_order": 2,
-    "ingredient_id": 611,
-    "detail_ingredient_id": null,
-    "ratio": 2
-  },
-  {
-    "id": 109,
-    "recipe_id": 45,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 110,
-    "recipe_id": 45,
-    "slot_order": 2,
-    "ingredient_id": 613,
-    "detail_ingredient_id": null,
-    "ratio": 2
-  },
-  {
-    "id": 111,
-    "recipe_id": 46,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 112,
-    "recipe_id": 46,
-    "slot_order": 2,
-    "ingredient_id": 614,
-    "detail_ingredient_id": null,
-    "ratio": 2
-  },
-  {
-    "id": 113,
-    "recipe_id": 47,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 114,
-    "recipe_id": 47,
-    "slot_order": 2,
-    "ingredient_id": 615,
-    "detail_ingredient_id": null,
-    "ratio": 2
-  },
-  {
-    "id": 115,
-    "recipe_id": 48,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 116,
-    "recipe_id": 48,
-    "slot_order": 2,
-    "ingredient_id": 616,
-    "detail_ingredient_id": null,
-    "ratio": 2
   },
   {
     "id": 117,
@@ -3778,22 +3666,6 @@ window.KSool.SeedDataBundle = {
     "ingredient_id": 705,
     "detail_ingredient_id": null,
     "ratio": 1
-  },
-  {
-    "id": 120,
-    "recipe_id": 50,
-    "slot_order": 1,
-    "ingredient_id": 105,
-    "detail_ingredient_id": null,
-    "ratio": 3
-  },
-  {
-    "id": 121,
-    "recipe_id": 50,
-    "slot_order": 2,
-    "ingredient_id": 617,
-    "detail_ingredient_id": null,
-    "ratio": 2
   },
   {
     "id": 122,
@@ -4544,6 +4416,134 @@ window.KSool.SeedDataBundle = {
     "recipe_id": 85,
     "slot_order": 3,
     "ingredient_id": 701,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1076,
+    "recipe_id": 38,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1077,
+    "recipe_id": 38,
+    "slot_order": 2,
+    "ingredient_id": 610,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1084,
+    "recipe_id": 42,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1085,
+    "recipe_id": 42,
+    "slot_order": 2,
+    "ingredient_id": 612,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1088,
+    "recipe_id": 44,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1089,
+    "recipe_id": 44,
+    "slot_order": 2,
+    "ingredient_id": 611,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1090,
+    "recipe_id": 45,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1091,
+    "recipe_id": 45,
+    "slot_order": 2,
+    "ingredient_id": 613,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1092,
+    "recipe_id": 46,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1093,
+    "recipe_id": 46,
+    "slot_order": 2,
+    "ingredient_id": 614,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1094,
+    "recipe_id": 47,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1095,
+    "recipe_id": 47,
+    "slot_order": 2,
+    "ingredient_id": 615,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1096,
+    "recipe_id": 48,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1097,
+    "recipe_id": 48,
+    "slot_order": 2,
+    "ingredient_id": 616,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1100,
+    "recipe_id": 50,
+    "slot_order": 1,
+    "ingredient_id": 105,
+    "detail_ingredient_id": null,
+    "ratio": 7
+  },
+  {
+    "id": 1101,
+    "recipe_id": 50,
+    "slot_order": 2,
+    "ingredient_id": 707,
     "detail_ingredient_id": null,
     "ratio": 1
   }
