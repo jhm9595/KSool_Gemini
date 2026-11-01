@@ -151,7 +151,7 @@ class KSoolApp {
     try {
       const [categories, ingredients_base, ingredients_detail, recipes, recipe_ingredients, external_hints] =
         await Promise.all([
-          fetch('./data/categories.json?v=20261101_26').then(r => r.json()),
+          fetch('./data/categories.json?v=20261101_27').then(r => r.json()),
           fetch('./data/ingredients_base.json?v=20261101_26').then(r => r.json()),
           fetch('./data/ingredients_detail.json?v=20261101_25').then(r => r.json()),
           fetch('./data/recipes.json?v=20261101_27').then(r => r.json()),

@@ -36,15 +36,15 @@ window.KSool.SeedDataBundle = {
     "order": 5
   },
   {
-    "category_id": "ETC",
-    "name": "기타",
-    "emoji": "🍯",
-    "order": 6
-  },
-  {
     "category_id": "DESSERT",
     "name": "디저트",
     "emoji": "🍦",
+    "order": 6
+  },
+  {
+    "category_id": "ETC",
+    "name": "기타",
+    "emoji": "🍯",
     "order": 7
   }
 ],

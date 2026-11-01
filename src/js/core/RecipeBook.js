@@ -16,7 +16,7 @@ class RecipeBook {
   }
 
   load(bundleData, customPromotedRecipes = []) {
-    this.categories = bundleData.categories || [];
+    this.categories = [...(bundleData.categories || [])].sort((a, b) => (a.order || 0) - (b.order || 0));
     this.baseIngredients.clear();
     this.detailIngredients.clear();
     this.detailsByBaseId.clear();
