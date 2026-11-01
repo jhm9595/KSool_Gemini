@@ -61,7 +61,8 @@ class InventoryManager {
         this.shownTabIntros = {
           collection: Boolean(saved.shownTabIntros.collection),
           fridge: Boolean(saved.shownTabIntros.fridge),
-          suggestions: Boolean(saved.shownTabIntros.suggestions)
+          suggestions: Boolean(saved.shownTabIntros.suggestions),
+          detailPicker: Boolean(saved.shownTabIntros.detailPicker)
         };
       }
     }
@@ -69,6 +70,14 @@ class InventoryManager {
     // 2. 현재 해금된 레시피 진행도에 맞춰 Step(1~7) 및 단계별 기초 재료·조합 재료 동기화
     this._syncStepAndIngredients();
     this._recalculateLevel();
+
+    // 하위 호환성: 이미 해금된 기능/탭인데 저장 데이터의 플래그가 누락되어 있던 경우 플래그 동기화
+    // (새로고침 시 팝업이 반복해서 뜨지 않도록 이미 해금된 항목은 플래그를 true로 맞춤)
+    if (this.craftFailCount >= 1) this.shownTabIntros.collection = true;
+    if (this.isDetailPickerUnlocked()) this.shownTabIntros.detailPicker = true;
+    if (this.getUnlockProgressRatio() >= 0.8) this.shownTabIntros.fridge = true;
+    const totalRecs = this.recipeBook.getAllRecipes().length;
+    if (totalRecs > 0 && this.unlockedRecipeIds.size >= totalRecs) this.shownTabIntros.suggestions = true;
   }
 
   /**

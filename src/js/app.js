@@ -115,10 +115,9 @@ class KSoolApp {
     this._bindGlobalEvents();
     this.renderAll();
 
-    this._checkProgressiveTabUnlocks();
-    if (this.pendingTabIntroQueue.length > 0) {
-      setTimeout(() => this._showNextPendingTabIntro(), 600);
-    }
+    // 초기 로딩/새로고침 시에는 해금 탭 상태만 동기화하고, 팝업 큐는 실행하지 않습니다.
+    // (안내 모달 팝업은 새로고침이 아니라 실제 플레이 진행 중에만 발생해야 함)
+    this._checkProgressiveTabUnlocks(false);
   }
 
   /**
@@ -195,19 +194,25 @@ class KSoolApp {
     });
   }
 
-  _checkProgressiveTabUnlocks() {
+  _checkProgressiveTabUnlocks(shouldQueue = true) {
     if (this.inventory.unlockAllSandboxMode) return;
 
     if (!this.inventory.shownTabIntros.collection && this.inventory.craftFailCount >= 1) {
       this.inventory.shownTabIntros.collection = true;
       this.inventory.save();
-      this.pendingTabIntroQueue.push('collection');
+      if (shouldQueue) this.pendingTabIntroQueue.push('collection');
     }
 
     if (!this.inventory.shownTabIntros.detailPicker && this.inventory.isDetailPickerUnlocked()) {
       this.inventory.shownTabIntros.detailPicker = true;
       this.inventory.save();
-      this.pendingTabIntroQueue.push('detailPicker');
+      if (shouldQueue) this.pendingTabIntroQueue.push('detailPicker');
+    }
+
+    if (!this.inventory.shownTabIntros.fridge && this.inventory.getUnlockProgressRatio() >= 0.8) {
+      this.inventory.shownTabIntros.fridge = true;
+      this.inventory.save();
+      if (shouldQueue) this.pendingTabIntroQueue.push('fridge');
     }
 
     const totalRecipes = this.recipeBook.getAllRecipes().length;
@@ -218,7 +223,7 @@ class KSoolApp {
     ) {
       this.inventory.shownTabIntros.suggestions = true;
       this.inventory.save();
-      this.pendingTabIntroQueue.push('suggestions');
+      if (shouldQueue) this.pendingTabIntroQueue.push('suggestions');
     }
   }
 
@@ -1192,7 +1197,7 @@ class KSoolApp {
           this.inventory.unlockAllSandboxMode = false;
           this.inventory.userLevel = 1;
           this.inventory.craftFailCount = 0;
-          this.inventory.shownTabIntros = { collection: false, fridge: false, suggestions: false };
+          this.inventory.shownTabIntros = { collection: false, fridge: false, suggestions: false, detailPicker: false };
           this.pendingTabIntroQueue = [];
           this.inventory.unlockedImageRecipeIds.clear();
           this.inventory.hintProgressByRecipe = {};
