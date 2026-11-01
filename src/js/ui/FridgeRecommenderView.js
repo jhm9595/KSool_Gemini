@@ -132,7 +132,7 @@ class FridgeRecommenderView {
               <div class="fridge-card-top">
                 <div style="display:flex; align-items:center; gap:8px;">
                   <span style="display:flex; align-items:center; justify-content:center;">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(rec, 28) : rec.emoji}</span>
-                  <span style="font-size:0.86rem; font-weight:900; color:#f8fafc;">
+                  <span class="fridge-recipe-name">
                     ${isWinner ? '🎯 [당첨!] ' : ''}${this.brandResolver.resolveName(rec)}
                   </span>
                 </div>
@@ -151,7 +151,7 @@ class FridgeRecommenderView {
               <div class="fridge-card-top">
                 <div style="display:flex; align-items:center; gap:6px;">
                   <span class="online-sug-badge">🌐 조합추천</span>
-                  <span style="font-size:0.8rem; font-weight:800; color:#e2e8f0;">
+                  <span class="fridge-recipe-name" style="color:#e2e8f0;">
                     ${isWinner ? '🎯 [당첨!] ' : ''}유저 추천 조합 (👍 ${sug.upvotes})
                   </span>
                 </div>
@@ -191,9 +191,7 @@ class FridgeRecommenderView {
           </div>
 
           <button class="random-pick-btn" id="fridge-random-pick-btn" ${fullMatches.length === 0 ? 'disabled' : ''}>
-            <span>${fullMatches.length > 0
-              ? `🎲 랜덤 추첨 (${fullMatches.length}종 중 추첨)`
-              : `🎲 랜덤 추첨`}</span>
+            <span>🎲 랜덤 추첨</span>
           </button>
 
           <div class="fridge-match-list">

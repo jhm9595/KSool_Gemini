@@ -265,14 +265,38 @@
   font-weight: 700;
 }
 
-/* 🧊 냉장고를 부탁해: 폴더블 폰 / 태블릿 2-컬럼 분할 뷰 */
-@media (min-width: 680px), (orientation: landscape) and (min-width: 580px) {
+.fridge-recipe-name {
+  font-size: 0.88rem;
+  font-weight: 900;
+  color: #f8fafc;
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+.fridge-recipe-card .suggestion-items-wrap {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.fridge-recipe-card .pot-slot.sug-slot-card {
+  width: 68px !important;
+  min-width: 66px !important;
+  height: 64px !important;
+  padding: 4px !important;
+  box-sizing: border-box !important;
+}
+
+/* 🧊 냉장고를 부탁해: 대화면 / 태블릿 2-컬럼 와이드 분할 뷰 */
+@media (min-width: 760px) {
   .fridge-view-container {
     display: grid !important;
-    grid-template-columns: 1.05fr 1fr !important;
-    gap: 16px !important;
+    grid-template-columns: minmax(330px, 1fr) minmax(380px, 1.25fr) !important;
+    gap: 20px !important;
     align-items: start !important;
-    max-width: 1000px;
+    max-width: 1040px;
     margin: 0 auto;
   }
 }

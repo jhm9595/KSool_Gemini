@@ -422,7 +422,7 @@ class PartyGameHubView {
     this.requestWakeLock();
 
     container.innerHTML = `
-      <div class="party-fullscreen-wrapper">
+      <div class="party-fullscreen-wrapper party-game-${this.activeGameKey}" data-game="${this.activeGameKey}">
         <!-- 상단 미니 탑바: 뒤로가기 버튼 + 현재 게임 뱃지 + 사운드 토글 -->
         <div class="party-game-top-bar">
           <button type="button" class="party-back-btn" id="party-back-btn">
@@ -439,7 +439,7 @@ class PartyGameHubView {
         </div>
 
         <!-- 전체화면 가득 찬 게임 실행 영역 -->
-        <div id="party-game-stage" class="party-game-stage fullscreen"></div>
+        <div id="party-game-stage" class="party-game-stage fullscreen party-stage-${this.activeGameKey}"></div>
 
         <!-- 풀스크린 벌칙 플래시 오버레이 -->
         <div id="party-penalty-overlay" class="party-penalty-overlay"></div>

@@ -2018,10 +2018,17 @@
 
 /* ⑦ 냉장고를 부탁해 미니게임 임베드 스타일 */
 .party-game-stage .fridge-view-container {
-  max-width: 480px;
+  max-width: 1040px;
   width: 100%;
   margin: 0 auto;
-  padding: 4px 2px 20px;
+  padding: 6px 4px 24px;
+  box-sizing: border-box;
+}
+
+/* 냉장고를 부탁해 대화면 폭 확장 */
+.party-game-fridge > *,
+.party-stage-fridge {
+  max-width: 1040px !important;
 }
 
 /* ==========================================================================
@@ -2643,6 +2650,10 @@
     width: 100%;
   }
 
+  .party-stage-fridge {
+    max-width: 1040px !important;
+  }
+
   .party-fullscreen-wrapper {
     align-items: center;
   }
@@ -2650,6 +2661,10 @@
   .party-fullscreen-wrapper > * {
     max-width: 720px;
     width: 100%;
+  }
+
+  .party-fullscreen-wrapper.party-game-fridge > * {
+    max-width: 1040px !important;
   }
 
   /* 표면장력 게임: 큼직한 3D 소주잔 & 버튼 여유 */
