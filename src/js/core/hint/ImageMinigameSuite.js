@@ -127,6 +127,12 @@ class ImageMinigameSuite {
 
   setQixDirection(dc, dr) {
     if (!this.isRunning || this.gameType !== 'TERRITORY_QIX' || !this.qixState) return;
+    if (this.gameState === 'READY') {
+      this.gameState = 'PLAYING';
+      this.qixState.lastTime = performance.now();
+      this.qixState.player.moveAccum = 0;
+      this.audio.playTap();
+    }
     this.qixState.player.dc = dc;
     this.qixState.player.dr = dr;
   }
@@ -328,6 +334,7 @@ class ImageMinigameSuite {
     const launchBall = () => {
       if (this.gameState === 'READY') {
         this.gameState = 'PLAYING';
+        this.bbState.lastTime = performance.now();
         this.audio.playTap();
         const b = this.bbState.ball;
         b.vy = -3.9;
@@ -336,6 +343,7 @@ class ImageMinigameSuite {
         this.audio.playTap();
         this.start('BRICK_BREAKER');
         this.gameState = 'PLAYING';
+        this.bbState.lastTime = performance.now();
         const b = this.bbState.ball;
         b.vy = -3.9;
         b.vx = (Math.random() > 0.5 ? 1 : -1) * (2.8 + Math.random() * 0.8);
@@ -419,7 +427,7 @@ class ImageMinigameSuite {
   _updateBrickBreaker() {
     const st = this.bbState;
     const now = performance.now();
-    const dt = (now - st.lastTime) / 1000;
+    const dt = Math.min((now - st.lastTime) / 1000, 0.05);
     st.lastTime = now;
     st.elapsed += dt;
 
@@ -725,16 +733,30 @@ class ImageMinigameSuite {
     const handleQixAction = () => {
       if (this.gameState === 'READY') {
         this.gameState = 'PLAYING';
+        this.qixState.lastTime = performance.now();
+        this.qixState.player.moveAccum = 0;
+        this.qixState.player.dc = 0;
+        this.qixState.player.dr = 0;
         this.audio.playTap();
+        return true;
       } else if (this.gameState === 'OVER') {
         this.audio.playTap();
         this.start('TERRITORY_QIX');
         this.gameState = 'PLAYING';
+        this.qixState.lastTime = performance.now();
+        this.qixState.player.moveAccum = 0;
+        this.qixState.player.dc = 0;
+        this.qixState.player.dr = 0;
+        return true;
       }
+      return false;
     };
 
     const steerToward = (clientX, clientY) => {
-      handleQixAction();
+      const wasStarting = handleQixAction();
+      // 게임 시작 화면(터치하여 시작)을 누르는 탭에서는 위로 무작정 돌진하지 않고 제자리 대기!
+      if (wasStarting) return;
+
       const rect = this.canvas.getBoundingClientRect();
       const x = (clientX - rect.left) * (this.width / rect.width);
       const y = (clientY - rect.top) * (this.height / rect.height) - topOffset;
@@ -926,7 +948,7 @@ class ImageMinigameSuite {
   _updateTerritoryQix() {
     const st = this.qixState;
     const now = performance.now();
-    const dt = (now - st.lastTime) / 1000;
+    const dt = Math.min((now - st.lastTime) / 1000, 0.05); // 최대 50ms로 델타타임 클램핑
     st.lastTime = now;
     st.elapsed += dt;
 
@@ -1041,6 +1063,8 @@ class ImageMinigameSuite {
     st.player.r = st.rows - 1;
     st.player.dc = 0;
     st.player.dr = 0;
+    st.player.moveAccum = 0;
+    st.lastTime = performance.now();
 
     if (st.lives <= 0) {
       this.gameState = 'OVER';
