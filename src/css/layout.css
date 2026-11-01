@@ -396,54 +396,137 @@ body.admin-mode .header-toolbar {
   line-height: 1.4;
 }
 
-.settings-theme-selector {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+/* 사운드 / 효과음 컨트롤 카드 */
+.settings-sound-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 12px 14px;
 }
 
-.settings-theme-chip {
-  background: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 10px;
-  padding: 8px 4px;
+.settings-sound-mute-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 3px;
+  width: 58px;
+  height: 58px;
+  border-radius: 12px;
+  border: 1.5px solid #38bdf8;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(2, 132, 199, 0.25) 100%);
+  color: #38bdf8;
   cursor: pointer;
   transition: all 0.15s ease;
-  color: #cbd5e1;
+  flex-shrink: 0;
 }
 
-.settings-theme-chip:hover {
-  border-color: #38bdf8;
-  background: #24344d;
+.settings-sound-mute-btn:hover {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(2, 132, 199, 0.4) 100%);
+  transform: translateY(-1px);
 }
 
-.settings-theme-chip.active {
-  background: rgba(14, 165, 233, 0.18);
-  border-color: #0284c7;
-  color: #38bdf8;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+.settings-sound-mute-btn:active {
+  transform: scale(0.96);
 }
 
-.theme-chip-icon {
-  font-size: 1.25rem;
+.settings-sound-mute-btn.is-muted {
+  border-color: #64748b;
+  background: rgba(30, 41, 59, 0.5);
+  color: #94a3b8;
 }
 
-.theme-chip-label {
+.sound-icon-display {
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.sound-mute-btn-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+.settings-sound-control-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.settings-sound-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sound-status-label {
   font-size: 0.76rem;
   font-weight: 800;
+  color: #f1f5f9;
 }
 
-.theme-chip-sub {
-  font-size: 0.65rem;
-  color: #64748b;
+.sound-vol-percent {
+  font-size: 0.74rem;
+  font-weight: 900;
+  color: #38bdf8;
+  font-variant-numeric: tabular-nums;
 }
 
-.settings-theme-chip.active .theme-chip-sub {
-  color: #7dd3fc;
+.settings-sound-mute-btn.is-muted + .settings-sound-control-col .sound-vol-percent {
+  color: #94a3b8;
+}
+
+.settings-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slider-min-icon, .slider-max-icon {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.settings-sound-range {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: #334155;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.settings-sound-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.settings-sound-range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.settings-sound-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+  cursor: pointer;
+  border: none;
 }
 
 .settings-danger-section {

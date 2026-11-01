@@ -2,7 +2,7 @@
  * SettingsModalView - K-SOOL Settings Modal
  *
  * Contains strictly:
- * 1. Graphic Icon Style Switcher (✨ 기본 이모지 / 👾 레트로 도트 / 💎 고급 형태)
+ * 1. Sound / Audio Settings (음소거 토글, 0~100% 음량 조절 슬라이더, 동적 아이콘)
  * 2. Entire Game Progress Reset (전체 초기화)
  */
 (function() {
@@ -31,12 +31,22 @@
       modal.classList.remove('active');
     }
 
+    _getSoundIcon(isMuted, volPercent) {
+      if (isMuted || volPercent === 0) return '🔇';
+      if (volPercent <= 35) return '🔈';
+      if (volPercent <= 70) return '🔉';
+      return '🔊';
+    }
+
     render() {
       const content = document.getElementById(this.contentId);
       if (!content) return;
 
       const app = this.app;
-      const currentTheme = window.KSool?.PixelIconRegistry?.getTheme() || 'hd';
+      const audioService = app?.audio;
+      const isMuted = audioService ? audioService.isMutedState() : false;
+      const volPercent = audioService ? audioService.getVolumePercent() : 70;
+      const soundIcon = this._getSoundIcon(isMuted, volPercent);
 
       content.innerHTML = `
         <div class="modal-header">
@@ -48,26 +58,29 @@
         </div>
 
         <div class="settings-modal-body">
-          <!-- 1. 아이콘 그래픽 스타일 -->
+          <!-- 1. 효과음 및 사운드 설정 -->
           <div class="settings-section">
-            <div class="settings-section-title">아이콘 그래픽 스타일</div>
-            <div class="settings-theme-selector">
-              <button type="button" class="settings-theme-chip ${currentTheme === 'emoji' ? 'active' : ''}" data-set-theme="emoji">
-                <span class="theme-chip-icon">✨</span>
-                <span class="theme-chip-label">이모지</span>
+            <div class="settings-section-title">효과음 설정</div>
+            <div class="settings-sound-card">
+              <button type="button" class="settings-sound-mute-btn ${isMuted ? 'is-muted' : ''}" id="settings-sound-mute-btn" title="${isMuted ? '소리 켜기' : '음소거'}">
+                <span class="sound-icon-display" id="settings-sound-icon">${soundIcon}</span>
+                <span class="sound-mute-btn-label" id="settings-mute-btn-label">${isMuted ? '무음' : '소리'}</span>
               </button>
-              <button type="button" class="settings-theme-chip ${currentTheme === 'dot' ? 'active' : ''}" data-set-theme="dot">
-                <span class="theme-chip-icon">👾</span>
-                <span class="theme-chip-label">도트</span>
-              </button>
-              <button type="button" class="settings-theme-chip ${currentTheme === 'hd' ? 'active' : ''}" data-set-theme="hd">
-                <span class="theme-chip-icon">💎</span>
-                <span class="theme-chip-label">고급</span>
-              </button>
+              <div class="settings-sound-control-col">
+                <div class="settings-sound-labels">
+                  <span class="sound-status-label" id="settings-sound-status-label">${isMuted ? '음소거 상태' : '효과음 켜짐'}</span>
+                  <span class="sound-vol-percent" id="settings-sound-percent">${isMuted ? '0%' : `${volPercent}%`}</span>
+                </div>
+                <div class="settings-slider-row">
+                  <span class="slider-min-icon">🔈</span>
+                  <input type="range" min="0" max="100" value="${isMuted ? 0 : volPercent}" class="settings-sound-range" id="settings-sound-range" aria-label="음량 조절" />
+                  <span class="slider-max-icon">🔊</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- 2. 전체 초기화 -->
+          <!-- 2. 전체 진행도 초기화 -->
           <div class="settings-section settings-danger-section">
             <div class="settings-section-title" style="color:#f87171;">진행도 초기화</div>
             <div class="settings-reset-card" style="border-bottom:none; padding:0;">
@@ -85,12 +98,13 @@
 
     _bindEvents(container) {
       const app = this.app;
+      const audioService = app?.audio;
 
       // 닫기 버튼
       const closeBtn = container.querySelector('#settings-close-btn');
       if (closeBtn) {
         closeBtn.onclick = () => {
-          app?.audio?.playTap();
+          audioService?.playTap();
           this.close();
         };
       }
@@ -103,20 +117,54 @@
         };
       }
 
-      // 1. 아이콘 테마 변경
-      container.querySelectorAll('[data-set-theme]').forEach(btn => {
-        btn.onclick = () => {
-          const theme = btn.getAttribute('data-set-theme');
-          if (window.KSool?.PixelIconRegistry) {
-            window.KSool.PixelIconRegistry.setTheme(theme);
-            app?.audio?.playTap();
-            app?.renderAll();
-            this.render();
+      // 1. 사운드 음소거 토글 버튼
+      const muteBtn = container.querySelector('#settings-sound-mute-btn');
+      const soundIconEl = container.querySelector('#settings-sound-icon');
+      const muteBtnLabelEl = container.querySelector('#settings-mute-btn-label');
+      const statusLabelEl = container.querySelector('#settings-sound-status-label');
+      const percentEl = container.querySelector('#settings-sound-percent');
+      const rangeEl = container.querySelector('#settings-sound-range');
+
+      const updateSoundUI = () => {
+        if (!audioService) return;
+        const isMuted = audioService.isMutedState();
+        const volPercent = audioService.getVolumePercent();
+        const icon = this._getSoundIcon(isMuted, volPercent);
+
+        if (soundIconEl) soundIconEl.textContent = icon;
+        if (muteBtnLabelEl) muteBtnLabelEl.textContent = isMuted ? '무음' : '소리';
+        if (muteBtn) muteBtn.classList.toggle('is-muted', isMuted);
+        if (statusLabelEl) statusLabelEl.textContent = isMuted ? '음소거 상태' : '효과음 켜짐';
+        if (percentEl) percentEl.textContent = isMuted ? '0%' : `${volPercent}%`;
+        if (rangeEl) rangeEl.value = isMuted ? 0 : volPercent;
+      };
+
+      if (muteBtn && audioService) {
+        muteBtn.onclick = () => {
+          audioService.toggleMute();
+          updateSoundUI();
+          if (!audioService.isMutedState()) {
+            audioService.playTap();
           }
         };
-      });
+      }
 
-      // 2. 전체 진행도 리셋
+      // 2. 사운드 볼륨 슬라이더
+      if (rangeEl && audioService) {
+        rangeEl.oninput = () => {
+          const val = Number(rangeEl.value);
+          audioService.setVolume(val / 100);
+          updateSoundUI();
+        };
+
+        rangeEl.onchange = () => {
+          if (!audioService.isMutedState()) {
+            audioService.playTap();
+          }
+        };
+      }
+
+      // 3. 전체 진행도 리셋
       const resetAllBtn = container.querySelector('#settings-reset-all-btn');
       if (resetAllBtn) {
         resetAllBtn.onclick = () => {

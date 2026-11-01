@@ -3,6 +3,9 @@ window.KSool = window.KSool || {};
 class AudioService {
   constructor() {
     this.ctx = null;
+    this.isMuted = localStorage.getItem('ksool_sound_muted') === 'true';
+    const savedVol = localStorage.getItem('ksool_sound_volume');
+    this.volume = savedVol !== null ? Math.max(0, Math.min(1, parseFloat(savedVol))) : 0.7;
   }
 
   _getContext() {
@@ -16,6 +19,50 @@ class AudioService {
     return this.ctx;
   }
 
+  getVolume() {
+    return this.volume;
+  }
+
+  getVolumePercent() {
+    return Math.round(this.volume * 100);
+  }
+
+  isMutedState() {
+    return this.isMuted || this.volume <= 0;
+  }
+
+  getEffectiveVolume() {
+    return this.isMutedState() ? 0 : this.volume;
+  }
+
+  setVolume(vol) {
+    this.volume = Math.max(0, Math.min(1, Number(vol)));
+    if (this.volume === 0) {
+      this.isMuted = true;
+    } else if (this.isMuted && this.volume > 0) {
+      this.isMuted = false;
+    }
+    try {
+      localStorage.setItem('ksool_sound_volume', String(this.volume));
+      localStorage.setItem('ksool_sound_muted', String(this.isMuted));
+    } catch (_) {}
+    return this.volume;
+  }
+
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+    if (!this.isMuted && this.volume === 0) {
+      this.volume = 0.5;
+      try {
+        localStorage.setItem('ksool_sound_volume', '0.5');
+      } catch (_) {}
+    }
+    try {
+      localStorage.setItem('ksool_sound_muted', String(this.isMuted));
+    } catch (_) {}
+    return this.isMuted;
+  }
+
   vibrate(pattern = 15) {
     if (navigator && typeof navigator.vibrate === 'function') {
       try { navigator.vibrate(pattern); } catch (_) {}
@@ -23,6 +70,8 @@ class AudioService {
   }
 
   playTap() {
+    const effVol = this.getEffectiveVolume();
+    if (effVol <= 0) return;
     this.vibrate(10);
     const ctx = this._getContext();
     if (!ctx) return;
@@ -32,8 +81,8 @@ class AudioService {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(520, now);
     osc.frequency.exponentialRampToValueAtTime(240, now + 0.06);
-    gain.gain.setValueAtTime(0.12, now);
-    gain.gain.linearRampToValueAtTime(0.01, now + 0.06);
+    gain.gain.setValueAtTime(0.12 * effVol, now);
+    gain.gain.linearRampToValueAtTime(0.01 * effVol, now + 0.06);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start(now);
@@ -41,6 +90,8 @@ class AudioService {
   }
 
   playSuccess() {
+    const effVol = this.getEffectiveVolume();
+    if (effVol <= 0) return;
     this.vibrate([30, 50, 60]);
     const ctx = this._getContext();
     if (!ctx) return;
@@ -50,8 +101,8 @@ class AudioService {
       const gain = ctx.createGain();
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, now + idx * 0.07);
-      gain.gain.setValueAtTime(0.18, now + idx * 0.07);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.25);
+      gain.gain.setValueAtTime(0.18 * effVol, now + idx * 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + idx * 0.07 + 0.25);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start(now + idx * 0.07);
@@ -60,6 +111,8 @@ class AudioService {
   }
 
   playFail() {
+    const effVol = this.getEffectiveVolume();
+    if (effVol <= 0) return;
     this.vibrate([40, 40, 40]);
     const ctx = this._getContext();
     if (!ctx) return;
@@ -69,8 +122,8 @@ class AudioService {
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(190, now);
     osc.frequency.linearRampToValueAtTime(110, now + 0.25);
-    gain.gain.setValueAtTime(0.15, now);
-    gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+    gain.gain.setValueAtTime(0.15 * effVol, now);
+    gain.gain.linearRampToValueAtTime(0.01 * effVol, now + 0.25);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start(now);

@@ -9,7 +9,24 @@ class PartySoundSynth {
     this.ctx = null;
     this.pourOsc = null;
     this.pourGain = null;
-    this.isMuted = false;
+  }
+
+  _getEffectiveVolume() {
+    const isMuted = localStorage.getItem('ksool_sound_muted') === 'true';
+    if (isMuted) return 0;
+    const savedVol = localStorage.getItem('ksool_sound_volume');
+    const vol = savedVol !== null ? parseFloat(savedVol) : 0.7;
+    return Math.max(0, Math.min(1, vol));
+  }
+
+  get isMuted() {
+    return this._getEffectiveVolume() <= 0;
+  }
+
+  set isMuted(val) {
+    try {
+      localStorage.setItem('ksool_sound_muted', String(Boolean(val)));
+    } catch (_) {}
   }
 
   _initContext() {
@@ -25,7 +42,8 @@ class PartySoundSynth {
   }
 
   playTap() {
-    if (this.isMuted) return;
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const osc = this.ctx.createOscillator();
@@ -33,8 +51,8 @@ class PartySoundSynth {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(600, this.ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(850, this.ctx.currentTime + 0.05);
-    gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+    gain.gain.setValueAtTime(0.18 * effVol, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001 * effVol, this.ctx.currentTime + 0.05);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start();
@@ -46,7 +64,8 @@ class PartySoundSynth {
   }
 
   playUp() {
-    if (this.isMuted) return;
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -55,8 +74,8 @@ class PartySoundSynth {
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(440, now);
     osc.frequency.exponentialRampToValueAtTime(880, now + 0.18);
-    gain.gain.setValueAtTime(0.3, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+    gain.gain.setValueAtTime(0.3 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(0.01 * effVol, now + 0.22);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start(now);
@@ -64,7 +83,8 @@ class PartySoundSynth {
   }
 
   playDown() {
-    if (this.isMuted) return;
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -73,8 +93,8 @@ class PartySoundSynth {
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(700, now);
     osc.frequency.exponentialRampToValueAtTime(320, now + 0.18);
-    gain.gain.setValueAtTime(0.3, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+    gain.gain.setValueAtTime(0.3 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(0.01 * effVol, now + 0.22);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start(now);
@@ -82,7 +102,8 @@ class PartySoundSynth {
   }
 
   playMetalHit(strainRatio = 0.5) {
-    if (this.isMuted) return;
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -100,8 +121,8 @@ class PartySoundSynth {
     osc2.frequency.setValueAtTime(baseFreq * 1.5, now);
     osc2.frequency.exponentialRampToValueAtTime(baseFreq * 0.9, now + 0.08);
 
-    gain.gain.setValueAtTime(0.35, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    gain.gain.setValueAtTime(0.35 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + 0.1);
 
     osc1.connect(gain);
     osc2.connect(gain);
@@ -114,7 +135,8 @@ class PartySoundSynth {
   }
 
   playSnap() {
-    if (this.isMuted) return;
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -124,8 +146,8 @@ class PartySoundSynth {
     osc.type = 'square';
     osc.frequency.setValueAtTime(2200, now);
     osc.frequency.exponentialRampToValueAtTime(300, now + 0.12);
-    gain.gain.setValueAtTime(0.4, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    gain.gain.setValueAtTime(0.4 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + 0.15);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start(now);
@@ -133,7 +155,8 @@ class PartySoundSynth {
   }
 
   startPour() {
-    if (this.isMuted) return;
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx || this.pourOsc) return;
     const now = this.ctx.currentTime;
@@ -141,7 +164,7 @@ class PartySoundSynth {
     this.pourGain = this.ctx.createGain();
     this.pourOsc.type = 'triangle';
     this.pourOsc.frequency.setValueAtTime(380, now);
-    this.pourGain.gain.setValueAtTime(0.12, now);
+    this.pourGain.gain.setValueAtTime(0.12 * effVol, now);
     this.pourOsc.connect(this.pourGain);
     this.pourGain.connect(this.ctx.destination);
     this.pourOsc.start(now);
@@ -168,7 +191,8 @@ class PartySoundSynth {
   }
 
   playPour(duration = 0.8) {
-    if (this.isMuted) return;
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -177,8 +201,8 @@ class PartySoundSynth {
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(360, now);
     osc.frequency.exponentialRampToValueAtTime(680, now + duration);
-    gain.gain.setValueAtTime(0.15, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    gain.gain.setValueAtTime(0.15 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + duration);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start(now);
@@ -186,7 +210,8 @@ class PartySoundSynth {
   }
 
   playCurtainReveal() {
-    if (this.isMuted) return;
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -196,8 +221,8 @@ class PartySoundSynth {
       const gain = this.ctx.createGain();
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, now + idx * 0.045);
-      gain.gain.setValueAtTime(0.18, now + idx * 0.045);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.045 + 0.22);
+      gain.gain.setValueAtTime(0.18 * effVol, now + idx * 0.045);
+      gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + idx * 0.045 + 0.22);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
       osc.start(now + idx * 0.045);
@@ -206,7 +231,8 @@ class PartySoundSynth {
   }
 
   playHeartbeat() {
-    if (this.isMuted) return;
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -216,8 +242,8 @@ class PartySoundSynth {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(80, now);
     osc.frequency.exponentialRampToValueAtTime(35, now + 0.12);
-    gain.gain.setValueAtTime(0.45, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+    gain.gain.setValueAtTime(0.45 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + 0.14);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start(now);
@@ -225,7 +251,8 @@ class PartySoundSynth {
   }
 
   playTick() {
-    if (this.isMuted) return;
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -233,8 +260,8 @@ class PartySoundSynth {
     const gain = this.ctx.createGain();
     osc.type = 'sine';
     osc.frequency.setValueAtTime(1400, now);
-    gain.gain.setValueAtTime(0.2, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+    gain.gain.setValueAtTime(0.2 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + 0.03);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start(now);
@@ -242,7 +269,8 @@ class PartySoundSynth {
   }
 
   playSpinWhir() {
-    if (this.isMuted) return;
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -251,8 +279,8 @@ class PartySoundSynth {
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(520, now);
     osc.frequency.exponentialRampToValueAtTime(180, now + 0.4);
-    gain.gain.setValueAtTime(0.25, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
+    gain.gain.setValueAtTime(0.25 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + 0.42);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start(now);
@@ -260,7 +288,8 @@ class PartySoundSynth {
   }
 
   playExplosion() {
-    if (this.isMuted) return;
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -271,8 +300,8 @@ class PartySoundSynth {
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(160, now);
     osc.frequency.exponentialRampToValueAtTime(25, now + 0.45);
-    gain.gain.setValueAtTime(0.6, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    gain.gain.setValueAtTime(0.6 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + 0.5);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start(now);
@@ -285,8 +314,8 @@ class PartySoundSynth {
     sirenOsc.frequency.setValueAtTime(880, now + 0.1);
     sirenOsc.frequency.setValueAtTime(1100, now + 0.25);
     sirenOsc.frequency.setValueAtTime(880, now + 0.4);
-    sirenGain.gain.setValueAtTime(0.3, now + 0.1);
-    sirenGain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+    sirenGain.gain.setValueAtTime(0.3 * effVol, now + 0.1);
+    sirenGain.gain.exponentialRampToValueAtTime(0.01 * effVol, now + 0.6);
     sirenOsc.connect(sirenGain);
     sirenGain.connect(this.ctx.destination);
     sirenOsc.start(now + 0.1);
