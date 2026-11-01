@@ -153,88 +153,108 @@ class HintModalView {
       const needsRatioGameChoice = this.ratioProvider.requiresRatioGame(this.activeRecipeId);
       const isUpAndDownChoice = isBaseballDoneChoice && needsRatioGameChoice;
 
-      // 1. 순차적 3단계 진행 인디케이터
+      // 1. 순차적 3단계 진행 인디케이터 (보라 -> 골드 -> 사이언 색상 테마)
       const stepIndicatorHtml = `
         <div class="hint-step-indicator">
-          <span class="step-pill ${isImageUnlocked ? 'done' : 'curr'}">1.그림${isImageUnlocked ? '✓' : ''}</span>
+          <span class="step-pill pill-purple ${isImageUnlocked ? 'done' : 'curr'}">1.외형${isImageUnlocked ? '✓' : ''}</span>
           <span class="step-pill-arrow">➔</span>
-          <span class="step-pill ${isDescUnlocked ? 'done' : (isImageUnlocked ? 'curr' : 'locked')}">2.설명${isDescUnlocked ? '✓' : ''}</span>
+          <span class="step-pill pill-gold ${isDescUnlocked ? 'done' : (isImageUnlocked ? 'curr' : 'locked')}">2.설명${isDescUnlocked ? '✓' : ''}</span>
           <span class="step-pill-arrow">➔</span>
-          <span class="step-pill ${isRecipeUnlocked ? 'done' : (isBaseballUnlocked ? 'curr' : 'locked')}">3.베이스볼</span>
+          <span class="step-pill pill-cyan ${isRecipeUnlocked ? 'done' : (isBaseballUnlocked ? 'curr' : 'locked')}">3.추리${isRecipeUnlocked ? '✓' : ''}</span>
         </div>
       `;
 
-      // 2. 설명 힌트 박스 (복권 긁기 영역)
-      let hintDescBoxHtml = '';
-      if (recipe.unlock_hint) {
-        if (isDescUnlocked || isRecipeUnlocked) {
-          // 2단계 완료 상태: 텍스트 노출
-          hintDescBoxHtml = `
-            <div class="bb-target-hint hint-desc-revealed">
-              <span class="hint-bulb">💡</span> ${recipe.unlock_hint}
-            </div>
-          `;
-        } else if (!isImageUnlocked) {
-          // 1단계 미달성: 잠김
-          hintDescBoxHtml = `
-            <div class="bb-target-hint hint-desc-locked">
-              <span class="hint-lock-icon">🔒</span>
-              <span><b>2단계 설명 힌트</b>: 1단계 그림 해금 미니게임을 먼저 클리어해야 복권을 긁을 수 있습니다.</span>
-            </div>
-          `;
-        } else {
-          // 1단계 달성, 2단계 미달성: 복권 대기 또는 캔버스 스크래치 카드
-          if (this.isScratchingActive) {
-            hintDescBoxHtml = `
-              <div id="scratch-card-mount-area" style="width:100%; margin-top:4px;"></div>
-            `;
-          } else {
-            hintDescBoxHtml = `
-              <div class="bb-target-hint hint-scratch-prompt" id="scratch-prompt-card">
-                <div class="scratch-prompt-left">
-                  <span class="scratch-ticket-icon">🎫</span>
-                  <div class="scratch-prompt-info">
-                    <div class="scratch-prompt-title">2단계: 설명 힌트 황금 복권 도착!</div>
-                    <div class="scratch-prompt-sub">버튼을 눌러 복권을 긁고 숨겨진 재료 힌트를 확인하세요.</div>
-                  </div>
-                </div>
-                <button type="button" class="btn-start-scratch" id="btn-start-scratch">
-                  <span class="ad-tag">AD</span>
-                  <span>복권 긁기 ➔</span>
-                </button>
-              </div>
-            `;
-          }
-        }
-      }
-
+      // 2. 외부 힌트 (있을 경우만)
       let extHintCardHtml = '';
       if (hasExtHint) {
         const primaryHint = extHints[0];
         const isVideo = primaryHint.platform === 'YOUTUBE';
         const hintIcon = isVideo ? '📺' : '📝';
         const hintSubLabel = isVideo
-          ? `영상 힌트 보러가기 (${window.KSool.ExternalHintLinker.formatTimestamp(primaryHint.start_time_sec)})`
+          ? `영상 힌트 (${window.KSool.ExternalHintLinker.formatTimestamp(primaryHint.start_time_sec)})`
           : '힌트 글 보러가기';
 
         extHintCardHtml = `
-          <button class="hint-big-choice-btn choice-ext-hint choice-span-full" id="choice-ext-hint-btn">
-            <span class="choice-big-icon">${hintIcon}</span>
-            <span class="choice-big-title">힌트보기</span>
-            <span class="choice-big-sub">${hintSubLabel}</span>
+          <button class="hint-ext-hint-bar" id="choice-ext-hint-btn">
+            <span class="ext-icon">${hintIcon}</span>
+            <span class="ext-label">외부 힌트: ${hintSubLabel}</span>
+            <span class="ext-arrow">➔</span>
           </button>
         `;
       }
 
-      const unlockedPreviewBanner = isImageUnlocked ? `
-        <div class="unlocked-img-preview-banner">
-          <span class="unlocked-img-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 32) : recipe.emoji}</span>
-          <div class="unlocked-img-text">
-            <div style="font-weight:900; color:#e9d5ff; font-size:0.82rem;">🖼️ 그림 힌트 해금 완료!</div>
-            <div style="font-size:0.7rem; color:#cbd5e1;">도감에 실제 술 외형이 등록되었습니다. ${isDescUnlocked ? '베이스볼로 재료를 추리해보세요!' : '이제 2단계 설명 복권을 긁어보세요!'}</div>
+      // 3. STEP 2 카드 내부 HTML 구성 (잠김 / 복권 대기 / 스크래치 중 / 완료)
+      let step2CardInnerHtml = '';
+      let step2CardClass = 'hint-step-card step-gold';
+
+      if (!isImageUnlocked && !isRecipeUnlocked) {
+        // [잠김 상태] 1단계 미완료
+        step2CardClass += ' step-locked';
+        step2CardInnerHtml = `
+          <div class="step-card-num-col">
+            <span class="step-order-badge">STEP 2</span>
+            <span class="step-main-icon">🔒</span>
           </div>
-        </div>
-      ` : '';
+          <div class="step-card-main-col">
+            <div class="step-card-header">
+              <span class="step-main-title">설명 힌트</span>
+              <span class="step-status-tag tag-locked">🔒 1단계 필요</span>
+            </div>
+            <div class="step-main-desc">1단계 외형 그림을 클리어하면 복권이 도착합니다.</div>
+          </div>
+        `;
+      } else if (this.isScratchingActive) {
+        // [스크래치 실행 중] 캔버스 마운트
+        step2CardClass += ' step-scratching';
+        step2CardInnerHtml = `
+          <div style="width:100%; display:flex; flex-direction:column; gap:6px;">
+            <div class="step-card-header" style="margin-bottom:2px;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="step-order-badge">STEP 2</span>
+                <span class="step-main-title">은박 복권 긁기</span>
+              </div>
+              <span class="step-status-tag tag-scratching">🪙 긁는 중...</span>
+            </div>
+            <div id="scratch-card-mount-area" style="width:100%;"></div>
+          </div>
+        `;
+      } else if (isDescUnlocked || isRecipeUnlocked) {
+        // [완료 상태] 설명글 노출
+        step2CardClass += ' step-done';
+        step2CardInnerHtml = `
+          <div style="width:100%; display:flex; flex-direction:column; gap:4px;">
+            <div class="step-card-header">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="step-order-badge">STEP 2</span>
+                <span class="step-main-title">설명 힌트</span>
+              </div>
+              <span class="step-status-tag tag-done">✅ 완료</span>
+            </div>
+            <div class="step-revealed-hint">
+              <span class="hint-bulb">💡</span> ${recipe.unlock_hint || '레시피 힌트가 없습니다.'}
+            </div>
+          </div>
+        `;
+      } else {
+        // [대기 상태] 1단계 완료, 복권 긁기 대기
+        step2CardClass += ' step-active';
+        step2CardInnerHtml = `
+          <div class="step-card-num-col">
+            <span class="step-order-badge">STEP 2</span>
+            <span class="step-main-icon ticket-bounce">🎫</span>
+          </div>
+          <div class="step-card-main-col">
+            <div class="step-card-header">
+              <span class="step-main-title">설명 힌트 (황금 복권)</span>
+              <button type="button" class="btn-step-scratch" id="btn-start-scratch">
+                <span class="ad-tag">AD</span>
+                <span>긁기 ➔</span>
+              </button>
+            </div>
+            <div class="step-main-desc">복권을 긁어 술의 핵심 재료 힌트를 확인하세요!</div>
+          </div>
+        `;
+      }
 
       container.innerHTML = `
         <div class="hint-top-header">
@@ -242,7 +262,7 @@ class HintModalView {
           <button class="modal-close-x" id="hint-close-btn">✕</button>
         </div>
 
-        <div class="bb-target-info-card" style="margin-bottom:8px;">
+        <div class="bb-target-info-card" style="margin-bottom:10px;">
           <div class="bb-target-title-row">
             <div style="display:flex; align-items:center; gap:6px;">
               <span class="bb-target-num">${recipe.formatted_number || ''}</span>
@@ -250,41 +270,47 @@ class HintModalView {
             </div>
             ${stepIndicatorHtml}
           </div>
-          ${hintDescBoxHtml}
         </div>
 
-        ${unlockedPreviewBanner}
-
-        <div class="hint-choice-grid">
-          <!-- 1단계: 그림 해금 미니게임 -->
-          <button class="hint-big-choice-btn choice-minigame ${isImageUnlocked ? 'cleared' : 'active-step'}" id="choice-minigame-btn">
-            <span class="choice-badge-tag ${isImageUnlocked ? 'cleared' : ''}">${isImageUnlocked ? '✅ 1단계 완료' : '🎮 1단계 도전'}</span>
-            <span class="choice-big-icon">${isImageUnlocked ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 32) : recipe.emoji) : '🕹️'}</span>
-            <span class="choice-big-title">그림 해금 게임</span>
-            <span class="choice-big-sub">벽돌깨기 · 땅따먹기</span>
-          </button>
-
-          <!-- 2단계: 설명 힌트 복권 -->
-          <button class="hint-big-choice-btn choice-scratch ${isDescUnlocked ? 'cleared' : (isImageUnlocked ? 'active-step' : 'locked-step')}" id="choice-scratch-btn">
-            <span class="choice-badge-tag ${isDescUnlocked ? 'cleared' : (isImageUnlocked ? 'ready' : 'locked')}">
-              ${isDescUnlocked ? '✅ 2단계 완료' : (isImageUnlocked ? '🎫 2단계 긁기' : '🔒 2단계 잠김')}
-            </span>
-            <span class="choice-big-icon">${isDescUnlocked ? '📜' : (isImageUnlocked ? '🎫' : '🔒')}</span>
-            <span class="choice-big-title">설명 힌트</span>
-            <span class="choice-big-sub">${isDescUnlocked ? '복권 해금 완료' : (isImageUnlocked ? '복권 긁고 힌트 열기' : '1단계 그림 클리어 필요')}</span>
-          </button>
-
-          <!-- 3단계: 베이스볼 / 업앤다운 게임 -->
-          <button class="hint-big-choice-btn choice-baseball choice-span-full ${isBaseballUnlocked ? (isRecipeUnlocked ? 'cleared' : 'active-step') : 'locked-step'}" id="choice-baseball-btn">
-            <span class="choice-badge-tag ${isBaseballUnlocked ? 'ready' : 'locked'}">
-              ${isBaseballUnlocked ? '🎯 3단계 입장' : '🔒 3단계 잠김'}
-            </span>
-            <span class="choice-big-icon">${isBaseballUnlocked ? (isUpAndDownChoice ? '🎯' : '⚾') : '🔒'}</span>
-            <div style="display:flex; flex-direction:column; align-items:flex-start; min-width:0;">
-              <span class="choice-big-title">${isUpAndDownChoice ? '업앤다운' : '베이스볼'}</span>
-              <span class="choice-big-sub">${isBaseballUnlocked ? (isUpAndDownChoice ? '황금비율 추리 게임' : '재료 & 황금비율 추리 게임') : '2단계 설명 힌트 복권 해금 후 입장 가능'}</span>
+        <div class="hint-steps-stack">
+          <!-- STEP 1: 외형 그림 (퍼플 테마) -->
+          <div class="hint-step-card step-purple ${isImageUnlocked ? 'step-done' : 'step-active'}" id="choice-minigame-btn" role="button" tabindex="0">
+            <div class="step-card-num-col">
+              <span class="step-order-badge">STEP 1</span>
+              <span class="step-main-icon">${isImageUnlocked ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 32) : recipe.emoji) : '🎮'}</span>
             </div>
-          </button>
+            <div class="step-card-main-col">
+              <div class="step-card-header">
+                <span class="step-main-title">외형 그림</span>
+                <span class="step-status-tag ${isImageUnlocked ? 'tag-done' : 'tag-active'}">
+                  ${isImageUnlocked ? '✅ 완료' : '도전 ➔'}
+                </span>
+              </div>
+              <div class="step-main-desc">벽돌깨기 · 땅따먹기 아케이드</div>
+            </div>
+          </div>
+
+          <!-- STEP 2: 설명 힌트 (골드 테마) -->
+          <div class="${step2CardClass}" id="choice-scratch-btn" role="button" tabindex="0">
+            ${step2CardInnerHtml}
+          </div>
+
+          <!-- STEP 3: 베이스볼 / 업앤다운 추리 (사이언 테마) -->
+          <div class="hint-step-card step-cyan ${isBaseballUnlocked ? (isRecipeUnlocked ? 'step-done' : 'step-active') : 'step-locked'}" id="choice-baseball-btn" role="button" tabindex="0">
+            <div class="step-card-num-col">
+              <span class="step-order-badge">STEP 3</span>
+              <span class="step-main-icon">${isBaseballUnlocked ? (isUpAndDownChoice ? '🎯' : '⚾') : '🔒'}</span>
+            </div>
+            <div class="step-card-main-col">
+              <div class="step-card-header">
+                <span class="step-main-title">${isUpAndDownChoice ? '업앤다운' : '베이스볼 추리'}</span>
+                <span class="step-status-tag ${isBaseballUnlocked ? (isRecipeUnlocked ? 'tag-done' : 'tag-active') : 'tag-locked'}">
+                  ${isBaseballUnlocked ? (isRecipeUnlocked ? '✅ 완성' : '입장 ➔') : '🔒 2단계 필요'}
+                </span>
+              </div>
+              <div class="step-main-desc">${isBaseballUnlocked ? (isUpAndDownChoice ? '황금비율 추리 게임' : '재료 & 황금비율 추리 게임') : '2단계 설명 복권을 긁어야 입장 가능'}</div>
+            </div>
+          </div>
 
           ${extHintCardHtml}
         </div>
