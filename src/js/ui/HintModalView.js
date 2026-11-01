@@ -369,7 +369,7 @@ class HintModalView {
           <div class="cat-filter-bar">
             ${solvedCategories.map(c => `
               <button class="cat-chip ${this.selectedStage2Category === c.category_id ? 'active' : ''}" data-bb-stage2-cat="${c.category_id}">
-                ${c.emoji} ${c.name}
+                ${c.name}
               </button>
             `).join('')}
           </div>

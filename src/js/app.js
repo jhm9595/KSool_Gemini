@@ -146,7 +146,7 @@ class KSoolApp {
     try {
       const [categories, ingredients_base, ingredients_detail, recipes, recipe_ingredients, external_hints] =
         await Promise.all([
-          fetch('./data/categories.json?v=20261101_25').then(r => r.json()),
+          fetch('./data/categories.json?v=20261101_26').then(r => r.json()),
           fetch('./data/ingredients_base.json?v=20261101_25').then(r => r.json()),
           fetch('./data/ingredients_detail.json?v=20261101_25').then(r => r.json()),
           fetch('./data/recipes.json?v=20261101_25').then(r => r.json()),
@@ -1111,7 +1111,7 @@ class KSoolApp {
         if (hasChainUnlock) {
           const newIng = result.newlyUnlockedIngredient;
           const cat = this.recipeBook.categories.find(c => c.category_id === newIng.category_id);
-          const catLabel = cat ? `${cat.emoji} ${cat.name}` : '📦 재료';
+          const catLabel = cat ? cat.name : '기타';
           const ingName = this.brandResolver.resolveName(newIng);
 
           groupsHtml.push(`
@@ -1147,7 +1147,7 @@ class KSoolApp {
 
             for (const [cId, ings] of byCat.entries()) {
               const cat = this.recipeBook.categories.find(c => c.category_id === cId);
-              const catLabel = cat ? `${cat.emoji} ${cat.name}` : '📦 재료';
+              const catLabel = cat ? cat.name : '기타';
 
               groupsHtml.push(`
                 <div class="craft-unlock-group">

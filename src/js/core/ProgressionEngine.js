@@ -104,7 +104,7 @@ class ProgressionEngine {
         step_id: 7,
         code: 'STEP 7',
         title: '전설의 황금비율 & 특산 명주 (최대 10개 해금!)',
-        subtitle: '비율 해제 및 신규 감미료(꿀), 전설의 브랜드 소맥(테슬라·테진아·카스처럼)과 특산 명주가 열렸습니다!',
+        subtitle: '비율 해제 및 신규 재료(꿀), 전설의 브랜드 소맥(테슬라·테진아·카스처럼)과 특산 명주가 열렸습니다!',
         maxCountPerSlot: 10,
         maxTotalCount: 10,
         allowDetailPicker: true,

@@ -37,7 +37,7 @@ window.KSool.SeedDataBundle = {
   },
   {
     "category_id": "ETC",
-    "name": "감미료",
+    "name": "기타",
     "emoji": "🍯",
     "order": 6
   },
