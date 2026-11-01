@@ -216,7 +216,7 @@
   "rec_bibibig_makgeolli": {
     "key": "rec_bibibig_makgeolli",
     "name": "단팥 막걸리",
-    "innerSvg": "<rect x=\"2\" y=\"5\" width=\"12\" height=\"1\" fill=\"#eab308\"/><rect x=\"2\" y=\"6\" width=\"1\" height=\"6\" fill=\"#ca8a04\"/><rect x=\"13\" y=\"6\" width=\"1\" height=\"6\" fill=\"#a16207\"/><rect x=\"4\" y=\"12\" width=\"8\" height=\"1\" fill=\"#a16207\"/><rect x=\"3\" y=\"6\" width=\"10\" height=\"5\" fill=\"#f8fafc\"/><rect x=\"6\" y=\"7\" width=\"5\" height=\"3\" fill=\"#881337\"/><rect x=\"7\" y=\"4\" width=\"3\" height=\"4\" fill=\"#881337\"/>"
+    "innerSvg": "<rect x=\"2\" y=\"5\" width=\"12\" height=\"1\" fill=\"#eab308\"/><rect x=\"2\" y=\"6\" width=\"1\" height=\"6\" fill=\"#ca8a04\"/><rect x=\"13\" y=\"6\" width=\"1\" height=\"6\" fill=\"#a16207\"/><rect x=\"4\" y=\"12\" width=\"8\" height=\"1\" fill=\"#a16207\"/><rect x=\"3\" y=\"6\" width=\"10\" height=\"5\" fill=\"#f8fafc\"/><rect x=\"6\" y=\"7\" width=\"5\" height=\"3\" fill=\"#5e1820\"/><rect x=\"7\" y=\"4\" width=\"3\" height=\"4\" fill=\"#5e1820\"/>"
   },
   "rec_icheon_makgeolli": {
     "key": "rec_icheon_makgeolli",
@@ -251,7 +251,7 @@
   "bibibig": {
     "key": "bibibig",
     "name": "단팥바",
-    "innerSvg": "<rect x=\"5\" y=\"1\" width=\"6\" height=\"10\" fill=\"#881337\"/><rect x=\"5\" y=\"1\" width=\"1\" height=\"10\" fill=\"#be123c\"/><rect x=\"10\" y=\"1\" width=\"1\" height=\"10\" fill=\"#4c0519\"/><rect x=\"7\" y=\"3\" width=\"2\" height=\"2\" fill=\"#4c0519\"/><rect x=\"6\" y=\"6\" width=\"2\" height=\"2\" fill=\"#4c0519\"/><rect x=\"8\" y=\"8\" width=\"2\" height=\"2\" fill=\"#4c0519\"/><rect x=\"7\" y=\"11\" width=\"2\" height=\"5\" fill=\"#d97706\"/><rect x=\"7\" y=\"11\" width=\"1\" height=\"5\" fill=\"#fde68a\"/>"
+    "innerSvg": "<rect x=\"5\" y=\"2\" width=\"6\" height=\"1\" fill=\"#3d0c12\"/><rect x=\"6\" y=\"2\" width=\"4\" height=\"1\" fill=\"#78252f\"/><rect x=\"4\" y=\"3\" width=\"8\" height=\"8\" fill=\"#3d0c12\"/><rect x=\"5\" y=\"3\" width=\"6\" height=\"8\" fill=\"#5e1820\"/><rect x=\"5\" y=\"3\" width=\"2\" height=\"8\" fill=\"#78252f\"/><rect x=\"5\" y=\"3\" width=\"1\" height=\"8\" fill=\"#943843\"/><rect x=\"6\" y=\"4\" width=\"1\" height=\"5\" fill=\"#ffffff\" opacity=\"0.3\"/><rect x=\"8\" y=\"4\" width=\"2\" height=\"2\" fill=\"#280509\"/><rect x=\"8\" y=\"4\" width=\"1\" height=\"1\" fill=\"#78252f\"/><rect x=\"6\" y=\"7\" width=\"2\" height=\"2\" fill=\"#280509\"/><rect x=\"6\" y=\"7\" width=\"1\" height=\"1\" fill=\"#78252f\"/><rect x=\"9\" y=\"8\" width=\"2\" height=\"2\" fill=\"#280509\"/><rect x=\"7\" y=\"9\" width=\"1\" height=\"1\" fill=\"#280509\"/><rect x=\"5\" y=\"10\" width=\"6\" height=\"1\" fill=\"#3d0c12\"/><rect x=\"7\" y=\"11\" width=\"2\" height=\"5\" fill=\"#b45309\"/><rect x=\"7\" y=\"11\" width=\"1\" height=\"5\" fill=\"#fde68a\"/><rect x=\"8\" y=\"11\" width=\"1\" height=\"5\" fill=\"#d97706\"/>"
   },
   "chocolate": {
     "key": "chocolate",
@@ -1182,11 +1182,43 @@ const SPRITE_DATA_HD = {
     "key": "bibibig",
     "name": "단팥바",
     "viewBox": "0 0 32 32",
-    "innerSvg": "<path d=\"M 16,3 C 12,3 11,6 11,10 L 11,22 L 21,22 L 21,10 C 21,6 20,3 16,3 Z\" fill=\"#3b0764\"/><path d=\"M 16,4 C 13,4 12,7 12,10 L 12,21 L 20,21 L 20,10 C 20,7 19,4 16,4 Z\" fill=\"#581c87\"/><path d=\"M 16,4 C 14,4 13,7 13,10 L 13,21 L 17,21 L 17,10 C 17,7 16,4 16,4 Z\" fill=\"#701a75\"/><circle cx=\"14\" cy=\"9\" r=\"1.5\" fill=\"#2e1065\"/><circle cx=\"18\" cy=\"13\" r=\"1.5\" fill=\"#2e1065\"/><circle cx=\"15\" cy=\"17\" r=\"1.5\" fill=\"#2e1065\"/><rect x=\"15\" y=\"22\" width=\"2\" height=\"9\" fill=\"#d97706\"/><rect x=\"15\" y=\"22\" width=\"1\" height=\"9\" fill=\"#fde68a\"/>"
+    "innerSvg": "<path d=\"M 10,7 C 10,5.2 11.5,4.2 13.5,4.2 L 18.5,4.2 C 20.5,4.2 22,5.2 22,7 L 22,22 C 22,22.6 21.6,23 21,23 L 11,23 C 10.4,23 10,22.6 10,22 Z\" fill=\"#3d0c12\"/><path d=\"M 10.5,7 C 10.5,5.6 11.8,4.8 13.5,4.8 L 18.5,4.8 C 20.2,4.8 21.5,5.6 21.5,7 L 21.5,21.8 C 21.5,22.2 21.2,22.5 20.8,22.5 L 11.2,22.5 C 10.8,22.5 10.5,22.2 10.5,21.8 Z\" fill=\"#5e1820\"/><path d=\"M 10.5,7 C 10.5,5.6 11.8,4.8 13.5,4.8 L 15.5,4.8 L 15.5,22.5 L 11.2,22.5 C 10.8,22.5 10.5,22.2 10.5,21.8 Z\" fill=\"#78252f\" opacity=\"0.85\"/><path d=\"M 11.2,7.2 C 11.2,6.2 12.2,5.5 13.5,5.5 L 14.5,5.5 L 14.5,21.8 L 11.2,21.8 Z\" fill=\"#943843\" opacity=\"0.65\"/><line x1=\"12.5\" y1=\"7.5\" x2=\"12.5\" y2=\"20.5\" stroke=\"#ffffff\" stroke-width=\"0.8\" stroke-linecap=\"round\" opacity=\"0.25\"/><ellipse cx=\"14\" cy=\"9.5\" rx=\"1.8\" ry=\"1.1\" fill=\"#280509\" transform=\"rotate(-15 14 9.5)\"/><ellipse cx=\"13.8\" cy=\"9.2\" rx=\"1.0\" ry=\"0.5\" fill=\"#78252f\" opacity=\"0.6\" transform=\"rotate(-15 13.8 9.2)\"/><ellipse cx=\"18\" cy=\"13.5\" rx=\"2.0\" ry=\"1.2\" fill=\"#280509\" transform=\"rotate(20 18 13.5)\"/><ellipse cx=\"17.8\" cy=\"13.2\" rx=\"1.1\" ry=\"0.6\" fill=\"#78252f\" opacity=\"0.6\" transform=\"rotate(20 17.8 13.2)\"/><ellipse cx=\"13.5\" cy=\"17\" rx=\"1.9\" ry=\"1.1\" fill=\"#280509\" transform=\"rotate(10 13.5 17)\"/><ellipse cx=\"18.5\" cy=\"18.5\" rx=\"1.6\" ry=\"1.0\" fill=\"#280509\" transform=\"rotate(-25 18.5 18.5)\"/><path d=\"M 14.5,22 L 17.5,22 L 17.5,29 C 17.5,29.8 16.8,30.5 16,30.5 C 15.2,30.5 14.5,29.8 14.5,29 Z\" fill=\"#b45309\"/><path d=\"M 14.8,22 L 17.2,22 L 17.2,28.8 C 17.2,29.4 16.6,30 16,30 C 15.4,30 14.8,29.4 14.8,28.8 Z\" fill=\"#d97706\"/><path d=\"M 15,22 L 16,22 L 16,28.5 C 16,29.2 15.4,29.5 15,29.5 Z\" fill=\"#fde68a\" opacity=\"0.8\"/>"
   }
 };
 
   const ALIAS_MAP = {
+  "3": "melona",
+  "4": "beer",
+  "5": "soju",
+  "11": "ice",
+  "12": "sparkling_water",
+  "14": "blue_lemonade",
+  "15": "milksoda",
+  "20": "maesilju",
+  "22": "tomato_juice",
+  "23": "screwbar",
+  "25": "nuruk",
+  "26": "makgeolli",
+  "28": "chocolate",
+  "29": "choco_milk",
+  "32": "tankboy",
+  "34": "strawberry_milk",
+  "35": "banana_milk",
+  "36": "yuzu_cheong",
+  "37": "maesil_cheong",
+  "52": "tonic_water",
+  "53": "calamansi_pouch",
+  "57": "bokbunjaju",
+  "58": "cider",
+  "59": "pear_drink",
+  "60": "sikhye",
+  "61": "misutgaru",
+  "62": "vinegar",
+  "63": "pomegranate_concentrate",
+  "64": "hongcho",
+  "65": "iced_americano",
+  "66": "jawsbar",
+  "67": "bibibig",
   "1": "rec_somaek",
   "2": "rec_kkulju",
   "6": "rec_hongchaju",
@@ -1637,6 +1669,8 @@ const SPRITE_DATA_HD = {
   "rec_33": "rec_tankboyju",
   "탱크보이주": "rec_tankboyju",
   "rec_strawberry_makgeolli": "rec_strawberry_makgeolli",
+  "딸기 막걸리": "rec_strawberry_makgeolli",
+  "바나나 막걸리": "rec_banana_milk_makgeolli",
   "딸기우유 막걸리": "rec_strawberry_makgeolli",
   "rec_38": "rec_strawberry_makgeolli",
   "rec_honey_makgeolli": "rec_honey_makgeolli",
