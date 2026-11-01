@@ -267,21 +267,36 @@ class ImageMinigameSuite {
       ctx.fillRect(0, 32, this.width, this.height - 32);
     }
 
-    const boxW = 220;
-    const boxH = 46;
+    const isWin = (text === 'Clear!');
+    const boxW = isWin ? 150 : (subText ? 220 : 180);
+    const boxH = subText ? 46 : 40;
     const boxX = cx - boxW / 2;
     const boxY = cy - boxH / 2;
 
-    ctx.shadowColor = isOver ? 'rgba(239, 68, 68, 0.7)' : 'rgba(56, 189, 248, 0.7)';
+    let glowColor = 'rgba(56, 189, 248, 0.7)';
+    let strokeColor = `rgba(56, 189, 248, ${0.85 * pulse})`;
+    let textColor = '#38bdf8';
+
+    if (isOver) {
+      glowColor = 'rgba(239, 68, 68, 0.7)';
+      strokeColor = `rgba(239, 68, 68, ${0.75 * pulse})`;
+      textColor = '#fca5a5';
+    } else if (isWin) {
+      glowColor = 'rgba(52, 211, 153, 0.85)';
+      strokeColor = `rgba(52, 211, 153, ${0.9 * pulse})`;
+      textColor = '#34d399';
+    }
+
+    ctx.shadowColor = glowColor;
     ctx.shadowBlur = 12 * pulse;
 
     ctx.fillStyle = isOver ? 'rgba(30, 20, 35, 0.94)' : 'rgba(15, 23, 42, 0.94)';
-    ctx.strokeStyle = isOver ? `rgba(239, 68, 68, ${0.75 * pulse})` : `rgba(56, 189, 248, ${0.85 * pulse})`;
+    ctx.strokeStyle = strokeColor;
     ctx.lineWidth = 2;
 
     ctx.beginPath();
     if (ctx.roundRect) {
-      ctx.roundRect(boxX, boxY, boxW, boxH, 23);
+      ctx.roundRect(boxX, boxY, boxW, boxH, boxH / 2);
     } else {
       ctx.rect(boxX, boxY, boxW, boxH);
     }
@@ -289,10 +304,12 @@ class ImageMinigameSuite {
     ctx.stroke();
 
     ctx.shadowBlur = 0;
-    ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.font = isWin
+      ? 'bold 20px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif'
+      : 'bold 16px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = isOver ? '#fca5a5' : '#38bdf8';
+    ctx.fillStyle = textColor;
     ctx.fillText(text, cx, cy + (subText ? -7 : 0));
 
     if (subText) {
@@ -1408,7 +1425,7 @@ class ImageMinigameSuite {
     } else if (this.gameState === 'OVER') {
       this._drawOverlayPrompt(ctx, '👆 터치하여 다시 시작', '', true);
     } else if (this.gameState === 'WIN') {
-      this._drawOverlayPrompt(ctx, '🎉 그림 해금 완료!', '우측 상단 ✕ 버튼으로 닫기');
+      this._drawOverlayPrompt(ctx, 'Clear!', '');
     }
 
     ctx.restore();
