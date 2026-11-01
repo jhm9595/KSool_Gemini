@@ -309,12 +309,13 @@ window.KSool.SeedDataBundle = {
   },
   {
     "ingredient_id": 315,
+    "category_id": "FRUIT",
     "display_name": "오렌지",
     "real_name": "오렌지",
-    "category": "과일/채소",
-    "is_unlocked_initially": false,
-    "description": "새콤달콤 비타민이 가득한 둥근 감귤류 과일. 죠스바의 겉 껍질 맛을 담당합니다.",
-    "emoji": "🍊"
+    "is_licensed": false,
+    "emoji": "🍊",
+    "picker_component": "NONE",
+    "picker_config": null
   },
   {
     "ingredient_id": 401,
