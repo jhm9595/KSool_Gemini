@@ -158,6 +158,51 @@ class ImageMinigameSuite {
     }
   }
 
+  /**
+   * 벽돌깨기 전용: 도트 스프라이트 좌표계와 1:1로 완벽히 정렬된 숨겨진 실제 술 아트 렌더링
+   * 각 블록의 원래 고유 색상(p.color)을 블록 좌표 (padX + c*pitchX, topY + r*pitchY, bw, bh)에 1픽셀 오차 없이 정밀 렌더링
+   */
+  _renderBrickHiddenArtwork(dotInfo, { padX, topY, bw, bh, pitchX, pitchY }) {
+    const c = this.hiddenArtCanvas;
+    const g = c.getContext('2d');
+    const w = c.width;
+    const h = c.height;
+
+    // 1. 세련된 방사형 배경
+    const cx = w / 2;
+    const cy = topY + 8 * pitchY;
+    const rad = g.createRadialGradient(cx, cy, 20, cx, cy, w * 0.75);
+    rad.addColorStop(0, '#1a2333');
+    rad.addColorStop(0.55, '#0b1120');
+    rad.addColorStop(1, '#050811');
+    g.fillStyle = rad;
+    g.fillRect(0, 0, w, h);
+
+    // 2. 각 도트 픽셀의 실제 색상을 블록 좌표에 1:1로 정확하게 렌더링
+    for (const p of dotInfo.activePixels) {
+      const bx = padX + p.c * pitchX;
+      const by = topY + p.r * pitchY;
+
+      // 본체 실제 술 색상
+      g.fillStyle = p.color;
+      g.fillRect(bx, by, bw, bh);
+
+      // 입체적인 픽셀 하이라이트 & 쉐도우 (도트 아트의 질감 극대화)
+      g.fillStyle = 'rgba(255, 255, 255, 0.22)';
+      g.fillRect(bx, by, bw, 1.5);
+      g.fillRect(bx, by, 1.5, bh);
+
+      g.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      g.fillRect(bx, by + bh - 1.5, bw, 1.5);
+      g.fillRect(bx + bw - 1.5, by, 1.5, bh);
+
+      // 은은한 외곽 경계선
+      g.strokeStyle = 'rgba(0, 0, 0, 0.35)';
+      g.lineWidth = 1;
+      g.strokeRect(bx, by, bw, bh);
+    }
+  }
+
   stop() {
     this.isRunning = false;
     if (this.rafId) {
@@ -386,12 +431,14 @@ class ImageMinigameSuite {
     const padX = Math.floor((this.width - stageW) / 2); // 좌우 여백 (420 - 350) / 2 = 35px
     const topY = 44; // 상단 여백 (HUD 32px 아래)
 
-    // 숨겨진 배경 일러스트를 벽돌 스테이지 영역에 1:1로 정확히 정렬
-    this._renderHiddenArtwork({
-      x: padX,
-      y: topY,
-      w: stageW,
-      h: stageH
+    // 숨겨진 실제 도트 아트를 벽돌 그리드 좌표계와 1:1로 완벽히 일치하도록 렌더링
+    this._renderBrickHiddenArtwork(dotInfo, {
+      padX,
+      topY,
+      bw,
+      bh,
+      pitchX,
+      pitchY
     });
 
     this.bbState = {
@@ -751,43 +798,63 @@ class ImageMinigameSuite {
   _drawBrickBreaker(ctx) {
     const st = this.bbState;
 
-    // 1. 전체 캔버스 배경 및 숨겨진 완성 일러스트 (깨진 블럭 자리로 드러남)
+    // 1. 전체 캔버스 배경 및 숨겨진 완성 일러스트 (깨진 블럭 자리로 1:1 완벽 정밀 노출)
     ctx.fillStyle = '#070b14';
     ctx.fillRect(0, 0, this.width, this.height);
-    const artH = Math.min(this.height - 34, (st.blockAreaBottom || 280) + 16);
-    ctx.drawImage(this.hiddenArtCanvas, 0, 0, this.width, this.height, 0, 32, this.width, artH);
+    ctx.drawImage(this.hiddenArtCanvas, 0, 0);
 
-    // 2. 살아있는 도트 블럭 렌더링
+    // 2. 살아있는 도트 블럭 렌더링 (스포일러 방지 신비로운 네온 블루 덮개)
     for (const blk of st.blocks) {
       if (!blk.alive) continue;
 
-      // 미파괴 블럭 뒤쪽 그림 가리기용 암막
-      ctx.fillStyle = '#0b1120';
+      // 미파괴 블럭 뒤쪽 그림 가리기용 암막 (1px 여유로 완전 차단)
+      ctx.fillStyle = '#070b14';
       ctx.fillRect(blk.x - 1, blk.y - 1, blk.w + 2, blk.h + 2);
 
       if (blk.isSteel) {
-        // 강철 범퍼: 메탈릭 그레이 + 리벳 장식
-        ctx.fillStyle = '#334155';
+        // 강철 범퍼: 메탈릭 티타늄 그레이 + 리벳 장식
+        const steelGrad = ctx.createLinearGradient(blk.x, blk.y, blk.x, blk.y + blk.h);
+        steelGrad.addColorStop(0, '#475569');
+        steelGrad.addColorStop(1, '#1e293b');
+        ctx.fillStyle = steelGrad;
         ctx.fillRect(blk.x, blk.y, blk.w, blk.h);
+
         ctx.fillStyle = '#94a3b8';
-        ctx.fillRect(blk.x + 2, blk.y + 2, blk.w - 4, 2);
+        ctx.fillRect(blk.x + 2, blk.y + 1, blk.w - 4, 1.5);
         ctx.strokeStyle = '#64748b';
         ctx.lineWidth = 1.5;
         ctx.strokeRect(blk.x, blk.y, blk.w, blk.h);
-      } else {
-        // 일반 도트 벽돌: 해당 술의 원래 픽셀 색상 그대로 렌더링
-        ctx.fillStyle = blk.color;
+      } else if (blk.hp === 2) {
+        // 라벨/코어 2HP 블록: 짙은 사파이어 블루 + 골드 네온 테두리 (2회 타격 필요)
+        const hp2Grad = ctx.createLinearGradient(blk.x, blk.y, blk.x, blk.y + blk.h);
+        hp2Grad.addColorStop(0, '#1e3a8a');
+        hp2Grad.addColorStop(1, '#0f172a');
+        ctx.fillStyle = hp2Grad;
         ctx.fillRect(blk.x, blk.y, blk.w, blk.h);
 
-        // 3D 베벨 테두리 (라벨 2HP 블록은 골드 테두리)
-        ctx.strokeStyle = blk.hp === 2 ? '#fde047' : 'rgba(255, 255, 255, 0.24)';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.5;
         ctx.strokeRect(blk.x, blk.y, blk.w, blk.h);
 
-        if (blk.hp === 2) {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-          ctx.fillRect(blk.x + blk.w / 2 - 2, blk.y + blk.h / 2 - 1, 4, 2);
-        }
+        ctx.fillStyle = '#fde047';
+        ctx.fillRect(blk.x + blk.w / 2 - 3, blk.y + blk.h / 2 - 1, 6, 2);
+      } else {
+        // 일반 블록: 스포일러 방지 신비로운 사이언/네온 블루 덮개!
+        const blockGrad = ctx.createLinearGradient(blk.x, blk.y, blk.x, blk.y + blk.h);
+        blockGrad.addColorStop(0, '#0284c7');
+        blockGrad.addColorStop(0.5, '#0369a1');
+        blockGrad.addColorStop(1, '#075985');
+        ctx.fillStyle = blockGrad;
+        ctx.fillRect(blk.x, blk.y, blk.w, blk.h);
+
+        // 상단 3D 하이라이트
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+        ctx.fillRect(blk.x + 1, blk.y + 1, blk.w - 2, 1.5);
+
+        // 사이언 네온 테두리
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.55)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(blk.x, blk.y, blk.w, blk.h);
       }
     }
 
