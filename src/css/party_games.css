@@ -744,8 +744,8 @@
 .updown-status-row .status-num {
   font-size: clamp(2.2rem, 5vh, 3.2rem);
   font-weight: 900;
-  text-align: left;
-  justify-self: start;
+  text-align: center;
+  justify-self: center;
   font-variant-numeric: tabular-nums;
   letter-spacing: -1px;
   line-height: 1.1;
@@ -754,8 +754,8 @@
 .updown-status-row .status-label {
   font-size: clamp(1.8rem, 4vh, 2.6rem);
   font-weight: 900;
-  text-align: left;
-  justify-self: start;
+  text-align: center;
+  justify-self: center;
   letter-spacing: 1px;
   line-height: 1.1;
 }
