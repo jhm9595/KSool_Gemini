@@ -12,7 +12,7 @@ window.KSool = window.KSool || {};
 class UpAndDownGame {
   constructor(hub) {
     this.hub = hub;
-    this.maxNumber = 50; // 1~50 고정
+    this.maxNumber = 50; // 기본 50 (설정 가능)
     this.secretNumber = 0;
     this.minRange = 1;
     this.maxRange = 50;
@@ -21,6 +21,10 @@ class UpAndDownGame {
     this.inputVal = '';
     this.isFinished = false;
     this.lastResult = null; // 'UP' | 'DOWN' | 'BOMB'
+    this.hasStarted = false; // 첫 guess 제출 여부 (false면 MAX 표시, true면 UP/DOWN 표시)
+    this.isEditingMax = false; // MAX 숫자 설정 모드 여부
+    this.animatingResult = null; // 화살표 애니메이션 중인 결과 ('UP' | 'DOWN' | null)
+    this.animTimer = null;
   }
 
   init() {
@@ -28,14 +32,18 @@ class UpAndDownGame {
   }
 
   reset() {
+    clearTimeout(this.animTimer);
     this.secretNumber = Math.floor(Math.random() * this.maxNumber) + 1;
     this.minRange = 1;
     this.maxRange = this.maxNumber;
     this.lastUpVal = 0;
-    this.lastDownVal = this.maxNumber + 1; // 51
+    this.lastDownVal = this.maxNumber + 1;
     this.inputVal = '';
     this.isFinished = false;
     this.lastResult = null;
+    this.hasStarted = false; // 초기 상태: 노란색 MAX 표시
+    this.isEditingMax = false;
+    this.animatingResult = null;
     this.render();
   }
 
@@ -49,38 +57,27 @@ class UpAndDownGame {
   _canPrefixBeValid(prefix) {
     if (!prefix) return true;
     const n = Number(prefix);
-    if (isNaN(n)) return false;
+    if (isNaN(n) || n === 0) return false;
 
-    // 1자리 입력인 경우
-    if (prefix.length === 1) {
-      if (prefix === '0') return false; // 1~50 게임에서 0으로 시작하는 유효 숫자는 없음
+    // 1) 입력한 숫자 자체가 이미 [minRange, maxRange] 범위 안에 있는 경우
+    if (n >= this.minRange && n <= this.maxRange) {
+      return true;
+    }
 
-      // 해당 1자리 숫자가 범위 안에 들어오는 경우 (예: 5 in [3, 9])
-      if (n >= this.minRange && n <= this.maxRange) {
+    // 2) 자릿수를 1자리 이상 더 붙여서 범위 내 숫자를 완성할 수 있는지 검사
+    let minVal = n;
+    let maxVal = n;
+    while (minVal <= this.maxRange) {
+      minVal = minVal * 10;
+      maxVal = maxVal * 10 + 9;
+      const low = Math.max(minVal, this.minRange);
+      const high = Math.min(maxVal, this.maxRange);
+      if (low <= high) {
         return true;
       }
-
-      // 십의 자리가 n인 2자리 수 [10*n, 10*n + 9]가 [minRange, maxRange]와 겹치는지 확인
-      const lowest = n * 10;
-      const highest = Math.min(this.maxNumber, n * 10 + 9);
-
-      if (lowest <= highest) {
-        const overlapStart = Math.max(lowest, this.minRange);
-        const overlapEnd = Math.min(highest, this.maxRange);
-        if (overlapStart <= overlapEnd) {
-          return true; // 2자리 숫자를 완성했을 때 범위 안에 들어올 가능성 있음
-        }
-      }
-      return false; // 이 숫자로 시작해서는 절대 범위 안의 숫자를 만들 수 없음 -> 탈락!
     }
 
-    // 2자리 입력인 경우
-    if (prefix.length === 2) {
-      return n >= this.minRange && n <= this.maxRange;
-    }
-
-    // 3자리 이상 (50을 초과하므로 불가)
-    return false;
+    return false; // 절대 범위 내 숫자를 완성할 수 없음 -> 낙장불입 탈락!
   }
 
   handleDigitPress(digit) {
@@ -89,6 +86,18 @@ class UpAndDownGame {
       return;
     }
 
+    // 1) MAX 숫자 설정 모드인 경우
+    if (this.isEditingMax) {
+      if (this.inputVal === '' && digit === '0') return; // 첫자리 0 방지
+      if (this.inputVal.length >= 3) return; // 최대 3자리 (999)
+      this.inputVal = this.inputVal + String(digit);
+      this.hub.sound.playTap();
+      this.hub.vibrateShort();
+      this._updateDisplayOnly();
+      return;
+    }
+
+    // 2) 일반 게임 숫자 입력 모드인 경우
     const candidate = this.inputVal + String(digit);
 
     // 낙장불입 검사: 입력한 순간 사이에 올 수 없는 숫자라면 즉시 탈락!
@@ -110,11 +119,33 @@ class UpAndDownGame {
       return;
     }
 
+    // 1) MAX 숫자 설정 모드에서 확인 누른 경우
+    if (this.isEditingMax) {
+      const newMax = Number(this.inputVal);
+      if (newMax >= 2 && newMax <= 999) {
+        this.maxNumber = newMax;
+      } else {
+        this.maxNumber = 50;
+      }
+      this.secretNumber = Math.floor(Math.random() * this.maxNumber) + 1;
+      this.minRange = 1;
+      this.maxRange = this.maxNumber;
+      this.lastUpVal = 0;
+      this.lastDownVal = this.maxNumber + 1;
+      this.inputVal = '';
+      this.isEditingMax = false; // 확인 후 자동으로 focus out!
+      this.hasStarted = false; // 아직 게임 시작 전(MAX 표시 상태 유지)
+      this.hub.sound.playTap();
+      this.render();
+      return;
+    }
+
+    // 2) 일반 게임 제출 모드
     if (!this.inputVal) return;
 
     const val = Number(this.inputVal);
 
-    // 1자리만 누르고 확인을 눌렀는데 범위 미달인 경우 (예: 18~35 범위에서 '2' 누르고 확인)
+    // 범위 미달/초과인 경우
     if (val < this.minRange || val > this.maxRange) {
       this._triggerOutOfRangeFail(this.inputVal);
       return;
@@ -135,52 +166,55 @@ class UpAndDownGame {
       return;
     }
 
-    if (val < this.secretNumber) {
-      // UP!
+    // UP 또는 DOWN 진행 -> 이제 MAX 표시는 사라지고 UP/DOWN 모드로 전환
+    this.hasStarted = true;
+    const isUp = val < this.secretNumber;
+
+    if (isUp) {
       this.minRange = val + 1;
       this.lastUpVal = val;
       this.lastResult = 'UP';
+      this.animatingResult = 'UP';
       this.hub.sound.playUp();
-      this.hub.vibrateShort();
     } else {
-      // DOWN!
       this.maxRange = val - 1;
       this.lastDownVal = val;
       this.lastResult = 'DOWN';
+      this.animatingResult = 'DOWN';
       this.hub.sound.playDown();
-      this.hub.vibrateShort();
     }
 
+    this.hub.vibrateShort();
     this.inputVal = '';
+    clearTimeout(this.animTimer);
+
+    // 1단계: n UP, n DOWN 자리에 화살표 UP/DOWN 배너를 대칭으로 즉시 표시!
     this.render();
-    this._triggerFlashAnimation(this.lastResult);
+    this._triggerVignetteOnly(this.lastResult);
+
+    // 2단계: 0.75초 후 화살표 배너가 사라지면서 갱신된 n UP, n DOWN 표시로 복귀
+    this.animTimer = setTimeout(() => {
+      this.animatingResult = null;
+      this.render();
+    }, 750);
   }
 
-  _triggerFlashAnimation(type) {
+  _triggerVignetteOnly(type) {
     const box = document.querySelector('.updown-box');
     if (!box) return;
 
-    // 이전 플래시 엘리먼트 정리
-    box.querySelectorAll('.updown-flash-banner, .updown-flash-vignette').forEach(el => el.remove());
+    box.querySelectorAll('.updown-flash-vignette').forEach(el => el.remove());
 
     const isUp = type === 'UP';
-    const text = isUp ? '▲ UP' : '▼ DOWN';
     const typeClass = isUp ? 'up' : 'down';
 
     const vignette = document.createElement('div');
     vignette.className = `updown-flash-vignette ${typeClass}`;
-
-    const banner = document.createElement('div');
-    banner.className = `updown-flash-banner ${typeClass}`;
-    banner.textContent = text;
-
     box.appendChild(vignette);
-    box.appendChild(banner);
 
     setTimeout(() => {
       vignette.remove();
-      banner.remove();
-    }, 750);
+    }, 650);
   }
 
   _triggerOutOfRangeFail(wrongNum) {
@@ -199,11 +233,17 @@ class UpAndDownGame {
   _updateDisplayOnly() {
     const displays = document.querySelectorAll('.party-number-display');
     displays.forEach(displayEl => {
+      if (this.isEditingMax) {
+        displayEl.classList.add('editing-max');
+      } else {
+        displayEl.classList.remove('editing-max');
+      }
+
       if (this.inputVal) {
         displayEl.textContent = this.inputVal;
         displayEl.classList.remove('placeholder');
       } else {
-        displayEl.textContent = '· ·';
+        displayEl.textContent = this.isEditingMax ? 'MAX ?' : '· ·';
         displayEl.classList.add('placeholder');
       }
     });
@@ -212,6 +252,46 @@ class UpAndDownGame {
   // =========================================================================
   // 렌더링 & 이벤트 바인딩 (오프라인 양방향 대칭 테이블탑)
   // =========================================================================
+
+  _renderStationStatus() {
+    // 1) 아직 게임 시작 전: 노란색 [maxNumber] MAX 표시
+    if (!this.hasStarted) {
+      return `
+        <div class="updown-status-max ${this.isEditingMax ? 'editing' : ''}">
+          <button type="button" class="updown-max-num-btn ${this.isEditingMax ? 'focused' : ''}" title="최대 숫자 변경 (클릭 후 키패드로 입력)">
+            ${this.maxNumber}
+          </button>
+          <span class="max-label">MAX</span>
+        </div>
+      `;
+    }
+
+    // 2) 숫자를 누르고 확인을 눌러 UP/DOWN 판정이 난 직후 (애니메이션 진행 중):
+    //    기존 n UP, n DOWN 자리에 큼직한 화살표 UP/DOWN 배너 표시!
+    if (this.animatingResult) {
+      const isUp = this.animatingResult === 'UP';
+      return `
+        <div class="updown-status-anim-banner ${isUp ? 'up' : 'down'}">
+          <span class="anim-arrow">${isUp ? '▲' : '▼'}</span>
+          <span class="anim-text">${isUp ? 'UP' : 'DOWN'}</span>
+        </div>
+      `;
+    }
+
+    // 3) 애니메이션이 끝난 후 또는 게임 진행 중: 갱신된 n UP, n DOWN 표시
+    return `
+      <div class="updown-status-grid">
+        <div class="updown-status-row up">
+          <span class="status-num">${this.lastUpVal}</span>
+          <span class="status-label">UP</span>
+        </div>
+        <div class="updown-status-row down">
+          <span class="status-num">${this.lastDownVal}</span>
+          <span class="status-label">DOWN</span>
+        </div>
+      </div>
+    `;
+  }
 
   _getBottleCapSvg() {
     const isExploded = this.isFinished;
@@ -266,25 +346,17 @@ class UpAndDownGame {
 
   _renderStation(isTop = false) {
     const flipClass = isTop ? 'top-station' : 'bottom-station';
+    const placeholderText = this.isEditingMax ? 'MAX ?' : '· ·';
     return `
       <div class="updown-player-station ${flipClass}">
-        <!-- 1. 병뚜껑 쪽 인접: UP / DOWN 대칭 표시 (세로 중앙축 맞춤 대형 타이포) -->
+        <!-- 1. 병뚜껑 쪽 인접: MAX 또는 UP / DOWN 대칭 표시 (세로 중앙축 맞춤 대형 타이포) -->
         <div class="updown-station-status-slot">
-          <div class="updown-status-grid">
-            <div class="updown-status-row up">
-              <span class="status-num">${this.lastUpVal}</span>
-              <span class="status-label">UP</span>
-            </div>
-            <div class="updown-status-row down">
-              <span class="status-num">${this.lastDownVal}</span>
-              <span class="status-label">DOWN</span>
-            </div>
-          </div>
+          ${this._renderStationStatus()}
         </div>
 
         <!-- 2. 입력된 숫자 디스플레이 -->
-        <div class="party-number-display ${!this.inputVal ? 'placeholder' : ''}">
-          ${this.inputVal || '· ·'}
+        <div class="party-number-display ${this.isEditingMax ? 'editing-max' : ''} ${!this.inputVal ? 'placeholder' : ''}">
+          ${this.inputVal || placeholderText}
         </div>
 
         <!-- 3. 3x4 스마트폰 다이얼 패드 -->
@@ -305,7 +377,7 @@ class UpAndDownGame {
             New
           </button>
           <button type="button" class="party-num-key" data-digit="0">0</button>
-          <button type="button" class="party-key-action submit btn-updown-submit" title="숫자 확인">
+          <button type="button" class="party-key-action submit btn-updown-submit" title="${this.isEditingMax ? 'MAX 설정 완료' : '숫자 확인'}">
             확인
           </button>
         </div>
@@ -338,6 +410,18 @@ class UpAndDownGame {
   }
 
   _bindEvents() {
+    // MAX 숫자 버튼 클릭 -> 편집 모드 진입
+    document.querySelectorAll('.updown-max-num-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        if (this.isFinished || this.hasStarted) return;
+        this.isEditingMax = true;
+        this.inputVal = '';
+        this.hub.sound.playTap();
+        this.render();
+      };
+    });
+
     document.querySelectorAll('.btn-updown-submit').forEach(btn => {
       btn.onclick = (e) => {
         e.stopPropagation();
@@ -363,7 +447,7 @@ class UpAndDownGame {
   }
 
   destroy() {
-    // UpAndDownGame has no background timers
+    clearTimeout(this.animTimer);
   }
 }
 
