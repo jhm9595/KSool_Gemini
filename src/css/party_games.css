@@ -2359,19 +2359,20 @@
   background: #1e293b;
   border: 1.5px solid #334155;
   border-radius: 12px;
-  padding: 10px 4px 8px;
+  padding: 8px 3px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  min-height: 70px;
+  gap: 4px;
+  min-height: 72px;
   width: 100%;
   box-sizing: border-box;
   cursor: pointer;
   transition: all 0.15s ease;
   color: #cbd5e1;
   user-select: none;
+  text-align: center;
 }
 
 .penalty-cocktail-box .fridge-ing-chip:hover {
@@ -2387,16 +2388,22 @@
   min-height: 26px;
   font-size: 1.35rem;
   line-height: 1;
+  margin: 0 auto;
 }
 
 .penalty-cocktail-box .fridge-ing-chip .chip-name {
-  font-size: 0.8rem;
+  font-size: clamp(0.72rem, 1.8vw, 0.76rem);
   font-weight: 800;
   text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .penalty-cocktail-box .fridge-ing-chip.selected {
