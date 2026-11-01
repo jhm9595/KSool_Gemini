@@ -191,15 +191,18 @@ class HintModalView {
         // [잠김 상태] 1단계 미완료
         step2CardClass += ' step-locked';
         step2CardInnerHtml = `
-          <div class="step-card-num-col">
-            <span class="step-order-badge">STEP 2</span>
+          <div class="step-card-icon-col">
             <span class="step-main-icon">🔒</span>
           </div>
           <div class="step-card-main-col">
             <div class="step-card-header">
-              <span class="step-main-title">설명 힌트</span>
+              <div class="step-title-group">
+                <span class="step-order-badge">STEP 2</span>
+                <span class="step-main-title">설명 힌트</span>
+              </div>
               <span class="step-status-tag tag-locked">🔒 1단계 필요</span>
             </div>
+            <div class="step-main-desc">1단계 그림 해금 후 복권이 도착합니다</div>
           </div>
         `;
       } else if (this.isScratchingActive) {
@@ -208,7 +211,7 @@ class HintModalView {
         step2CardInnerHtml = `
           <div style="width:100%; display:flex; flex-direction:column; gap:6px;">
             <div class="step-card-header" style="margin-bottom:2px;">
-              <div style="display:flex; align-items:center; gap:6px;">
+              <div class="step-title-group">
                 <span class="step-order-badge">STEP 2</span>
                 <span class="step-main-title">은박 복권 긁기</span>
               </div>
@@ -221,13 +224,13 @@ class HintModalView {
         // [완료 상태] 설명글 노출
         step2CardClass += ' step-done';
         step2CardInnerHtml = `
-          <div style="width:100%; display:flex; flex-direction:column; gap:4px;">
+          <div style="width:100%; display:flex; flex-direction:column; gap:6px;">
             <div class="step-card-header">
-              <div style="display:flex; align-items:center; gap:6px;">
+              <div class="step-title-group">
                 <span class="step-order-badge">STEP 2</span>
                 <span class="step-main-title">설명 힌트</span>
               </div>
-              <span class="step-status-tag tag-done">✅ 완료</span>
+              <span class="step-status-tag tag-done">Clear</span>
             </div>
             <div class="step-revealed-hint">
               <span class="hint-bulb">💡</span> ${recipe.unlock_hint || '레시피 힌트가 없습니다.'}
@@ -238,18 +241,21 @@ class HintModalView {
         // [대기 상태] 1단계 완료, 복권 긁기 대기
         step2CardClass += ' step-active';
         step2CardInnerHtml = `
-          <div class="step-card-num-col">
-            <span class="step-order-badge">STEP 2</span>
+          <div class="step-card-icon-col">
             <span class="step-main-icon ticket-bounce">🎫</span>
           </div>
           <div class="step-card-main-col">
             <div class="step-card-header">
-              <span class="step-main-title">설명 힌트</span>
+              <div class="step-title-group">
+                <span class="step-order-badge">STEP 2</span>
+                <span class="step-main-title">설명 힌트</span>
+              </div>
               <button type="button" class="btn-step-scratch" id="btn-start-scratch">
                 <span class="ad-tag">AD</span>
                 <span>복권 긁기 ➔</span>
               </button>
             </div>
+            <div class="step-main-desc">은박 복권을 긁어 재료 힌트를 확인하세요</div>
           </div>
         `;
       }
@@ -273,15 +279,17 @@ class HintModalView {
         <div class="hint-steps-stack">
           <!-- STEP 1: 외형 그림 (퍼플 테마) -->
           <div class="hint-step-card step-purple ${isImageUnlocked ? 'step-done' : 'step-active'}" id="choice-minigame-btn" role="button" tabindex="0">
-            <div class="step-card-num-col">
-              <span class="step-order-badge">STEP 1</span>
+            <div class="step-card-icon-col">
               <span class="step-main-icon">${isImageUnlocked ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 32) : recipe.emoji) : '🎮'}</span>
             </div>
             <div class="step-card-main-col">
               <div class="step-card-header">
-                <span class="step-main-title">외형 그림</span>
+                <div class="step-title-group">
+                  <span class="step-order-badge">STEP 1</span>
+                  <span class="step-main-title">외형 그림</span>
+                </div>
                 <span class="step-status-tag ${isImageUnlocked ? 'tag-done' : 'tag-active'}">
-                  ${isImageUnlocked ? '✅ 완료' : '도전 ➔'}
+                  ${isImageUnlocked ? 'Clear' : '도전 ➔'}
                 </span>
               </div>
               <div class="step-main-desc">벽돌깨기 · 땅따먹기 아케이드</div>
@@ -295,15 +303,17 @@ class HintModalView {
 
           <!-- STEP 3: 베이스볼 / 업앤다운 추리 (사이언 테마) -->
           <div class="hint-step-card step-cyan ${isBaseballUnlocked ? (isRecipeUnlocked ? 'step-done' : 'step-active') : 'step-locked'}" id="choice-baseball-btn" role="button" tabindex="0">
-            <div class="step-card-num-col">
-              <span class="step-order-badge">STEP 3</span>
+            <div class="step-card-icon-col">
               <span class="step-main-icon">${isBaseballUnlocked ? (isUpAndDownChoice ? '🎯' : '⚾') : '🔒'}</span>
             </div>
             <div class="step-card-main-col">
               <div class="step-card-header">
-                <span class="step-main-title">${isUpAndDownChoice ? '업앤다운' : '베이스볼 추리'}</span>
+                <div class="step-title-group">
+                  <span class="step-order-badge">STEP 3</span>
+                  <span class="step-main-title">${isUpAndDownChoice ? '업앤다운' : '베이스볼 추리'}</span>
+                </div>
                 <span class="step-status-tag ${isBaseballUnlocked ? (isRecipeUnlocked ? 'tag-done' : 'tag-active') : 'tag-locked'}">
-                  ${isBaseballUnlocked ? (isRecipeUnlocked ? '✅ 완성' : '입장 ➔') : '🔒 2단계 필요'}
+                  ${isBaseballUnlocked ? (isRecipeUnlocked ? 'Clear' : '입장 ➔') : '🔒 2단계 필요'}
                 </span>
               </div>
               <div class="step-main-desc">${isBaseballUnlocked ? (isUpAndDownChoice ? '황금비율 추리 게임' : '재료 & 황금비율 추리 게임') : '2단계 설명 복권을 긁어야 입장 가능'}</div>

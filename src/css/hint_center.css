@@ -565,14 +565,17 @@
   transform: scale(0.98);
 }
 
-.step-card-num-col {
+.step-card-num-col,
+.step-card-icon-col {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
   flex-shrink: 0;
   width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.14);
 }
 
 .step-order-badge {
@@ -590,6 +593,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.step-main-icon svg,
+.step-main-icon img,
+.step-main-icon canvas,
+.step-main-icon .pixel-art {
+  display: block;
+  max-width: 32px;
+  max-height: 32px;
+}
+
+.step-title-group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
 }
 
 .step-card-main-col {
@@ -637,6 +656,8 @@
   background: rgba(16, 185, 129, 0.2);
   color: #6ee7b7;
   border: 1px solid rgba(16, 185, 129, 0.45);
+  font-weight: 800;
+  letter-spacing: 0.3px;
 }
 
 .step-status-tag.tag-locked {
