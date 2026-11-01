@@ -679,10 +679,11 @@
 }
 
 .updown-status-max .max-label {
-  font-size: clamp(1.8rem, 4vh, 2.6rem);
+  font-size: clamp(2.2rem, 5vh, 3.2rem);
   font-weight: 900;
   color: #facc15;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.5px;
+  line-height: 1;
   text-shadow: 0 0 20px rgba(250, 204, 21, 0.8), 0 0 40px rgba(234, 179, 8, 0.5);
 }
 
@@ -747,17 +748,17 @@
   text-align: center;
   justify-self: center;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -1px;
-  line-height: 1.1;
+  letter-spacing: 0;
+  line-height: 1;
 }
 
 .updown-status-row .status-label {
-  font-size: clamp(1.8rem, 4vh, 2.6rem);
+  font-size: clamp(2.2rem, 5vh, 3.2rem);
   font-weight: 900;
   text-align: center;
   justify-self: center;
-  letter-spacing: 1px;
-  line-height: 1.1;
+  letter-spacing: 0.5px;
+  line-height: 1;
 }
 
 .updown-status-row.up .status-num,
