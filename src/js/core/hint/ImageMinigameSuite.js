@@ -62,23 +62,10 @@ class ImageMinigameSuite {
 
     drawBackground();
 
-    // 2. 실제 픽셀/HD 아이콘 및 하단 이름 텍스트 렌더링
-    const iconSize = 144;
+    // 2. 실제 픽셀/HD 아이콘 렌더링 (순수 일러스트/그림만 렌더링하고 글자는 일체 배제)
+    const iconSize = 160;
     const ix = cx - iconSize / 2;
-    const iy = cy - iconSize / 2 - 16;
-    const textY = cy + 76;
-    const recipeName = this.recipe?.display_name || this.recipe?.real_name || this.recipe?.name || '';
-
-    const drawTitle = () => {
-      g.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
-      g.textAlign = 'center';
-      g.textBaseline = 'middle';
-      g.fillStyle = '#fde047';
-      g.shadowColor = 'rgba(0,0,0,0.95)';
-      g.shadowBlur = 8;
-      g.fillText(recipeName, cx, textY);
-      g.shadowBlur = 0;
-    };
+    const iy = cy - iconSize / 2;
 
     let hasSvg = false;
     if (this.recipe && window.KSool?.pixelIcon) {
@@ -91,10 +78,9 @@ class ImageMinigameSuite {
           }
           const img = new Image();
           img.onload = () => {
-            // 이미지 로드 시 배경 전체를 매끄럽게 재도색 후 아이콘과 텍스트를 칼정렬 렌더링 (검은 사각형 컷아웃 제거)
+            // 이미지 로드 완료 시 배경 재도색 후 순수 아이콘만 정중앙 렌더링
             drawBackground();
             g.drawImage(img, ix, iy, iconSize, iconSize);
-            drawTitle();
           };
           img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
         }
@@ -104,14 +90,13 @@ class ImageMinigameSuite {
     }
 
     if (!hasSvg) {
-      g.font = '72px sans-serif';
+      g.font = '84px sans-serif';
       g.textAlign = 'center';
       g.textBaseline = 'middle';
       g.shadowColor = 'rgba(250, 204, 21, 0.6)';
       g.shadowBlur = 18;
-      g.fillText(this.recipe ? this.recipe.emoji : '🍶', cx, cy - 16);
+      g.fillText(this.recipe ? this.recipe.emoji : '🍶', cx, cy);
       g.shadowBlur = 0;
-      drawTitle();
     }
   }
 
@@ -614,7 +599,7 @@ class ImageMinigameSuite {
     const cx = this.width / 2;
     const cy = (this.height + topOffset) / 2;
     const picHalfW = 90;
-    const picHalfH = 104;
+    const picHalfH = 90;
 
     const picMinC = Math.max(1, Math.floor((cx - picHalfW) / cellW));
     const picMaxC = Math.min(cols - 2, Math.ceil((cx + picHalfW) / cellW));
