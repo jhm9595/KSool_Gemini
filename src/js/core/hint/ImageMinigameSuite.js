@@ -133,8 +133,21 @@ class ImageMinigameSuite {
       this.qixState.player.moveAccum = 0;
       this.audio.playTap();
     }
-    this.qixState.player.dc = dc;
-    this.qixState.player.dr = dr;
+    const pl = this.qixState.player;
+    const grid = this.qixState.grid;
+    const isDrawing = grid[pl.r] && grid[pl.r][pl.c] === 2;
+    const isReverse = (pl.dc !== 0 && dc === -pl.dc) || (pl.dr !== 0 && dr === -pl.dr);
+    const nc = pl.c + dc;
+    const nr = pl.r + dr;
+    const nextCell = grid[nr] ? grid[nr][nc] : null;
+
+    // 1. 자기 자신의 선(2)으로 돌진하는 것은 즉사이므로 원천 차단
+    if (nextCell === 2) return;
+    // 2. 선을 긋고 있는 도중 180도 역주행 완전 차단 (직각 회전만 허용)
+    if (isDrawing && isReverse) return;
+
+    pl.dc = dc;
+    pl.dr = dr;
   }
 
   _spawnParticles(x, y, color, count = 12) {
@@ -801,13 +814,37 @@ class ImageMinigameSuite {
       const dx = targetC - pl.c;
       const dy = targetR - pl.r;
       if (Math.abs(dx) < 0.8 && Math.abs(dy) < 0.8) return;
-      if (Math.abs(dx) > Math.abs(dy)) {
-        pl.dc = dx > 0 ? 1 : -1;
-        pl.dr = 0;
+
+      // 주 이동축과 직각 부 이동축을 후보군으로 구성
+      const candidates = [];
+      if (Math.abs(dx) >= Math.abs(dy)) {
+        if (Math.abs(dx) >= 0.8) candidates.push({ dc: dx > 0 ? 1 : -1, dr: 0 });
+        if (Math.abs(dy) >= 0.8) candidates.push({ dc: 0, dr: dy > 0 ? 1 : -1 });
       } else {
-        pl.dc = 0;
-        pl.dr = dy > 0 ? 1 : -1;
+        if (Math.abs(dy) >= 0.8) candidates.push({ dc: 0, dr: dy > 0 ? 1 : -1 });
+        if (Math.abs(dx) >= 0.8) candidates.push({ dc: dx > 0 ? 1 : -1, dr: 0 });
       }
+
+      const isDrawing = grid[pl.r] && grid[pl.r][pl.c] === 2;
+
+      for (const cand of candidates) {
+        const isReverse = (pl.dc !== 0 && cand.dc === -pl.dc) || (pl.dr !== 0 && cand.dr === -pl.dr);
+        const nc = pl.c + cand.dc;
+        const nr = pl.r + cand.dr;
+        const nextCell = grid[nr] ? grid[nr][nc] : null;
+
+        // 1. 자기 자신의 선(2)으로 돌진하는 방향은 절대 차단 (의문사 방지)
+        if (nextCell === 2) continue;
+
+        // 2. 선을 긋고 있는 도중에는 180도 역주행 완전 차단 (직각 전환만 허용)
+        if (isDrawing && isReverse) continue;
+
+        // 안전하고 유효한 방향으로 전환
+        pl.dc = cand.dc;
+        pl.dr = cand.dr;
+        return;
+      }
+      // 이미 지나친 지점을 재클릭하는 등 후보 모두가 역주행/자기선 충돌일 경우: 기존 방향을 안전하게 유지!
     };
 
     let isPointerDown = false;
@@ -829,12 +866,15 @@ class ImageMinigameSuite {
 
     const onKeyDown = (e) => {
       handleQixAction();
-      const pl = this.qixState.player;
-      if (e.key === 'ArrowLeft' || e.key === 'a') { pl.dc = -1; pl.dr = 0; }
-      else if (e.key === 'ArrowRight' || e.key === 'd') { pl.dc = 1; pl.dr = 0; }
-      else if (e.key === 'ArrowUp' || e.key === 'w') { pl.dc = 0; pl.dr = -1; }
-      else if (e.key === 'ArrowDown' || e.key === 's') { pl.dc = 0; pl.dr = 1; }
-      else if (e.key === ' ' || e.key === 'Enter') { handleQixAction(); }
+      let reqDc = 0, reqDr = 0;
+      if (e.key === 'ArrowLeft' || e.key === 'a') reqDc = -1;
+      else if (e.key === 'ArrowRight' || e.key === 'd') reqDc = 1;
+      else if (e.key === 'ArrowUp' || e.key === 'w') reqDr = -1;
+      else if (e.key === 'ArrowDown' || e.key === 's') reqDr = 1;
+      else if (e.key === ' ' || e.key === 'Enter') { handleQixAction(); return; }
+      else return;
+
+      this.setQixDirection(reqDc, reqDr);
     };
 
     this.canvas.addEventListener('mousedown', onDown);
