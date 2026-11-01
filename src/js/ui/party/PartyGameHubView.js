@@ -46,7 +46,7 @@ class PartyGameHubView {
         title: '표면장력 소주잔 채우기',
         badge: '블라인드 서바이벌',
         accentColor: '#06b6d4',
-        desc: '미스터리 가림막을 뚫고 표면장력 한계까지 술 채우기'
+        desc: '표면장력 한계까지 술 채우기'
       },
       {
         key: 'bottlespin',
@@ -62,7 +62,7 @@ class PartyGameHubView {
         title: '훈민정음 시한폭탄',
         badge: '폭탄 돌리기',
         accentColor: '#ef4444',
-        desc: '제시된 초성의 단어를 외치며 폭탄을 넘기는 게임'
+        desc: '초성의 단어를 외치며 폭탄을 넘기는 게임'
       },
       {
         key: 'penaltycocktail',
@@ -70,7 +70,7 @@ class PartyGameHubView {
         title: '랜덤 벌칙주 제조기',
         badge: '벌칙주',
         accentColor: '#a855f7',
-        desc: '선택한 술과 음료로 랜덤 비율의 벌칙주를 만드는 게임'
+        desc: '선택한 재료로 랜덤 비율의 벌칙주 제조'
       },
       {
         key: 'fridge',
@@ -78,7 +78,7 @@ class PartyGameHubView {
         title: '냉장고를 부탁해',
         badge: '조합 탐색',
         accentColor: '#0ea5e9',
-        desc: '가지고 있는 술과 음료로 만들 수 있는 술 조합 찾기'
+        desc: '현재 만들 수 있는 술 조합 찾기'
       }
     ];
 
