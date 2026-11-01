@@ -416,7 +416,25 @@ class HintModalView {
         </div>
 
         <div class="arcade-cabinet-box">
-          <canvas id="minigame-canvas" width="420" height="520" class="minigame-canvas"></canvas>
+          <div class="arcade-canvas-wrapper" id="arcade-canvas-wrapper">
+            <canvas id="minigame-canvas" width="420" height="520" class="minigame-canvas"></canvas>
+          </div>
+          <!-- 탕탕특공대 스타일 하단 중앙 가상 조이스틱 (땅따먹기 전용) -->
+          <div id="qix-joystick-zone" class="qix-joystick-zone ${this.selectedMinigameType === 'TERRITORY_QIX' ? 'active' : ''}">
+            <div class="qix-joystick-pad" id="qix-joystick-pad" title="조이스틱을 밀어 4방향으로 이동">
+              <div class="qix-joystick-arrows">
+                <span class="qix-arrow arrow-up">▲</span>
+                <span class="qix-arrow arrow-right">▶</span>
+                <span class="qix-arrow arrow-down">▼</span>
+                <span class="qix-arrow arrow-left">◀</span>
+              </div>
+              <div class="qix-joystick-center-dot"></div>
+              <div class="qix-joystick-knob" id="qix-joystick-knob">
+                <div class="qix-knob-thumb"></div>
+              </div>
+            </div>
+            <div class="qix-joystick-guide-text">조이스틱으로 4방향 이동</div>
+          </div>
         </div>
       `;
 
@@ -791,6 +809,14 @@ class HintModalView {
       }
     );
     this.minigameInstance.start(this.selectedMinigameType);
+    if (this.selectedMinigameType === 'TERRITORY_QIX') {
+      const padEl = document.getElementById('qix-joystick-pad');
+      const knobEl = document.getElementById('qix-joystick-knob');
+      const zoneEl = document.getElementById('qix-joystick-zone');
+      if (padEl && knobEl && this.minigameInstance.bindJoystick) {
+        this.minigameInstance.bindJoystick(padEl, knobEl, zoneEl);
+      }
+    }
   }
 
   _updateMinigameControlsOnly(recipe) {
