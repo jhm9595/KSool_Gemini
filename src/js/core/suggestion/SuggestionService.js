@@ -116,9 +116,10 @@ class SuggestionService {
     const existing = this.suggestions.find(s => s.suggestion_key === key && !s.is_applied);
 
     if (existing) {
-      this.vote(key, 'UP');
+      existing.upvotes += 1;
+      this.userVotes[key] = 'UP';
       this._save();
-      return { ok: true, action: 'UPVOTED_EXISTING', message: '이미 올라온 조합에 추천을 반영했어요.' };
+      return { ok: true, action: 'UPVOTED_EXISTING', message: '이미 올라온 조합이라 👍 추천이 +1 추가되었습니다!' };
     }
 
     const newEntry = {
@@ -144,7 +145,7 @@ class SuggestionService {
     if (!item) return;
 
     const prev = this.userVotes[suggestionKey];
-    if (!['UP', 'DOWN'].includes(type) || prev === type) return;
+    if (prev === type) return;
 
     if (prev === 'UP') item.upvotes = Math.max(0, item.upvotes - 1);
     if (prev === 'DOWN') item.downvotes = Math.max(0, item.downvotes - 1);

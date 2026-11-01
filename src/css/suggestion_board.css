@@ -1,5 +1,141 @@
-.lounge{max-width:1100px;margin:auto;padding:20px 20px 90px;color:var(--text)}
-.lounge button,.lounge input,.lounge textarea,.lounge select{font:inherit}.lounge button,.lounge-primary{cursor:pointer;border:1px solid var(--border);border-radius:10px;background:#1e293b;color:#e2e8f0;min-height:44px;padding:10px 14px}.lounge button:focus-visible,.lounge input:focus-visible,.lounge textarea:focus-visible,.lounge a:focus-visible,.lounge select:focus-visible{outline:2px solid #fbbf24;outline-offset:3px}.lounge button:disabled{opacity:.45;cursor:default}
-.lounge-hero{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:34px;border:1px solid #3b4659;border-radius:22px;background:radial-gradient(ellipse at 90% 10%,#453b2a 0,transparent 65%),#182234;overflow:hidden}.lounge-eyebrow{font-size:11px;font-weight:800;letter-spacing:2px;color:#f4c778}.lounge h2{font-size:clamp(26px,4vw,42px);line-height:1.3;letter-spacing:-1.3px;margin:12px 0}.lounge-hero p{color:#b8c3d2;font-size:14px;line-height:1.7;margin-bottom:24px}.lounge .lounge-primary{display:inline-block;background:#f4c778;color:#24201b;border:0;text-decoration:none;font-weight:800}.lounge-art{font-size:100px;position:relative;min-width:190px;text-align:center;transform:rotate(-9deg)}.lounge-art span{position:absolute;font-size:45px;bottom:-18px;right:0}.lounge-art span:last-child{left:0;top:-15px;right:auto}.lounge-art i{position:absolute;font-size:24px;color:#f4c778;right:0;top:0}
-.lounge-notice{color:#adbbce;font-size:12px;padding:18px 2px;line-height:1.7}.lounge-tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:16px}.lounge-tabs button[aria-pressed=true]{background:#f4c77818;color:#f4c778;border-color:#b78e48}.lounge-tools{display:flex;gap:10px;margin:22px 0}.lounge-tools label{flex:1;min-width:0}.lounge input,.lounge select,.lounge textarea{width:100%;color:#e2e8f0;background:#121b2a;border:1px solid #39485d;border-radius:10px;padding:12px;user-select:text;min-height:44px}.lounge select{width:140px}.lounge-section-heading{display:flex;justify-content:space-between;align-items:center;margin:20px 0 14px}.lounge h3{font-size:17px}.lounge-section-heading>span{font-size:12px;color:var(--text-muted)}.lounge-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}.lounge-card{min-width:0;padding:20px;border:1px solid #334155;border-radius:16px;background:linear-gradient(145deg,#1d293b,#162132)}.lounge-shared{border-color:#f4c778}.lounge-card-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#a8b5c8}.lounge-card-top button{font-size:23px;padding:0 10px;color:#f4c778;background:transparent;border:0}.lounge-recipe-title{display:flex;gap:14px;align-items:center;margin:12px 0}.lounge-recipe-title>span{font-size:40px;background:#ffffff08;border-radius:14px;padding:8px}.lounge-card small{color:#a8b5c8;font-size:11px}.lounge-recipe-title h3{font-size:21px;margin-top:4px}.lounge-card p{font-size:13px;color:#aebccf;line-height:1.8;margin:10px 0 16px}.lounge .lounge-reveal{width:100%;background:#111b2a;color:#f4c778;border-style:dashed;font-size:13px}.lounge-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:16px;font-size:11px;color:#a8b5c8}.lounge-card-footer button{background:transparent;border:0;padding:8px;color:#dae4f2;font-size:12px}.lounge-formula{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:16px 0;font-size:13px;line-height:1.6}.lounge-ingredient{display:inline-flex;align-items:center;gap:5px;padding:8px;background:#0c1524;border-radius:9px}.lounge-ingredient>span{font-size:23px}.lounge-ingredient b{color:#f4c778}.lounge-plus{color:#8091a9}.lounge-answer form{border-top:1px solid #334155;padding-top:14px;display:grid;gap:9px}.lounge-answer label{font-size:12px;color:#c5d0de}.lounge textarea{min-height:80px;resize:vertical;line-height:1.6}.lounge-answer form button{justify-self:end;font-size:12px}.lounge-compose{padding:26px;border:1px solid #645438;border-radius:16px;margin-top:26px;background:#29271f55}.lounge-compose h3{font-size:23px;margin:10px 0}.lounge-compose p,.lounge-storage{color:#a8b5c8;font-size:12px;line-height:1.8}.lounge-compose>button{margin:6px 8px 0 0}.lounge-storage{margin:18px 0}.lounge-status:empty{display:none}.lounge-status{position:sticky;bottom:0;padding:14px;border:1px solid #80704a;background:#29271f;border-radius:12px;font-size:13px}.lounge-empty{padding:35px;text-align:center;color:#a8b5c8;font-size:13px;grid-column:1/-1;border:1px dashed #334155;border-radius:12px}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
-@media(max-width:600px){.lounge{padding:12px 12px 80px}.lounge-hero{padding:24px 20px}.lounge-art{font-size:66px;min-width:78px}.lounge-art span{font-size:28px}.lounge-art i{display:none}.lounge-hero p{font-size:12px}.lounge-grid{grid-template-columns:1fr}.lounge-tabs{gap:5px}.lounge-tabs button{font-size:12px;padding:10px}.lounge-tools{gap:6px}.lounge select{width:120px;font-size:12px}.lounge-card{padding:16px}}
+/* 👍 초간단 조합 추천 게시판 & 관리자 ⚡딸깍 뷰 */
+.suggestion-view-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 12px 14px;
+  gap: 10px;
+}
+
+.suggestion-top-bar {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.suggestion-pot-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.suggest-submit-btn {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.suggest-submit-btn:disabled {
+  background: #334155;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.suggestion-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 16px;
+}
+
+/* 주조실 슬롯 카드와 동일한 UI + 가장 오른쪽 끝 위/아래 👍👎 배치 */
+.suggestion-row-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.suggestion-items-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+}
+
+.pot-slot.sug-slot-card {
+  width: 74px;
+  min-width: 70px;
+  height: 68px;
+  cursor: default;
+  flex-shrink: 0;
+}
+
+.pot-slot.sug-slot-card:active {
+  transform: none;
+}
+
+.suggestion-actions-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.vote-btn {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 58px;
+  gap: 6px;
+}
+
+.vote-btn.up:hover, .vote-btn.up.voted {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
+
+.vote-btn.down:hover, .vote-btn.down.voted {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.admin-apply-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+  color: #0f172a;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+}
+
+.admin-apply-btn:hover {
+  transform: scale(1.04);
+}
