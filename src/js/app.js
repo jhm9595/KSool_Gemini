@@ -112,11 +112,26 @@ class KSoolApp {
     this.inventory.save();
     this.suggestionService.init();
     this.fridgeEngine.init();
+    this.suggestionBoardView.initSharedCombo();
+    if (this.suggestionBoardView.sharedCombo || this.recipeBook.recipes.has(this.suggestionBoardView.sharedId)) this.currentTab = 'suggestions';
 
     const nextQuiz = this.inventory.getNextQuizRecipe();
     this.quizTargetRecipeId = nextQuiz ? nextQuiz.recipe_id : 5;
 
     this._bindGlobalEvents();
+    window.addEventListener('hashchange', () => {
+      const params = new URLSearchParams(location.hash.slice(1));
+      const lounge = this.suggestionBoardView;
+      lounge.sharedId = Number(params.get('recipe'));
+      lounge.sharedTip = (params.get('tip') || '').slice(0, 500);
+      lounge.sharedCombo = null;
+      lounge.message = '';
+      lounge.query = '';
+      lounge.tab = 'guide';
+      lounge.initSharedCombo();
+      if (this.recipeBook.recipes.has(lounge.sharedId)) lounge.open.add(lounge.sharedId);
+      if (lounge.sharedCombo || this.recipeBook.recipes.has(lounge.sharedId)) this.switchTab('suggestions');
+    });
     this.renderAll();
 
     // 초기 로딩/새로고침 시에는 해금 탭 상태만 동기화하고, 팝업 큐는 실행하지 않습니다.

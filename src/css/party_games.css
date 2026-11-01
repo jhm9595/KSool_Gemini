@@ -1148,13 +1148,23 @@
 
 .cap-question-btn .q-mark-char {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 38px;
+  font-size: 26px;
   font-weight: 900;
   fill: #fde047;
-  transform-origin: 100px 100px;
+  transform-origin: 100px 93px;
   filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.95));
   animation: qMarkPulse 1.1s ease-in-out infinite alternate;
   user-select: none;
+}
+
+.cap-question-btn .q-mark-subtext {
+  font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  fill: #fef08a;
+  letter-spacing: -0.2px;
+  user-select: none;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9));
 }
 
 @keyframes qHaloSpin {
