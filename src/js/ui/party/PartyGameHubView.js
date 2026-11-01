@@ -440,10 +440,10 @@ class PartyGameHubView {
 
         <!-- 전체화면 가득 찬 게임 실행 영역 -->
         <div id="party-game-stage" class="party-game-stage fullscreen party-stage-${this.activeGameKey}"></div>
-
-        <!-- 풀스크린 벌칙 플래시 오버레이 -->
-        <div id="party-penalty-overlay" class="party-penalty-overlay"></div>
       </div>
+
+      <!-- 풀스크린 벌칙 플래시 오버레이 (대화면/모바일 전 기기 100% 뷰포트 정중앙 보장) -->
+      <div id="party-penalty-overlay" class="party-penalty-overlay"></div>
     `;
 
     // 뒤로가기 버튼 이벤트
