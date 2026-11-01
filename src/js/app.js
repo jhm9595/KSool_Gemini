@@ -518,14 +518,8 @@ class KSoolApp {
                 ? targetRec.description
                 : (isDescUnlocked
                     ? `<span class="hint-bulb">💡</span> ${targetRec.unlock_hint || ''}`
-                    : `<div class="quiz-desc-scratch-strip" id="quiz-locked-desc-btn" title="AD 시청 후 복권 긁기로 설명 힌트 해금">
-                         <div class="scratch-strip-foil">
-                           <span class="scratch-strip-coin">🪙</span>
-                           <span class="scratch-strip-label">은박을 긁어 힌트 확인</span>
-                         </div>
-                         <button type="button" class="scratch-strip-ad-badge" id="quiz-scratch-ad-btn">
-                           <span class="ad-pill">AD</span> 긁기
-                         </button>
+                    : `<div class="quiz-desc-locked" id="quiz-locked-desc-btn" title="클릭하여 설명 힌트 해금 (단계별 힌트)">
+                         <span class="quiz-lock-icon">🔒</span>
                        </div>`
                   )
               }
@@ -584,7 +578,7 @@ class KSoolApp {
       lockedDescBtn.onclick = (e) => {
         e.stopPropagation();
         this.audio.playTap();
-        this.hintModalView.open(targetRec.recipe_id, 'SCRATCH');
+        this.hintModalView.open(targetRec.recipe_id);
       };
     }
 
