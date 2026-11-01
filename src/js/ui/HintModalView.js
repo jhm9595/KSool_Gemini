@@ -224,7 +224,7 @@ class HintModalView {
             <div class="mg-card-body">
               <div class="mg-card-title-row">
                 <span class="mg-card-title">2. 네온 땅따먹기 (그림 영역 점령)</span>
-                <span class="mg-diff-pill vhard">VERY HARD · 그림 90%</span>
+                <span class="mg-diff-pill vhard">VERY HARD · 그림 100%</span>
               </div>
               <div class="mg-card-desc">
                 어둠 속을 질주하는 <b>보스 코어 + 고속 화염구 2기</b>가 내 궤적(선)에 닿기 전에 안전지대로 복귀해 <b>뒤에 숨겨진 그림 영역을 뚫어 완전히 드러내세요!</b>
@@ -541,32 +541,27 @@ class HintModalView {
       <div class="bb-help-popover updown-help-popover">
         ${isUpAndDown ? `
           <div style="font-size:0.86rem; color:#fde047; font-weight:900; margin-bottom:5px;">
-            🎯 업앤다운(Up & Down) 규칙
+            🎯 업앤다운 규칙
           </div>
-          <div style="line-height:1.55; font-size:0.78rem; color:#cbd5e1;">
-            • 재료 카드를 선택하고 1~10 숫자 중 황금비율 숫자를 누릅니다.<br>
-            • <b>Up</b>: 실제 황금비율이 누른 숫자보다 큽니다.<br>
-            • <b>Down</b>: 실제 황금비율이 누른 숫자보다 작습니다.<br>
-            • <b>정답</b>: 해당 재료의 황금비율을 맞췄습니다!
+          <div style="line-height:1.6; font-size:0.78rem; color:#cbd5e1; word-break:keep-all;">
+            • <b>Up</b>: 실제 비율이 선택한 숫자보다 큼<br>
+            • <b>Down</b>: 실제 비율이 선택한 숫자보다 작음<br>
+            • <b>정답</b>: 해당 재료의 황금비율 일치!
           </div>
-          <div style="color:#6ee7b7; font-size:0.75rem; margin-top:5px; font-weight:800;">
-            💡 모든 재료의 비율을 맞추면 완벽한 레시피가 완성됩니다!
+          <div style="color:#6ee7b7; font-size:0.72rem; margin-top:6px; font-weight:700; word-break:keep-all;">
+            💡 모든 재료의 비율을 맞추면 최종 레시피가 완성됩니다.
           </div>
         ` : `
           <div style="font-size:0.86rem; color:#fde047; font-weight:900; margin-bottom:6px;">
-            ⚾ 숫자야구(베이스볼) 규칙
+            ⚾ 베이스볼 판정 규칙
           </div>
-          <div style="line-height:1.6; font-size:0.78rem; color:#cbd5e1;">
-            • <b style="color:#60a5fa;">S (스트라이크)</b>: 재료와 슬롯 위치(순서)가 모두 일치<br>
-            • <b style="color:#fbbf24;">B (볼)</b>: 레시피에 포함되지만 슬롯 위치가 다름 <span style="color:#fde047; font-weight:700;">(※ 순서가 중요한 경우에만 발생)</span><br>
-            • <b style="color:#f87171;">O (아웃)</b>: 레시피에 아예 들어가지 않는 전혀 다른 재료 (정답에 미포함)
+          <div style="line-height:1.65; font-size:0.78rem; color:#cbd5e1; word-break:keep-all;">
+            • <b style="color:#60a5fa;">S (스트라이크)</b>: 재료와 위치 모두 일치<br>
+            • <b style="color:#fbbf24;">B (볼)</b>: 재료는 맞으나 위치가 다름<br>
+            • <b style="color:#f87171;">O (아웃)</b>: 레시피에 없는 재료
           </div>
-          <div style="background:rgba(15,23,42,0.85); border:1px solid #334155; border-radius:8px; padding:7px 10px; margin-top:8px; font-size:0.73rem; color:#93c5fd; line-height:1.5;">
-            <b>📌 판정 예시</b> (정답이 [소주 · 맥주 · 콜라]일 때)<br>
-            내가 [<b>소주</b> · 사이다 · <b>맥주</b>]를 추리했다면?<br>
-            👉 소주(1번 위치 일치 = <b style="color:#60a5fa;">1S</b>), 맥주(포함되나 위치 다름 = <b style="color:#fbbf24;">1B</b>), 사이다(정답에 없음 = <b style="color:#f87171;">1O</b>)<br>
-            ➔ 판정 결과: <b style="color:#ffffff;">1S 1B 1O</b><br>
-            <span style="color:#94a3b8; font-size:0.7rem;">※ 순서가 무관한 일반 레시피는 포함된 재료는 모두 S(스트라이크), 없는 재료는 O(아웃)으로 판정됩니다.</span>
+          <div style="color:#94a3b8; font-size:0.72rem; margin-top:6px; word-break:keep-all;">
+            ※ 순서 없는 레시피는 맞는 재료가 모두 S로 판정됩니다.
           </div>
         `}
       </div>
