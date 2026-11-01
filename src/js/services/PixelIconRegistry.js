@@ -310,12 +310,12 @@
   },
   "rec_mango_ringo": {
     "key": "rec_mango_ringo",
-    "name": "망고톡톡",
+    "name": "망고비어",
     "innerSvg": "<rect x=\"6\" y=\"0\" width=\"4\" height=\"1\" fill=\"#facc15\"/><rect x=\"6\" y=\"1\" width=\"4\" height=\"1\" fill=\"#eab308\"/><rect x=\"7\" y=\"2\" width=\"1\" height=\"4\" fill=\"#86efac\"/><rect x=\"8\" y=\"2\" width=\"2\" height=\"4\" fill=\"#22c55e\"/><rect x=\"5\" y=\"6\" width=\"2\" height=\"1\" fill=\"#4ade80\"/><rect x=\"7\" y=\"6\" width=\"4\" height=\"1\" fill=\"#16a34a\"/><rect x=\"4\" y=\"7\" width=\"1\" height=\"8\" fill=\"#15803d\"/><rect x=\"5\" y=\"7\" width=\"1\" height=\"8\" fill=\"#4ade80\"/><rect x=\"6\" y=\"7\" width=\"4\" height=\"8\" fill=\"#22c55e\"/><rect x=\"10\" y=\"7\" width=\"1\" height=\"8\" fill=\"#14532d\"/><rect x=\"5\" y=\"9\" width=\"5\" height=\"4\" fill=\"#fde047\"/><rect x=\"6\" y=\"9\" width=\"3\" height=\"3\" fill=\"#f97316\"/><rect x=\"7\" y=\"9\" width=\"1\" height=\"1\" fill=\"#15803d\"/><rect x=\"5\" y=\"9\" width=\"5\" height=\"1\" fill=\"#ffffff\"/><rect x=\"5\" y=\"15\" width=\"6\" height=\"1\" fill=\"#14532d\"/>"
   },
   "rec_mango_ringoju": {
     "key": "rec_mango_ringoju",
-    "name": "망고톡톡주",
+    "name": "망고비어주",
     "innerSvg": "<rect x=\"6\" y=\"0\" width=\"4\" height=\"1\" fill=\"#facc15\"/><rect x=\"6\" y=\"1\" width=\"4\" height=\"1\" fill=\"#eab308\"/><rect x=\"7\" y=\"2\" width=\"1\" height=\"4\" fill=\"#86efac\"/><rect x=\"8\" y=\"2\" width=\"2\" height=\"4\" fill=\"#22c55e\"/><rect x=\"5\" y=\"6\" width=\"2\" height=\"1\" fill=\"#4ade80\"/><rect x=\"7\" y=\"6\" width=\"4\" height=\"1\" fill=\"#16a34a\"/><rect x=\"4\" y=\"7\" width=\"1\" height=\"8\" fill=\"#15803d\"/><rect x=\"5\" y=\"7\" width=\"1\" height=\"8\" fill=\"#4ade80\"/><rect x=\"6\" y=\"7\" width=\"4\" height=\"8\" fill=\"#22c55e\"/><rect x=\"10\" y=\"7\" width=\"1\" height=\"8\" fill=\"#14532d\"/><rect x=\"5\" y=\"9\" width=\"5\" height=\"4\" fill=\"#fde047\"/><rect x=\"6\" y=\"9\" width=\"3\" height=\"3\" fill=\"#f97316\"/><rect x=\"7\" y=\"9\" width=\"1\" height=\"1\" fill=\"#15803d\"/><rect x=\"5\" y=\"9\" width=\"5\" height=\"1\" fill=\"#ffffff\"/><rect x=\"5\" y=\"15\" width=\"6\" height=\"1\" fill=\"#14532d\"/>"
   },
   "rec_maeksato": {
@@ -676,13 +676,13 @@
   },
   "rec_mango_ringo": {
     "key": "rec_mango_ringo",
-    "name": "망고톡톡",
+    "name": "망고비어",
     "viewBox": "0 0 32 32",
     "innerSvg": "<rect x=\"12\" y=\"1\" width=\"8\" height=\"2\" fill=\"#ca8a04\"/><rect x=\"13\" y=\"1\" width=\"6\" height=\"1\" fill=\"#facc15\"/><rect x=\"12\" y=\"3\" width=\"8\" height=\"1\" fill=\"#a16207\"/><rect x=\"13\" y=\"4\" width=\"1\" height=\"7\" fill=\"#14532d\"/><rect x=\"14\" y=\"4\" width=\"1\" height=\"7\" fill=\"#86efac\"/><rect x=\"15\" y=\"4\" width=\"2\" height=\"7\" fill=\"#22c55e\"/><rect x=\"17\" y=\"4\" width=\"1\" height=\"7\" fill=\"#16a34a\"/><rect x=\"18\" y=\"4\" width=\"1\" height=\"7\" fill=\"#14532d\"/><rect x=\"12\" y=\"11\" width=\"2\" height=\"1\" fill=\"#86efac\"/><rect x=\"14\" y=\"11\" width=\"4\" height=\"1\" fill=\"#22c55e\"/><rect x=\"18\" y=\"11\" width=\"2\" height=\"1\" fill=\"#14532d\"/><rect x=\"10\" y=\"12\" width=\"3\" height=\"1\" fill=\"#86efac\"/><rect x=\"13\" y=\"12\" width=\"6\" height=\"1\" fill=\"#22c55e\"/><rect x=\"19\" y=\"12\" width=\"3\" height=\"1\" fill=\"#14532d\"/><rect x=\"9\" y=\"13\" width=\"3\" height=\"1\" fill=\"#86efac\"/><rect x=\"12\" y=\"13\" width=\"8\" height=\"1\" fill=\"#22c55e\"/><rect x=\"20\" y=\"13\" width=\"3\" height=\"1\" fill=\"#14532d\"/><rect x=\"8\" y=\"14\" width=\"1\" height=\"15\" fill=\"#14532d\"/><rect x=\"9\" y=\"14\" width=\"1\" height=\"15\" fill=\"#4ade80\"/><rect x=\"10\" y=\"14\" width=\"2\" height=\"15\" fill=\"#86efac\"/><rect x=\"12\" y=\"14\" width=\"7\" height=\"15\" fill=\"#22c55e\"/><rect x=\"19\" y=\"14\" width=\"3\" height=\"15\" fill=\"#16a34a\"/><rect x=\"22\" y=\"14\" width=\"1\" height=\"15\" fill=\"#166534\"/><rect x=\"23\" y=\"14\" width=\"1\" height=\"15\" fill=\"#14532d\"/><rect x=\"10\" y=\"16\" width=\"12\" height=\"9\" fill=\"#fde047\"/><rect x=\"10\" y=\"16\" width=\"12\" height=\"1\" fill=\"#fef08a\"/><rect x=\"10\" y=\"24\" width=\"12\" height=\"1\" fill=\"#eab308\"/><circle cx=\"16\" cy=\"19.5\" r=\"2.2\" fill=\"#ea580c\"/><circle cx=\"15.5\" cy=\"19\" r=\"1.8\" fill=\"#f97316\"/><circle cx=\"15\" cy=\"18.5\" r=\"0.8\" fill=\"#fde047\"/><path d=\"M 16.5,18 Q 18,16.5 19,17 Q 18,18.5 16.5,18 Z\" fill=\"#16a34a\"/><rect x=\"12\" y=\"22\" width=\"8\" height=\"2\" fill=\"#ffffff\"/><rect x=\"13\" y=\"23\" width=\"6\" height=\"0.8\" fill=\"#ea580c\"/><rect x=\"9\" y=\"29\" width=\"14\" height=\"1\" fill=\"#166534\"/><rect x=\"10\" y=\"30\" width=\"12\" height=\"1\" fill=\"#14532d\"/>"
   },
   "rec_mango_ringoju": {
     "key": "rec_mango_ringoju",
-    "name": "망고톡톡주",
+    "name": "망고비어주",
     "viewBox": "0 0 32 32",
     "innerSvg": "<rect x=\"12\" y=\"1\" width=\"8\" height=\"2\" fill=\"#ca8a04\"/><rect x=\"13\" y=\"1\" width=\"6\" height=\"1\" fill=\"#facc15\"/><rect x=\"12\" y=\"3\" width=\"8\" height=\"1\" fill=\"#a16207\"/><rect x=\"13\" y=\"4\" width=\"1\" height=\"7\" fill=\"#14532d\"/><rect x=\"14\" y=\"4\" width=\"1\" height=\"7\" fill=\"#86efac\"/><rect x=\"15\" y=\"4\" width=\"2\" height=\"7\" fill=\"#22c55e\"/><rect x=\"17\" y=\"4\" width=\"1\" height=\"7\" fill=\"#16a34a\"/><rect x=\"18\" y=\"4\" width=\"1\" height=\"7\" fill=\"#14532d\"/><rect x=\"12\" y=\"11\" width=\"2\" height=\"1\" fill=\"#86efac\"/><rect x=\"14\" y=\"11\" width=\"4\" height=\"1\" fill=\"#22c55e\"/><rect x=\"18\" y=\"11\" width=\"2\" height=\"1\" fill=\"#14532d\"/><rect x=\"10\" y=\"12\" width=\"3\" height=\"1\" fill=\"#86efac\"/><rect x=\"13\" y=\"12\" width=\"6\" height=\"1\" fill=\"#22c55e\"/><rect x=\"19\" y=\"12\" width=\"3\" height=\"1\" fill=\"#14532d\"/><rect x=\"9\" y=\"13\" width=\"3\" height=\"1\" fill=\"#86efac\"/><rect x=\"12\" y=\"13\" width=\"8\" height=\"1\" fill=\"#22c55e\"/><rect x=\"20\" y=\"13\" width=\"3\" height=\"1\" fill=\"#14532d\"/><rect x=\"8\" y=\"14\" width=\"1\" height=\"15\" fill=\"#14532d\"/><rect x=\"9\" y=\"14\" width=\"1\" height=\"15\" fill=\"#4ade80\"/><rect x=\"10\" y=\"14\" width=\"2\" height=\"15\" fill=\"#86efac\"/><rect x=\"12\" y=\"14\" width=\"7\" height=\"15\" fill=\"#22c55e\"/><rect x=\"19\" y=\"14\" width=\"3\" height=\"15\" fill=\"#16a34a\"/><rect x=\"22\" y=\"14\" width=\"1\" height=\"15\" fill=\"#166534\"/><rect x=\"23\" y=\"14\" width=\"1\" height=\"15\" fill=\"#14532d\"/><rect x=\"10\" y=\"16\" width=\"12\" height=\"9\" fill=\"#fde047\"/><rect x=\"10\" y=\"16\" width=\"12\" height=\"1\" fill=\"#fef08a\"/><rect x=\"10\" y=\"24\" width=\"12\" height=\"1\" fill=\"#eab308\"/><circle cx=\"16\" cy=\"19.5\" r=\"2.2\" fill=\"#ea580c\"/><circle cx=\"15.5\" cy=\"19\" r=\"1.8\" fill=\"#f97316\"/><circle cx=\"15\" cy=\"18.5\" r=\"0.8\" fill=\"#fde047\"/><path d=\"M 16.5,18 Q 18,16.5 19,17 Q 18,18.5 16.5,18 Z\" fill=\"#16a34a\"/><rect x=\"12\" y=\"22\" width=\"8\" height=\"2\" fill=\"#ffffff\"/><rect x=\"13\" y=\"23\" width=\"6\" height=\"0.8\" fill=\"#ea580c\"/><rect x=\"9\" y=\"29\" width=\"14\" height=\"1\" fill=\"#166534\"/><rect x=\"10\" y=\"30\" width=\"12\" height=\"1\" fill=\"#14532d\"/>"
   },
@@ -1112,10 +1112,14 @@
   "아이스티": "rec_icetea",
   "rec_13": "rec_icetea",
   "rec_mango_ringo": "rec_mango_ringo",
+  "망고비어": "rec_mango_ringo",
+  "망고라거": "rec_mango_ringo",
   "망고톡톡": "rec_mango_ringo",
   "rec_16": "rec_mango_ringo",
   "망고링고": "rec_mango_ringo",
   "rec_mango_ringoju": "rec_mango_ringoju",
+  "망고비어주": "rec_mango_ringoju",
+  "망고라거주": "rec_mango_ringoju",
   "망고톡톡주": "rec_mango_ringoju",
   "rec_17": "rec_mango_ringoju",
   "망고링고주": "rec_mango_ringoju",

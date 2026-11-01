@@ -1018,7 +1018,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 4,
     "recipe_number": 4,
     "formatted_number": "No.04",
-    "unlock_hint": "톡 쏘는 기포가 살아있는 워터에 황금빛 들판의 곡물을 더해 발효시킨 시원한 라거입니다."
+    "unlock_hint": "톡 쏘는 탄산 기포 액체에 황금빛 들판의 구수한 곡물을 더해 발효시킨 시원하고 청량한 황금빛 주류입니다."
   },
   {
     "recipe_id": 5,
@@ -1194,7 +1194,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 3,
     "recipe_number": 3,
     "formatted_number": "No.03",
-    "unlock_hint": "평범한 액체 속에 보이지 않는 기체를 가득 불어넣어 톡 쏘는 청량감을 만든 베이스 워터입니다."
+    "unlock_hint": "평범한 자연의 액체 속에 보이지 않는 탄산 기포를 가득 불어넣어 톡 쏘는 청량감을 만든 기초 음료입니다."
   },
   {
     "recipe_id": 13,
@@ -1264,7 +1264,7 @@ window.KSool.SeedDataBundle = {
   },
   {
     "recipe_id": 16,
-    "display_name": "망고톡톡",
+    "display_name": "망고비어",
     "real_name": "망고링고",
     "is_licensed": false,
     "difficulty": "EASY",
@@ -1286,7 +1286,7 @@ window.KSool.SeedDataBundle = {
   },
   {
     "recipe_id": 17,
-    "display_name": "망고톡톡주",
+    "display_name": "망고비어주",
     "real_name": "망고링고주",
     "is_licensed": false,
     "difficulty": "NORMAL",
@@ -1480,7 +1480,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 7,
     "recipe_number": 32,
     "formatted_number": "No.32",
-    "unlock_hint": "구수한 곡물에 수분과 바람을 머금게 하여 자연 발효균을 피워낸 전통 술 빚기의 핵심 발효제입니다."
+    "unlock_hint": "구수한 햇곡식에 촉촉한 수분과 바람을 머금게 하여 자연 발효균을 피워낸 전통 술 빚기의 핵심 발효제입니다."
   },
   {
     "recipe_id": 26,
@@ -2052,7 +2052,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 8,
     "recipe_number": 42,
     "formatted_number": "No.42",
-    "unlock_hint": "투명한 증류주에 쌉싸름한 믹서 워터를 두 배로 채우고, 차가운 결정체와 노란 시트러스 조각을 띄운 한국형 하이볼의 정석입니다."
+    "unlock_hint": "투명한 증류주에 쌉싸름하고 달콤한 탄산 믹서를 두 배로 채우고, 차가운 결정체와 노란 시트러스 조각을 띄운 한국형 하이볼의 정석입니다."
   },
   {
     "recipe_id": 52,
@@ -2074,7 +2074,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 3,
     "recipe_number": 19,
     "formatted_number": "No.19",
-    "unlock_hint": "하이볼의 단짝 믹서! 기포가 올라오는 워터에 은은한 단맛과 상큼한 노란 시트러스 향을 조화시켰습니다."
+    "unlock_hint": "하이볼의 단짝 믹서! 기포가 톡톡 올라오는 맑은 탄산에 은은한 단맛과 상큼한 노란 시트러스 향을 조화시켰습니다."
   },
   {
     "recipe_id": 53,
@@ -2162,7 +2162,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 10,
     "recipe_number": 61,
     "formatted_number": "No.61",
-    "unlock_hint": "[특산 재료 필수] 주류 냉장고에서 고른 남쪽 섬의 화산암반 증류주에 쌉싸름한 믹서 워터 두 배와 차가운 결정을 더했습니다."
+    "unlock_hint": "[특산 재료 필수] 주류 냉장고에서 고른 남쪽 섬의 화산암반 증류주에 쌉싸름하고 달콤한 탄산 믹서 두 배와 차가운 결정을 더했습니다."
   },
   {
     "recipe_id": 57,
@@ -2197,7 +2197,7 @@ window.KSool.SeedDataBundle = {
     "emoji": "🥤",
     "category": "기초합성",
     "unlocks_ingredient_id": 606,
-    "description": "탄산수와 설탕이 만나 톡 쏘는 청량감과 달콤함을 품은 국민 사이다 탄생!",
+    "description": "톡 쏘는 탄산 기포와 달콤한 당분이 만나 국민적 청량감을 품은 사이다 탄생!",
     "requires_order": false,
     "max_ratio": 1,
     "sum_ratio": 2,
@@ -2206,7 +2206,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 10,
     "recipe_number": 16,
     "formatted_number": "No.16",
-    "unlock_hint": "톡 쏘는 기포가 솟구치는 청량한 스파클링 워터에 달콤한 결정을 녹여 만든 초록 병의 국민 투명 탄산음료입니다."
+    "unlock_hint": "톡 쏘는 기포가 솟구치는 청량한 탄산 액체에 달콤한 결정을 녹여 만든 초록 병의 국민 투명 탄산음료입니다."
   },
   {
     "recipe_id": 59,
@@ -2250,7 +2250,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 9,
     "recipe_number": 34,
     "formatted_number": "No.34",
-    "unlock_hint": "하얀 주식 곡물에 구수한 보리 싹과 달콤한 결정을 더해 따뜻하게 삭혀 만든 밥알 동동 전통 음료입니다."
+    "unlock_hint": "하얀 주식 곡물에 구수한 엿기름 싹과 달콤한 결정을 더해 따뜻하게 삭혀 만든 밥알 동동 전통 음료입니다."
   },
   {
     "recipe_id": 61,
@@ -2272,7 +2272,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 1,
     "recipe_number": 52,
     "formatted_number": "No.52",
-    "unlock_hint": "주식인 쌀과 구수한 보리를 뜨거운 불길에 골고루 볶아 곱게 빻아낸 여름철 전통 영양 곡물 가루입니다."
+    "unlock_hint": "한국인의 대표 주식 곡물과 구수한 황금빛 곡식을 뜨거운 열기로 골고루 볶아 곱게 빻아낸 여름철 전통 영양 곡물 가루입니다."
   },
   {
     "recipe_id": 62,
@@ -2312,7 +2312,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 3,
     "step_order": 10,
-    "unlock_hint": "붉은 보석 알갱이가 가득한 과일에 달콤한 결정과 불을 더해 진하게 졸여낸 엑기스입니다."
+    "unlock_hint": "붉은 보석 알갱이가 가득한 과일에 달콤한 결정을 더해 뜨거운 열기로 진하게 졸여낸 엑기스입니다."
   },
   {
     "recipe_id": 64,
@@ -2352,7 +2352,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 3,
     "step_order": 11,
-    "unlock_hint": "검게 볶은 로스팅 원두에 맑은 자연의 액체와 차가운 사각 결정체를 가득 채워 완성한 현대인의 생명수입니다."
+    "unlock_hint": "검게 볶은 다크 로스팅 추출액에 맑은 자연의 액체와 차가운 사각 결정체를 가득 채워 완성한 현대인의 생명수입니다."
   },
   {
     "recipe_id": 66,
@@ -2392,7 +2392,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 3,
     "step_order": 13,
-    "unlock_hint": "구수한 붉은 곡물 앙금에 하얀 목장 음료와 달콤한 결정을 듬뿍 넣고 꽁꽁 얼려낸, 어르신들도 사랑하는 전통 팥빙수맛 사각 아이스바입니다."
+    "unlock_hint": "구수한 붉은 곡물 앙금에 하얀 목장 음료와 달콤한 결정을 듬뿍 넣고 꽁꽁 얼려낸, 어르신들도 사랑하는 전통 옛날 빙수맛 사각 아이스바입니다."
   },
   {
     "recipe_id": 68,
@@ -2612,7 +2612,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 3,
     "step_order": 15,
-    "unlock_hint": "도수 높은 투명 증류주에 깊게 볶은 차가운 블랙 원두 추출액을 1:1로 섞어 알코올 향을 그윽한 로스팅 원두 풍미로 지워버린 직장인 칵테일입니다."
+    "unlock_hint": "도수 높은 투명 증류주에 깊게 볶은 차가운 다크 로스팅 추출액을 1:1로 섞어 알코올 향을 그윽한 로스팅 풍미로 지워버린 직장인 칵테일입니다."
   },
   {
     "recipe_id": 79,
@@ -2632,7 +2632,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 5,
     "step_order": 12,
-    "unlock_hint": "시원한 황금빛 거품 발효주 두 배에 차가운 블랙 원두 음료 하나를 부어 유럽 펍의 다크 스타우트 풍미를 재현한 하이브리드 주류입니다."
+    "unlock_hint": "시원한 황금빛 거품 발효주 두 배에 차가운 다크 로스팅 음료 하나를 부어 유럽 펍의 다크 스타우트 풍미를 재현한 하이브리드 주류입니다."
   },
   {
     "recipe_id": 80,
@@ -2692,7 +2692,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 5,
     "step_order": 13,
-    "unlock_hint": "구수한 전통 쌀 발효 탁주 두 배에 부드러운 순백 목장 음료와 달콤한 붉은 팥 앙금 아이스바를 녹여 팥빙수처럼 걸쭉하고 달달하게 즐기는 이색 디저트 주류입니다."
+    "unlock_hint": "구수한 전통 주식 발효 탁주 두 배에 부드러운 순백 목장 음료와 달콤한 붉은 곡물 앙금 아이스바를 녹여 옛날 빙수처럼 걸쭉하고 달달하게 즐기는 이색 디저트 주류입니다."
   },
   {
     "recipe_id": 83,
@@ -2712,7 +2712,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 4,
     "step_id": 3,
     "step_order": 18,
-    "unlock_hint": "투명한 증류주와 차가운 블랙 원두 추출액, 부드러운 순백 목장 음료와 달콤한 결정을 1:1:1:1로 섞어 서양의 유명 리큐르 칵테일을 친숙하게 재현한 주류입니다."
+    "unlock_hint": "투명한 증류주와 차가운 다크 로스팅 추출액, 부드러운 순백 목장 음료와 달콤한 결정을 1:1:1:1로 섞어 서양의 유명 리큐르 칵테일을 친숙하게 재현한 주류입니다."
   }
 ],
   recipe_ingredients: [
