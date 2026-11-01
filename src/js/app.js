@@ -86,9 +86,6 @@ class KSoolApp {
       audio: this.audio
     });
 
-    if (window.KSool?.IconCompareModalView) {
-      this.iconCompareModalView = new window.KSool.IconCompareModalView('icon-compare-modal', 'icon-compare-content', this);
-    }
     if (window.KSool?.SettingsModalView) {
       this.settingsModalView = new window.KSool.SettingsModalView('settings-modal', 'settings-modal-content', this);
     }
@@ -1372,17 +1369,6 @@ class KSoolApp {
         this.audio.playTap();
         if (this.settingsModalView) {
           this.settingsModalView.open();
-        }
-      };
-    }
-
-    // 아이콘 3종 스타일 한눈에 비교하기 모달 오픈
-    const iconCompareBtn = document.getElementById('open-icon-compare-btn');
-    if (iconCompareBtn) {
-      iconCompareBtn.onclick = () => {
-        if (this.iconCompareModalView) {
-          this.iconCompareModalView.open('featured');
-          this.audio.playTap();
         }
       };
     }
