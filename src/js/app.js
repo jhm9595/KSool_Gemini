@@ -520,6 +520,7 @@ class KSoolApp {
                     ? `<span class="hint-bulb">💡</span> ${targetRec.unlock_hint || ''}`
                     : `<div class="quiz-desc-locked" id="quiz-locked-desc-btn" title="클릭하여 설명 힌트 해금 (단계별 힌트)">
                          <span class="quiz-lock-icon">🔒</span>
+                         <span class="quiz-lock-label">설명 힌트 잠김</span>
                        </div>`
                   )
               }
