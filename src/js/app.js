@@ -209,7 +209,7 @@ class KSoolApp {
       if (shouldQueue) this.pendingTabIntroQueue.push('detailPicker');
     }
 
-    if (!this.inventory.shownTabIntros.fridge && this.inventory.getUnlockProgressRatio() >= 0.8) {
+    if (!this.inventory.shownTabIntros.fridge && this.inventory.getUnlockProgressRatio() >= 0.5) {
       this.inventory.shownTabIntros.fridge = true;
       this.inventory.save();
       if (shouldQueue) this.pendingTabIntroQueue.push('fridge');
@@ -244,9 +244,9 @@ class KSoolApp {
       },
       fridge: {
         emoji: '🧊',
-        badge: '신규 탭 해금 (도감 80% 달성)',
+        badge: '신규 탭 해금 (도감 50% 달성)',
         title: '[냉장고를 부탁해] 탭이 열렸습니다!',
-        desc: '도감의 80% 이상을 정복하셨군요! 이제 <b>[🧊 냉장고를 부탁해]</b> 탭에서 내 냉장고 속 재료를 선택하면, 내가 해금한 술 조합 중 재료가 가장 많이 일치하는 꿀조합을 추천받고 <b>🎲 랜덤 추첨</b>도 돌릴 수 있습니다!',
+        desc: '도감의 50% 이상을 정복하셨군요! 이제 <b>[🧊 냉장고를 부탁해]</b> 탭에서 내 냉장고 속 재료를 선택하면, 내가 해금한 술 조합 중 재료가 가장 많이 일치하는 꿀조합을 추천받고 <b>🎲 랜덤 추첨</b>도 돌릴 수 있습니다!',
         btnLabel: '🧊 냉장고를 부탁해 가기'
       },
       detailPicker: {

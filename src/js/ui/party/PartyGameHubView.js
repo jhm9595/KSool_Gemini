@@ -21,6 +21,7 @@ class PartyGameHubView {
     this.mode = 'lobby'; // 'lobby' | 'game'
     this.activeGameKey = null;
     this.wakeLock = null;
+    this.toastTimer = null;
 
     // 7대 술게임 메타데이터 목록 (로비 카드 렌더링용)
     this.gamesList = [
@@ -273,37 +274,118 @@ class PartyGameHubView {
     }
   }
 
+  _ensureInventory() {
+    if (!this.inventory) {
+      const app = window.ksoolApp || window.app;
+      if (app?.inventory) this.inventory = app.inventory;
+    }
+    return this.inventory;
+  }
+
+  _isGameUnlocked(gameKey) {
+    const inv = this._ensureInventory();
+    if (!inv) return true;
+    if (inv.unlockAllSandboxMode) return true;
+
+    if (gameKey === 'penaltycocktail') {
+      // 소주(101)와 맥주(102)가 둘 다 해금되었을 때 오픈
+      const hasSoju = inv.isIngredientAvailable(101) || inv.isRecipeUnlocked(5);
+      const hasBeer = inv.isIngredientAvailable(102) || inv.isRecipeUnlocked(4);
+      return Boolean(hasSoju && hasBeer);
+    }
+
+    if (gameKey === 'fridge') {
+      // 전체 도감 레시피의 50% 이상 해금 시 오픈
+      const ratio = typeof inv.getUnlockProgressRatio === 'function' ? inv.getUnlockProgressRatio() : 0;
+      return ratio >= 0.5;
+    }
+
+    return true;
+  }
+
+  _getGameLockReason(gameKey) {
+    const inv = this._ensureInventory();
+    if (gameKey === 'penaltycocktail') {
+      const hasSoju = inv ? (inv.isIngredientAvailable(101) || inv.isRecipeUnlocked(5)) : false;
+      const hasBeer = inv ? (inv.isIngredientAvailable(102) || inv.isRecipeUnlocked(4)) : false;
+      let missing = [];
+      if (!hasSoju) missing.push('🍶 소주');
+      if (!hasBeer) missing.push('🍺 맥주');
+      return `🔒 [랜덤 벌칙주 제조기]\n주조실에서 ${missing.join(', ')}를 해금하면 열립니다!`;
+    }
+    if (gameKey === 'fridge') {
+      const ratio = inv && typeof inv.getUnlockProgressRatio === 'function' ? inv.getUnlockProgressRatio() : 0;
+      const pct = Math.round(ratio * 100);
+      return `🔒 [냉장고를 부탁해]\n도감 50% 이상 달성 시 열립니다! (현재: ${pct}%)`;
+    }
+    return '🔒 아직 해금되지 않은 게임입니다.';
+  }
+
+  showToast(message) {
+    let toast = document.getElementById('party-lock-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'party-lock-toast';
+      toast.className = 'party-lock-toast';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.remove('show');
+    void toast.offsetWidth; // reflow
+    toast.classList.add('show');
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2400);
+  }
+
   /**
    * [뷰 1] 화면 중앙 5대 술게임 대형 카드 선택 로비
    */
   renderLobby(container) {
+    const inv = this._ensureInventory();
+    const fridgeProgressRatio = inv && typeof inv.getUnlockProgressRatio === 'function' ? inv.getUnlockProgressRatio() : 0;
+    const fridgePercent = Math.round(fridgeProgressRatio * 100);
+
     container.innerHTML = `
       <div class="party-lobby-container">
-        <!-- 상단 헤더 (공백 축소, 우측 상단 순수 아이콘 사운드 버튼) -->
+        <!-- 상단 헤더: 설명 제거, 한 줄 콤팩트 헤더 -->
         <div class="party-lobby-header">
           <button type="button" class="party-sound-toggle-btn" id="party-sound-toggle" title="효과음 On/Off" aria-label="효과음 On/Off">
             ${this.sound.isMuted ? '🔇' : '🔊'}
           </button>
           <h2 class="party-lobby-title">🍻 술자리 미니게임 모음</h2>
-          <p class="party-lobby-desc">스마트폰을 테이블 중앙에 두고 함께 즐기는 7대 술자리 게임!</p>
         </div>
 
-        <!-- 중앙 큼지막한 게임 선택 카드 목록 -->
+        <!-- 중앙 게임 선택 카드 목록 -->
         <div class="party-games-grid-menu">
-          ${this.gamesList.map(g => `
-            <div class="party-lobby-card" data-start-game="${g.key}" style="--card-accent:${g.accentColor};">
-              <div class="lobby-card-emoji-wrap">
-                <span class="lobby-card-emoji">${g.emoji}</span>
-              </div>
-              <div class="lobby-card-body">
-                <div class="lobby-card-header">
-                  <span class="lobby-card-badge" style="color:${g.accentColor}; border-color:${g.accentColor};">${g.badge}</span>
+          ${this.gamesList.map(g => {
+            const unlocked = this._isGameUnlocked(g.key);
+            let badgeHtml = `<span class="lobby-card-badge" style="color:${g.accentColor}; border-color:${g.accentColor};">${g.badge}</span>`;
+            if (!unlocked) {
+              if (g.key === 'penaltycocktail') {
+                badgeHtml = `<span class="lobby-card-badge lock-badge">🔒 소주·맥주 필요</span>`;
+              } else if (g.key === 'fridge') {
+                badgeHtml = `<span class="lobby-card-badge lock-badge">🔒 도감 50% (${fridgePercent}%)</span>`;
+              }
+            }
+
+            return `
+              <div class="party-lobby-card ${!unlocked ? 'is-locked' : ''}" data-start-game="${g.key}" style="--card-accent:${g.accentColor};">
+                ${!unlocked ? '<div class="lobby-card-lock-overlay" title="잠김">🔒</div>' : ''}
+                <div class="lobby-card-emoji-wrap">
+                  <span class="lobby-card-emoji">${g.emoji}</span>
                 </div>
-                <div class="lobby-card-title">${g.title}</div>
-                <div class="lobby-card-desc">${g.desc}</div>
+                <div class="lobby-card-body">
+                  <div class="lobby-card-header">
+                    ${badgeHtml}
+                  </div>
+                  <div class="lobby-card-title">${g.title}</div>
+                  <div class="lobby-card-desc">${g.desc}</div>
+                </div>
               </div>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       </div>
     `;
@@ -312,6 +394,13 @@ class PartyGameHubView {
     container.querySelectorAll('[data-start-game]').forEach(card => {
       card.onclick = () => {
         const key = card.getAttribute('data-start-game');
+        if (!this._isGameUnlocked(key)) {
+          this.sound?.playSnap?.();
+          this.vibrateShort?.();
+          const reason = this._getGameLockReason(key);
+          this.showToast(reason);
+          return;
+        }
         this.playGame(key);
       };
     });

@@ -75,7 +75,7 @@ class InventoryManager {
     // (새로고침 시 팝업이 반복해서 뜨지 않도록 이미 해금된 항목은 플래그를 true로 맞춤)
     if (this.craftFailCount >= 1) this.shownTabIntros.collection = true;
     if (this.isDetailPickerUnlocked()) this.shownTabIntros.detailPicker = true;
-    if (this.getUnlockProgressRatio() >= 0.8) this.shownTabIntros.fridge = true;
+    if (this.getUnlockProgressRatio() >= 0.5) this.shownTabIntros.fridge = true;
     const totalRecs = this.recipeBook.getAllRecipes().length;
     if (totalRecs > 0 && this.unlockedRecipeIds.size >= totalRecs) this.shownTabIntros.suggestions = true;
   }
@@ -295,7 +295,7 @@ class InventoryManager {
   }
 
   isFridgeTabUnlocked() {
-    return Boolean(this.unlockAllSandboxMode || this.getUnlockProgressRatio() >= 0.8 || this.shownTabIntros.fridge);
+    return Boolean(this.unlockAllSandboxMode || this.getUnlockProgressRatio() >= 0.5 || this.shownTabIntros.fridge);
   }
 
   isSuggestionTabUnlocked() {
