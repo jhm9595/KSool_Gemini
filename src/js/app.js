@@ -942,7 +942,11 @@ class KSoolApp {
         }
       }
 
-      const displayName = this.brandResolver.resolveName(rec);
+      const rawName = this.brandResolver.resolveName(rec);
+      let displayName = rawName;
+      if (rawName === '아이스 아메리카노' || rawName === '아이스아메리카노') {
+        displayName = '아이스<br>아메리카노';
+      }
 
       const displayEmoji = (isUnlocked || isImageUnlocked)
         ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(rec, 34) : rec.emoji)

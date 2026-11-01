@@ -849,14 +849,17 @@
   background: #1e293b;
   border: 1px solid #334155;
   border-radius: 14px;
-  padding: 12px 8px;
+  padding: 22px 6px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 5px;
   cursor: pointer;
   position: relative;
   text-align: center;
+  min-height: 104px;
+  box-sizing: border-box;
   transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
@@ -928,19 +931,29 @@
 
 .sool-emoji {
   font-size: 1.7rem;
-  margin-top: 6px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sool-name {
   font-size: 0.76rem;
   font-weight: 800;
   color: #f8fafc;
+  word-break: keep-all;
+  line-height: 1.3;
+  text-align: center;
 }
 
 .sool-hint-status {
-  font-size: 0.62rem;
+  font-size: 0.60rem;
   color: #fbbf24;
   font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.3px;
+  word-break: keep-all;
+  margin-top: 1px;
 }
 
 /* 대화면 전용 주류 선반 및 가로 레인은 모바일에서 숨김 */
