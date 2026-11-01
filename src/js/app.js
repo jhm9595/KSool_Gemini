@@ -33,7 +33,12 @@ class KSoolApp {
       ratioProvider: this.ratioProvider,
       brandResolver: this.brandResolver,
       audio: this.audio,
+      app: this,
       onImageUnlocked: () => {
+        this.renderBrewView();
+        this.renderCollectionView();
+      },
+      onDescUnlocked: () => {
         this.renderBrewView();
         this.renderCollectionView();
       },
@@ -479,6 +484,7 @@ class KSoolApp {
     const hasNext = navIdx >= 0 && navIdx < navigableRecipes.length - 1;
     const isUnlocked = this.inventory.isRecipeUnlocked(targetRec.recipe_id);
     const isImageUnlocked = this.inventory.isRecipeImageUnlocked(targetRec.recipe_id);
+    const isDescUnlocked = this.inventory.isRecipeDescUnlocked(targetRec.recipe_id);
     const isImageAvailable = isUnlocked || isImageUnlocked;
     const resolvedName = this.brandResolver.resolveName(targetRec);
     const isCollectionUnlocked = this.inventory.isTabUnlocked('collection');
@@ -507,7 +513,17 @@ class KSoolApp {
                 <button type="button" class="quiz-nav-btn" id="quiz-next-btn" ${hasNext ? '' : 'disabled'} title="다음 번호">▶</button>
               </div>
             </div>
-            <div class="quiz-desc-text">${isUnlocked ? targetRec.description : (targetRec.unlock_hint || '')}</div>
+            <div class="quiz-desc-text">
+              ${isUnlocked
+                ? targetRec.description
+                : (isDescUnlocked
+                    ? `<span class="hint-bulb">💡</span> ${targetRec.unlock_hint || ''}`
+                    : `<span class="quiz-desc-locked" id="quiz-locked-desc-btn" title="힌트 메뉴에서 1단계 그림 ➔ 2단계 복권 긁기로 해금할 수 있습니다">
+                         <span class="quiz-lock-icon">🔒</span> 설명 힌트 잠김 (힌트 메뉴에서 복권 긁기로 해금)
+                       </span>`
+                  )
+              }
+            </div>
           </div>
         </div>
       </div>

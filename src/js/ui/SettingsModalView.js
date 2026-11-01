@@ -130,6 +130,7 @@
               app.inventory.shownTabIntros = { collection: false, fridge: false, suggestions: false, detailPicker: false };
               app.pendingTabIntroQueue = [];
               app.inventory.unlockedImageRecipeIds.clear();
+              app.inventory.unlockedDescRecipeIds?.clear();
               app.inventory.hintProgressByRecipe = {};
               app.inventory.promotedCustomRecipes = [];
               app.inventory.init();

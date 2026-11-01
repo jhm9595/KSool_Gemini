@@ -912,3 +912,231 @@
   border-color: #60a5fa;
   background: #172554;
 }
+
+/* =========================================================================
+   🕵️ 순차적 힌트 3단계 인디케이터 & 복권 긁기 (Scratch Card)
+   ========================================================================= */
+.hint-step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hint-step-indicator .step-pill {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #334155;
+}
+
+.hint-step-indicator .step-pill.done {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #6ee7b7;
+}
+
+.hint-step-indicator .step-pill.curr {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
+  color: #7dd3fc;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+}
+
+.hint-step-indicator .step-pill.locked {
+  background: #0f172a;
+  border-color: #1e293b;
+  color: #475569;
+}
+
+.hint-step-indicator .step-pill-arrow {
+  font-size: 0.62rem;
+  color: #475569;
+}
+
+/* 2단계 설명 힌트 박스 상태 */
+.bb-target-hint.hint-desc-locked {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px dashed #334155;
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: #64748b;
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bb-target-hint.hint-scratch-prompt {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.7));
+  border: 1.5px solid #0284c7;
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.18);
+}
+
+.scratch-prompt-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.scratch-ticket-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  animation: ticketBounce 1.8s infinite ease-in-out;
+}
+
+@keyframes ticketBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px) scale(1.05); }
+}
+
+.scratch-prompt-title {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #7dd3fc;
+}
+
+.scratch-prompt-sub {
+  font-size: 0.66rem;
+  color: #94a3b8;
+  margin-top: 1px;
+}
+
+.btn-start-scratch {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  color: #ffffff;
+  border: none;
+  font-size: 0.76rem;
+  font-weight: 900;
+  padding: 7px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-start-scratch:hover {
+  background: linear-gradient(135deg, #0369a1, #1d4ed8);
+  transform: translateY(-1px);
+}
+
+.btn-start-scratch:active {
+  transform: scale(0.96);
+}
+
+.btn-start-scratch .ad-tag {
+  background: #f59e0b;
+  color: #0f172a;
+  font-size: 0.58rem;
+  font-weight: 900;
+  padding: 1px 4px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+/* 캔버스 복권 긁기 컨테이너 */
+.scratch-card-box {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1.5px solid #475569;
+  background: #090e1a;
+  min-height: 64px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+}
+
+.scratch-underlayer {
+  font-size: 0.76rem;
+  color: #e2e8f0;
+  line-height: 1.5;
+  font-weight: 600;
+  user-select: text;
+  word-break: keep-all;
+}
+
+.scratch-overlay-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  touch-action: none;
+  z-index: 2;
+  border-radius: 10px;
+}
+
+.scratch-quick-reveal-btn {
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  z-index: 3;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid #64748b;
+  color: #cbd5e1;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.scratch-quick-reveal-btn:hover {
+  border-color: #38bdf8;
+  color: #f1f5f9;
+}
+
+/* 선택 버튼들 상태 스타일 */
+.hint-big-choice-btn.choice-scratch {
+  border-color: #0284c7;
+  background: linear-gradient(145deg, #1e293b, #0c2d48);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.25);
+}
+
+.hint-big-choice-btn.locked-step {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+  border-color: #334155 !important;
+  background: #111827 !important;
+  box-shadow: none !important;
+}
+
+.hint-big-choice-btn.active-step {
+  border-color: #38bdf8 !important;
+  animation: pulseActiveBorder 2s infinite ease-in-out;
+}
+
+@keyframes pulseActiveBorder {
+  0%, 100% { box-shadow: 0 0 8px rgba(56, 189, 248, 0.2); }
+  50% { box-shadow: 0 0 16px rgba(56, 189, 248, 0.5); }
+}
+
+.choice-badge-tag.ready {
+  background: rgba(56, 189, 248, 0.28);
+  color: #7dd3fc;
+  border-color: rgba(56, 189, 248, 0.6);
+}
+
+.choice-badge-tag.locked {
+  background: rgba(100, 116, 139, 0.25);
+  color: #94a3b8;
+  border-color: rgba(100, 116, 139, 0.4);
+}
