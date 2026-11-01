@@ -1243,6 +1243,30 @@ class KSoolApp {
   }
 
   _bindGlobalEvents() {
+    // [관리자/개발자 툴바 제어] 일반 테스터/유저에게는 기본 숨김 (?admin URL 파라미터나 로고 5회 탭 시 토글)
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasAdminParam = urlParams.has('admin') || urlParams.has('dev') || urlParams.has('debug');
+    if (hasAdminParam || localStorage.getItem('ksool_admin_mode') === 'true') {
+      document.body.classList.add('admin-mode');
+    }
+
+    const brandLogo = document.querySelector('.brand-title-row') || document.querySelector('.brand-badge');
+    let tapCount = 0;
+    let tapTimer = null;
+    if (brandLogo) {
+      brandLogo.style.cursor = 'pointer';
+      brandLogo.addEventListener('click', () => {
+        tapCount++;
+        clearTimeout(tapTimer);
+        tapTimer = setTimeout(() => { tapCount = 0; }, 1500);
+        if (tapCount >= 5) {
+          tapCount = 0;
+          const isNowAdmin = document.body.classList.toggle('admin-mode');
+          localStorage.setItem('ksool_admin_mode', isNowAdmin ? 'true' : 'false');
+          if (this.audio) this.audio.playSuccess();
+        }
+      });
+    }
     // 탭 전환
     document.querySelectorAll('[data-tab-target]').forEach(btn => {
       btn.onclick = () => {
