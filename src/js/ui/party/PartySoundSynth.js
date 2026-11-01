@@ -132,58 +132,26 @@ class PartySoundSynth {
     osc.stop(now + 0.15);
   }
 
-  startPour(baseFreq = 380) {
+  startPour() {
     if (this.isMuted) return;
     this._initContext();
     if (!this.ctx || this.pourOsc) return;
     const now = this.ctx.currentTime;
-    this.pourBaseFreq = baseFreq;
     this.pourOsc = this.ctx.createOscillator();
     this.pourGain = this.ctx.createGain();
-    this.pourFilter = this.ctx.createBiquadFilter();
-
     this.pourOsc.type = 'triangle';
-    this.pourOsc.frequency.setValueAtTime(baseFreq, now);
-
-    // 필터: 초반에는 맑게 열려있다가 85% 이상 극단적 위험 구간에서 둔탁하게 차단
-    this.pourFilter.type = 'lowpass';
-    this.pourFilter.frequency.setValueAtTime(3200, now);
-
+    this.pourOsc.frequency.setValueAtTime(380, now);
     this.pourGain.gain.setValueAtTime(0.12, now);
-
-    this.pourOsc.connect(this.pourFilter);
-    this.pourFilter.connect(this.pourGain);
+    this.pourOsc.connect(this.pourGain);
     this.pourGain.connect(this.ctx.destination);
     this.pourOsc.start(now);
   }
 
-  updatePour(heightRatio, baseFreq = 380, pitchSlope = 320, isNearEnd = false) {
+  updatePour(heightRatio) {
     if (!this.pourOsc || !this.ctx) return;
-    const now = this.ctx.currentTime;
-
-    if (isNearEnd) {
-      // [트릭 3] 85%~ 끝자락: 고음 상승이 완전히 차단되고 먹먹한 저음으로 변해 음정 계산 무력화!
-      if (this.pourFilter) {
-        this.pourFilter.frequency.setTargetAtTime(220, now, 0.05);
-      }
-      // 135Hz ~ 160Hz 둔탁한 저주파 공명 찰랑거림
-      const muffleFreq = 145 + Math.sin(now * 18) * 15;
-      this.pourOsc.frequency.setTargetAtTime(muffleFreq, now, 0.04);
-      if (this.pourGain) {
-        this.pourGain.gain.setTargetAtTime(0.18, now, 0.05);
-      }
-    } else {
-      // 0% ~ 84% 구간: 판마다 다른 시작 음정(baseFreq)에서 pitchSlope만큼 점진 상승
-      if (this.pourFilter) {
-        this.pourFilter.frequency.setTargetAtTime(3200, now, 0.05);
-      }
-      const normRatio = Math.min(1, heightRatio / 0.85);
-      const targetFreq = baseFreq + normRatio * pitchSlope;
-      this.pourOsc.frequency.setTargetAtTime(targetFreq, now, 0.03);
-      if (this.pourGain) {
-        this.pourGain.gain.setTargetAtTime(0.12, now, 0.05);
-      }
-    }
+    // 잔이 찰수록 매끄럽게 음정 상승 (380Hz ~ 700Hz)
+    const targetFreq = 380 + heightRatio * 320;
+    this.pourOsc.frequency.setValueAtTime(targetFreq, this.ctx.currentTime);
   }
 
   stopPour() {
@@ -196,27 +164,7 @@ class PartySoundSynth {
       } catch (_) {}
       this.pourOsc = null;
       this.pourGain = null;
-      this.pourFilter = null;
     }
-  }
-
-  playGhostHeartbeat() {
-    if (this.isMuted) return;
-    this._initContext();
-    if (!this.ctx) return;
-    const now = this.ctx.currentTime;
-    // [트릭 2] 60% 부근 기습 가짜 심장박동 (서늘하고 묵직한 서브베이스 쿵!)
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(85, now);
-    osc.frequency.exponentialRampToValueAtTime(25, now + 0.15);
-    gain.gain.setValueAtTime(0.65, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-    osc.start(now);
-    osc.stop(now + 0.2);
   }
 
   playPour(duration = 0.8) {

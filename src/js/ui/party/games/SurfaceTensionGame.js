@@ -62,17 +62,12 @@ class SurfaceTensionGame {
     this.revealThreshold = 90;
     this.isBlindLifted = false;
 
-    // 3. 판마다 제각각인 사운드 프로필 (음정 계산 심리전 트릭)
-    this.pourBaseFreq = 260 + Math.floor(Math.random() * 260); // 260Hz ~ 520Hz 무작위 시작 피치
-    this.pourPitchSlope = 200 + Math.floor(Math.random() * 240); // 200Hz ~ 440Hz 무작위 피치 변화폭
-    this.fakeHeartbeatLevel = 58 + Math.floor(Math.random() * 6); // 58% ~ 63% 부근 기습 가짜 심장박동 지점
-    this.hasTriggeredFakeHeartbeat = false;
-
     this.isPouring = false;
     this.isOverflowed = false;
 
     if (this.pourInterval) clearInterval(this.pourInterval);
     if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+    this.heartbeatTimer = null;
     if (this.toastTimer) clearTimeout(this.toastTimer);
 
     this.hub.sound.stopPour();
@@ -85,8 +80,14 @@ class SurfaceTensionGame {
       return;
     }
 
+    // 다음 사람이 손을 대고 붓기 시작하면 심장박동 루프 일시 정지
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
+
     this.isPouring = true;
-    this.hub.sound.startPour(this.pourBaseFreq);
+    this.hub.sound.startPour();
     this.hub.vibrateShort();
 
     const stageBox = document.getElementById('surface-screen-touch-area');
@@ -97,24 +98,7 @@ class SurfaceTensionGame {
 
       // 누르고 있는 동안 점진적으로 술이 차오름 (초당 약 8.75%)
       this.currentLevel += 0.35;
-      const isNearEnd = this.currentLevel >= 85;
-      this.hub.sound.updatePour(this.currentLevel / 100, this.pourBaseFreq, this.pourPitchSlope, isNearEnd);
-
-      // [트릭 2] 60%쯤에서 기습 가짜 심장박동 쿵! (간담을 서늘하게 만드는 심리전 트릭)
-      if (!this.hasTriggeredFakeHeartbeat && this.currentLevel >= this.fakeHeartbeatLevel && this.currentLevel < 80) {
-        this.hasTriggeredFakeHeartbeat = true;
-        this.hub.sound.playGhostHeartbeat();
-        this.hub.vibrateShort();
-      }
-
-      // [트릭 3] 88% 이상 진짜 끝자락 위험 수위 도달 시 빠른 심장박동 효과음 루프
-      if (this.currentLevel >= 88 && !this.heartbeatTimer) {
-        this.heartbeatTimer = setInterval(() => {
-          if (this.currentLevel >= 88 && !this.isOverflowed) {
-            this.hub.sound.playHeartbeat();
-          }
-        }, 480);
-      }
+      this.hub.sound.updatePour(this.currentLevel / 100);
 
       // 무한정 계속 누르고 있어서 표면장력 한계를 10% 이상 극단적으로 초과하면 즉시 폭발 넘침
       if (this.currentLevel >= this.overflowLimit + 10) {
@@ -152,10 +136,20 @@ class SurfaceTensionGame {
       this.liftBlind();
     }
 
-    // 안전하게 통과! 긴장감 넘치는 햅틱/사운드 피드백
-    if (this.currentLevel >= 90) {
+    // [심장박동 소리 조건]: 손을 뗀 후 위험 수위(85% 이상)에 도달해 있다면
+    // 손을 뗀 직후부터 다음 턴까지 긴장감 넘치는 심장박동 사운드가 울림!
+    if (this.currentLevel >= 85) {
       this.hub.vibratePenalty(); // 짜릿한 한계 도달 햅틱
-      this.hub.sound.playUp();
+      this.hub.sound.playHeartbeat();
+      if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = setInterval(() => {
+        if (!this.isPouring && !this.isOverflowed && this.currentLevel >= 85) {
+          this.hub.sound.playHeartbeat();
+        } else {
+          clearInterval(this.heartbeatTimer);
+          this.heartbeatTimer = null;
+        }
+      }, 550);
     } else {
       this.hub.vibrateShort();
     }
@@ -166,6 +160,7 @@ class SurfaceTensionGame {
     this.isPouring = false;
     if (this.pourInterval) clearInterval(this.pourInterval);
     if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+    this.heartbeatTimer = null;
     this.hub.sound.stopPour();
 
     // 혹시 가림막이 닫혀 있던 경우에도 결과를 볼 수 있게 즉시 해제
@@ -375,6 +370,7 @@ class SurfaceTensionGame {
     }
     if (this.pourInterval) clearInterval(this.pourInterval);
     if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+    this.heartbeatTimer = null;
     if (this.toastTimer) clearTimeout(this.toastTimer);
     this.hub.sound.stopPour();
     this.isPouring = false;
