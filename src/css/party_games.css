@@ -2198,6 +2198,7 @@
   box-sizing: border-box;
   gap: 10px;
   overflow: hidden;
+  word-break: keep-all;
 }
 
 /* 카드 공통 스타일 */
@@ -2487,12 +2488,14 @@
   font-weight: 900;
   color: #c084fc;
   text-shadow: 0 0 16px rgba(192, 132, 252, 0.6);
+  word-break: keep-all;
 }
 
 .mixing-sub {
   font-size: 0.95rem;
   color: #cbd5e1;
   font-weight: 700;
+  word-break: keep-all;
 }
 
 /* 5. 결과 뷰 */
@@ -2512,6 +2515,8 @@
   align-items: center;
   gap: 4px;
   text-align: center;
+  width: 100%;
+  word-break: keep-all;
 }
 
 .result-glass-pill {
@@ -2531,6 +2536,9 @@
   letter-spacing: -0.5px;
   text-shadow: 0 0 20px rgba(168, 85, 247, 0.7);
   margin: 2px 0;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-height: 1.25;
 }
 
 /* 결과 잔 그래픽 래퍼 */
