@@ -681,12 +681,12 @@ class KSoolApp {
 
     const catChips = visibleCategories.map(c => `
       <button class="cat-chip ${this.selectedIngCategory === c.category_id ? 'active' : ''}" data-ing-cat="${c.category_id}">
-        ${c.emoji} ${c.name}
+        ${c.name}
       </button>
     `).join('');
 
-    // '전체 재료' 탭은 제일 마지막 탭으로 배치
-    const allChip = `<button class="cat-chip ${this.selectedIngCategory === 'ALL' ? 'active' : ''}" data-ing-cat="ALL">📦 전체 재료</button>`;
+    // 'ALL' 탭은 제일 마지막 탭으로 배치 (아이콘 없이 순수 텍스트 ALL)
+    const allChip = `<button class="cat-chip ${this.selectedIngCategory === 'ALL' ? 'active' : ''}" data-ing-cat="ALL">ALL</button>`;
 
     bar.innerHTML = catChips + allChip;
     bar.querySelectorAll('[data-ing-cat]').forEach(btn => {
@@ -763,7 +763,7 @@ class KSoolApp {
 
       liquorShelf.innerHTML = `
         <div class="shelf-header">
-          <span class="shelf-title">🍶 주류 베이스</span>
+          <span class="shelf-title">주류 베이스</span>
           <span class="shelf-badge">${liquorItems.length}종</span>
         </div>
         <div class="shelf-grid">
@@ -788,7 +788,6 @@ class KSoolApp {
           <div class="lane-section" data-lane-cat="${c.category_id}">
             <div class="lane-header">
               <div class="lane-title-group">
-                <span class="lane-emoji">${c.emoji}</span>
                 <span class="lane-title">${c.name}</span>
               </div>
               <span class="lane-count">${catItems.length}종</span>
