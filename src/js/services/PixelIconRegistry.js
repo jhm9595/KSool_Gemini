@@ -561,7 +561,22 @@
   "coffee_beans": {
     "key": "coffee_beans",
     "name": "커피콩",
-    "innerSvg": "<rect x=\"2\" y=\"4\" width=\"6\" height=\"8\" fill=\"#78350f\"/><rect x=\"3\" y=\"3\" width=\"4\" height=\"10\" fill=\"#451a03\"/><rect x=\"5\" y=\"4\" width=\"1\" height=\"8\" fill=\"#260e02\"/><rect x=\"3\" y=\"5\" width=\"1\" height=\"4\" fill=\"#9a3412\"/><rect x=\"8\" y=\"4\" width=\"6\" height=\"8\" fill=\"#78350f\"/><rect x=\"9\" y=\"3\" width=\"4\" height=\"10\" fill=\"#451a03\"/><rect x=\"10\" y=\"4\" width=\"1\" height=\"8\" fill=\"#260e02\"/><rect x=\"12\" y=\"5\" width=\"1\" height=\"4\" fill=\"#9a3412\"/>"
+    "innerSvg": "<rect x=\"2\" y=\"4\" width=\"6\" height=\"8\" fill=\"#a16207\"/><rect x=\"3\" y=\"3\" width=\"4\" height=\"10\" fill=\"#78350f\"/><rect x=\"5\" y=\"4\" width=\"1\" height=\"8\" fill=\"#451a03\"/><rect x=\"3\" y=\"5\" width=\"1\" height=\"4\" fill=\"#ca8a04\"/><rect x=\"8\" y=\"4\" width=\"6\" height=\"8\" fill=\"#a16207\"/><rect x=\"9\" y=\"3\" width=\"4\" height=\"10\" fill=\"#78350f\"/><rect x=\"10\" y=\"4\" width=\"1\" height=\"8\" fill=\"#451a03\"/><rect x=\"12\" y=\"5\" width=\"1\" height=\"4\" fill=\"#ca8a04\"/>"
+  },
+  "red_bean": {
+    "key": "red_bean",
+    "name": "팥",
+    "innerSvg": "<rect x=\"2\" y=\"8\" width=\"5\" height=\"6\" fill=\"#7f1d1d\"/><rect x=\"3\" y=\"7\" width=\"3\" height=\"8\" fill=\"#991b1b\"/><rect x=\"4\" y=\"9\" width=\"1\" height=\"4\" fill=\"#ffffff\"/><rect x=\"8\" y=\"8\" width=\"5\" height=\"6\" fill=\"#7f1d1d\"/><rect x=\"9\" y=\"7\" width=\"3\" height=\"8\" fill=\"#991b1b\"/><rect x=\"10\" y=\"9\" width=\"1\" height=\"4\" fill=\"#ffffff\"/><rect x=\"5\" y=\"3\" width=\"5\" height=\"5\" fill=\"#991b1b\"/><rect x=\"6\" y=\"2\" width=\"3\" height=\"7\" fill=\"#b91c1c\"/><rect x=\"7\" y=\"4\" width=\"2\" height=\"2\" fill=\"#ffffff\"/>"
+  },
+  "roasted_beans": {
+    "key": "roasted_beans",
+    "name": "원두",
+    "innerSvg": "<rect x=\"2\" y=\"6\" width=\"5\" height=\"7\" fill=\"#3d1a08\"/><rect x=\"3\" y=\"5\" width=\"3\" height=\"9\" fill=\"#1c0a00\"/><rect x=\"4\" y=\"6\" width=\"1\" height=\"7\" fill=\"#0a0401\"/><rect x=\"8\" y=\"5\" width=\"5\" height=\"7\" fill=\"#3d1a08\"/><rect x=\"9\" y=\"4\" width=\"3\" height=\"9\" fill=\"#1c0a00\"/><rect x=\"10\" y=\"5\" width=\"1\" height=\"7\" fill=\"#0a0401\"/><rect x=\"4\" y=\"3\" width=\"1\" height=\"2\" fill=\"#e2e8f0\"/><rect x=\"5\" y=\"1\" width=\"1\" height=\"2\" fill=\"#cbd5e1\"/><rect x=\"11\" y=\"2\" width=\"1\" height=\"2\" fill=\"#e2e8f0\"/><rect x=\"10\" y=\"0\" width=\"1\" height=\"2\" fill=\"#cbd5e1\"/>"
+  },
+  "red_bean_porridge": {
+    "key": "red_bean_porridge",
+    "name": "단팥죽",
+    "innerSvg": "<rect x=\"2\" y=\"8\" width=\"12\" height=\"5\" fill=\"#334155\"/><rect x=\"3\" y=\"7\" width=\"10\" height=\"1\" fill=\"#701a28\"/><rect x=\"4\" y=\"8\" width=\"8\" height=\"2\" fill=\"#831843\"/><rect x=\"4\" y=\"6\" width=\"3\" height=\"3\" fill=\"#ffffff\"/><rect x=\"8\" y=\"5\" width=\"3\" height=\"3\" fill=\"#ffffff\"/><rect x=\"11\" y=\"7\" width=\"2\" height=\"2\" fill=\"#ffffff\"/><rect x=\"7\" y=\"7\" width=\"1\" height=\"1\" fill=\"#fde047\"/><rect x=\"4\" y=\"13\" width=\"8\" height=\"1\" fill=\"#1e293b\"/><rect x=\"5\" y=\"14\" width=\"6\" height=\"1\" fill=\"#1e293b\"/><rect x=\"8\" y=\"2\" width=\"1\" height=\"2\" fill=\"#e2e8f0\" opacity=\"0.7\"/>"
   },
   "sugar": {
     "key": "sugar",
@@ -633,6 +648,9 @@
   "rice": "🏞️",
   "misutgaru": "🥣",
   "coffee_beans": "🫘",
+  "red_bean": "🫘",
+  "roasted_beans": "☕",
+  "red_bean_porridge": "🥣",
   "black_tea": "🫖",
   "energy_drink": "⚡",
   "ion_drink": "🎽",
@@ -972,7 +990,25 @@ const SPRITE_DATA_HD = {
     "key": "coffee_beans",
     "name": "커피콩",
     "viewBox": "0 0 32 32",
-    "innerSvg": "<ellipse cx=\"12\" cy=\"18\" rx=\"6\" ry=\"8\" fill=\"#271004\" transform=\"rotate(-25 12 18)\"/><ellipse cx=\"12\" cy=\"18\" rx=\"5\" ry=\"7\" fill=\"#451a03\" transform=\"rotate(-25 12 18)\"/><path d=\"M 9,12 Q 13,18 10,24\" stroke=\"#1c0a00\" stroke-width=\"1.8\" fill=\"none\"/><ellipse cx=\"20\" cy=\"14\" rx=\"6\" ry=\"8\" fill=\"#451a03\" transform=\"rotate(35 20 14)\"/><ellipse cx=\"20\" cy=\"14\" rx=\"5\" ry=\"7\" fill=\"#78350f\" transform=\"rotate(35 20 14)\"/><path d=\"M 18,8 Q 22,14 19,20\" stroke=\"#271004\" stroke-width=\"1.8\" fill=\"none\"/><ellipse cx=\"18\" cy=\"11\" rx=\"1.5\" ry=\"3\" fill=\"#92400e\" opacity=\"0.6\" transform=\"rotate(35 18 11)\"/>"
+    "innerSvg": "<ellipse cx=\"12\" cy=\"18\" rx=\"6\" ry=\"8\" fill=\"#78350f\" transform=\"rotate(-25 12 18)\"/><ellipse cx=\"12\" cy=\"18\" rx=\"5\" ry=\"7\" fill=\"#a16207\" transform=\"rotate(-25 12 18)\"/><path d=\"M 9,12 Q 13,18 10,24\" stroke=\"#451a03\" stroke-width=\"1.8\" fill=\"none\"/><ellipse cx=\"20\" cy=\"14\" rx=\"6\" ry=\"8\" fill=\"#a16207\" transform=\"rotate(35 20 14)\"/><ellipse cx=\"20\" cy=\"14\" rx=\"5\" ry=\"7\" fill=\"#ca8a04\" transform=\"rotate(35 20 14)\"/><path d=\"M 18,8 Q 22,14 19,20\" stroke=\"#78350f\" stroke-width=\"1.8\" fill=\"none\"/><ellipse cx=\"18\" cy=\"11\" rx=\"1.5\" ry=\"3\" fill=\"#eab308\" opacity=\"0.6\" transform=\"rotate(35 18 11)\"/>"
+  },
+  "red_bean": {
+    "key": "red_bean",
+    "name": "팥",
+    "viewBox": "0 0 32 32",
+    "innerSvg": "<ellipse cx=\"11\" cy=\"20\" rx=\"6.5\" ry=\"5.5\" fill=\"#7f1d1d\" transform=\"rotate(-15 11 20)\"/><ellipse cx=\"11\" cy=\"20\" rx=\"5.5\" ry=\"4.5\" fill=\"#991b1b\" transform=\"rotate(-15 11 20)\"/><ellipse cx=\"9.5\" cy=\"18.5\" rx=\"2.5\" ry=\"1.5\" fill=\"#b91c1c\" transform=\"rotate(-15 9.5 18.5)\"/><path d=\"M 7.5,20 Q 11,19 14.5,20\" stroke=\"#ffffff\" stroke-width=\"1.6\" stroke-linecap=\"round\" fill=\"none\"/><ellipse cx=\"21\" cy=\"18\" rx=\"6.5\" ry=\"5.5\" fill=\"#7f1d1d\" transform=\"rotate(25 21 18)\"/><ellipse cx=\"21\" cy=\"18\" rx=\"5.5\" ry=\"4.5\" fill=\"#991b1b\" transform=\"rotate(25 21 18)\"/><ellipse cx=\"20\" cy=\"16.5\" rx=\"2.5\" ry=\"1.5\" fill=\"#b91c1c\" transform=\"rotate(25 20 16.5)\"/><path d=\"M 18,18 Q 21,17 24,18\" stroke=\"#ffffff\" stroke-width=\"1.6\" stroke-linecap=\"round\" fill=\"none\"/><ellipse cx=\"16\" cy=\"10\" rx=\"6\" ry=\"5\" fill=\"#991b1b\" transform=\"rotate(5 16 10)\"/><ellipse cx=\"16\" cy=\"10\" rx=\"5\" ry=\"4\" fill=\"#b91c1c\" transform=\"rotate(5 16 10)\"/><ellipse cx=\"15\" cy=\"8.5\" rx=\"2\" ry=\"1.2\" fill=\"#dc2626\" transform=\"rotate(5 15 8.5)\"/><path d=\"M 13.5,10 Q 16,9.2 18.5,10\" stroke=\"#ffffff\" stroke-width=\"1.5\" stroke-linecap=\"round\" fill=\"none\"/>"
+  },
+  "roasted_beans": {
+    "key": "roasted_beans",
+    "name": "원두",
+    "viewBox": "0 0 32 32",
+    "innerSvg": "<ellipse cx=\"11\" cy=\"20\" rx=\"6\" ry=\"8\" fill=\"#1c0a00\" transform=\"rotate(-25 11 20)\"/><ellipse cx=\"11\" cy=\"20\" rx=\"5\" ry=\"7\" fill=\"#271004\" transform=\"rotate(-25 11 20)\"/><path d=\"M 8,14 Q 12,20 9,26\" stroke=\"#0a0401\" stroke-width=\"2\" fill=\"none\"/><ellipse cx=\"21\" cy=\"17\" rx=\"6\" ry=\"8\" fill=\"#271004\" transform=\"rotate(35 21 17)\"/><ellipse cx=\"21\" cy=\"17\" rx=\"5\" ry=\"7\" fill=\"#3d1a08\" transform=\"rotate(35 21 17)\"/><path d=\"M 19,11 Q 23,17 20,23\" stroke=\"#1c0a00\" stroke-width=\"2\" fill=\"none\"/><path d=\"M 11,11 Q 9,6 12,2 M 16,10 Q 18,5 15,1\" stroke=\"#cbd5e1\" stroke-width=\"1.6\" stroke-linecap=\"round\" fill=\"none\" opacity=\"0.75\"/>"
+  },
+  "red_bean_porridge": {
+    "key": "red_bean_porridge",
+    "name": "단팥죽",
+    "viewBox": "0 0 32 32",
+    "innerSvg": "<path d=\"M 5,16 C 5,26 11,28 16,28 C 21,28 27,26 27,16 Z\" fill=\"#1e293b\"/><path d=\"M 6,16 C 6,25 11.5,27 16,27 C 20.5,27 26,25 26,16 Z\" fill=\"#334155\"/><ellipse cx=\"16\" cy=\"16\" rx=\"10\" ry=\"4.5\" fill=\"#701a28\"/><ellipse cx=\"16\" cy=\"16.5\" rx=\"9\" ry=\"3.8\" fill=\"#831843\"/><circle cx=\"12\" cy=\"15\" r=\"3\" fill=\"#ffffff\"/><circle cx=\"12\" cy=\"15\" r=\"2.2\" fill=\"#f8fafc\"/><circle cx=\"17\" cy=\"14\" r=\"3.2\" fill=\"#ffffff\"/><circle cx=\"17\" cy=\"14\" r=\"2.4\" fill=\"#f8fafc\"/><circle cx=\"21\" cy=\"16\" r=\"2.6\" fill=\"#ffffff\"/><circle cx=\"21\" cy=\"16\" r=\"1.8\" fill=\"#f8fafc\"/><ellipse cx=\"14.5\" cy=\"17\" rx=\"1.4\" ry=\"0.8\" fill=\"#fde047\" transform=\"rotate(-20 14.5 17)\"/><path d=\"M 14,10 Q 13,6 15,3 M 18,10 Q 19,6 17,2\" stroke=\"#cbd5e1\" stroke-width=\"1.4\" stroke-linecap=\"round\" fill=\"none\" opacity=\"0.7\"/>"
   },
   "black_tea": {
     "key": "black_tea",
@@ -1233,6 +1269,11 @@ const SPRITE_DATA_HD = {
   "502": "rice",
   "503": "misutgaru",
   "504": "coffee_beans",
+  "505": "red_bean",
+  "506": "roasted_beans",
+  "807": "red_bean_porridge",
+  "84": "roasted_beans",
+  "85": "red_bean_porridge",
   "601": "black_tea",
   "602": "energy_drink",
   "603": "ion_drink",
@@ -1370,20 +1411,25 @@ const SPRITE_DATA_HD = {
   "rec_61": "misutgaru",
   "coffee_beans": "coffee_beans",
   "커피콩": "coffee_beans",
+  "생두": "coffee_beans",
   "ing_504": "coffee_beans",
-  "커피원두": "coffee_beans",
-  "팥": "coffee_beans",
-  "red_bean": "coffee_beans",
-  "ing_505": "coffee_beans",
-  "원두": "coffee_beans",
-  "볶은원두": "coffee_beans",
-  "roasted_beans": "coffee_beans",
-  "ing_506": "coffee_beans",
-  "rec_84": "coffee_beans",
-  "단팥죽": "misutgaru",
-  "red_bean_porridge": "misutgaru",
-  "ing_807": "misutgaru",
-  "rec_85": "misutgaru",
+  "red_bean": "red_bean",
+  "팥": "red_bean",
+  "붉은팥": "red_bean",
+  "ing_505": "red_bean",
+  "roasted_beans": "roasted_beans",
+  "원두": "roasted_beans",
+  "볶은원두": "roasted_beans",
+  "커피원두": "roasted_beans",
+  "ing_506": "roasted_beans",
+  "rec_84": "roasted_beans",
+  "84": "roasted_beans",
+  "red_bean_porridge": "red_bean_porridge",
+  "단팥죽": "red_bean_porridge",
+  "팥죽": "red_bean_porridge",
+  "ing_807": "red_bean_porridge",
+  "rec_85": "red_bean_porridge",
+  "85": "red_bean_porridge",
   "black_tea": "black_tea",
   "홍차": "black_tea",
   "ing_601": "black_tea",
