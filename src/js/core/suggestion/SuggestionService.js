@@ -14,6 +14,9 @@ class SuggestionService {
     this.STORAGE_KEY = 'ksool_alchemy_v2_suggestions';
     this.suggestions = [];
     this.userVotes = {}; // suggestion_key -> 'UP' | 'DOWN'
+    this.SUPABASE_URL = 'https://jyjxvwxlwkoedxwkkysj.supabase.co';
+    this.SUPABASE_KEY = 'sb_publishable_BqLI_-8VDKQiSJ69qVZoug_t6-AWeUj';
+    this.onSuggestionsUpdated = null;
   }
 
   init() {
@@ -29,6 +32,7 @@ class SuggestionService {
     if (this.suggestions.length === 0) {
       this._seedDefaultSuggestions();
     }
+    this._fetchRemoteSuggestions();
   }
 
   _seedDefaultSuggestions() {
@@ -119,6 +123,7 @@ class SuggestionService {
       existing.upvotes += 1;
       this.userVotes[key] = 'UP';
       this._save();
+      this._syncRemoteVote(key, existing.upvotes, existing.downvotes);
       return { ok: true, action: 'UPVOTED_EXISTING', message: '이미 올라온 조합이라 👍 추천이 +1 추가되었습니다!' };
     }
 
@@ -137,6 +142,7 @@ class SuggestionService {
     this.suggestions.unshift(newEntry);
     this.userVotes[key] = 'UP';
     this._save();
+    this._syncRemoteUpsert(newEntry);
     return { ok: true, action: 'CREATED', message: '현재 재료 조합이 추천 목록에 등록되었습니다!' };
   }
 
@@ -155,6 +161,7 @@ class SuggestionService {
 
     this.userVotes[suggestionKey] = type;
     this._save();
+    this._syncRemoteVote(suggestionKey, item.upvotes, item.downvotes);
   }
 
   /**
@@ -171,6 +178,7 @@ class SuggestionService {
     this.inventory.unlockRecipe(promoted.recipe.recipe_id);
     this.inventory.save();
     this._save();
+    this._syncRemoteApply(suggestionKey);
 
     return promoted.recipe;
   }
@@ -181,6 +189,97 @@ class SuggestionService {
         this.STORAGE_KEY,
         JSON.stringify({ suggestions: this.suggestions, userVotes: this.userVotes })
       );
+    } catch (_) {}
+  }
+  async _fetchRemoteSuggestions() {
+    try {
+      const res = await fetch(`${this.SUPABASE_URL}/rest/v1/ksool_suggestions?select=*&order=upvotes.desc`, {
+        headers: {
+          'apikey': this.SUPABASE_KEY,
+          'Authorization': `Bearer ${this.SUPABASE_KEY}`
+        }
+      });
+      if (!res.ok) return;
+      const remoteList = await res.json();
+      if (!Array.isArray(remoteList) || remoteList.length === 0) return;
+
+      const map = new Map();
+      this.suggestions.forEach(s => map.set(s.suggestion_key, s));
+
+      remoteList.forEach(r => {
+        const existing = map.get(r.suggestion_key);
+        if (existing) {
+          existing.upvotes = r.upvotes;
+          existing.downvotes = r.downvotes;
+          existing.is_applied = r.is_applied;
+          if (r.items) existing.items = r.items;
+        } else {
+          map.set(r.suggestion_key, {
+            suggestion_key: r.suggestion_key,
+            items: r.items,
+            upvotes: r.upvotes,
+            downvotes: r.downvotes,
+            is_applied: r.is_applied
+          });
+        }
+      });
+
+      this.suggestions = Array.from(map.values());
+      this._save();
+      if (this.onSuggestionsUpdated) {
+        this.onSuggestionsUpdated();
+      }
+    } catch (err) {
+      console.warn('[SuggestionService] Remote sync fallback to local cache:', err);
+    }
+  }
+
+  async _syncRemoteUpsert(entry) {
+    try {
+      await fetch(`${this.SUPABASE_URL}/rest/v1/ksool_suggestions`, {
+        method: 'POST',
+        headers: {
+          'apikey': this.SUPABASE_KEY,
+          'Authorization': `Bearer ${this.SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({
+          suggestion_key: entry.suggestion_key,
+          items: entry.items,
+          upvotes: entry.upvotes,
+          downvotes: entry.downvotes,
+          is_applied: entry.is_applied
+        })
+      });
+    } catch (_) {}
+  }
+
+  async _syncRemoteVote(suggestionKey, upvotes, downvotes) {
+    try {
+      await fetch(`${this.SUPABASE_URL}/rest/v1/ksool_suggestions?suggestion_key=eq.${encodeURIComponent(suggestionKey)}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': this.SUPABASE_KEY,
+          'Authorization': `Bearer ${this.SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ upvotes, downvotes })
+      });
+    } catch (_) {}
+  }
+
+  async _syncRemoteApply(suggestionKey) {
+    try {
+      await fetch(`${this.SUPABASE_URL}/rest/v1/ksool_suggestions?suggestion_key=eq.${encodeURIComponent(suggestionKey)}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': this.SUPABASE_KEY,
+          'Authorization': `Bearer ${this.SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ is_applied: true })
+      });
     } catch (_) {}
   }
 }

@@ -111,6 +111,7 @@ class KSoolApp {
     }
     this.inventory.save();
     this.suggestionService.init();
+    this.suggestionService.onSuggestionsUpdated = () => this.suggestionBoardView?.render();
     this.fridgeEngine.init();
 
     const nextQuiz = this.inventory.getNextQuizRecipe();
