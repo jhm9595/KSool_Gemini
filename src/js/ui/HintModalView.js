@@ -24,7 +24,7 @@ class HintModalView {
     this.showHelpGuide = false; // 베이스볼 게임 방법 간단 도움말 토글
   }
 
-  open(recipeId) {
+  open(recipeId, initialMode = null) {
     this._stopMinigame();
     this.activeRecipeId = Number(recipeId);
     this.lastUpDownResult = null;
@@ -35,12 +35,23 @@ class HintModalView {
     this._resetGuessSlots();
     this._clearActiveRecipeHistory();
 
-    // 도감에서 미해금 카드를 누르면 [⚾ 베이스볼 / 🎮 그림 해금 게임 / (있을 경우 📺 힌트보기)] 선택 화면부터 노출
-    // 전체 해금 모드(unlockAllSandboxMode)일 때는 즉시 100% 해금된 베이스볼 & 황금비율 화면으로 직행
-    this.viewMode = this.inventory.unlockAllSandboxMode ? 'BASEBALL' : 'CHOICE';
+    // initialMode가 지정된 경우 해당 모드로 직행 ('MINIGAME_SELECT' 등)
+    if (initialMode === 'MINIGAME_SELECT' || initialMode === 'minigame') {
+      this.viewMode = 'MINIGAME_SELECT';
+    } else if (initialMode === 'BASEBALL' || initialMode === 'baseball') {
+      this.viewMode = 'BASEBALL';
+    } else {
+      // 도감에서 미해금 카드를 누르면 [⚾ 베이스볼 / 🎮 그림 해금 게임 / (있을 경우 📺 힌트보기)] 선택 화면부터 노출
+      // 전체 해금 모드(unlockAllSandboxMode)일 때는 즉시 100% 해금된 베이스볼 & 황금비율 화면으로 직행
+      this.viewMode = this.inventory.unlockAllSandboxMode ? 'BASEBALL' : 'CHOICE';
+    }
 
     this.render();
     document.getElementById('hint-modal').classList.add('active');
+  }
+
+  openMinigame(recipeId) {
+    this.open(recipeId, 'MINIGAME_SELECT');
   }
 
   close() {

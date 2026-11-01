@@ -468,6 +468,7 @@ class KSoolApp {
     const hasNext = navIdx >= 0 && navIdx < navigableRecipes.length - 1;
     const isUnlocked = this.inventory.isRecipeUnlocked(targetRec.recipe_id);
     const isImageUnlocked = this.inventory.isRecipeImageUnlocked(targetRec.recipe_id);
+    const isImageAvailable = isUnlocked || isImageUnlocked;
     const resolvedName = this.brandResolver.resolveName(targetRec);
     const isCollectionUnlocked = this.inventory.isTabUnlocked('collection');
     const showHintBtn = !isUnlocked && isCollectionUnlocked;
@@ -477,7 +478,11 @@ class KSoolApp {
       <div class="brew-quiz-card">
         <div class="quiz-question-row">
           <div class="quiz-icon-col">
-            <div class="quiz-mystery-icon">${(isUnlocked || isImageUnlocked) ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(targetRec, 36) : targetRec.emoji) : '❓'}</div>
+            <div class="quiz-mystery-icon ${isImageAvailable ? 'is-unlocked' : 'is-locked'}"
+                 id="quiz-mystery-icon"
+                 ${isImageAvailable ? '' : 'title="❓ 클릭하여 그림 해금 미니게임 도전"'}>
+              ${isImageAvailable ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(targetRec, 36) : targetRec.emoji) : '❓'}
+            </div>
             ${showHintBtn ? `<button type="button" class="quiz-infer-btn" id="quiz-open-hint-btn">힌트</button>` : ''}
           </div>
           <div class="quiz-question-body">
@@ -539,14 +544,21 @@ class KSoolApp {
         this.audio.playTap();
         this.hintModalView.open(targetRec.recipe_id);
       };
-      const mysteryIcon = container.querySelector('.quiz-mystery-icon');
-      if (mysteryIcon) {
+    }
+
+    const mysteryIcon = container.querySelector('#quiz-mystery-icon');
+    if (mysteryIcon && targetRec) {
+      const isImageAvailable = this.inventory.isRecipeUnlocked(targetRec.recipe_id) || this.inventory.isRecipeImageUnlocked(targetRec.recipe_id);
+      if (!isImageAvailable) {
         mysteryIcon.style.cursor = 'pointer';
-        mysteryIcon.title = '힌트 보기';
         mysteryIcon.onclick = () => {
           this.audio.playTap();
-          this.hintModalView.open(targetRec.recipe_id);
+          this.hintModalView.open(targetRec.recipe_id, 'MINIGAME_SELECT');
         };
+      } else {
+        mysteryIcon.style.cursor = 'default';
+        mysteryIcon.removeAttribute('title');
+        mysteryIcon.onclick = null;
       }
     }
   }
