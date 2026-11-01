@@ -535,7 +535,7 @@ class CapFlickGame {
             <g id="cap-question-btn" 
                class="cap-question-btn ${this.showQuestionMark ? 'show' : ''}" 
                role="button" 
-               aria-label="휴지 쏙 빼고 Up & Down 숫자 게임으로 이동"
+               aria-label="Up & Down 숫자 게임으로 이동"
                style="transform-origin: 100px 100px;">
               <!-- 펄스 회전 글로우 헤일로 -->
               <circle cx="100" cy="100" r="42" class="q-pulse-halo"/>
@@ -543,9 +543,8 @@ class CapFlickGame {
               <circle cx="100" cy="100" r="32" class="q-main-disc"/>
               <!-- 내부 엠보스 림 -->
               <circle cx="100" cy="100" r="28" class="q-inner-rim"/>
-              <!-- ? 텍스트 및 휴지 빼기 라벨 -->
-              <text x="100" y="93" text-anchor="middle" dominant-baseline="central" class="q-mark-char">?</text>
-              <text x="100" y="113" text-anchor="middle" dominant-baseline="central" class="q-mark-subtext">휴지 빼기</text>
+              <!-- ? 텍스트 -->
+              <text x="100" y="100" text-anchor="middle" dominant-baseline="central" class="q-mark-char">?</text>
             </g>
           </svg>
         </div>
