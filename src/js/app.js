@@ -1103,14 +1103,6 @@ class KSoolApp {
       }
 
       // [CASE B] 완전히 새로운 K-술 최초 발견 (화려한 축하 연출)
-      const quizClearBanner = result.isQuizClear
-        ? `<div style="width:100%; background:rgba(59,130,246,0.2); border:1px solid #3b82f6; border-radius:10px; padding:8px; font-size:0.78rem; color:#93c5fd; font-weight:800; text-align:center;">
-             🎯 [${rec.formatted_number}] 단계별 퀴즈 추리 정답! 다음 번호 과제로 진급합니다!
-           </div>`
-        : `<div style="width:100%; background:rgba(245,158,11,0.18); border:1px solid #f59e0b; border-radius:10px; padding:8px; font-size:0.78rem; color:#fde68a; font-weight:800; text-align:center;">
-             🎉 새로운 조합 발견! 도감에 [${rec.formatted_number}] ${this.brandResolver.resolveName(rec)}이(가) 등록되었습니다!
-           </div>`;
-
       let unifiedUnlockBanner = '';
       const hasChainUnlock = Boolean(result.newlyUnlockedIngredient);
       const hasStepUp = Boolean(result.stepUpInfo && result.stepUpInfo.newStepConfig);
@@ -1199,7 +1191,7 @@ class KSoolApp {
             <span class="diff-badge diff-${rec.difficulty}" style="position:static; font-size:0.7rem; padding:3px 9px;">
               ${rec.formatted_number || ''} · ${rec.category} · ${rec.difficulty}
             </span>
-            <span style="background:rgba(245,158,11,0.22); border:1px solid #f59e0b; color:#fde047; font-size:0.68rem; font-weight:900; padding:2px 7px; border-radius:6px;">🎉 NEW 발견!</span>
+            <span style="background:rgba(245,158,11,0.22); border:1px solid #f59e0b; color:#fde047; font-size:0.68rem; font-weight:900; padding:2px 7px; border-radius:6px;">NEW</span>
           </div>
           <div class="craft-result-info-card">
             <div class="craft-result-left">
@@ -1213,7 +1205,6 @@ class KSoolApp {
           <div style="width:100%; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; font-size:0.8rem; color:#fcd34d; font-weight:800;">
             ${recipeFormula}
           </div>
-          ${quizClearBanner}
           ${unifiedUnlockBanner}
           <button class="mix-btn" id="result-close-btn" style="width:100%; margin-top:4px;">확인</button>
         </div>
