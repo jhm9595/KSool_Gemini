@@ -240,8 +240,8 @@ module.exports = [
   {
     key: 'rec_mango_ringo',
     id: 16,
-    name: '망고톡톡',
-    aliases: [16, '16', 'rec_16', '망고톡톡', '망고링고'],
+    name: '망고비어',
+    aliases: [16, '16', 'rec_16', '망고비어', '망고링고'],
     palette: {
       '.': null,
       'F': '#ffffff', // 맥주 거품
@@ -269,8 +269,8 @@ module.exports = [
   {
     key: 'rec_mango_ringoju',
     id: 17,
-    name: '망고톡톡주',
-    aliases: [17, '17', 'rec_17', '망고톡톡주', '망고링고주'],
+    name: '망고비어주',
+    aliases: [17, '17', 'rec_17', '망고비어주', '망고링고주'],
     palette: {
       '.': null,
       'S': '#fde047', // 망고 과육 엣지

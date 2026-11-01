@@ -149,7 +149,7 @@ class KSoolApp {
           fetch('./data/categories.json').then(r => r.json()),
           fetch('./data/ingredients_base.json').then(r => r.json()),
           fetch('./data/ingredients_detail.json').then(r => r.json()),
-          fetch('./data/recipes.json').then(r => r.json()),
+          fetch('./data/recipes.json?v=20261101_24').then(r => r.json()),
           fetch('./data/recipe_ingredients.json').then(r => r.json()),
           fetch('./data/external_hints.json').then(r => r.json())
         ]);
