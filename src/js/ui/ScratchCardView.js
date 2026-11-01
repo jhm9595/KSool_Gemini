@@ -19,7 +19,7 @@
       this.isDrawing = false;
       this.lastPoint = null;
       this.moveCount = 0;
-      this.scratchRatioThreshold = options.threshold || 0.35; // 35% 이상 긁히면 자동 공개
+      this.scratchRatioThreshold = options.threshold || 0.48; // 48% 이상 충분히 긁었을 때 자동 공개
     }
 
     render(parentEl) {
@@ -159,14 +159,14 @@
       if (!this.ctx) return;
       this.ctx.globalCompositeOperation = 'destination-out';
       this.ctx.beginPath();
-      this.ctx.arc(x, y, 16, 0, Math.PI * 2);
+      this.ctx.arc(x, y, 12, 0, Math.PI * 2);
       this.ctx.fill();
     }
 
     _scratchLine(p1, p2) {
       if (!this.ctx || !p1 || !p2) return;
       this.ctx.globalCompositeOperation = 'destination-out';
-      this.ctx.lineWidth = 32;
+      this.ctx.lineWidth = 22;
       this.ctx.lineCap = 'round';
       this.ctx.lineJoin = 'round';
       this.ctx.beginPath();
@@ -205,13 +205,15 @@
       this.isCompleted = true;
 
       if (this.canvas) {
-        this.canvas.style.transition = 'opacity 0.35s ease';
+        // 은박지가 서서히 옅어지며 뒤쪽 설명이 투명하게 드러나는 페이드아웃 애니메이션
+        this.canvas.style.transition = 'opacity 0.65s cubic-bezier(0.25, 0.1, 0.25, 1)';
         this.canvas.style.opacity = '0';
+        this.canvas.style.pointerEvents = 'none';
         setTimeout(() => {
           if (this.canvas && this.canvas.parentElement) {
             this.canvas.remove();
           }
-        }, 360);
+        }, 680);
       }
 
       this.audio?.playTap?.();

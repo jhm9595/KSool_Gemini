@@ -1198,6 +1198,85 @@
 }
 
 /* 주조실 잠긴 설명 힌트 텍스트 버튼 */
+/* 주조실 잠긴 설명 힌트: 은박지(실버 스크래치 호일) 스트립 & AD 긁기 버튼 */
+.quiz-desc-scratch-strip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  max-width: 100%;
+  padding: 3px 6px 3px 9px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #334155 0%, #64748b 25%, #cbd5e1 50%, #64748b 75%, #1e293b 100%);
+  background-size: 200% 200%;
+  border: 1px dashed rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3), 0 2px 6px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.quiz-desc-scratch-strip:hover {
+  border-color: rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.5), 0 3px 10px rgba(0, 0, 0, 0.45);
+  transform: translateY(-1px);
+}
+
+.scratch-strip-foil {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.scratch-strip-coin {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.scratch-strip-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.3px;
+}
+
+.scratch-strip-ad-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.66rem;
+  font-weight: 800;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 2px 5px rgba(37, 99, 235, 0.4);
+  transition: all 0.15s ease;
+}
+
+.scratch-strip-ad-badge:hover {
+  background: #1d4ed8;
+  transform: scale(1.04);
+}
+
+.scratch-strip-ad-badge .ad-pill {
+  background: #facc15;
+  color: #0f172a;
+  font-size: 0.56rem;
+  font-weight: 900;
+  padding: 1px 3px;
+  border-radius: 3px;
+  line-height: 1;
+}
+
 .quiz-desc-locked {
   display: inline-flex;
   align-items: center;

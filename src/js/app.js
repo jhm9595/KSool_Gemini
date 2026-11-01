@@ -518,9 +518,15 @@ class KSoolApp {
                 ? targetRec.description
                 : (isDescUnlocked
                     ? `<span class="hint-bulb">💡</span> ${targetRec.unlock_hint || ''}`
-                    : `<span class="quiz-desc-locked" id="quiz-locked-desc-btn" title="힌트 메뉴에서 1단계 그림 ➔ 2단계 복권 긁기로 해금할 수 있습니다">
-                         <span class="quiz-lock-icon">🔒</span> 설명 힌트 잠김 (힌트 메뉴에서 복권 긁기로 해금)
-                       </span>`
+                    : `<div class="quiz-desc-scratch-strip" id="quiz-locked-desc-btn" title="AD 시청 후 복권 긁기로 설명 힌트 해금">
+                         <div class="scratch-strip-foil">
+                           <span class="scratch-strip-coin">🪙</span>
+                           <span class="scratch-strip-label">은박을 긁어 힌트 확인</span>
+                         </div>
+                         <button type="button" class="scratch-strip-ad-badge" id="quiz-scratch-ad-btn">
+                           <span class="ad-pill">AD</span> 긁기
+                         </button>
+                       </div>`
                   )
               }
             </div>
@@ -570,6 +576,15 @@ class KSoolApp {
       hintBtn.onclick = () => {
         this.audio.playTap();
         this.hintModalView.open(targetRec.recipe_id);
+      };
+    }
+
+    const lockedDescBtn = container.querySelector('#quiz-locked-desc-btn');
+    if (lockedDescBtn && targetRec) {
+      lockedDescBtn.onclick = (e) => {
+        e.stopPropagation();
+        this.audio.playTap();
+        this.hintModalView.open(targetRec.recipe_id, 'SCRATCH');
       };
     }
 

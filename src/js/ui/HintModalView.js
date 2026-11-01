@@ -1,7 +1,7 @@
 window.KSool = window.KSool || {};
 
 class HintModalView {
-  constructor({ recipeBook, inventory, baseballEngine, ratioProvider, brandResolver, audio, onImageUnlocked, onAutoSetupBrew }) {
+  constructor({ recipeBook, inventory, baseballEngine, ratioProvider, brandResolver, audio, onImageUnlocked, onDescUnlocked, onAutoSetupBrew }) {
     this.recipeBook = recipeBook;
     this.inventory = inventory;
     this.baseballEngine = baseballEngine;
@@ -9,6 +9,7 @@ class HintModalView {
     this.brandResolver = brandResolver;
     this.audio = audio;
     this.onImageUnlocked = onImageUnlocked || null;
+    this.onDescUnlocked = onDescUnlocked || null;
     this.onAutoSetupBrew = onAutoSetupBrew || null;
 
     this.activeRecipeId = null;
@@ -37,9 +38,29 @@ class HintModalView {
     this._resetGuessSlots();
     this._clearActiveRecipeHistory();
 
-    // initialMode가 지정된 경우 해당 모드로 직행 ('MINIGAME_SELECT' 등)
+    // initialMode가 지정된 경우 해당 모드로 직행 ('MINIGAME_SELECT', 'SCRATCH' 등)
     if (initialMode === 'MINIGAME_SELECT' || initialMode === 'minigame') {
       this.viewMode = 'MINIGAME_SELECT';
+    } else if (initialMode === 'SCRATCH' || initialMode === 'scratch') {
+      this.viewMode = 'CHOICE';
+      const isImageUnlocked = this.inventory.isRecipeUnlocked(this.activeRecipeId) || this.inventory.isRecipeImageUnlocked(this.activeRecipeId);
+      const isDescUnlocked = this.inventory.isRecipeDescUnlocked(this.activeRecipeId);
+      if (isImageUnlocked && !isDescUnlocked) {
+        // 1단계 그림이 이미 해금된 상태면 보상형 광고 모달 띄우고 바로 복권 긁기 오픈
+        if (window.KSool?.AdService) {
+          window.KSool.AdService.showRewardedAd({
+            rewardType: 'HINT_SCRATCH',
+            recipeId: this.activeRecipeId,
+            audio: this.audio,
+            onRewarded: () => {
+              this.isScratchingActive = true;
+              this.render();
+            }
+          });
+        } else {
+          this.isScratchingActive = true;
+        }
+      }
     } else if (initialMode === 'BASEBALL' || initialMode === 'baseball') {
       const isDescUnlocked = this.inventory.isRecipeDescUnlocked(this.activeRecipeId);
       const isRecipeUnlocked = this.inventory.isRecipeUnlocked(this.activeRecipeId);
@@ -65,6 +86,12 @@ class HintModalView {
     this._clearActiveRecipeHistory();
     document.getElementById('hint-modal-content')?.classList.remove('minigame-card-expanded');
     document.getElementById('hint-modal').classList.remove('active');
+    if (this.onDescUnlocked) {
+      this.onDescUnlocked();
+    }
+    if (this.onImageUnlocked) {
+      this.onImageUnlocked();
+    }
   }
 
   _clearActiveRecipeHistory() {
@@ -275,11 +302,14 @@ class HintModalView {
             audio: this.audio,
             onComplete: () => {
               this.inventory.unlockRecipeDesc(this.activeRecipeId);
-              this.isScratchingActive = false;
               if (this.onDescUnlocked) {
                 this.onDescUnlocked();
               }
-              this.render();
+              // 은박지가 서서히 투명해지는 페이드아웃 애니메이션(0.65초) 후 모달 뷰 갱신
+              setTimeout(() => {
+                this.isScratchingActive = false;
+                this.render();
+              }, 700);
             }
           });
           this.scratchCardInstance.render(mountEl);

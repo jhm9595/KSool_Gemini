@@ -1089,6 +1089,7 @@
   touch-action: none;
   z-index: 2;
   border-radius: 10px;
+  transition: opacity 0.65s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .scratch-quick-reveal-btn {
