@@ -6,13 +6,15 @@ window.KSool = window.KSool || {};
  * 2) TERRITORY_QIX : 📐 외곽 실루엣 땅따먹기 (100% 암전 속 술의 고유 외곽선을 네온으로 표시 + 실루엣 100% 점령 시 클리어)
  */
 class ImageMinigameSuite {
-  constructor(canvas, recipe, audio, onWin, onLose) {
+  constructor(canvas, recipe, audio, onWin, onLose, onClose) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.recipe = recipe;
     this.audio = audio;
     this.onWin = onWin;
     this.onLose = onLose;
+    this.onClose = onClose;
+    this.winTimestamp = 0;
 
     this.width = canvas.width;
     this.height = canvas.height;
@@ -696,7 +698,21 @@ class ImageMinigameSuite {
       });
     }
 
+    const handleWinClose = () => {
+      if (this.gameState === 'WIN' && performance.now() - this.winTimestamp > 250) {
+        this.audio?.playTap?.();
+        if (this.onClose) {
+          this.onClose();
+        } else {
+          document.getElementById('hint-close-btn')?.click();
+        }
+        return true;
+      }
+      return false;
+    };
+
     const launchBall = () => {
+      if (handleWinClose()) return;
       if (this.gameState === 'READY') {
         this.gameState = 'PLAYING';
         this.bbState.lastTime = performance.now();
@@ -728,6 +744,7 @@ class ImageMinigameSuite {
     };
 
     const onMouseDown = (e) => {
+      if (handleWinClose()) return;
       movePaddle(e.clientX);
       launchBall();
     };
@@ -737,6 +754,10 @@ class ImageMinigameSuite {
     };
 
     const onTouchStart = (e) => {
+      if (handleWinClose()) {
+        if (e.cancelable) e.preventDefault();
+        return;
+      }
       if (e.touches && e.touches[0]) {
         e.preventDefault();
         movePaddle(e.touches[0].clientX);
@@ -752,6 +773,7 @@ class ImageMinigameSuite {
     };
 
     const onKeyDown = (e) => {
+      if (handleWinClose()) return;
       if (e.key === 'ArrowLeft' || e.key === 'a') {
         this.bbState.paddle.keyDir = -1;
         launchBall();
@@ -956,6 +978,7 @@ class ImageMinigameSuite {
     const pct = (st.brokenCount / Math.max(1, st.totalBreakable)) * 100;
     if (st.brokenCount >= st.totalBreakable || (st.totalBreakable - st.brokenCount <= 2 && pct >= 96)) {
       this.gameState = 'WIN';
+      this.winTimestamp = performance.now();
       this.audio.playSuccess();
       if (this.onWin) this.onWin();
     }
@@ -1054,7 +1077,7 @@ class ImageMinigameSuite {
     this._drawHUD(ctx, {
       lives: st.lives,
       progressPct: pct,
-      labelText: `블록 파괴: ${Math.floor(pct)}% / 100%`
+      labelText: `${Math.floor(pct)}% / 100%`
     });
   }
 
@@ -1287,7 +1310,21 @@ class ImageMinigameSuite {
 
     let qixIgnoreInputUntil = 0;
 
+    const handleWinClose = () => {
+      if (this.gameState === 'WIN' && performance.now() - this.winTimestamp > 250) {
+        this.audio?.playTap?.();
+        if (this.onClose) {
+          this.onClose();
+        } else {
+          document.getElementById('hint-close-btn')?.click();
+        }
+        return true;
+      }
+      return false;
+    };
+
     const handleQixAction = () => {
+      if (handleWinClose()) return true;
       if (this.gameState === 'READY') {
         this.gameState = 'PLAYING';
         this.qixState.lastTime = performance.now();
@@ -1353,6 +1390,10 @@ class ImageMinigameSuite {
 
     let isPointerDown = false;
     const onDown = (e) => {
+      if (handleWinClose()) {
+        if (e.cancelable) e.preventDefault();
+        return;
+      }
       if (e.cancelable && e.type && e.type.startsWith('touch')) {
         e.preventDefault();
       }
@@ -1367,8 +1408,10 @@ class ImageMinigameSuite {
       if (pt) steerToward(pt.clientX, pt.clientY);
     };
     const onUp = () => { isPointerDown = false; };
+    const onClick = () => { handleWinClose(); };
 
     const onKeyDown = (e) => {
+      if (handleWinClose()) return;
       handleQixAction();
       let reqDc = 0, reqDr = 0;
       if (e.key === 'ArrowLeft' || e.key === 'a') reqDc = -1;
@@ -1383,6 +1426,7 @@ class ImageMinigameSuite {
 
     this.canvas.addEventListener('mousedown', onDown);
     this.canvas.addEventListener('mousemove', onMove);
+    this.canvas.addEventListener('click', onClick);
     window.addEventListener('mouseup', onUp);
     this.canvas.addEventListener('touchstart', onDown, { passive: false });
     this.canvas.addEventListener('touchmove', onMove, { passive: false });
@@ -1392,6 +1436,7 @@ class ImageMinigameSuite {
     this._cleanupInputHandlers = () => {
       this.canvas.removeEventListener('mousedown', onDown);
       this.canvas.removeEventListener('mousemove', onMove);
+      this.canvas.removeEventListener('click', onClick);
       window.removeEventListener('mouseup', onUp);
       this.canvas.removeEventListener('touchstart', onDown);
       this.canvas.removeEventListener('touchmove', onMove);
@@ -1549,6 +1594,7 @@ class ImageMinigameSuite {
           // 술의 외곽 실루엣 내부를 100% 모두 점령했을 때 승리!
           if (st.capturedSilhouetteCount >= st.totalSilhouetteCells || st.silhouetteRevealedPct >= 100) {
             this.gameState = 'WIN';
+            this.winTimestamp = performance.now();
             this.audio.playSuccess();
             if (this.onWin) this.onWin();
             return;
@@ -1710,7 +1756,7 @@ class ImageMinigameSuite {
     this._drawHUD(ctx, {
       lives: st.lives,
       progressPct: st.silhouetteRevealedPct,
-      labelText: `실루엣 점령: ${Math.floor(st.silhouetteRevealedPct)}% / 100%`
+      labelText: `${Math.floor(st.silhouetteRevealedPct)}% / 100%`
     });
   }
 

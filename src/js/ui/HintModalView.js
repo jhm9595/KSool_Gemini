@@ -368,7 +368,7 @@ class HintModalView {
             </div>
             <div class="mg-card-body">
               <div class="mg-card-title-row">
-                <span class="mg-card-title">1. 벽돌깨기 (도트 스테이지)</span>
+                <span class="mg-card-title">1. 벽돌깨기</span>
                 <span class="mg-diff-pill hard">도트 블록 100% 격파</span>
               </div>
               <div class="mg-card-desc">
@@ -384,7 +384,7 @@ class HintModalView {
             </div>
             <div class="mg-card-body">
               <div class="mg-card-title-row">
-                <span class="mg-card-title">2. 땅따먹기 (실루엣 점령)</span>
+                <span class="mg-card-title">2. 땅따먹기</span>
                 <span class="mg-diff-pill vhard">외곽 실루엣 100% 점령</span>
               </div>
               <div class="mg-card-desc">
@@ -405,8 +405,8 @@ class HintModalView {
     // =========================================================================
     if (this.viewMode === 'MINIGAME_PLAY') {
       const gameTitles = {
-        BRICK_BREAKER: '🧱 벽돌깨기 (도트 스테이지)',
-        TERRITORY_QIX: '📐 땅따먹기 (실루엣 점령)'
+        BRICK_BREAKER: '🧱 벽돌깨기',
+        TERRITORY_QIX: '📐 땅따먹기'
       };
 
       container.innerHTML = `
@@ -788,6 +788,9 @@ class HintModalView {
       () => {
         this.minigameStatus = 'LOSE';
         this._updateMinigameControlsOnly(recipe);
+      },
+      () => {
+        this.close();
       }
     );
     this.minigameInstance.start(this.selectedMinigameType);
@@ -859,6 +862,15 @@ class HintModalView {
   _bindEvents(container) {
     const closeBtn = container.querySelector('#hint-close-btn');
     if (closeBtn) closeBtn.onclick = () => this.close();
+
+    const cabinetBox = container.querySelector('.arcade-cabinet-box');
+    if (cabinetBox) {
+      cabinetBox.onclick = () => {
+        if (this.minigameStatus === 'WIN') {
+          this.close();
+        }
+      };
+    }
 
     const helpBtn = container.querySelector('#bb-help-toggle-btn');
     if (helpBtn) {
