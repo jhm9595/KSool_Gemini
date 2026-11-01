@@ -200,7 +200,6 @@ class HintModalView {
               <span class="step-main-title">설명 힌트</span>
               <span class="step-status-tag tag-locked">🔒 1단계 필요</span>
             </div>
-            <div class="step-main-desc">1단계 외형 그림을 클리어하면 복권이 도착합니다.</div>
           </div>
         `;
       } else if (this.isScratchingActive) {
@@ -245,13 +244,12 @@ class HintModalView {
           </div>
           <div class="step-card-main-col">
             <div class="step-card-header">
-              <span class="step-main-title">설명 힌트 (황금 복권)</span>
+              <span class="step-main-title">설명 힌트</span>
               <button type="button" class="btn-step-scratch" id="btn-start-scratch">
                 <span class="ad-tag">AD</span>
-                <span>긁기 ➔</span>
+                <span>복권 긁기 ➔</span>
               </button>
             </div>
-            <div class="step-main-desc">복권을 긁어 술의 핵심 재료 힌트를 확인하세요!</div>
           </div>
         `;
       }
