@@ -172,7 +172,7 @@ class HintModalView {
             <span class="choice-badge-tag ${isImageUnlocked ? 'cleared' : ''}">${isImageUnlocked ? '✅ 해금됨' : '🎮 아케이드'}</span>
             <span class="choice-big-icon">${isImageUnlocked ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 32) : recipe.emoji) : '🕹️'}</span>
             <span class="choice-big-title">그림 해금 게임</span>
-            <span class="choice-big-sub">블럭깨기 · 네온 땅따먹기</span>
+            <span class="choice-big-sub">벽돌깨기 · 땅따먹기</span>
           </button>
 
           ${extHintCardHtml}
@@ -207,11 +207,11 @@ class HintModalView {
             </div>
             <div class="mg-card-body">
               <div class="mg-card-title-row">
-                <span class="mg-card-title">1. 아이스 브레이커 (블럭깨기)</span>
-                <span class="mg-diff-pill hard">HARD · 85%</span>
+                <span class="mg-card-title">1. 벽돌깨기</span>
+                <span class="mg-diff-pill hard">100% 클리어</span>
               </div>
               <div class="mg-card-desc">
-                다중 체력(1~3단) 얼음과 강철 범퍼를 돌파하세요! 깨진 얼음에서 떨어지는 <b>☠️독방울(라이프 감소)</b>과 <b>❄️냉기(패들 축소)</b>를 피해야 합니다.
+                단단한 벽돌과 강철 범퍼를 돌파하세요! 깨진 벽돌에서 떨어지는 <b>☠️독방울(라이프 감소)</b>과 <b>❄️냉기(패들 축소)</b>를 피해야 합니다.
               </div>
             </div>
             <button class="mg-play-btn">도전 ➔</button>
@@ -223,8 +223,8 @@ class HintModalView {
             </div>
             <div class="mg-card-body">
               <div class="mg-card-title-row">
-                <span class="mg-card-title">2. 네온 땅따먹기 (그림 영역 점령)</span>
-                <span class="mg-diff-pill vhard">VERY HARD · 그림 100%</span>
+                <span class="mg-card-title">2. 땅따먹기</span>
+                <span class="mg-diff-pill vhard">100% 점령</span>
               </div>
               <div class="mg-card-desc">
                 어둠 속을 질주하는 <b>보스 코어 + 고속 화염구 2기</b>가 내 궤적(선)에 닿기 전에 안전지대로 복귀해 <b>뒤에 숨겨진 그림 영역을 뚫어 완전히 드러내세요!</b>
@@ -244,8 +244,8 @@ class HintModalView {
     // =========================================================================
     if (this.viewMode === 'MINIGAME_PLAY') {
       const gameTitles = {
-        BRICK_BREAKER: '🧱 아이스 브레이커',
-        TERRITORY_QIX: '📐 네온 땅따먹기'
+        BRICK_BREAKER: '🧱 벽돌깨기',
+        TERRITORY_QIX: '📐 땅따먹기'
       };
 
       const canvasHeight = 440;

@@ -2,8 +2,8 @@ window.KSool = window.KSool || {};
 
 /**
  * 도감 그림(아이콘/일러스트) 선해금을 위한 아케이드 미니게임 엔진
- * 1) BRICK_BREAKER : 🧱 아이스 브레이커 (다중 체력 얼음블럭 + 함정 낙하물 회피 블럭깨기)
- * 2) TERRITORY_QIX : 📐 네온 땅따먹기 (그림 영역 점령 + 보스 탄막 & 감시자 회피)
+ * 1) BRICK_BREAKER : 🧱 벽돌깨기 (다중 체력 벽돌 + 함정 낙하물 회피)
+ * 2) TERRITORY_QIX : 📐 땅따먹기 (그림 영역 점령 + 보스 탄막 & 감시자 회피)
  */
 class ImageMinigameSuite {
   constructor(canvas, recipe, audio, onWin, onLose) {
@@ -41,23 +41,13 @@ class ImageMinigameSuite {
     const cy = (h + 32) / 2;
 
     const drawBackground = () => {
-      // 1. 네온 펍 무드의 깊이감 있는 그라데이션 배경 (원형/링 불필요 아티팩트 완전 제거)
+      // 심플하고 깔끔한 다크 그라데이션 배경 (원형 링 및 격자무늬 일체 제거)
       const rad = g.createRadialGradient(cx, cy, 20, cx, cy, w * 0.72);
       rad.addColorStop(0, '#1e293b');
       rad.addColorStop(0.55, '#0f172a');
       rad.addColorStop(1, '#050811');
       g.fillStyle = rad;
       g.fillRect(0, 0, w, h);
-
-      // 미세 모눈 격자
-      g.strokeStyle = 'rgba(56, 189, 248, 0.07)';
-      g.lineWidth = 1;
-      for (let x = 0; x < w; x += 18) {
-        g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke();
-      }
-      for (let y = 0; y < h; y += 18) {
-        g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke();
-      }
     };
 
     drawBackground();
@@ -281,7 +271,7 @@ class ImageMinigameSuite {
       lives: 3,
       elapsed: 0,
       lastTime: performance.now(),
-      targetPct: 85,
+      targetPct: 100,
       blockAreaBottom: topY + rows * (bh + gap),
       paddle: {
         x: this.width / 2 - 40,
@@ -589,9 +579,9 @@ class ImageMinigameSuite {
       b.vy = 0;
     }
 
-    // 승리 판정
+    // 승리 판정 (깰 수 있는 벽돌을 100% 모두 깨야 해금)
     const pct = (st.brokenCount / Math.max(1, st.totalBreakable)) * 100;
-    if (pct >= st.targetPct) {
+    if (st.brokenCount >= st.totalBreakable) {
       this.gameState = 'WIN';
       this.audio.playSuccess();
       if (this.onWin) this.onWin();
@@ -614,8 +604,9 @@ class ImageMinigameSuite {
       ctx.fillRect(blk.x - 2, blk.y - 2, blk.w + 4, blk.h + 4);
 
       if (blk.isSteel) {
+        // 강철: 글자/아이콘 없이 깔끔한 단색 회색
         ctx.fillStyle = '#475569';
-        ctx.strokeStyle = '#94a3b8';
+        ctx.strokeStyle = '#64748b';
       } else if (blk.hp === 3) {
         ctx.fillStyle = '#d97706';
         ctx.strokeStyle = '#fde68a';
@@ -630,12 +621,6 @@ class ImageMinigameSuite {
       ctx.lineWidth = 1.5;
       ctx.fillRect(blk.x, blk.y, blk.w, blk.h);
       ctx.strokeRect(blk.x, blk.y, blk.w, blk.h);
-
-      ctx.font = 'bold 11px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(blk.isSteel ? '⚙️강철' : `🧊×${blk.hp}`, blk.x + blk.w / 2, blk.y + blk.h / 2);
     }
 
     // 3. 낙하 함정 그리기
@@ -914,6 +899,7 @@ class ImageMinigameSuite {
         }
       }
     }
+    st.revealedPicCells = revealedPicCells;
     st.pictureRevealedPct = (revealedPicCells / Math.max(1, st.totalPicCells)) * 100;
 
     // 전체 점령률 집계 (참고용)
@@ -971,8 +957,8 @@ class ImageMinigameSuite {
           pl.dc = 0;
           pl.dr = 0;
           this._floodFillCaptureQix();
-          // 네모칸 전체(100%)를 모두 땅따먹어 그림이 온전히 드러났으면 승리!
-          if (st.pictureRevealedPct >= st.targetPct) {
+          // 네모 점선 영역 전체(100%)를 모두 땅따먹었을 때만 승리!
+          if (st.revealedPicCells >= st.totalPicCells || st.pictureRevealedPct >= 100) {
             this.gameState = 'WIN';
             this.audio.playSuccess();
             if (this.onWin) this.onWin();
@@ -1131,7 +1117,7 @@ class ImageMinigameSuite {
       timeLeftSec: null,
       progressPct: st.pictureRevealedPct,
       targetPct: st.targetPct,
-      labelText: `그림 점령 ${Math.floor(st.pictureRevealedPct)}% / 목표 100%`,
+      labelText: `해금률 ${Math.floor(st.pictureRevealedPct)}% / 목표 100%`,
       subText: ''
     });
   }
