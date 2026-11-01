@@ -1502,7 +1502,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 8,
     "recipe_number": 33,
     "formatted_number": "No.33",
-    "unlock_hint": "한국인의 주식인 하얀 곡식과 전통 발효제, 맑은 액체를 함께 빚어 막 걸러낸 구수하고 뽀얀 전통 탁주입니다."
+    "unlock_hint": "한국인의 주식인 곡물과 전통 발효제, 맑은 액체를 함께 빚어 막 걸러낸 구수하고 뽀얀 전통 탁주입니다."
   },
   {
     "recipe_id": 27,
@@ -2250,7 +2250,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 9,
     "recipe_number": 34,
     "formatted_number": "No.34",
-    "unlock_hint": "하얀 주식 곡물에 구수한 엿기름 싹과 달콤한 결정을 더해 따뜻하게 삭혀 만든 밥알 동동 전통 음료입니다."
+    "unlock_hint": "한국인의 주식인 곡물에 구수한 보리 싹과 달콤한 결정을 더해 따뜻하게 삭혀 만든 밥알 동동 전통 음료입니다."
   },
   {
     "recipe_id": 61,
@@ -2272,7 +2272,7 @@ window.KSool.SeedDataBundle = {
     "step_order": 1,
     "recipe_number": 52,
     "formatted_number": "No.52",
-    "unlock_hint": "한국인의 대표 주식 곡물과 구수한 황금빛 곡식을 뜨거운 열기로 골고루 볶아 곱게 빻아낸 여름철 전통 영양 곡물 가루입니다."
+    "unlock_hint": "한국인의 주식인 곡물과 구수한 황금빛 곡식을 뜨거운 열기로 골고루 볶아 곱게 빻아낸 여름철 전통 영양 곡물 가루입니다."
   },
   {
     "recipe_id": 62,
@@ -2352,7 +2352,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 3,
     "step_order": 11,
-    "unlock_hint": "검게 볶은 다크 로스팅 추출액에 맑은 자연의 액체와 차가운 사각 결정체를 가득 채워 완성한 현대인의 생명수입니다."
+    "unlock_hint": "다크 로스팅 추출액에 맑은 자연의 액체와 차가운 사각 결정체를 가득 채워 완성한 현대인의 생명수입니다."
   },
   {
     "recipe_id": 66,
@@ -2612,7 +2612,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 2,
     "step_id": 3,
     "step_order": 15,
-    "unlock_hint": "도수 높은 투명 증류주에 깊게 볶은 차가운 다크 로스팅 추출액을 1:1로 섞어 알코올 향을 그윽한 로스팅 풍미로 지워버린 직장인 칵테일입니다."
+    "unlock_hint": "도수 높은 투명 증류주에 차가운 다크 로스팅 추출액을 1:1로 섞어 알코올 향을 그윽한 커피 향미로 지워버린 직장인 칵테일입니다."
   },
   {
     "recipe_id": 79,
@@ -2692,7 +2692,7 @@ window.KSool.SeedDataBundle = {
     "item_count": 3,
     "step_id": 5,
     "step_order": 13,
-    "unlock_hint": "구수한 전통 주식 발효 탁주 두 배에 부드러운 순백 목장 음료와 달콤한 붉은 곡물 앙금 아이스바를 녹여 옛날 빙수처럼 걸쭉하고 달달하게 즐기는 이색 디저트 주류입니다."
+    "unlock_hint": "주식인 곡물로 빚은 전통 탁주 두 배에 부드러운 순백 목장 음료와 달콤한 붉은 곡물 앙금 아이스바를 녹여 옛날 빙수처럼 걸쭉하고 달달하게 즐기는 이색 디저트 주류입니다."
   },
   {
     "recipe_id": 83,
