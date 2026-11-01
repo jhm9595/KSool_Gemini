@@ -22,6 +22,7 @@ class UpAndDownGame {
     this.isFinished = false;
     this.lastResult = null; // 'UP' | 'DOWN' | 'BOMB'
     this.hasStarted = false; // 첫 guess 제출 여부 (false면 MAX 표시, true면 UP/DOWN 표시)
+    this.hasDownUpdated = false; // DOWN 방향이 실제로 갱신되었는지 여부
     this.isEditingMax = false; // MAX 숫자 설정 모드 여부
     this.animatingResult = null; // 화살표 애니메이션 중인 결과 ('UP' | 'DOWN' | null)
     this.animTimer = null;
@@ -42,6 +43,7 @@ class UpAndDownGame {
     this.isFinished = false;
     this.lastResult = null;
     this.hasStarted = false; // 초기 상태: 노란색 MAX 표시
+    this.hasDownUpdated = false;
     this.isEditingMax = false;
     this.animatingResult = null;
     this.render();
@@ -179,6 +181,7 @@ class UpAndDownGame {
     } else {
       this.maxRange = val - 1;
       this.lastDownVal = val;
+      this.hasDownUpdated = true;
       this.lastResult = 'DOWN';
       this.animatingResult = 'DOWN';
       this.hub.sound.playDown();
@@ -278,16 +281,20 @@ class UpAndDownGame {
       `;
     }
 
-    // 3) 애니메이션이 끝난 후 또는 게임 진행 중: 갱신된 n UP, n DOWN 표시
+    // 3) 애니메이션이 끝난 후 또는 게임 진행 중: 갱신된 n UP 및 DOWN / MAX 표시
+    const downClass = this.hasDownUpdated ? 'down' : 'max';
+    const downNum = this.hasDownUpdated ? this.lastDownVal : this.maxNumber;
+    const downLabel = this.hasDownUpdated ? 'DOWN' : 'MAX';
+
     return `
       <div class="updown-status-grid">
         <div class="updown-status-row up">
           <span class="status-num">${this.lastUpVal}</span>
           <span class="status-label">UP</span>
         </div>
-        <div class="updown-status-row down">
-          <span class="status-num">${this.lastDownVal}</span>
-          <span class="status-label">DOWN</span>
+        <div class="updown-status-row ${downClass}">
+          <span class="status-num">${downNum}</span>
+          <span class="status-label">${downLabel}</span>
         </div>
       </div>
     `;
