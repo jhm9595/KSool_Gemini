@@ -1,0 +1,42 @@
+name: Deploy K-Sool to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - release
+  workflow_dispatch:
+
+# 동시 배포 방지 & 이전 대기/진행 작업 자동 취소 (Stuck / In-Progress 충돌 원천 해결)
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+# GITHUB_TOKEN에 GitHub Pages 배포 권한 부여
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # 전체 정적 웹 애플리케이션 루트 업로드
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
