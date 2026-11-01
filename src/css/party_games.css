@@ -805,7 +805,7 @@
 
 
 #cap-wire-transform-group {
-  transition: transform 0.32s cubic-bezier(0.2, 1.25, 0.45, 1);
+  /* JS 물리 감쇠 진동 엔진(Web Animations API)으로 톡/딱/빡 각도를 정밀 제어하므로 단조로운 CSS transition 간섭 제거 */
   will-change: transform;
 }
 

@@ -40,6 +40,11 @@ class CapFlickGame {
       clearTimeout(this.hitTextTimeout);
       this.hitTextTimeout = null;
     }
+    const oldWire = document.getElementById('cap-wire-transform-group');
+    if (oldWire && oldWire.currentAnimation) {
+      try { oldWire.currentAnimation.cancel(); } catch (_) {}
+      oldWire.currentAnimation = null;
+    }
     this.maxFatigue = Math.floor(Math.random() * 11) + 18; // 18 ~ 28회 상당 피로도
     this.currentFatigue = 0;
     this.isBroken = false;
@@ -126,27 +131,50 @@ class CapFlickGame {
   _executeFlickHit(fatigueInc, powerLevel) {
     this.currentFatigue += fatigueInc;
 
-    // 손가락이 안 보이므로 시계방향(1) 또는 반시계방향(-1) 50% 랜덤 결정
-    const dir = Math.random() < 0.5 ? 1 : -1;
+    const startAngle = this.bendAngle || 0;
 
-    // 상호작용 체감 각도 설정 (병뚜껑과 꼬다리의 접점을 축으로 회전/휨):
-    // 톡: 조금 움직임 (약 10° ~ 18°)
-    // 딱: 중간쯤 움직임 (약 32° ~ 50°)
-    // 빡: 거의 90도~120도 가깝게 확 꺾임 (약 75° ~ 110°)
-    let deltaAngle = 0;
-    if (powerLevel === 'light') {
-      deltaAngle = dir * (10 + Math.floor(Math.random() * 9));
-    } else if (powerLevel === 'normal') {
-      deltaAngle = dir * (32 + Math.floor(Math.random() * 19));
+    // 1. 타격 방향(Direction) 결정:
+    // - 거의 중립(중심 ±10도 이내)일 때는 좌/우 50% 확률로 결정
+    // - 이미 한쪽으로 휘어 있다면: 70%는 휜 방향으로 더 깊게 꺾고, 30%는 반대편에서 강타하여 반대쪽으로 크게 젖힘
+    let dir = 1;
+    if (Math.abs(startAngle) < 10) {
+      dir = Math.random() < 0.5 ? 1 : -1;
     } else {
-      deltaAngle = dir * (75 + Math.floor(Math.random() * 35));
+      const curSign = Math.sign(startAngle);
+      if (Math.random() < 0.7) {
+        dir = curSign; // 순방향 심화
+      } else {
+        dir = -curSign; // 역방향 강타 (대폭 스윙)
+      }
     }
 
-    // 접점(100px 25px) 기준 좌우 휨 각도 누적 (현실적인 알루미늄 철사 휨 한계: ±125° 범위 내에서 왕복)
-    let nextBend = (this.bendAngle || 0) + deltaAngle;
-    if (nextBend > 125) nextBend = 125 - (nextBend - 125) * 0.4;
-    if (nextBend < -125) nextBend = -125 - (nextBend + 125) * 0.4;
-    this.bendAngle = Math.round(nextBend);
+    // 2. 파워 등급별 [순간 최대 튕김 각도(Peak)] 및 [영구 휨 변형 각도(Permanent Delta)]
+    // - 톡 (light): 순간 18° ~ 26° 가볍게 튕김, 영구 변형 +8° ~ 14°
+    // - 딱 (normal): 순간 52° ~ 74° 탄력 있게 크게 튕김, 영구 변형 +30° ~ 46°
+    // - 빡! (max): 순간 105° ~ 138° (90도 직각 초과!) 사정없이 확 젖힘, 영구 변형 +70° ~ 92°
+    let peakImpulse = 0;
+    let permDelta = 0;
+
+    if (powerLevel === 'light') {
+      peakImpulse = 18 + Math.floor(Math.random() * 9); // 18° ~ 26°
+      permDelta = 8 + Math.floor(Math.random() * 7);    // 8° ~ 14°
+    } else if (powerLevel === 'normal') {
+      peakImpulse = 52 + Math.floor(Math.random() * 23); // 52° ~ 74°
+      permDelta = 30 + Math.floor(Math.random() * 17);   // 30° ~ 46°
+    } else {
+      // 풀파워 빡! 90도 직각을 넘어 105° ~ 138°까지 사정없이 홱 꺾임
+      peakImpulse = 105 + Math.floor(Math.random() * 34); // 105° ~ 138°
+      permDelta = 70 + Math.floor(Math.random() * 23);    // 70° ~ 92°
+    }
+
+    // 최종 목표 안착 각도 계산 (현실적인 알루미늄 철사 최대 휨 한계: ±125°)
+    let targetBend = startAngle + (dir * permDelta);
+    targetBend = Math.max(-125, Math.min(125, targetBend));
+    this.bendAngle = Math.round(targetBend);
+
+    // 순간 최대 피크 각도 계산 (최대 ±138°까지 순간 튕김 허용)
+    let peakAngle = startAngle + (dir * peakImpulse);
+    peakAngle = Math.max(-138, Math.min(138, peakAngle));
 
     const strainRatio = Math.min(1, this.currentFatigue / this.maxFatigue);
 
@@ -165,7 +193,7 @@ class CapFlickGame {
       }
     }
 
-    // 시각 효과: 뚜껑 본체는 고정되어 있고, 꼬다리 와이어만 접점(100px 25px)을 축으로 좌우 휨!
+    // 시각 효과: 뚜껑 본체는 고정되어 있고, 꼬다리 와이어만 접점(100px 25px)을 축으로 물리 탄성 감쇠 진동!
     const wireGroup = document.getElementById('cap-wire-transform-group');
     const arena = document.getElementById('cap-flick-arena');
 
@@ -177,8 +205,69 @@ class CapFlickGame {
 
     if (wireGroup) {
       wireGroup.style.transformOrigin = '100px 25px';
-      wireGroup.style.transform = `rotate(${this.bendAngle}deg)`;
+
+      // 기존 진행 중인 애니메이션 정리
+      if (wireGroup.currentAnimation) {
+        try { wireGroup.currentAnimation.cancel(); } catch (_) {}
+        wireGroup.currentAnimation = null;
+      }
+
+      // 파워 레벨별 물리 탄성 감쇠 진동(Spring-Damper Keyframes)
+      let keyframes = [];
+      let duration = 300;
+
+      if (powerLevel === 'light') {
+        // 톡: 0.26초 가볍고 빠른 1.5회 미세 바운스
+        duration = 260;
+        keyframes = [
+          { transform: `rotate(${startAngle}deg)` },
+          { transform: `rotate(${peakAngle}deg)`, offset: 0.3, easing: 'cubic-bezier(0.12, 0.9, 0.3, 1)' },
+          { transform: `rotate(${this.bendAngle - (dir * 3)}deg)`, offset: 0.68 },
+          { transform: `rotate(${this.bendAngle}deg)`, offset: 1.0 }
+        ];
+      } else if (powerLevel === 'normal') {
+        // 딱: 0.42초 탄력 있게 촥 젖혀지며 2회 바운스
+        duration = 420;
+        const overshoot = (peakAngle - this.bendAngle) * 0.45;
+        keyframes = [
+          { transform: `rotate(${startAngle}deg)` },
+          { transform: `rotate(${peakAngle}deg)`, offset: 0.22, easing: 'cubic-bezier(0.08, 0.95, 0.2, 1)' },
+          { transform: `rotate(${this.bendAngle - overshoot}deg)`, offset: 0.52 },
+          { transform: `rotate(${this.bendAngle + overshoot * 0.3}deg)`, offset: 0.78 },
+          { transform: `rotate(${this.bendAngle}deg)`, offset: 1.0 }
+        ];
+      } else {
+        // 빡!: 0.58초 90도 직각을 넘어 105°~138°까지 사정없이 확 젖혀진 후 3회 거칠게 요동치고 깊숙이 꺾임!
+        duration = 580;
+        const overshoot = (peakAngle - this.bendAngle) * 0.55;
+        keyframes = [
+          { transform: `rotate(${startAngle}deg)` },
+          { transform: `rotate(${peakAngle}deg)`, offset: 0.18, easing: 'cubic-bezier(0.05, 0.98, 0.15, 1)' },
+          { transform: `rotate(${this.bendAngle - overshoot}deg)`, offset: 0.45 },
+          { transform: `rotate(${this.bendAngle + overshoot * 0.38}deg)`, offset: 0.68 },
+          { transform: `rotate(${this.bendAngle - overshoot * 0.14}deg)`, offset: 0.85 },
+          { transform: `rotate(${this.bendAngle}deg)`, offset: 1.0 }
+        ];
+      }
+
       wireGroup.style.setProperty('--fly-angle', `${this.bendAngle}deg`);
+
+      try {
+        const anim = wireGroup.animate(keyframes, {
+          duration: duration,
+          fill: 'forwards'
+        });
+        wireGroup.currentAnimation = anim;
+        anim.onfinish = () => {
+          wireGroup.style.transform = `rotate(${this.bendAngle}deg)`;
+          if (wireGroup.currentAnimation === anim) {
+            wireGroup.currentAnimation = null;
+          }
+        };
+      } catch (_) {
+        // Web Animations API 비지원 환경 폴백
+        wireGroup.style.transform = `rotate(${this.bendAngle}deg)`;
+      }
     }
 
     // 괄호 없이 임팩트 있는 톡, 딱!, 빡! 텍스트 (게이지와 뚜껑 사이 대칭 표시)
@@ -219,8 +308,12 @@ class CapFlickGame {
       window.KSool.lastCapAngle = this.baseAngle;
 
       if (wireGroup) {
+        if (wireGroup.currentAnimation) {
+          try { wireGroup.currentAnimation.cancel(); } catch (_) {}
+          wireGroup.currentAnimation = null;
+        }
         wireGroup.style.transformOrigin = '100px 25px';
-        const flyAngle = this.bendAngle || 0;
+        const flyAngle = peakAngle || this.bendAngle || 0;
         wireGroup.style.setProperty('--fly-angle', `${flyAngle}deg`);
         wireGroup.classList.add('broken-fly');
       }
