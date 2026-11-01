@@ -470,12 +470,14 @@ class KSoolApp {
       ${modeTabsHtml}
       <div class="brew-quiz-card">
         <div class="quiz-question-row">
-          <div class="quiz-mystery-icon">${(isUnlocked || isImageUnlocked) ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(targetRec, 36) : targetRec.emoji) : '❓'}</div>
+          <div class="quiz-icon-col">
+            <div class="quiz-mystery-icon">${(isUnlocked || isImageUnlocked) ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(targetRec, 36) : targetRec.emoji) : '❓'}</div>
+            ${showHintBtn ? `<button type="button" class="quiz-infer-btn" id="quiz-open-hint-btn">힌트</button>` : ''}
+          </div>
           <div class="quiz-question-body">
             <div class="quiz-header-inline">
               <div class="quiz-title-group">
                 <span class="quiz-target-title">${resolvedName}</span>
-                ${showHintBtn ? `<button type="button" class="quiz-infer-btn" id="quiz-open-hint-btn">힌트</button>` : ''}
               </div>
               <div class="quiz-nav-right">
                 <button type="button" class="quiz-nav-btn" id="quiz-prev-btn" ${hasPrev ? '' : 'disabled'} title="이전 번호">◀</button>
@@ -531,6 +533,15 @@ class KSoolApp {
         this.audio.playTap();
         this.hintModalView.open(targetRec.recipe_id);
       };
+      const mysteryIcon = container.querySelector('.quiz-mystery-icon');
+      if (mysteryIcon) {
+        mysteryIcon.style.cursor = 'pointer';
+        mysteryIcon.title = '힌트 보기';
+        mysteryIcon.onclick = () => {
+          this.audio.playTap();
+          this.hintModalView.open(targetRec.recipe_id);
+        };
+      }
     }
   }
 
