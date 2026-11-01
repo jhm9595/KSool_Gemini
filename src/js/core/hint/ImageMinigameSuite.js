@@ -721,14 +721,47 @@ class ImageMinigameSuite {
         dr: 0,
         moveAccum: 0
       },
-      enemies: [
-        // 보스 코어 + 기동 추격체 2개 (초반 속도를 대폭 높여 약 2.5배 빠른 팽팽한 아케이드 텐션 제공)
-        { c: cols * 0.5, r: rows * 0.5, vc: 17.5, vr: 14.5, isBoss: true, baseSpeed: 22.7 },
-        { c: cols * 0.3, r: rows * 0.35, vc: -20.5, vr: 17.5, isBoss: false, baseSpeed: 26.9 },
-        { c: cols * 0.7, r: rows * 0.65, vc: 18.5, vr: -20.5, isBoss: false, baseSpeed: 27.6 }
-      ],
+      enemies: (() => {
+        // 보스 코어 + 기동 추격체 2개: 매 게임마다 스폰 위치와 진행 각도를 랜덤화하여 12시 일직선 50% 날먹 꼼수 차단
+        const configs = [
+          { isBoss: true, baseSpeed: 22.7 },
+          { isBoss: false, baseSpeed: 26.9 },
+          { isBoss: false, baseSpeed: 27.6 }
+        ];
+
+        // 플레이어 시작 지점(하단 중앙 c: cols/2, r: rows-1)과 최소 20칸 이상 떨어진 상/중단 3개 구역 분할 배치
+        const zones = [
+          { minC: cols * 0.12, maxC: cols * 0.38, minR: rows * 0.15, maxR: rows * 0.58 }, // 좌측
+          { minC: cols * 0.38, maxC: cols * 0.62, minR: rows * 0.15, maxR: rows * 0.50 }, // 중앙 상단
+          { minC: cols * 0.62, maxC: cols * 0.88, minR: rows * 0.15, maxR: rows * 0.58 }  // 우측
+        ];
+        zones.sort(() => Math.random() - 0.5);
+
+        return configs.map((cfg, idx) => {
+          const z = zones[idx];
+          const c = z.minC + Math.random() * (z.maxC - z.minC);
+          const r = z.minR + Math.random() * (z.maxR - z.minR);
+
+          // 완전 수평/수직 이동으로 인한 단조로운 벽 바운스 방지 (대각 성분 보장)
+          let angle;
+          do {
+            angle = Math.random() * Math.PI * 2;
+          } while (Math.abs(Math.cos(angle)) < 0.35 || Math.abs(Math.sin(angle)) < 0.35);
+
+          return {
+            c,
+            r,
+            vc: Math.cos(angle) * cfg.baseSpeed,
+            vr: Math.sin(angle) * cfg.baseSpeed,
+            isBoss: cfg.isBoss,
+            baseSpeed: cfg.baseSpeed
+          };
+        });
+      })(),
       capturedPct: 0
     };
+
+    let qixIgnoreInputUntil = 0;
 
     const handleQixAction = () => {
       if (this.gameState === 'READY') {
@@ -737,6 +770,7 @@ class ImageMinigameSuite {
         this.qixState.player.moveAccum = 0;
         this.qixState.player.dc = 0;
         this.qixState.player.dr = 0;
+        qixIgnoreInputUntil = performance.now() + 280; // 시작 터치 후 280ms 동안 잔여 synthetic 마우스/터치 입력 완전 무시
         this.audio.playTap();
         return true;
       } else if (this.gameState === 'OVER') {
@@ -747,6 +781,7 @@ class ImageMinigameSuite {
         this.qixState.player.moveAccum = 0;
         this.qixState.player.dc = 0;
         this.qixState.player.dr = 0;
+        qixIgnoreInputUntil = performance.now() + 280;
         return true;
       }
       return false;
@@ -754,8 +789,8 @@ class ImageMinigameSuite {
 
     const steerToward = (clientX, clientY) => {
       const wasStarting = handleQixAction();
-      // 게임 시작 화면(터치하여 시작)을 누르는 탭에서는 위로 무작정 돌진하지 않고 제자리 대기!
-      if (wasStarting) return;
+      // 게임 시작 화면(터치하여 시작)을 누르는 탭 또는 시작 직후 딜레이 동안에는 방향 전환하지 않고 제자리 대기!
+      if (wasStarting || performance.now() < qixIgnoreInputUntil) return;
 
       const rect = this.canvas.getBoundingClientRect();
       const x = (clientX - rect.left) * (this.width / rect.width);
@@ -777,6 +812,9 @@ class ImageMinigameSuite {
 
     let isPointerDown = false;
     const onDown = (e) => {
+      if (e.cancelable && e.type && e.type.startsWith('touch')) {
+        e.preventDefault(); // 모바일 synthetic mouse/scroll 이벤트 원천 방지
+      }
       isPointerDown = true;
       const pt = e.touches ? e.touches[0] : e;
       if (pt) steerToward(pt.clientX, pt.clientY);
