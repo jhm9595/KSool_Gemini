@@ -17,7 +17,6 @@ class FridgeRecommenderView {
 
     this.selectedCategory = 'ALCOHOL';
     this.lastRandomWinnerKey = null;
-    this.filterMode = 'FULL';
   }
 
   render() {
@@ -91,11 +90,8 @@ class FridgeRecommenderView {
 
     const unlockedAlcoholMatches = this.fridgeEngine.findCraftableFromFridge();
     const fullMatches = unlockedAlcoholMatches.filter(m => m.isFullMatch);
-    const partialMatches = unlockedAlcoholMatches.filter(m => !m.isFullMatch);
     const selectedCount = eligibleIngs.filter(ing => this.fridgeEngine.isSelected(ing.ingredient_id)).length;
     const isSugUnlocked = this.inventory.isSuggestionTabUnlocked();
-
-    const currentList = this.filterMode === 'FULL' ? fullMatches : unlockedAlcoholMatches;
 
     let matchesHtml = '';
     if (unlockedAlcoholMatches.length === 0) {
@@ -105,26 +101,8 @@ class FridgeRecommenderView {
           (위에서 냉장고 재료를 1개 이상 선택해보세요!)
         </div>
       `;
-    } else if (this.filterMode === 'FULL' && fullMatches.length === 0) {
-      matchesHtml = `
-        <div class="fridge-no-full-match-card">
-          <div style="font-size:1.4rem; margin-bottom:4px;">🍶</div>
-          <div style="font-weight:900; color:#f8fafc; font-size:0.86rem; margin-bottom:4px;">
-            바로 만들 수 있는 술이 아직 없습니다
-          </div>
-          <div style="font-size:0.75rem; color:#94a3b8; line-height:1.45;">
-            선택한 냉장고 재료만으로 완성 가능한 술이 없습니다.<br/>
-            함께 조합할 주류나 음료를 1개 이상 더 선택해보세요!
-          </div>
-          ${partialMatches.length > 0 ? `
-            <button class="fridge-mini-btn" id="fridge-view-all-sub-btn" style="margin-top:8px; padding:6px 12px; font-size:0.74rem;">
-              🔍 재료 일부 일치 조합 보기 (${partialMatches.length}건)
-            </button>
-          ` : ''}
-        </div>
-      `;
     } else {
-      matchesHtml = currentList.map(entry => {
+      matchesHtml = unlockedAlcoholMatches.map(entry => {
         const isWinner = this.lastRandomWinnerKey === entry.entryKey;
         const slotsHtml = entry.items.map(it => {
           const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
@@ -208,24 +186,15 @@ class FridgeRecommenderView {
         <div class="fridge-result-section">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <span style="font-size:0.82rem; font-weight:900; color:#f8fafc;">
-              🍸 추천 조합 (${this.filterMode === 'FULL' ? `재료 일치 ${fullMatches.length}건` : `전체 ${unlockedAlcoholMatches.length}건`})
+              🍸 추천 조합 (${unlockedAlcoholMatches.length}건 · 재료 일치순)
             </span>
           </div>
 
           <button class="random-pick-btn" id="fridge-random-pick-btn" ${fullMatches.length === 0 ? 'disabled' : ''}>
             <span>${fullMatches.length > 0
-              ? `🎲 오늘 마실 술 랜덤 추첨 (재료 일치 ${fullMatches.length}종 중 추첨)`
-              : `🎲 오늘 마실 술 랜덤 추첨 (재료 일치 조합 없음)`}</span>
+              ? `🎲 랜덤 추첨 (${fullMatches.length}종 중 추첨)`
+              : `🎲 랜덤 추첨`}</span>
           </button>
-
-          <div class="fridge-filter-tabs">
-            <button class="fridge-filter-tab ${this.filterMode === 'FULL' ? 'active' : ''}" data-fridge-filter="FULL">
-              ✅ 바로 제작 가능 (${fullMatches.length})
-            </button>
-            <button class="fridge-filter-tab ${this.filterMode === 'ALL' ? 'active' : ''}" data-fridge-filter="ALL">
-              🔍 전체 조합 (${unlockedAlcoholMatches.length})
-            </button>
-          </div>
 
           <div class="fridge-match-list">
             ${matchesHtml}
@@ -234,10 +203,10 @@ class FridgeRecommenderView {
       </div>
     `;
 
-    this._bindEvents(container, unlockedAlcoholMatches, fullMatches);
+    this._bindEvents(container, fullMatches);
   }
 
-  _bindEvents(container, unlockedAlcoholMatches, fullMatches) {
+  _bindEvents(container, fullMatches) {
     container.querySelectorAll('[data-fridge-cat]').forEach(btn => {
       btn.onclick = () => {
         this.selectedCategory = btn.getAttribute('data-fridge-cat');
@@ -245,23 +214,6 @@ class FridgeRecommenderView {
         this.render();
       };
     });
-
-    container.querySelectorAll('[data-fridge-filter]').forEach(btn => {
-      btn.onclick = () => {
-        this.filterMode = btn.getAttribute('data-fridge-filter');
-        this.audio?.playTap?.();
-        this.render();
-      };
-    });
-
-    const viewAllSubBtn = container.querySelector('#fridge-view-all-sub-btn');
-    if (viewAllSubBtn) {
-      viewAllSubBtn.onclick = () => {
-        this.filterMode = 'ALL';
-        this.audio?.playTap?.();
-        this.render();
-      };
-    }
 
     container.querySelectorAll('[data-fridge-ing]').forEach(chip => {
       chip.onclick = () => {
@@ -301,8 +253,13 @@ class FridgeRecommenderView {
         if (!picked) return;
         this.lastRandomWinnerKey = picked.entryKey;
         this.audio?.playSuccess?.();
-        this.filterMode = 'FULL';
         this.render();
+        setTimeout(() => {
+          const winnerEl = container.querySelector('.highlighted-winner');
+          if (winnerEl) {
+            winnerEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }, 60);
         if (picked.entryType === 'OFFICIAL' && picked.recipe && this.onShowRecipeDetail) {
           this.onShowRecipeDetail(picked.recipe);
         }
