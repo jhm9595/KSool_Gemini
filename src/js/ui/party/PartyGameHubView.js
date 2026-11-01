@@ -158,8 +158,15 @@ class PartyGameHubView {
   triggerPenalty({ title, subtitle, accentColor = '#ef4444', icon = '🚨' }) {
     this.vibratePenalty();
 
-    const overlay = document.getElementById('party-penalty-overlay');
-    if (!overlay) return;
+    let overlay = document.getElementById('party-penalty-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'party-penalty-overlay';
+      overlay.className = 'party-penalty-overlay';
+      document.body.appendChild(overlay);
+    } else if (overlay.parentElement !== document.body) {
+      document.body.appendChild(overlay);
+    }
 
     overlay.style.setProperty('--penalty-color', accentColor);
     overlay.innerHTML = `
@@ -194,6 +201,10 @@ class PartyGameHubView {
    */
   onLeavePartyTab() {
     this.releaseWakeLock();
+    const overlay = document.getElementById('party-penalty-overlay');
+    if (overlay) {
+      overlay.classList.remove('active');
+    }
     if (this.mode === 'game') {
       this.openLobby(false);
     }
@@ -237,6 +248,11 @@ class PartyGameHubView {
     this.activeGameKey = null;
     this.releaseWakeLock();
     this.sound.playTap();
+
+    const overlay = document.getElementById('party-penalty-overlay');
+    if (overlay) {
+      overlay.classList.remove('active');
+    }
 
     const container = document.getElementById(this.containerId);
     if (container) {
@@ -441,9 +457,6 @@ class PartyGameHubView {
         <!-- 전체화면 가득 찬 게임 실행 영역 -->
         <div id="party-game-stage" class="party-game-stage fullscreen party-stage-${this.activeGameKey}"></div>
       </div>
-
-      <!-- 풀스크린 벌칙 플래시 오버레이 (대화면/모바일 전 기기 100% 뷰포트 정중앙 보장) -->
-      <div id="party-penalty-overlay" class="party-penalty-overlay"></div>
     `;
 
     // 뒤로가기 버튼 이벤트

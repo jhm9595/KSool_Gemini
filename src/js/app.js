@@ -86,6 +86,10 @@ class KSoolApp {
       audio: this.audio
     });
 
+    if (window.KSool?.IconCompareModalView) {
+      this.iconCompareModalView = new window.KSool.IconCompareModalView('icon-compare-modal', 'icon-compare-content', this);
+    }
+
     this.currentTab = 'brew';
     this.brewMode = 'QUIZ'; // 'QUIZ' (단계별 넘버링 추리 퀴즈) | 'FREE' (자유 주조)
     this.quizTargetRecipeId = null;
@@ -379,9 +383,11 @@ class KSoolApp {
 
     const iconThemeBtn = document.getElementById('toggle-icon-theme-btn');
     if (iconThemeBtn) {
-      const isPixel = window.KSool?.PixelIconRegistry?.getTheme() !== 'emoji';
-      iconThemeBtn.classList.toggle('active', isPixel);
-      iconThemeBtn.textContent = isPixel ? '🎨 도트 픽셀' : '✨ 기본 이모지';
+      const theme = window.KSool?.PixelIconRegistry?.getTheme() || 'hd';
+      const meta = window.KSool?.PixelIconRegistry?.getThemeMeta(theme);
+      iconThemeBtn.classList.toggle('active', theme !== 'emoji');
+      iconThemeBtn.textContent = `${meta.icon} ${meta.label}`;
+      iconThemeBtn.title = `아이콘 스타일 전환 (현재: ${meta.label} - ${meta.title})\n클릭 시 💎고급 ➔ 👾도트 ➔ ✨이모지 순환`;
     }
 
     const licenseBtn = document.getElementById('toggle-license-btn');
@@ -1281,7 +1287,7 @@ class KSoolApp {
       };
     }
 
-    // 상단 토글 0: 🎨 레트로 도트 <-> ✨ 기본 이모지 아이콘 테마 전환
+    // 상단 토글 0: 💎고급 ➔ 👾도트 ➔ ✨이모지 3단계 순환 아이콘 테마 전환
     const iconThemeBtn = document.getElementById('toggle-icon-theme-btn');
     if (iconThemeBtn) {
       iconThemeBtn.onclick = () => {
@@ -1289,6 +1295,17 @@ class KSoolApp {
           window.KSool.PixelIconRegistry.toggleTheme();
           this.audio.playTap();
           this.renderAll();
+        }
+      };
+    }
+
+    // 아이콘 3종 스타일 한눈에 비교하기 모달 오픈
+    const iconCompareBtn = document.getElementById('open-icon-compare-btn');
+    if (iconCompareBtn) {
+      iconCompareBtn.onclick = () => {
+        if (this.iconCompareModalView) {
+          this.iconCompareModalView.open('featured');
+          this.audio.playTap();
         }
       };
     }
