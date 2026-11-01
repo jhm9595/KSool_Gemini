@@ -180,22 +180,27 @@
             <tbody>
               ${displayKeys.map(key => {
                 const isSpecialHd = reg.hasHd(key);
-                const emojiHtml = reg.getSvg(key, { theme: 'emoji', size: 36 });
+                const emojiHtml = reg.getSvg(key, { theme: 'emoji', size: 36, fallbackEmoji: foundEmoji });
                 const dotHtml = reg.getSvg(key, { theme: 'dot', size: 36 });
                 const hdHtml = reg.getSvg(key, { theme: 'hd', size: 36 });
 
-                // Try to resolve display name
-                let name = (reg.resolveKey(key) && window.KSool?.PixelIconRegistry?.getAllKeys() && window.KSool?.SeedDataBundle) ? null : null;
+                // Try to resolve display name and entity
+                let name = null;
+                let foundEmoji = null;
                 if (window.KSool?.SeedDataBundle) {
-                  const ing = (window.KSool.SeedDataBundle.INITIAL_INGREDIENTS || []).find(i => i.key === key || i.ingredient_id === key || ('ing_' + i.key) === key);
-                  const rec = (window.KSool.SeedDataBundle.RECIPES || []).find(r => r.key === key || ('rec_' + r.recipe_id) === key || ('rec_' + r.key) === key || r.recipe_id === key);
-                  const entity = ing || rec;
+                  const b = window.KSool.SeedDataBundle;
+                  const allEntities = [
+                    ...(b.ingredients_base || []),
+                    ...(b.ingredients_detail || []),
+                    ...(b.recipes || [])
+                  ];
+                  const entity = allEntities.find(e => {
+                    const resolved = reg.resolveKey(e);
+                    return resolved === key || e.key === key || ('ing_' + e.ingredient_id) === key || ('rec_' + e.recipe_id) === key;
+                  });
                   if (entity) {
-                    if (this.app?.brandResolver) {
-                      name = this.app.brandResolver.resolveName(entity);
-                    } else {
-                      name = entity.display_name || entity.name || entity.real_name || key;
-                    }
+                    name = this.app?.brandResolver ? this.app.brandResolver.resolveName(entity) : (entity.display_name || entity.name);
+                    foundEmoji = entity.emoji;
                   }
                 }
                 if (!name) {

@@ -601,7 +601,127 @@
 };
 
   // 2. [💎 32x32 고화질 디테일 아트 스프라이트 (사용자 피드백 맞춤형 19종+ 정밀 디자인)]
-  const SPRITE_DATA_HD = {
+  const EMOJI_MAP = {
+  "soju": "🍶",
+  "beer": "🍺",
+  "bokbunjaju": "🍷",
+  "maesilju": "🟢",
+  "makgeolli": "🍶",
+  "ice": "🧊",
+  "water": "💧",
+  "fire": "🔥",
+  "sparkling_water": "🫧",
+  "air": "🌬️",
+  "snow": "❄️",
+  "lemon": "🍋",
+  "melon": "🍈",
+  "mango": "🥭",
+  "maesil": "🍏",
+  "tomato": "🍅",
+  "apple": "🍎",
+  "strawberry": "🍓",
+  "cacao": "🫘",
+  "pear": "🍐",
+  "banana": "🍌",
+  "yuzu": "🍊",
+  "calamansi": "🍈",
+  "bokbunja": "🫐",
+  "pomegranate": "🍎",
+  "orange": "🍊",
+  "milk": "🥛",
+  "barley": "🌾",
+  "rice": "🏞️",
+  "misutgaru": "🥣",
+  "coffee_beans": "🫘",
+  "black_tea": "🫖",
+  "energy_drink": "⚡",
+  "ion_drink": "🎽",
+  "milksoda": "🫧",
+  "blue_lemonade": "🩵",
+  "cider": "🥤",
+  "cola": "🥤",
+  "tomato_juice": "🍅",
+  "choco_milk": "🍫",
+  "strawberry_milk": "🍓",
+  "banana_milk": "🍌",
+  "sikhye": "🌾",
+  "peach_drink": "🍑",
+  "pear_drink": "🍐",
+  "pineapple_juice": "🍍",
+  "yakult": "🍼",
+  "pomegranate_juice": "🌺",
+  "tonic_water": "🍸",
+  "calamansi_pouch": "🍋",
+  "iced_americano": "☕",
+  "hongcho": "🧪",
+  "sugar": "🍬",
+  "nuruk": "🍞",
+  "yuzu_cheong": "🍯",
+  "maesil_cheong": "🫙",
+  "honey": "🍯",
+  "vinegar": "🍶",
+  "pomegranate_concentrate": "🍷",
+  "screwbar": "🍭",
+  "chocolate": "🍫",
+  "tankboy": "🍧",
+  "melona": "🍈",
+  "jawsbar": "🦈",
+  "bibibig": "🪵",
+  "rec_somaek": "🍺",
+  "rec_kkulju": "🍯",
+  "rec_hongchaju": "🫖",
+  "rec_kibum_tea": "🗝️",
+  "rec_energy_soju": "⚡",
+  "rec_blue_lemon_soju": "🩵",
+  "rec_boksosa": "🍷",
+  "rec_icetea": "🍹",
+  "rec_mango_ringo": "🥭",
+  "rec_mango_ringoju": "🍹",
+  "rec_soju_cola": "🥤",
+  "rec_ringelju": "💉",
+  "rec_maeksato": "🍅",
+  "rec_screwbarju": "🍭",
+  "rec_maksa": "🍶",
+  "rec_choco_soju": "🍫",
+  "rec_golden_somaek": "👑",
+  "rec_tankboyju": "🍧",
+  "rec_strawberry_makgeolli": "🍓",
+  "rec_honey_makgeolli": "🍯",
+  "rec_yuzu_makgeolli": "🍊",
+  "rec_maesil_makgeolli": "🍏",
+  "rec_sikhye_makgeolli": "🌾",
+  "rec_misutgaru_makgeolli": "🥣",
+  "rec_banana_milk_makgeolli": "🍌",
+  "rec_peach_makgeolli": "🍑",
+  "rec_pear_makgeolli": "🍐",
+  "rec_pineapple_makgeolli": "🍍",
+  "rec_yakult_makgeolli": "🍼",
+  "rec_honey_misutgaru_makgeolli": "🍯",
+  "rec_pomegranate_makgeolli": "🌺",
+  "rec_sotonic": "🍸",
+  "rec_calamansiju": "🍋",
+  "rec_icheon_makgeolli": "👑",
+  "rec_hallasan_sotonic": "🌋",
+  "rec_tesla": "⚡",
+  "rec_tejina": "🎤",
+  "rec_casscheorom": "🌊",
+  "rec_kelly_is_back": "🌴",
+  "rec_castella": "🍞",
+  "rec_milkisju": "🥛",
+  "rec_gojingamlae": "🎢",
+  "rec_pocariju": "💧",
+  "rec_energizerju": "🔋",
+  "rec_taegeukju": "🇰🇷",
+  "rec_sowonju": "☕",
+  "rec_dutch_lager": "🍺",
+  "rec_melonaju": "🍈",
+  "rec_jawsbarju": "🦈",
+  "rec_bibibig_makgeolli": "🍧",
+  "rec_kahlua_milk": "☕",
+  "mango_ringo": "🥭"
+};
+
+const SPRITE_DATA_HD = {
   "soju": {
     "key": "soju",
     "name": "소주",
@@ -1714,7 +1834,12 @@
 
       // 1. [기본이모지 모드]
       if (activeTheme === 'emoji') {
-        const emoji = (item && (item.emoji || item.icon)) || opts.fallbackEmoji || '🍶';
+        const key = this.resolveKey(item);
+        const emoji = (item && typeof item === 'object' && (item.emoji || item.icon))
+          || (key && EMOJI_MAP[key])
+          || (typeof item === 'string' && EMOJI_MAP[item])
+          || opts.fallbackEmoji
+          || '🍶';
         return '<span class="k-pixel-icon-fallback' + cls + '" style="display:inline-block;font-size:' + (size * 0.85) + 'px;line-height:1;vertical-align:middle' + extraStyle + '">' + emoji + '</span>';
       }
 
@@ -1747,7 +1872,7 @@
       }
 
       // Fallback: if emoji is available
-      const fallback = (item && (item.emoji || item.icon)) || opts.fallbackEmoji || '🍶';
+      const fallback = (item && typeof item === 'object' && (item.emoji || item.icon)) || (key && EMOJI_MAP[key]) || opts.fallbackEmoji || '🍶';
       return '<span class="k-pixel-icon-fallback' + cls + '" style="display:inline-block;font-size:' + (size * 0.85) + 'px;line-height:1;vertical-align:middle' + extraStyle + '">' + fallback + '</span>';
     },
 
