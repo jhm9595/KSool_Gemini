@@ -2825,11 +2825,11 @@ window.KSool.SeedDataBundle = {
     "description": "팥을 물과 설탕과 함께 푹 삶아 달콤하고 부드럽게 끓여낸 전통 단팥죽.",
     "requires_order": false,
     "max_ratio": 1,
-    "sum_ratio": 3,
-    "item_count": 3,
+    "sum_ratio": 4,
+    "item_count": 4,
     "step_id": 3,
     "step_order": 14,
-    "unlock_hint": "붉은 곡물 알갱이를 맑은 액체, 달콤한 결정과 함께 정성껏 끓여낸 따뜻하고 달콤한 전통 간식입니다.",
+    "unlock_hint": "붉은 곡물 알갱이를 맑은 액체, 달콤한 결정과 함께 뜨거운 불로 정성껏 끓여낸 따뜻하고 달콤한 전통 간식입니다.",
     "recipe_number": 30,
     "formatted_number": "No.30"
   }
@@ -4416,6 +4416,14 @@ window.KSool.SeedDataBundle = {
     "recipe_id": 85,
     "slot_order": 3,
     "ingredient_id": 701,
+    "detail_ingredient_id": null,
+    "ratio": 1
+  },
+  {
+    "id": 1102,
+    "recipe_id": 85,
+    "slot_order": 4,
+    "ingredient_id": 203,
     "detail_ingredient_id": null,
     "ratio": 1
   },
