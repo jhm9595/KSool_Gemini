@@ -2565,13 +2565,25 @@
 
 /* 🎮 술게임 탭: 폴더블 폰 / 태블릿 / 대화면 반응형 확장 */
 @media (min-width: 620px) {
+  /* 술자리 미니게임 모음 로비: 대화면에서도 깨지지 않고 항상 깔끔한 가로줄(Row) 카드 리스트 유지 */
+  .party-lobby-container {
+    max-width: 620px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
   .party-games-grid-menu {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
     padding-bottom: 30px;
   }
 
+  .party-lobby-card {
+    padding: 16px 18px;
+  }
+
+  /* 인게임 플레이 스테이지: 대화면 최적화 */
   .party-game-stage {
     max-width: 680px;
     margin: 0 auto;
@@ -2602,7 +2614,7 @@
 }
 
 @media (min-width: 960px) {
-  .party-games-grid-menu {
-    grid-template-columns: repeat(3, 1fr) !important;
+  .party-lobby-container {
+    max-width: 680px;
   }
 }
