@@ -19,7 +19,7 @@
       this.isDrawing = false;
       this.lastPoint = null;
       this.moveCount = 0;
-      this.scratchRatioThreshold = options.threshold || 0.48; // 48% 이상 충분히 긁었을 때 자동 공개
+      this.scratchRatioThreshold = options.threshold || 0.80; // 80% 이상 충분히 긁었을 때 자동 공개
     }
 
     render(parentEl) {

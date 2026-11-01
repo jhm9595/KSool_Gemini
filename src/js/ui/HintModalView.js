@@ -324,6 +324,7 @@ class HintModalView {
             containerId: 'scratch-card-box',
             secretText: recipe.unlock_hint,
             audio: this.audio,
+            threshold: 0.80,
             onComplete: () => {
               this.inventory.unlockRecipeDesc(this.activeRecipeId);
               if (this.onDescUnlocked) {
