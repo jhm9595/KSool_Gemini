@@ -488,45 +488,84 @@ body.admin-mode .header-toolbar {
 }
 
 .slider-min-icon, .slider-max-icon {
-  font-size: 0.85rem;
-  opacity: 0.7;
+  font-size: 0.95rem;
+  opacity: 0.75;
+  cursor: pointer;
+  padding: 4px;
+  user-select: none;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.slider-min-icon:hover, .slider-max-icon:hover {
+  opacity: 1;
+  transform: scale(1.15);
 }
 
 .settings-sound-range {
   flex: 1;
-  height: 6px;
-  border-radius: 999px;
-  background: #334155;
+  height: 32px;
+  background: transparent;
   outline: none;
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
+  margin: 0;
+  padding: 0;
+  touch-action: none;
+}
+
+.settings-sound-range::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--track-fill, #334155);
+  cursor: pointer;
 }
 
 .settings-sound-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
+  margin-top: -7px;
   border-radius: 50%;
   background: #38bdf8;
-  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
-  cursor: pointer;
-  transition: transform 0.1s ease;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.7), 0 2px 4px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+  transition: transform 0.1s ease, background-color 0.1s ease;
 }
 
-.settings-sound-range::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
+.settings-sound-range:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  transform: scale(1.18);
+  background: #0ea5e9;
+  box-shadow: 0 0 14px rgba(14, 165, 233, 0.9);
+}
+
+.settings-sound-range::-moz-range-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--track-fill, #334155);
+  cursor: pointer;
 }
 
 .settings-sound-range::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: #38bdf8;
-  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
-  cursor: pointer;
-  border: none;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.7), 0 2px 4px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+  transition: transform 0.1s ease;
+}
+
+.settings-sound-range:active::-moz-range-thumb {
+  cursor: grabbing;
+  transform: scale(1.18);
+  background: #0ea5e9;
 }
 
 .settings-danger-section {

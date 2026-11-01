@@ -72,9 +72,9 @@
                   <span class="sound-vol-percent" id="settings-sound-percent">${isMuted ? '0%' : `${volPercent}%`}</span>
                 </div>
                 <div class="settings-slider-row">
-                  <span class="slider-min-icon">🔈</span>
+                  <span class="slider-min-icon" id="settings-vol-min-btn" title="최소 음량 (10%)">🔈</span>
                   <input type="range" min="0" max="100" value="${isMuted ? 0 : volPercent}" class="settings-sound-range" id="settings-sound-range" aria-label="음량 조절" />
-                  <span class="slider-max-icon">🔊</span>
+                  <span class="slider-max-icon" id="settings-vol-max-btn" title="최대 음량 (100%)">🔊</span>
                 </div>
               </div>
             </div>
@@ -124,8 +124,10 @@
       const statusLabelEl = container.querySelector('#settings-sound-status-label');
       const percentEl = container.querySelector('#settings-sound-percent');
       const rangeEl = container.querySelector('#settings-sound-range');
+      const minBtn = container.querySelector('#settings-vol-min-btn');
+      const maxBtn = container.querySelector('#settings-vol-max-btn');
 
-      const updateSoundUI = () => {
+      const updateSoundUI = (isDragging = false) => {
         if (!audioService) return;
         const isMuted = audioService.isMutedState();
         const volPercent = audioService.getVolumePercent();
@@ -136,28 +138,75 @@
         if (muteBtn) muteBtn.classList.toggle('is-muted', isMuted);
         if (statusLabelEl) statusLabelEl.textContent = isMuted ? '음소거 상태' : '효과음 켜짐';
         if (percentEl) percentEl.textContent = isMuted ? '0%' : `${volPercent}%`;
-        if (rangeEl) rangeEl.value = isMuted ? 0 : volPercent;
+
+        // 드래그 중에는 사용자가 잡고 있는 input value를 덮어쓰지 않아 조작 튕김/멈춤 방지
+        if (rangeEl && !isDragging) {
+          rangeEl.value = isMuted ? 0 : volPercent;
+        }
+
+        // 실시간 게이지 트랙 채우기 (0% ~ 100%)
+        const fillPercent = isMuted ? 0 : volPercent;
+        if (rangeEl) {
+          rangeEl.style.setProperty(
+            '--track-fill',
+            `linear-gradient(to right, #38bdf8 0%, #38bdf8 ${fillPercent}%, #334155 ${fillPercent}%, #334155 100%)`
+          );
+        }
       };
+
+      // 모달 오픈 시 초기 트랙 채움 상태 즉시 렌더링
+      updateSoundUI(false);
 
       if (muteBtn && audioService) {
         muteBtn.onclick = () => {
           audioService.toggleMute();
-          updateSoundUI();
+          updateSoundUI(false);
           if (!audioService.isMutedState()) {
             audioService.playTap();
           }
         };
       }
 
+      // 최소 음량 (10%) 버튼
+      if (minBtn && audioService) {
+        minBtn.onclick = () => {
+          audioService.setVolume(0.1);
+          updateSoundUI(false);
+          audioService.playTap();
+        };
+      }
+
+      // 최대 음량 (100%) 버튼
+      if (maxBtn && audioService) {
+        maxBtn.onclick = () => {
+          audioService.setVolume(1.0);
+          updateSoundUI(false);
+          audioService.playTap();
+        };
+      }
+
       // 2. 사운드 볼륨 슬라이더
+      let soundDebounceTimer = null;
+      const playDebouncedSound = () => {
+        if (!audioService || audioService.isMutedState()) return;
+        if (soundDebounceTimer) clearTimeout(soundDebounceTimer);
+        soundDebounceTimer = setTimeout(() => {
+          audioService.playTap();
+        }, 75);
+      };
+
       if (rangeEl && audioService) {
         rangeEl.oninput = () => {
           const val = Number(rangeEl.value);
           audioService.setVolume(val / 100);
-          updateSoundUI();
+          updateSoundUI(true);
+          playDebouncedSound();
         };
 
         rangeEl.onchange = () => {
+          const val = Number(rangeEl.value);
+          audioService.setVolume(val / 100);
+          updateSoundUI(false);
           if (!audioService.isMutedState()) {
             audioService.playTap();
           }

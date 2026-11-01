@@ -32,7 +32,9 @@ class AudioService {
   }
 
   getEffectiveVolume() {
-    return this.isMutedState() ? 0 : this.volume;
+    if (this.isMutedState()) return 0;
+    // 인체 청각 인지(Logarithmic) 특성에 맞춘 볼륨 보정 커브
+    return Math.pow(this.volume, 1.5);
   }
 
   setVolume(vol) {

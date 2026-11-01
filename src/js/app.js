@@ -126,7 +126,7 @@ class KSoolApp {
 
     // iOS 사파리 고무줄 바운스(Overscroll Rubber-banding) 원천 차단
     document.addEventListener('touchmove', (e) => {
-      const scrollable = e.target.closest('.view, .recipe-list, .pot-scroll-inner, .inventory-scroll, .modal-body, .minigame-canvas, .party-view-body, .lobby-grid');
+      const scrollable = e.target.closest('.view, .recipe-list, .pot-scroll-inner, .inventory-scroll, .modal-body, .minigame-canvas, .party-view-body, .lobby-grid, .settings-modal-body, .settings-modal-card, input[type="range"]');
       if (!scrollable) {
         e.preventDefault();
       }

@@ -16,7 +16,8 @@ class PartySoundSynth {
     if (isMuted) return 0;
     const savedVol = localStorage.getItem('ksool_sound_volume');
     const vol = savedVol !== null ? parseFloat(savedVol) : 0.7;
-    return Math.max(0, Math.min(1, vol));
+    const clamped = Math.max(0, Math.min(1, vol));
+    return Math.pow(clamped, 1.5);
   }
 
   get isMuted() {
