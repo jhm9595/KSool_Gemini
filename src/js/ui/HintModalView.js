@@ -248,51 +248,7 @@ class HintModalView {
         TERRITORY_QIX: '📐 네온 땅따먹기'
       };
 
-      let controlsHtml = '';
-      if (this.minigameStatus === 'WIN') {
-        controlsHtml = `
-          <div class="mg-result-banner win">
-            <div class="mg-result-title">🎉 그림 해금 성공! 도감에 [${window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 20) : recipe.emoji}] 그림이 공개되었습니다!</div>
-            <div class="mg-result-actions">
-              <button class="mg-action-btn primary" id="mg-go-baseball-btn">⚾ 베이스볼 추리하러 가기</button>
-              <button class="mg-action-btn secondary" id="mg-retry-btn">🔄 다시 플레이</button>
-            </div>
-          </div>
-        `;
-      } else if (this.minigameStatus === 'LOSE') {
-        controlsHtml = `
-          <div class="mg-result-banner lose">
-            <div class="mg-result-title">💥 공략 실패! 장애물과 함정 패턴을 피해 다시 도전해보세요!</div>
-            <div class="mg-result-actions">
-              <button class="mg-action-btn primary" id="mg-retry-btn">🔄 즉시 재도전</button>
-              <button class="mg-action-btn secondary" id="mg-back-select-btn">🕹️ 다른 게임 선택</button>
-            </div>
-          </div>
-        `;
-      } else {
-        if (this.selectedMinigameType === 'BRICK_BREAKER') {
-          controlsHtml = `
-            <div class="mg-control-bar">
-              <span class="mg-control-tip">↔ 화면(캔버스)을 좌우로 드래그하거나 키보드 ◀ ▶ 키로 패들을 움직이세요!</span>
-              <button class="mg-mini-retry-btn" id="mg-retry-btn">🔄 재시작</button>
-            </div>
-          `;
-        } else if (this.selectedMinigameType === 'TERRITORY_QIX') {
-          controlsHtml = `
-            <div class="mg-qix-dpad-bar">
-              <div class="mg-dpad-group">
-                <button class="dpad-btn" data-qix-dir="-1,0">◀</button>
-                <button class="dpad-btn" data-qix-dir="0,-1">▲</button>
-                <button class="dpad-btn" data-qix-dir="0,1">▼</button>
-                <button class="dpad-btn" data-qix-dir="1,0">▶</button>
-              </div>
-              <button class="mg-mini-retry-btn" id="mg-retry-btn">🔄 재시작</button>
-            </div>
-          `;
-        }
-      }
-
-      const canvasHeight = 430;
+      const canvasHeight = 440;
 
       container.innerHTML = `
         <div class="hint-top-header">
@@ -305,7 +261,6 @@ class HintModalView {
 
         <div class="arcade-cabinet-box">
           <canvas id="minigame-canvas" width="380" height="${canvasHeight}" class="minigame-canvas"></canvas>
-          <div id="minigame-controls-slot">${controlsHtml}</div>
         </div>
       `;
 
@@ -685,32 +640,7 @@ class HintModalView {
   }
 
   _updateMinigameControlsOnly(recipe) {
-    const slot = document.getElementById('minigame-controls-slot');
-    const container = document.getElementById('hint-modal-content');
-    if (!slot || !container) return;
-
-    if (this.minigameStatus === 'WIN') {
-      slot.innerHTML = `
-        <div class="mg-result-banner win">
-          <div class="mg-result-title">🎉 그림 해금 성공! 도감에 [${window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 20) : recipe.emoji}] 그림이 공개되었습니다!</div>
-          <div class="mg-result-actions">
-            <button class="mg-action-btn primary" id="mg-go-baseball-btn">⚾ 베이스볼 추리하러 가기</button>
-            <button class="mg-action-btn secondary" id="mg-retry-btn">🔄 다시 플레이</button>
-          </div>
-        </div>
-      `;
-    } else if (this.minigameStatus === 'LOSE') {
-      slot.innerHTML = `
-        <div class="mg-result-banner lose">
-          <div class="mg-result-title">💥 공략 실패! 장애물과 함정 패턴을 피해 다시 도전해보세요!</div>
-          <div class="mg-result-actions">
-            <button class="mg-action-btn primary" id="mg-retry-btn">🔄 즉시 재도전</button>
-            <button class="mg-action-btn secondary" id="mg-back-select-btn">🕹️ 다른 게임 선택</button>
-          </div>
-        </div>
-      `;
-    }
-    this._bindEvents(container);
+    // 캔버스 내부 터치 상호작용으로 완전 일원화되어 불필요한 하단 DOM 슬롯을 사용하지 않음
   }
 
   _getOptionsForStage(stage, overrideCatId = null) {

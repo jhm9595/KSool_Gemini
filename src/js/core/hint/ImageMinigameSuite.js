@@ -115,6 +115,7 @@ class ImageMinigameSuite {
   start(gameType) {
     this.stop();
     this.gameType = gameType;
+    this.gameState = 'READY';
     this.isRunning = true;
     this.particles = [];
     this.shakeTicks = 0;
@@ -176,6 +177,53 @@ class ImageMinigameSuite {
       ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
     }
     ctx.globalAlpha = 1;
+  }
+
+  _drawOverlayPrompt(ctx, text, subText = '', isOver = false) {
+    const pulse = 0.85 + 0.15 * Math.sin(performance.now() * 0.006);
+    const cx = this.width / 2;
+    const cy = this.height / 2 + 20;
+
+    ctx.save();
+    if (isOver) {
+      ctx.fillStyle = 'rgba(7, 11, 20, 0.65)';
+      ctx.fillRect(0, 32, this.width, this.height - 32);
+    }
+
+    const boxW = 210;
+    const boxH = 46;
+    const boxX = cx - boxW / 2;
+    const boxY = cy - boxH / 2;
+
+    ctx.shadowColor = isOver ? 'rgba(239, 68, 68, 0.7)' : 'rgba(56, 189, 248, 0.7)';
+    ctx.shadowBlur = 12 * pulse;
+
+    ctx.fillStyle = isOver ? 'rgba(30, 20, 35, 0.94)' : 'rgba(15, 23, 42, 0.94)';
+    ctx.strokeStyle = isOver ? `rgba(239, 68, 68, ${0.75 * pulse})` : `rgba(56, 189, 248, ${0.85 * pulse})`;
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(boxX, boxY, boxW, boxH, 23);
+    } else {
+      ctx.rect(boxX, boxY, boxW, boxH);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+    ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = isOver ? '#fca5a5' : '#38bdf8';
+    ctx.fillText(text, cx, cy + (subText ? -7 : 0));
+
+    if (subText) {
+      ctx.font = '12px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText(subText, cx, cy + 11);
+    }
+    ctx.restore();
   }
 
   _drawHUD(ctx, { lives, timeLeftSec, progressPct, targetPct, labelText, subText }) {
@@ -246,9 +294,9 @@ class ImageMinigameSuite {
       },
       ball: {
         x: this.width / 2,
-        y: this.height - 42,
-        vx: (Math.random() > 0.5 ? 1 : -1) * 3.4,
-        vy: -3.9,
+        y: this.height - 38,
+        vx: 0,
+        vy: 0,
         r: 7,
         speedMultiplier: 0.52
       },
@@ -287,25 +335,71 @@ class ImageMinigameSuite {
       }
     }
 
+    const launchBall = () => {
+      if (this.gameState === 'READY') {
+        this.gameState = 'PLAYING';
+        this.audio.playTap();
+        const b = this.bbState.ball;
+        b.vy = -3.9;
+        b.vx = (Math.random() > 0.5 ? 1 : -1) * (2.8 + Math.random() * 0.8);
+      } else if (this.gameState === 'OVER') {
+        this.audio.playTap();
+        this.start('BRICK_BREAKER');
+        this.gameState = 'PLAYING';
+        const b = this.bbState.ball;
+        b.vy = -3.9;
+        b.vx = (Math.random() > 0.5 ? 1 : -1) * (2.8 + Math.random() * 0.8);
+      }
+    };
+
     const movePaddle = (clientX) => {
       const rect = this.canvas.getBoundingClientRect();
       const scaleX = this.width / rect.width;
       const x = (clientX - rect.left) * scaleX;
       const p = this.bbState.paddle;
       p.x = Math.max(6, Math.min(this.width - p.w - 6, x - p.w / 2));
+      if (this.gameState === 'READY') {
+        this.bbState.ball.x = p.x + p.w / 2;
+        this.bbState.ball.y = p.y - this.bbState.ball.r - 2;
+      }
     };
 
-    const onMouseMove = (e) => movePaddle(e.clientX);
+    const onMouseDown = (e) => {
+      movePaddle(e.clientX);
+      launchBall();
+    };
+
+    const onMouseMove = (e) => {
+      movePaddle(e.clientX);
+    };
+
+    const onTouchStart = (e) => {
+      if (e.touches && e.touches[0]) {
+        e.preventDefault();
+        movePaddle(e.touches[0].clientX);
+        launchBall();
+      }
+    };
+
     const onTouchMove = (e) => {
       if (e.touches && e.touches[0]) {
         e.preventDefault();
         movePaddle(e.touches[0].clientX);
       }
     };
+
     const onKeyDown = (e) => {
-      if (e.key === 'ArrowLeft' || e.key === 'a') this.bbState.paddle.keyDir = -1;
-      else if (e.key === 'ArrowRight' || e.key === 'd') this.bbState.paddle.keyDir = 1;
+      if (e.key === 'ArrowLeft' || e.key === 'a') {
+        this.bbState.paddle.keyDir = -1;
+        launchBall();
+      } else if (e.key === 'ArrowRight' || e.key === 'd') {
+        this.bbState.paddle.keyDir = 1;
+        launchBall();
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        launchBall();
+      }
     };
+
     const onKeyUp = (e) => {
       if (
         (e.key === 'ArrowLeft' || e.key === 'a') && this.bbState.paddle.keyDir === -1 ||
@@ -315,16 +409,18 @@ class ImageMinigameSuite {
       }
     };
 
+    this.canvas.addEventListener('mousedown', onMouseDown);
     this.canvas.addEventListener('mousemove', onMouseMove);
+    this.canvas.addEventListener('touchstart', onTouchStart, { passive: false });
     this.canvas.addEventListener('touchmove', onTouchMove, { passive: false });
-    this.canvas.addEventListener('touchstart', onTouchMove, { passive: false });
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
     this._cleanupInputHandlers = () => {
+      this.canvas.removeEventListener('mousedown', onMouseDown);
       this.canvas.removeEventListener('mousemove', onMouseMove);
+      this.canvas.removeEventListener('touchstart', onTouchStart);
       this.canvas.removeEventListener('touchmove', onTouchMove);
-      this.canvas.removeEventListener('touchstart', onTouchMove);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
@@ -459,8 +555,8 @@ class ImageMinigameSuite {
           this.audio.playFail();
           this._spawnParticles(hz.x, p.y, '#ef4444', 18);
           if (st.lives <= 0) {
-            this.stop();
-            this.onLose('독방울(☠️)에 피격되어 모든 라이프를 잃었습니다!');
+            this.gameState = 'OVER';
+            if (this.onLose) this.onLose();
             return;
           }
         } else {
@@ -482,22 +578,23 @@ class ImageMinigameSuite {
       this.shakeTicks = 12;
       this.audio.playFail();
       if (st.lives <= 0) {
-        this.stop();
-        this.onLose('공을 모두 놓쳐 라이프가 소진되었습니다!');
+        this.gameState = 'OVER';
+        if (this.onLose) this.onLose();
         return;
       }
+      this.gameState = 'READY';
       b.x = p.x + p.w / 2;
-      b.y = p.y - 16;
-      b.vx = (Math.random() > 0.5 ? 1 : -1) * 3.4;
-      b.vy = -3.9;
+      b.y = p.y - b.r - 2;
+      b.vx = 0;
+      b.vy = 0;
     }
 
     // 승리 판정
     const pct = (st.brokenCount / Math.max(1, st.totalBreakable)) * 100;
     if (pct >= st.targetPct) {
+      this.gameState = 'WIN';
       this.audio.playSuccess();
-      this.stop();
-      this.onWin();
+      if (this.onWin) this.onWin();
     }
   }
 
@@ -640,7 +737,19 @@ class ImageMinigameSuite {
       capturedPct: 0
     };
 
+    const handleQixAction = () => {
+      if (this.gameState === 'READY') {
+        this.gameState = 'PLAYING';
+        this.audio.playTap();
+      } else if (this.gameState === 'OVER') {
+        this.audio.playTap();
+        this.start('TERRITORY_QIX');
+        this.gameState = 'PLAYING';
+      }
+    };
+
     const steerToward = (clientX, clientY) => {
+      handleQixAction();
       const rect = this.canvas.getBoundingClientRect();
       const x = (clientX - rect.left) * (this.width / rect.width);
       const y = (clientY - rect.top) * (this.height / rect.height) - topOffset;
@@ -674,11 +783,13 @@ class ImageMinigameSuite {
     const onUp = () => { isPointerDown = false; };
 
     const onKeyDown = (e) => {
+      handleQixAction();
       const pl = this.qixState.player;
       if (e.key === 'ArrowLeft' || e.key === 'a') { pl.dc = -1; pl.dr = 0; }
       else if (e.key === 'ArrowRight' || e.key === 'd') { pl.dc = 1; pl.dr = 0; }
       else if (e.key === 'ArrowUp' || e.key === 'w') { pl.dc = 0; pl.dr = -1; }
       else if (e.key === 'ArrowDown' || e.key === 's') { pl.dc = 0; pl.dr = 1; }
+      else if (e.key === ' ' || e.key === 'Enter') { handleQixAction(); }
     };
 
     this.canvas.addEventListener('mousedown', onDown);
@@ -862,9 +973,9 @@ class ImageMinigameSuite {
           this._floodFillCaptureQix();
           // 네모칸 전체(100%)를 모두 땅따먹어 그림이 온전히 드러났으면 승리!
           if (st.pictureRevealedPct >= st.targetPct) {
+            this.gameState = 'WIN';
             this.audio.playSuccess();
-            this.stop();
-            this.onWin();
+            if (this.onWin) this.onWin();
             return;
           }
         }
@@ -946,8 +1057,10 @@ class ImageMinigameSuite {
     st.player.dr = 0;
 
     if (st.lives <= 0) {
-      this.stop();
-      this.onLose('방해 구체에 선이 끊겨 모든 라이프를 잃었습니다!');
+      this.gameState = 'OVER';
+      if (this.onLose) this.onLose();
+    } else {
+      this.gameState = 'READY';
     }
   }
 
@@ -1025,6 +1138,15 @@ class ImageMinigameSuite {
 
   _update() {
     this._updateParticles();
+    if (this.gameState !== 'PLAYING') {
+      if (this.gameState === 'READY' && this.gameType === 'BRICK_BREAKER' && this.bbState) {
+        const p = this.bbState.paddle;
+        const b = this.bbState.ball;
+        b.x = p.x + p.w / 2;
+        b.y = p.y - b.r - 2;
+      }
+      return;
+    }
     if (this.gameType === 'BRICK_BREAKER') this._updateBrickBreaker();
     else if (this.gameType === 'TERRITORY_QIX') this._updateTerritoryQix();
   }
@@ -1033,16 +1155,23 @@ class ImageMinigameSuite {
     const ctx = this.ctx;
     ctx.save();
     if (this.shakeTicks > 0) {
+      this.shakeTicks--;
       const dx = (Math.random() - 0.5) * 6;
       const dy = (Math.random() - 0.5) * 6;
       ctx.translate(dx, dy);
     }
-
-    ctx.clearRect(0, 0, this.width, this.height);
     if (this.gameType === 'BRICK_BREAKER') this._drawBrickBreaker(ctx);
     else if (this.gameType === 'TERRITORY_QIX') this._drawTerritoryQix(ctx);
-
     this._drawParticles(ctx);
+
+    if (this.gameState === 'READY') {
+      this._drawOverlayPrompt(ctx, '👆 터치하여 시작');
+    } else if (this.gameState === 'OVER') {
+      this._drawOverlayPrompt(ctx, '👆 터치하여 다시 시작', '', true);
+    } else if (this.gameState === 'WIN') {
+      this._drawOverlayPrompt(ctx, '🎉 그림 해금 완료!', '우측 상단 ✕ 버튼으로 닫기');
+    }
+
     ctx.restore();
   }
 }
