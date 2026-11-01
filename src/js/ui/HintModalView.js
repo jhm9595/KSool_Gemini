@@ -128,19 +128,26 @@ class HintModalView {
         </div>
       ` : '';
 
-      const lightHintHtml = recipe.unlock_hint ? `
-        <div style="background:rgba(15,23,42,0.85); border:1px solid #334155; border-radius:10px; padding:10px 12px; font-size:0.75rem; color:#cbd5e1; line-height:1.45;">
-          <span style="color:#fde047; font-weight:800; margin-right:4px;">💡 힌트:</span>${recipe.unlock_hint}
-        </div>
-      ` : '';
-
       container.innerHTML = `
         <div class="hint-top-header">
-          <div class="modal-title">🕵️ ${targetBadgeHtml} 추리</div>
+          <div class="modal-title">🕵️ 추리</div>
           <button class="modal-close-x" id="hint-close-btn">✕</button>
         </div>
 
-        ${lightHintHtml}
+        <div class="bb-target-info-card" style="margin-bottom:8px;">
+          <div class="bb-target-title-row">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="bb-target-num">${recipe.formatted_number || ''}</span>
+              <span class="bb-target-name">${resolvedName}</span>
+            </div>
+          </div>
+          ${recipe.unlock_hint ? `
+            <div class="bb-target-hint">
+              <span class="hint-bulb">💡</span> ${recipe.unlock_hint}
+            </div>
+          ` : ''}
+        </div>
+
         ${unlockedPreviewBanner}
 
         <div class="hint-choice-grid">
@@ -593,16 +600,18 @@ class HintModalView {
             💡 모든 재료의 비율을 맞추면 완벽한 레시피가 완성됩니다!
           </div>
         ` : `
-          <div style="font-size:0.86rem; color:#fde047; font-weight:900; margin-bottom:4px;">
-            ⚾ 베이스볼 게임 규칙
+          <div style="font-size:0.86rem; color:#fde047; font-weight:900; margin-bottom:5px;">
+            ⚾ 숫자야구(베이스볼) 규칙
           </div>
-          <div style="line-height:1.5; font-size:0.78rem; color:#cbd5e1;">
-            • <b>S (스트라이크)</b>: 정답에 포함된 재료<br>
-            • <b>B (볼)</b>: 재료는 맞지만 투입 순서가 다름<br>
-            • <b>O (아웃)</b>: 정답에 없는 재료
+          <div style="line-height:1.55; font-size:0.78rem; color:#cbd5e1;">
+            • <b>S (스트라이크)</b>: 재료와 슬롯 위치(순서)가 모두 일치<br>
+            • <b>B (볼)</b>: 레시피에 포함되지만 슬롯 위치가 다름<br>
+            • <b>O (아웃)</b>: 레시피에 아예 들어가지 않는 재료
           </div>
-          <div style="color:#fcd34d; font-size:0.75rem; margin-top:4px;">
-            1단계(재료 유형) ➔ 2단계(대표 재료)를 맞추면 각 재료의 비율(?) Up/Down이 열립니다!
+          <div style="background:rgba(15,23,42,0.85); border:1px solid #334155; border-radius:6px; padding:6px 8px; margin-top:6px; font-size:0.73rem; color:#93c5fd; line-height:1.45;">
+            <b>📌 예시</b> (정답이 [소주 · 맥주 · 콜라]일 때)<br>
+            내가 [<b>소주</b> · 사이다 · <b>맥주</b>]를 추리했다면?<br>
+            👉 소주(1번째 일치=<b>1S</b>), 맥주(포함되나 위치 다름=<b>1B</b>) ➔ <b>1S 1B</b>
           </div>
         `}
       </div>

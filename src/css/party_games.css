@@ -2562,3 +2562,47 @@
   background: #334155;
   color: #ffffff;
 }
+
+/* 🎮 술게임 탭: 폴더블 폰 / 태블릿 / 대화면 반응형 확장 */
+@media (min-width: 620px) {
+  .party-games-grid-menu {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+    padding-bottom: 30px;
+  }
+
+  .party-game-stage {
+    max-width: 680px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .party-fullscreen-wrapper {
+    align-items: center;
+  }
+
+  .party-fullscreen-wrapper > * {
+    max-width: 720px;
+    width: 100%;
+  }
+
+  /* 표면장력 게임: 큼직한 3D 소주잔 & 버튼 여유 */
+  .st-main-card {
+    max-width: 580px;
+    margin: 0 auto;
+  }
+
+  /* 꼬다리 치기 & 병 돌리기 스테이지 */
+  .cap-arena-box,
+  .bottle-arena-box {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 960px) {
+  .party-games-grid-menu {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}

@@ -843,14 +843,9 @@ class KSoolApp {
 
       const numBadge = `<span class="sool-num-badge">${rec.formatted_number || `No.${rec.recipe_id}`}</span>`;
 
-      const imgOnlyBadge = (!isUnlocked && isImageUnlocked)
-        ? `<span class="img-unlocked-pill">🖼️ 그림해금</span>`
-        : '';
-
       return `
         <div class="sool-card ${cardStateClass}" data-recipe-card="${rec.recipe_id}">
           ${numBadge}
-          ${imgOnlyBadge}
           <span class="diff-badge diff-${rec.difficulty}">${rec.difficulty}</span>
           <span class="sool-emoji">${displayEmoji}</span>
           <span class="sool-name">${displayName}</span>

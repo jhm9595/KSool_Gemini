@@ -10,12 +10,55 @@
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
   border: 1px solid var(--border);
+  transition: max-width 0.25s ease, height 0.25s ease;
 }
 
-@media (min-width: 500px) {
+@media (min-width: 500px) and (max-width: 679px) {
   #app-container {
     height: 94vh;
     border-radius: 24px;
+  }
+}
+
+/* 📱 폴더블 폰(언폴드/펼침) & 태블릿 & 데스크톱 반응형 확장 */
+@media (min-width: 680px) {
+  #app-container {
+    max-width: 1060px;
+    height: 94vh;
+    max-height: 960px;
+    border-radius: 22px;
+  }
+  
+  .header-toolbar {
+    gap: 6px;
+    padding: 6px 12px;
+  }
+}
+
+/* 🔄 모바일 가로 모드 (Landscape Phone: height <= 520px) */
+@media (orientation: landscape) and (max-height: 520px) {
+  body {
+    align-items: stretch;
+  }
+  #app-container {
+    max-width: 100%;
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+  }
+  header {
+    padding: 6px 12px;
+    gap: 4px;
+  }
+  .header-top {
+    gap: 6px;
+  }
+  .tab-btn {
+    min-height: 42px;
+    padding: 3px 2px;
+    font-size: 0.74rem;
   }
 }
 
@@ -198,6 +241,8 @@ header {
 
 .modal-card {
   width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
   max-height: 88vh;
   background: #1e293b;
   border: 1px solid #475569;

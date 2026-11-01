@@ -264,3 +264,15 @@
   text-align: center;
   font-weight: 700;
 }
+
+/* 🧊 냉장고를 부탁해: 폴더블 폰 / 태블릿 2-컬럼 분할 뷰 */
+@media (min-width: 680px), (orientation: landscape) and (min-width: 580px) {
+  .fridge-view-container {
+    display: grid !important;
+    grid-template-columns: 1.05fr 1fr !important;
+    gap: 16px !important;
+    align-items: start !important;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+}
