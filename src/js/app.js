@@ -1194,6 +1194,42 @@ class KSoolApp {
     }
   }
 
+  showToast(message) {
+    let toast = document.getElementById('ksool-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'ksool-toast';
+      toast.style.cssText = `
+        position: fixed;
+        top: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-10px);
+        background: rgba(15, 23, 42, 0.95);
+        color: #38bdf8;
+        border: 1.5px solid #38bdf8;
+        padding: 10px 20px;
+        border-radius: 9999px;
+        font-size: 0.88rem;
+        font-weight: 800;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 16px rgba(56, 189, 248, 0.45);
+        z-index: 99999;
+        pointer-events: none;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        opacity: 0;
+        text-align: center;
+      `;
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+    if (this._toastTimer) clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(-10px)';
+    }, 2400);
+  }
+
   _bindGlobalEvents() {
     // [iOS / iPad Safari 더블탭 줌 및 핀치 제스처 원천 차단]
     // 패드/모바일 환경에서 빠르게 연타(예: 병뚜껑 꼬다리 치기)하거나 멀티터치 시 브라우저 화면이 확대되는 현상 방지
@@ -1217,34 +1253,102 @@ class KSoolApp {
       lastGlobalTouchEnd = now;
     }, { passive: false });
 
-    // [관리자/개발자 툴바 제어] 일반 테스터/유저에게는 기본 숨김 (?admin URL 파라미터나 로고 5회 탭 시 토글)
+    // [비밀 설정 변경창 / 관리자 툴바 제어]
+    // ?admin URL 파라미터나 상단(로고/헤더/상단 탭) 5회 연속 탭 시 토글
     const urlParams = new URLSearchParams(window.location.search);
     const hasAdminParam = urlParams.has('admin') || urlParams.has('dev') || urlParams.has('debug');
-    if (hasAdminParam || localStorage.getItem('ksool_admin_mode') === 'true') {
+    const isStoredAdmin = localStorage.getItem('ksool_admin_mode') === 'true';
+    if (hasAdminParam || isStoredAdmin) {
       document.body.classList.add('admin-mode');
+      if (this.config) this.config.isAdminMode = true;
     }
 
-    const brandLogo = document.querySelector('.brand-title-row') || document.querySelector('.brand-badge');
-    let tapCount = 0;
-    let tapTimer = null;
-    if (brandLogo) {
-      brandLogo.style.cursor = 'pointer';
-      brandLogo.addEventListener('click', () => {
-        tapCount++;
-        clearTimeout(tapTimer);
-        tapTimer = setTimeout(() => { tapCount = 0; }, 1500);
-        if (tapCount >= 5) {
-          tapCount = 0;
-          const isNowAdmin = document.body.classList.toggle('admin-mode');
-          localStorage.setItem('ksool_admin_mode', isNowAdmin ? 'true' : 'false');
-          if (this.audio) this.audio.playSuccess();
-        }
-      });
-    }
+    let secretTapCount = 0;
+    let secretTapTimer = null;
+    let lastSecretTapTime = 0;
+
+    const toggleSecretSettingsToolbar = () => {
+      const isNowAdmin = document.body.classList.toggle('admin-mode');
+      localStorage.setItem('ksool_admin_mode', isNowAdmin ? 'true' : 'false');
+      if (this.config) {
+        this.config.isAdminMode = isNowAdmin;
+      }
+      if (this.audio) {
+        this.audio.playSuccess();
+      }
+      this.renderHeader();
+      this.suggestionBoardView?.render?.();
+      this.showToast(isNowAdmin ? '🛠️ 비밀 설정 변경창이 활성화되었습니다!' : '🔒 비밀 설정 변경창이 비활성화되었습니다.');
+    };
+
+    const handleSecretTap = (e) => {
+      // ⚙️ 일반 설정 버튼은 제외
+      if (e && e.target && e.target.closest('#open-settings-btn')) return;
+
+      const now = performance.now();
+      // 터치/마우스 중복 이벤트 방지 (80ms 디바운스)
+      if (now - lastSecretTapTime < 80) return;
+      lastSecretTapTime = now;
+
+      secretTapCount++;
+      clearTimeout(secretTapTimer);
+      // 5회 탭 시 3초 동안 타이머 유지
+      secretTapTimer = setTimeout(() => {
+        secretTapCount = 0;
+      }, 3000);
+
+      this.audio?.playTap?.();
+
+      if (secretTapCount >= 5) {
+        secretTapCount = 0;
+        clearTimeout(secretTapTimer);
+        toggleSecretSettingsToolbar();
+      }
+    };
+
+    // 1) 상단 로고 및 헤더 영역 5회 탭 (pointerdown으로 터치/클릭 즉시 감지)
+    const headerTargets = [
+      document.querySelector('.brand'),
+      document.querySelector('.header-top'),
+      document.querySelector('.brand-title-row'),
+      document.querySelector('.k-emblem')
+    ].filter(Boolean);
+
+    headerTargets.forEach(el => {
+      el.style.cursor = 'pointer';
+      el.addEventListener('pointerdown', handleSecretTap);
+    });
+
+    // 2) 혹시 탭 버튼('주조' 등 상단 탭)을 연속 5번 눌렀을 때도 비밀 설정창 토글 지원
+    let tabTapCount = 0;
+    let tabTapTimer = null;
+    let lastTabTarget = null;
+    let lastTabTimestamp = 0;
+
     // 탭 전환
     document.querySelectorAll('[data-tab-target]').forEach(btn => {
       btn.onclick = () => {
         const target = btn.getAttribute('data-tab-target');
+        const now = performance.now();
+        if (now - lastTabTimestamp > 80) {
+          lastTabTimestamp = now;
+          if (lastTabTarget === target) {
+            tabTapCount++;
+            clearTimeout(tabTapTimer);
+            tabTapTimer = setTimeout(() => { tabTapCount = 0; }, 3000);
+            if (tabTapCount >= 5) {
+              tabTapCount = 0;
+              clearTimeout(tabTapTimer);
+              toggleSecretSettingsToolbar();
+            }
+          } else {
+            lastTabTarget = target;
+            tabTapCount = 1;
+            clearTimeout(tabTapTimer);
+            tabTapTimer = setTimeout(() => { tabTapCount = 0; }, 3000);
+          }
+        }
+
         this.audio.playTap();
         this.switchTab(target);
       };
