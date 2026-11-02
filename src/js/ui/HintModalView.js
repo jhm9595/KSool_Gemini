@@ -14,7 +14,7 @@ class HintModalView {
 
     this.activeRecipeId = null;
     this.viewMode = 'CHOICE'; // 'CHOICE' | 'BASEBALL' | 'MINIGAME_SELECT' | 'MINIGAME_PLAY'
-    this.selectedMinigameType = 'BRICK_BREAKER'; // 'BRICK_BREAKER' | 'TERRITORY_QIX'
+    this.selectedMinigameType = 'BRICK_BREAKER'; // 'BRICK_BREAKER' | 'TERRITORY_QIX' | 'NONOGRAM'
     this.minigameStatus = 'PLAYING'; // 'PLAYING' | 'WIN' | 'LOSE'
     this.minigameInstance = null;
 
@@ -280,7 +280,7 @@ class HintModalView {
                   ${isImageUnlocked ? 'Clear' : '도전 ➔'}
                 </span>
               </div>
-              <div class="step-main-desc">벽돌깨기 · 땅따먹기 아케이드</div>
+              <div class="step-main-desc">벽돌깨기 · 땅따먹기 · 네모로직</div>
             </div>
           </div>
 
@@ -390,6 +390,22 @@ class HintModalView {
             </div>
             <button class="mg-play-btn">도전 ➔</button>
           </div>
+
+          <div class="minigame-select-card mg-card-nonogram" data-start-minigame="NONOGRAM">
+            <div class="mg-card-left">
+              <span class="mg-card-icon">🧩</span>
+            </div>
+            <div class="mg-card-body">
+              <div class="mg-card-title-row">
+                <span class="mg-card-title">3. 네모네모 로직</span>
+                <span class="mg-diff-pill easy">숫자 퍼즐로 그림 완성</span>
+              </div>
+              <div class="mg-card-desc">
+                가로·세로 숫자를 단서로 빈칸을 채워 술 그림을 완성하세요! 오답 페널티 없이 마음껏 추리하고, 100% 일치하면 즉시 해금!
+              </div>
+            </div>
+            <button class="mg-play-btn">도전 ➔</button>
+          </div>
         </div>
       `;
 
@@ -403,7 +419,8 @@ class HintModalView {
     if (this.viewMode === 'MINIGAME_PLAY') {
       const gameTitles = {
         BRICK_BREAKER: '🧱 벽돌깨기',
-        TERRITORY_QIX: '📐 땅따먹기'
+        TERRITORY_QIX: '📐 땅따먹기',
+        NONOGRAM: '🧩 네모네모 로직'
       };
 
       container.innerHTML = `
