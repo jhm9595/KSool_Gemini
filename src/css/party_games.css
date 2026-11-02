@@ -1826,45 +1826,187 @@
   color: #ffffff;
 }
 
+/* 손가락 터치 스팟 (기본: 손가락을 얹어도 바깥쪽으로 컬러 링과 헤일로가 선명하게 보이도록 확장) */
 .finger-touch-spot {
   position: absolute;
-  width: 76px;
-  height: 76px;
+  width: 90px;
+  height: 90px;
   transform: translate(-50%, -50%);
-  border: 3.5px solid #38bdf8;
+  border: 4px solid #38bdf8;
   border-radius: 50%;
   pointer-events: none;
+  box-shadow: 0 0 22px currentColor;
   animation: pulseTouch 0.8s infinite alternate;
+  transition: opacity 0.35s ease, transform 0.35s ease, filter 0.35s ease;
+  z-index: 8;
+}
+
+/* 터치 중 손가락 둘레를 감싸는 회전 점선 헤일로 (눌린 손가락 바깥으로 내 색상이 훤히 보임) */
+.finger-outer-halo {
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  right: -12px;
+  bottom: -12px;
+  border-radius: 50%;
+  border: 2px dashed currentColor;
+  opacity: 0.75;
+  animation: rotateHalo 6s linear infinite;
 }
 
 .finger-inner-ripple {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  opacity: 0.35;
+  opacity: 0.38;
 }
 
+.finger-inner-ripple.winner {
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.95) 0%, rgba(220, 38, 38, 0.45) 70%, transparent 100%);
+  opacity: 0.95;
+}
+
+/* 🎯 당첨자 스팟: 팝업 없이 터치 좌표 지점에 직접 화려한 충격파와 포인터 뱃지 집중 표시 */
 .finger-touch-spot.target-winner {
-  border-color: #ef4444 !important;
-  animation: shakeCap 0.3s infinite;
-  box-shadow: 0 0 35px #ef4444;
+  z-index: 20 !important;
+  width: 105px;
+  height: 105px;
+  border: 4.5px solid #ef4444 !important;
+  box-shadow: 0 0 35px #ef4444, inset 0 0 20px rgba(239, 68, 68, 0.7) !important;
+  animation: winnerShake 0.35s infinite alternate !important;
 }
 
-.target-skull {
+/* 바깥으로 뿜어져 나가는 거대 충격파 링 (손가락을 얹고 있어도 시야 전체로 퍼짐) */
+.target-shockwave {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  border: 3.5px solid #ef4444;
+  transform: translate(-50%, -50%) scale(1);
+  animation: shockwaveExpand 1.2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+  pointer-events: none;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+}
+
+.target-shockwave.delay {
+  animation-delay: 0.6s;
+}
+
+/* 정중앙 타깃 마크 */
+.target-center-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.2rem;
+  line-height: 1;
+  pointer-events: none;
+  animation: crosshairPop 0.4s ease-out;
+}
+
+/* 당첨 지목 포인터 뱃지 (손가락 접점 위/아래에서 확실하게 가리킴) */
+.target-pointer-badge {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  border: 2px solid #fde047;
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.9), 0 4px 14px rgba(0, 0, 0, 0.8);
+  border-radius: 30px;
+  padding: 6px 14px;
+  color: #ffffff;
+  font-size: 1.02rem;
+  font-weight: 900;
+  white-space: nowrap;
+  z-index: 25;
+  pointer-events: none;
+}
+
+.target-pointer-badge.above {
+  top: -60px;
+  animation: bounceAbove 0.55s infinite alternate ease-in-out;
+}
+
+.target-pointer-badge.below {
+  bottom: -60px;
+  animation: bounceBelow 0.55s infinite alternate ease-in-out;
+}
+
+.badge-arrow {
+  font-size: 1.2rem;
+  animation: pulseDot 0.6s infinite alternate;
+}
+
+.badge-text {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+  color: #ffffff;
+  letter-spacing: -0.2px;
+}
+
+/* 통과자 (비당첨자) 스팟: 반투명 그레이스케일 처리 */
+.finger-touch-spot.target-safe {
+  opacity: 0.3 !important;
+  filter: grayscale(85%);
+  transform: translate(-50%, -50%) scale(0.85);
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+.target-safe-badge {
   position: absolute;
   top: -26px;
   left: 50%;
   transform: translateX(-50%);
-  color: #ef4444;
-  font-size: 0.95rem;
-  font-weight: 900;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid #64748b;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 12px;
   white-space: nowrap;
-  text-shadow: 0 0 10px #ef4444;
 }
 
 @keyframes pulseTouch {
-  0% { transform: translate(-50%, -50%) scale(0.9); }
-  100% { transform: translate(-50%, -50%) scale(1.15); }
+  0% { transform: translate(-50%, -50%) scale(0.94); }
+  100% { transform: translate(-50%, -50%) scale(1.08); }
+}
+
+@keyframes rotateHalo {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes winnerShake {
+  0% { transform: translate(-50%, -50%) scale(1.08) rotate(-3deg); }
+  100% { transform: translate(-50%, -50%) scale(1.18) rotate(3deg); }
+}
+
+@keyframes shockwaveExpand {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.95; }
+  100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
+}
+
+@keyframes bounceAbove {
+  0% { transform: translateX(-50%) translateY(0); }
+  100% { transform: translateX(-50%) translateY(-7px); }
+}
+
+@keyframes bounceBelow {
+  0% { transform: translateX(-50%) translateY(0); }
+  100% { transform: translateX(-50%) translateY(7px); }
+}
+
+@keyframes crosshairPop {
+  0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+  70% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
 }
 
 /* ==========================================================================

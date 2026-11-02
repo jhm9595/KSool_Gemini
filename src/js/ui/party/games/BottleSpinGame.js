@@ -335,8 +335,15 @@ class BottleSpinGame {
       this._checkStartCountdown();
     };
 
+    // 롱프레스 시 모바일 브라우저 돋보기 및 컨텍스트 메뉴 차단
+    arena.addEventListener('contextmenu', (e) => {
+      if (e.cancelable) e.preventDefault();
+      return false;
+    }, { passive: false });
+
     arena.ontouchmove = (e) => {
       e.preventDefault();
+      if (this.chosenFingerId !== null) return;
       const rect = arena.getBoundingClientRect();
       for (let i = 0; i < e.changedTouches.length; i++) {
         const t = e.changedTouches[i];
@@ -352,6 +359,11 @@ class BottleSpinGame {
 
     const handleTouchEnd = (e) => {
       e.preventDefault();
+      // 지목이 이미 완료된 상태라면, 손가락을 떼도 화면의 당첨 위치 표시를 유지
+      if (this.chosenFingerId !== null) {
+        return;
+      }
+
       for (let i = 0; i < e.changedTouches.length; i++) {
         const t = e.changedTouches[i];
         this.touchPoints.delete(String(t.identifier));
@@ -459,13 +471,13 @@ class BottleSpinGame {
     this.isFingerChoosing = false;
 
     this.hub.sound.playExplosion();
-    this.hub.triggerPenalty({
-      title: '지목! 원샷!',
-      subtitle: '타깃 당첨',
-      accentColor: '#ef4444',
-      icon: '🎯'
-    });
+    if (typeof this.hub.vibratePenalty === 'function') {
+      this.hub.vibratePenalty();
+    } else {
+      this.hub.vibrateShort();
+    }
 
+    // 화면 전체를 덮는 팝업 대신 집었던 위치에 직접 대형 당첨 이펙트 표시!
     this._updateFingerUI();
   }
 
@@ -480,13 +492,41 @@ class BottleSpinGame {
     let spotsHtml = '';
     this.touchPoints.forEach((pt, id) => {
       const isWinner = this.chosenFingerId === id;
-      spotsHtml += `
-        <div class="finger-touch-spot ${isWinner ? 'target-winner' : ''}" 
-             style="left:${pt.x}px; top:${pt.y}px; border-color:${isWinner ? '#ef4444' : pt.color};">
-          <div class="finger-inner-ripple" style="background:${isWinner ? '#ef4444' : pt.color};"></div>
-          ${isWinner ? '<div class="target-skull">💥 당첨!</div>' : ''}
-        </div>
-      `;
+      const isSafe = this.chosenFingerId !== null && !isWinner;
+      const isNearTop = pt.y < 85;
+
+      if (isWinner) {
+        spotsHtml += `
+          <div class="finger-touch-spot target-winner" 
+               style="left:${pt.x}px; top:${pt.y}px;">
+            <div class="target-shockwave"></div>
+            <div class="target-shockwave delay"></div>
+            <div class="finger-inner-ripple winner"></div>
+            <div class="target-center-crosshair">🎯</div>
+            <div class="target-pointer-badge ${isNearTop ? 'below' : 'above'}">
+              <span class="badge-arrow">${isNearTop ? '👆' : '👇'}</span>
+              <span class="badge-text">당첨! 원샷!</span>
+            </div>
+          </div>
+        `;
+      } else if (isSafe) {
+        spotsHtml += `
+          <div class="finger-touch-spot target-safe" 
+               style="left:${pt.x}px; top:${pt.y}px; border-color:${pt.color};">
+            <div class="finger-inner-ripple" style="background:${pt.color};"></div>
+            <div class="target-safe-badge">✓ 통과</div>
+          </div>
+        `;
+      } else {
+        // 일반 상태 (대기 중 또는 카운트다운 중)
+        spotsHtml += `
+          <div class="finger-touch-spot" 
+               style="left:${pt.x}px; top:${pt.y}px; border-color:${pt.color};">
+            <div class="finger-outer-halo" style="border-color:${pt.color};"></div>
+            <div class="finger-inner-ripple" style="background:${pt.color};"></div>
+          </div>
+        `;
+      }
     });
     spotsLayer.innerHTML = spotsHtml;
 
@@ -495,8 +535,8 @@ class BottleSpinGame {
     const hasMouse = Array.from(this.touchPoints.values()).some(p => p.isMouse);
 
     if (this.chosenFingerId !== null) {
-      if (guideMain) guideMain.innerHTML = '🎉 <b>벌칙자 지목 완료!</b>';
-      if (guideSub) guideSub.textContent = '화면을 터치하면 다시 시작합니다.';
+      if (guideMain) guideMain.innerHTML = '🎯 <b style="color: #f87171;">벌칙자 지목 완료!</b>';
+      if (guideSub) guideSub.innerHTML = '🎯 <b>표시된 위치</b>의 플레이어가 벌칙주 당첨! <br><span style="color:#94a3b8; font-size:0.8rem;">(화면을 아무 곳이나 터치하면 다시 시작)</span>';
       if (pcControls) pcControls.style.display = 'none';
     } else if (this.isFingerChoosing) {
       if (guideMain) guideMain.innerHTML = `<span class="countdown-highlight">⏳ ${this.countdownSeconds}초 뒤 지목!</span>`;
