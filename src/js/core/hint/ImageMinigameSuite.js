@@ -457,6 +457,10 @@ class ImageMinigameSuite {
       this.qixState.lastTime = performance.now();
       this.qixState.player.moveAccum = 0;
       this.audio.playTap();
+    } else if (this.gameState === 'OVER') {
+      this.audio.playTap();
+      this._resetTerritoryQixState();
+      this.gameState = 'PLAYING';
     }
     const pl = this.qixState.player;
     const grid = this.qixState.grid;
@@ -486,6 +490,7 @@ class ImageMinigameSuite {
    * 탕탕특공대 스타일 가상 조이스틱 바인딩 (땅따먹기 전용)
    */
   bindJoystick(padEl, knobEl, zoneEl) {
+    this._joystickElements = { padEl, knobEl, zoneEl };
     if (this._cleanupJoystick) {
       this._cleanupJoystick();
       this._cleanupJoystick = null;
@@ -516,6 +521,7 @@ class ImageMinigameSuite {
       updateArrows(0, 0);
       this.stopQixPlayer();
     };
+    this._resetJoystickUI = resetKnob;
 
     const handlePointerMove = (clientX, clientY) => {
       if (!isDragging) return;
@@ -567,9 +573,13 @@ class ImageMinigameSuite {
       const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : centerX);
       const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : centerY);
 
-      // 게임이 READY면 즉시 시작
+      // 게임이 READY면 즉시 시작, OVER면 재시작 후 즉시 플레이
       if (this.gameState === 'READY') {
         this.setQixDirection(0, 0);
+      } else if (this.gameState === 'OVER') {
+        this.audio.playTap();
+        this._resetTerritoryQixState();
+        this.gameState = 'PLAYING';
       }
 
       handlePointerMove(clientX, clientY);
@@ -618,6 +628,7 @@ class ImageMinigameSuite {
       window.removeEventListener('touchend', onPointerUp);
       window.removeEventListener('touchcancel', onPointerUp);
       resetKnob();
+      this._resetJoystickUI = null;
     };
   }
 
@@ -1283,6 +1294,71 @@ class ImageMinigameSuite {
   // =========================================================================
   // 2. 📐 외곽 실루엣 땅따먹기 (술의 외곽선 네온 가이드 + 실루엣 100% 점령)
   // =========================================================================
+  _createQixEnemies(cols, rows) {
+    const configs = [
+      { isBoss: true, baseSpeed: 23.5 },
+      { isBoss: false, baseSpeed: 27.5 },
+      { isBoss: false, baseSpeed: 28.2 }
+    ];
+
+    // 플레이어 시작 지점과 떨어진 상/중단 구역 배치
+    const zones = [
+      { minC: cols * 0.12, maxC: cols * 0.38, minR: rows * 0.14, maxR: rows * 0.52 },
+      { minC: cols * 0.38, maxC: cols * 0.62, minR: rows * 0.14, maxR: rows * 0.48 },
+      { minC: cols * 0.62, maxC: cols * 0.88, minR: rows * 0.14, maxR: rows * 0.52 }
+    ];
+
+    zones.sort(() => Math.random() - 0.5);
+
+    return configs.map((cfg, idx) => {
+      const z = zones[idx];
+      const c = z.minC + Math.random() * (z.maxC - z.minC);
+      const r = z.minR + Math.random() * (z.maxR - z.minR);
+
+      let angle;
+      do {
+        angle = Math.random() * Math.PI * 2;
+      } while (Math.abs(Math.cos(angle)) < 0.35 || Math.abs(Math.sin(angle)) < 0.35);
+
+      return {
+        c,
+        r,
+        vc: Math.cos(angle) * cfg.baseSpeed,
+        vr: Math.sin(angle) * cfg.baseSpeed,
+        isBoss: cfg.isBoss,
+        baseSpeed: cfg.baseSpeed
+      };
+    });
+  }
+
+  _resetTerritoryQixState() {
+    if (!this.qixState) return;
+    const st = this.qixState;
+    const { cols, rows } = st;
+
+    st.grid = Array.from({ length: rows }, (_, r) =>
+      Array.from({ length: cols }, (__, c) =>
+        r === 0 || r === rows - 1 || c === 0 || c === cols - 1 ? 1 : 0
+      )
+    );
+    st.lives = 3;
+    st.elapsed = 0;
+    st.lastTime = performance.now();
+    st.capturedSilhouetteCount = 0;
+    st.silhouetteRevealedPct = 0;
+    st.player = {
+      c: Math.floor(cols / 2),
+      r: rows - 1,
+      dc: 0,
+      dr: 0,
+      moveAccum: 0
+    };
+    st.enemies = this._createQixEnemies(cols, rows);
+    this.particles = [];
+    this.shakeTicks = 0;
+    this._resetJoystickUI?.();
+  }
+
   _initTerritoryQix() {
     const cols = 52;
     const rows = 52;
@@ -1468,42 +1544,7 @@ class ImageMinigameSuite {
         dr: 0,
         moveAccum: 0
       },
-      enemies: (() => {
-        const configs = [
-          { isBoss: true, baseSpeed: 23.5 },
-          { isBoss: false, baseSpeed: 27.5 },
-          { isBoss: false, baseSpeed: 28.2 }
-        ];
-
-        // 플레이어 시작 지점과 떨어진 상/중단 구역 배치
-        const zones = [
-          { minC: cols * 0.12, maxC: cols * 0.38, minR: rows * 0.14, maxR: rows * 0.52 },
-          { minC: cols * 0.38, maxC: cols * 0.62, minR: rows * 0.14, maxR: rows * 0.48 },
-          { minC: cols * 0.62, maxC: cols * 0.88, minR: rows * 0.14, maxR: rows * 0.52 }
-        ];
-
-        zones.sort(() => Math.random() - 0.5);
-
-        return configs.map((cfg, idx) => {
-          const z = zones[idx];
-          const c = z.minC + Math.random() * (z.maxC - z.minC);
-          const r = z.minR + Math.random() * (z.maxR - z.minR);
-
-          let angle;
-          do {
-            angle = Math.random() * Math.PI * 2;
-          } while (Math.abs(Math.cos(angle)) < 0.35 || Math.abs(Math.sin(angle)) < 0.35);
-
-          return {
-            c,
-            r,
-            vc: Math.cos(angle) * cfg.baseSpeed,
-            vr: Math.sin(angle) * cfg.baseSpeed,
-            isBoss: cfg.isBoss,
-            baseSpeed: cfg.baseSpeed
-          };
-        });
-      })(),
+      enemies: this._createQixEnemies(cols, rows),
       capturedPct: 0
     };
 
@@ -1535,7 +1576,7 @@ class ImageMinigameSuite {
         return true;
       } else if (this.gameState === 'OVER') {
         this.audio.playTap();
-        this.start('TERRITORY_QIX');
+        this._resetTerritoryQixState();
         this.gameState = 'PLAYING';
         this.qixState.lastTime = performance.now();
         this.qixState.player.moveAccum = 0;
@@ -1597,6 +1638,11 @@ class ImageMinigameSuite {
 
     const onKeyDown = (e) => {
       if (handleWinClose()) return;
+      if (this.gameState === 'OVER') {
+        this.audio.playTap();
+        this._resetTerritoryQixState();
+        this.gameState = 'PLAYING';
+      }
       handleQixAction();
       let reqDc = 0, reqDr = 0;
       if (e.key === 'ArrowLeft' || e.key === 'a') reqDc = -1;
@@ -1624,6 +1670,13 @@ class ImageMinigameSuite {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
+
+    const padEl = this._joystickElements?.padEl || document.getElementById('qix-joystick-pad');
+    const knobEl = this._joystickElements?.knobEl || document.getElementById('qix-joystick-knob');
+    const zoneEl = this._joystickElements?.zoneEl || document.getElementById('qix-joystick-zone');
+    if (padEl && knobEl && document.body.contains(padEl)) {
+      this.bindJoystick(padEl, knobEl, zoneEl);
+    }
   }
 
   _clearQixTrail() {
@@ -1858,9 +1911,13 @@ class ImageMinigameSuite {
 
     if (st.lives <= 0) {
       this.gameState = 'OVER';
+      this.stopQixPlayer();
+      this._resetJoystickUI?.();
       if (this.onLose) this.onLose();
     } else {
       this.gameState = 'READY';
+      this.stopQixPlayer();
+      this._resetJoystickUI?.();
     }
   }
 
