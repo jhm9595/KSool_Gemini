@@ -250,11 +250,11 @@ class IamGroundGame {
     } else {
       this.currentMeasureBeat = (this.currentMeasureBeat + 1) % 4;
       if (this.currentMeasureBeat === 0) {
-        // 이전 플레이어 결과 검증 (유저는 비트 3회 + 이름 1회 모두 성공해야 함)
+        // 이전 플레이어 결과 검증 (유저는 4번째 박자에 자기 이름을 누르면 성공)
         const prevPlayer = this.players[this.selfIntroPlayerIdx];
         if (prevPlayer && prevPlayer.isUser) {
-          if (this.userIntroRhythmHits.size < 3 || !this.userIntroHit) {
-            this._triggerUserFail(`${prevPlayer.name}님이 박자에 맞춰 비트 버튼과 이름을 다 누르지 못했습니다!`);
+          if (!this.userIntroHit) {
+            this._triggerUserFail(`${prevPlayer.name}님이 4번째 박자에 자기 이름을 누르지 못했습니다!`);
             return;
           }
         }
@@ -578,7 +578,7 @@ class IamGroundGame {
         } else if (!player.isUser) {
           this._triggerUserFail('자기소개에서는 자신의 이름을 눌러야 합니다!');
         } else if (this.currentMeasureBeat !== 3) {
-          this._triggerUserFail('이름을 부르지 않는 타이밍에는 동그란 비트 버튼을 눌러야 합니다!');
+          this._triggerUserFail('자기소개에서는 4번째 박자(쿵-짝-쿵-내이름!)에 이름을 눌러야 합니다!');
         }
       }
       return;
