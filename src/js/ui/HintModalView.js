@@ -358,10 +358,9 @@ class HintModalView {
             <div class="mg-card-body">
               <div class="mg-card-title-row">
                 <span class="mg-card-title">1. 벽돌깨기</span>
-                <span class="mg-diff-pill hard">블록 격파</span>
               </div>
               <div class="mg-card-desc">
-                도트 블록을 모두 깨뜨려 그림을 해금하세요.
+                도트 블록을 깨뜨려 그림을 해금하세요.
               </div>
             </div>
             <button class="mg-play-btn" type="button">도전 ➔</button>
@@ -375,10 +374,9 @@ class HintModalView {
             <div class="mg-card-body">
               <div class="mg-card-title-row">
                 <span class="mg-card-title">2. 땅따먹기</span>
-                <span class="mg-diff-pill vhard">영토 점령</span>
               </div>
               <div class="mg-card-desc">
-                선을 그어 영토를 75% 이상 점령하세요.
+                선을 그어 실루엣을 해금하세요.
               </div>
             </div>
             <button class="mg-play-btn" type="button">도전 ➔</button>
@@ -392,10 +390,9 @@ class HintModalView {
             <div class="mg-card-body">
               <div class="mg-card-title-row">
                 <span class="mg-card-title">3. 네모네모 로직</span>
-                <span class="mg-diff-pill easy">숫자 퍼즐</span>
               </div>
               <div class="mg-card-desc">
-                가로·세로 숫자에 맞춰 칸을 채워보세요.
+                숫자에 맞춰 칸을 채워보세요.
               </div>
             </div>
             <button class="mg-play-btn" type="button">도전 ➔</button>
@@ -446,9 +443,9 @@ class HintModalView {
         consoleControlsHtml = `
           <div class="nonogram-console-box">
             <div class="nonogram-buttons-row">
-              <button class="arcade-action-btn nono-action-btn active" id="nono-mode-fill">✏️ 칠하기</button>
-              <button class="arcade-action-btn nono-action-btn" id="nono-mode-mark">❌ X</button>
-              <button class="arcade-action-btn nono-action-btn reset" id="nono-reset-btn">🔄 리셋</button>
+              <button class="arcade-action-btn nono-action-btn active" id="nono-mode-fill">⬛ 채우기</button>
+              <button class="arcade-action-btn nono-action-btn" id="nono-mode-mark">❌ 표시</button>
+              <button class="arcade-action-btn nono-action-btn reset" id="nono-reset-btn">🔄 재시작</button>
             </div>
           </div>
         `;
@@ -1187,7 +1184,7 @@ class HintModalView {
       btn.addEventListener('pointerleave', onDirRelease, { passive: true });
     });
 
-    // 네모네모 로직 버튼군
+    // 네모네모 로직 버튼군 (외곽 HTML 버튼으로 직접 툴 모드 제어 & 리셋)
     const fillBtn = container.querySelector('#nono-mode-fill');
     const markBtn = container.querySelector('#nono-mode-mark');
     const nonoResetBtn = container.querySelector('#nono-reset-btn');
@@ -1196,24 +1193,19 @@ class HintModalView {
         this.audio?.playTap?.();
         fillBtn.classList.add('active');
         markBtn.classList.remove('active');
-        if (this.minigameInstance?.nonoState) {
-          this.minigameInstance.nonoState.mode = 'FILL';
-        }
+        this.minigameInstance?.setNonogramTool?.('FILL');
       };
       markBtn.onclick = () => {
         this.audio?.playTap?.();
         markBtn.classList.add('active');
         fillBtn.classList.remove('active');
-        if (this.minigameInstance?.nonoState) {
-          this.minigameInstance.nonoState.mode = 'MARK';
-        }
+        this.minigameInstance?.setNonogramTool?.('X');
       };
     }
     if (nonoResetBtn) {
       nonoResetBtn.onclick = () => {
         this.audio?.playTap?.();
-        const recipe = this.recipeBook.getRecipe(this.activeRecipeId);
-        if (recipe) this._startCanvasMinigame(recipe);
+        this.minigameInstance?.resetNonogram?.();
       };
     }
 
