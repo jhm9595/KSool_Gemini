@@ -1,6 +1,7 @@
+/* 기본 모바일 및 태블릿 세로(Portrait) 모드: 화면 전체를 100% 모바일 형태로 가득 채움 (바깥 여백 없음) */
 #app-container {
   width: 100%;
-  max-width: 480px;
+  max-width: 100%;
   height: 100%;
   height: 100dvh;
   max-height: 100dvh;
@@ -9,17 +10,31 @@
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
-  border: 1px solid var(--border);
+  box-shadow: none;
+  border: none;
+  margin: 0;
   overscroll-behavior: none;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
 }
 
-/* 큰 화면(PC, 태블릿, 폴더블)에서도 스마트폰처럼 세로 480px 프레임 유지 */
-@media (min-width: 500px) {
+/* PC 가로(Landscape) 와이드 모니터 화면에서만 가운데 스마트폰 프레임으로 센터링 (태블릿/패드 세로모드는 100% 모바일 전체화면) */
+@media (orientation: landscape) and (min-width: 900px), (min-aspect-ratio: 1.15/1) and (min-width: 600px) {
+  body {
+    background: #0b0f17;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   #app-container {
+    width: 100%;
+    max-width: 480px;
     height: 94vh;
     max-height: 920px;
     border-radius: 24px;
+    border: 1px solid var(--border);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
   }
 }
 

@@ -581,12 +581,9 @@ class CapFlickGame {
     const stage = document.querySelector('.capflick-minimal-box') || document.getElementById('cap-flick-arena');
     if (!stage) return;
 
-    // 텍스트 선택 및 모바일 롱프레스 '복사하기 / 오려오기' 시스템 팝업 원천 차단
-    if (this._preventCallouts && this._currentStage) {
-      this._currentStage.removeEventListener('contextmenu', this._preventCallouts);
-      this._currentStage.removeEventListener('selectstart', this._preventCallouts);
-    }
+    this._cleanupEvents();
 
+    // 텍스트 선택 및 모바일 롱프레스 '복사하기 / 오려오기' 시스템 팝업 원천 차단
     const preventCallouts = (e) => {
       if (e.cancelable) e.preventDefault();
       return false;
@@ -596,11 +593,22 @@ class CapFlickGame {
     this._preventCallouts = preventCallouts;
     this._currentStage = stage;
 
-    // 포인터 다운 (누르기 시작: 파워 차징 시작 또는 ? 버튼 처리)
+    let touchInProgress = false;
+
+    // 포인터/터치 다운 (누르기 시작: 파워 차징 시작 또는 ? 버튼 처리)
     const onStart = (e) => {
+      // 터치 이벤트 발생 시 중복 실행 방지
+      if (e.type === 'touchstart') {
+        touchInProgress = true;
+      } else if (e.type === 'pointerdown' && touchInProgress) {
+        if (e.pointerType === 'touch') return;
+      }
+
+      // 태블릿/모바일 더블탭 줌 및 브라우저 제스처 원천 방지
+      if (e.cancelable) e.preventDefault();
+
       // 1. 병뚜껑 가운데 ? 버튼 클릭 시 Up & Down 화면으로 즉시 전환
       if (e.target && e.target.closest('#cap-question-btn')) {
-        if (e.cancelable) e.preventDefault();
         e.stopPropagation();
         this._goToUpDown();
         return;
@@ -609,7 +617,6 @@ class CapFlickGame {
       // 2. ? 버튼이 떠 있는 상태에서 화면의 다른 곳을 터치하면: ? 사라지고 꼬다리 치기 계속 (리셋)
       if (this.showQuestionMark) {
         if (performance.now() - this.breakTimestamp < 350) return;
-        if (e.cancelable) e.preventDefault();
         e.stopPropagation();
         this.hub.sound.playTap();
         this.reset();
@@ -617,29 +624,35 @@ class CapFlickGame {
       }
 
       // 3. 정상 상태: 파워 차징 시작
-      if (e.cancelable) e.preventDefault();
       this._startCharging();
     };
 
-    // 포인터 업 (손 떼기: 파워 결정 및 타격)
+    // 포인터/터치 업 (손 떼기: 파워 결정 및 타격)
     const onEnd = (e) => {
-      if (this.showQuestionMark) return;
       if (e.cancelable) e.preventDefault();
+
+      if (e.type === 'touchend' || e.type === 'touchcancel') {
+        setTimeout(() => { touchInProgress = false; }, 80);
+      } else if (e.type === 'pointerup' || e.type === 'pointercancel') {
+        if (e.pointerType === 'touch' && touchInProgress) return;
+      }
+
+      if (this.showQuestionMark) return;
       this._releaseAndFlick();
     };
 
-    // 모바일 터치 + PC 마우스 통합 지원
-    if (window.PointerEvent) {
-      stage.onpointerdown = onStart;
-      window.onpointerup = onEnd;
-      window.onpointercancel = onEnd;
-    } else {
-      stage.ontouchstart = onStart;
-      window.ontouchend = onEnd;
-      window.ontouchcancel = onEnd;
-      stage.onmousedown = onStart;
-      window.onmouseup = onEnd;
-    }
+    // 아이패드/태블릿 사파리 더블탭 확대 방지를 위해 touchstart/touchend에 passive: false + preventDefault 필수 등록
+    stage.addEventListener('touchstart', onStart, { passive: false });
+    window.addEventListener('touchend', onEnd, { passive: false });
+    window.addEventListener('touchcancel', onEnd, { passive: false });
+
+    // PC 마우스 및 스타일러스 펜 대응용 PointerEvents
+    stage.addEventListener('pointerdown', onStart, { passive: false });
+    window.addEventListener('pointerup', onEnd, { passive: false });
+    window.addEventListener('pointercancel', onEnd, { passive: false });
+
+    this._onStartHandler = onStart;
+    this._onEndHandler = onEnd;
 
     // SVG ? 버튼에 직접 클릭 이벤트도 보강
     const qBtn = document.getElementById('cap-question-btn');
@@ -649,9 +662,40 @@ class CapFlickGame {
         e.stopPropagation();
         this._goToUpDown();
       };
-      qBtn.onclick = handleQ;
-      qBtn.ontouchend = handleQ;
+      qBtn.addEventListener('click', handleQ);
+      qBtn.addEventListener('touchend', handleQ, { passive: false });
+      this._qBtn = qBtn;
+      this._handleQ = handleQ;
     }
+  }
+
+  _cleanupEvents() {
+    if (this._currentStage) {
+      if (this._preventCallouts) {
+        this._currentStage.removeEventListener('contextmenu', this._preventCallouts);
+        this._currentStage.removeEventListener('selectstart', this._preventCallouts);
+      }
+      if (this._onStartHandler) {
+        this._currentStage.removeEventListener('touchstart', this._onStartHandler);
+        this._currentStage.removeEventListener('pointerdown', this._onStartHandler);
+      }
+    }
+    if (this._onEndHandler) {
+      window.removeEventListener('touchend', this._onEndHandler);
+      window.removeEventListener('touchcancel', this._onEndHandler);
+      window.removeEventListener('pointerup', this._onEndHandler);
+      window.removeEventListener('pointercancel', this._onEndHandler);
+    }
+    if (this._qBtn && this._handleQ) {
+      this._qBtn.removeEventListener('click', this._handleQ);
+      this._qBtn.removeEventListener('touchend', this._handleQ);
+      this._qBtn = null;
+      this._handleQ = null;
+    }
+    this._preventCallouts = null;
+    this._currentStage = null;
+    this._onStartHandler = null;
+    this._onEndHandler = null;
   }
 
   destroy() {
@@ -665,26 +709,7 @@ class CapFlickGame {
     }
     this.isCharging = false;
     this.showQuestionMark = false;
-    if (this._currentStage && this._preventCallouts) {
-      this._currentStage.removeEventListener('contextmenu', this._preventCallouts);
-      this._currentStage.removeEventListener('selectstart', this._preventCallouts);
-      this._preventCallouts = null;
-      this._currentStage = null;
-    }
-    const stage = document.querySelector('.capflick-minimal-box') || document.getElementById('cap-flick-arena');
-    if (window.PointerEvent) {
-      if (stage) stage.onpointerdown = null;
-      window.onpointerup = null;
-      window.onpointercancel = null;
-    } else {
-      if (stage) {
-        stage.ontouchstart = null;
-        stage.onmousedown = null;
-      }
-      window.ontouchend = null;
-      window.ontouchcancel = null;
-      window.onmouseup = null;
-    }
+    this._cleanupEvents();
   }
 }
 
