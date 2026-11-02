@@ -101,6 +101,14 @@ class PartyGameHubView {
         badge: '기억력 릴레이',
         accentColor: '#10b981',
         desc: '이전 재료를 순서대로 기억하고 새 재료를 추가하는 게임'
+      },
+      {
+        key: 'iamground',
+        emoji: '🎙️',
+        title: '아이엠그라운드',
+        badge: '박자 리듬 릴레이',
+        accentColor: '#ec4899',
+        desc: '박자에 맞춰 자기소개와 상대 지목을 이어가는 리듬 술게임'
       }
     ];
 
@@ -114,7 +122,8 @@ class PartyGameHubView {
       penaltycocktail: new window.KSool.PenaltyCocktailGame(this),
       fridge: new window.KSool.FridgePartyGame(this),
       baskin: new window.KSool.Baskin31Game(this),
-      market: new window.KSool.MarketMemoryGame(this)
+      market: new window.KSool.MarketMemoryGame(this),
+      iamground: new window.KSool.IamGroundGame(this)
     };
 
     this._setupWakeLockListener();

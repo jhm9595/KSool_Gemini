@@ -322,6 +322,86 @@ class PartySoundSynth {
     sirenOsc.start(now + 0.1);
     sirenOsc.stop(now + 0.65);
   }
+
+  playRhythmThud() {
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
+    this._initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(110, now);
+    osc.frequency.exponentialRampToValueAtTime(38, now + 0.12);
+    gain.gain.setValueAtTime(0.45 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + 0.14);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
+
+  playRhythmClap() {
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
+    this._initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    [0, 0.015].forEach((offset) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1200, now + offset);
+      osc.frequency.exponentialRampToValueAtTime(450, now + offset + 0.08);
+      gain.gain.setValueAtTime(0.32 * effVol, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + offset + 0.09);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.1);
+    });
+  }
+
+  playRhythmHit() {
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
+    this._initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(784, now); // G5
+    osc.frequency.exponentialRampToValueAtTime(1046.5, now + 0.1); // C6
+    gain.gain.setValueAtTime(0.35 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + 0.15);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.16);
+  }
+
+  playRhythmMiss() {
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
+    this._initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    [165, 178].forEach((freq) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.linearRampToValueAtTime(freq * 0.7, now + 0.22);
+      gain.gain.setValueAtTime(0.35 * effVol, now);
+      gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + 0.24);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    });
+  }
 }
 
 window.KSool.PartySoundSynth = PartySoundSynth;
