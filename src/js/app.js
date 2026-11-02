@@ -47,6 +47,26 @@ class KSoolApp {
       }
     });
 
+    this.recipeInspectorModalView = new window.KSool.RecipeInspectorModalView({
+      recipeBook: this.recipeBook,
+      inventory: this.inventory,
+      suggestionService: this.suggestionService,
+      brandResolver: this.brandResolver,
+      audio: this.audio,
+      onRecipePromoted: (newRecipe) => {
+        this.renderHeader();
+        this.renderCollectionView();
+        this.suggestionBoardView.render();
+        this.fridgeRecommenderView.render();
+        this.showCraftResultModal({
+          isSuccess: true,
+          recipe: newRecipe,
+          isNewDiscovery: true,
+          newlyUnlockedIngredient: null
+        });
+      }
+    });
+
     this.suggestionBoardView = new window.KSool.SuggestionBoardView({
       config: this.config,
       recipeBook: this.recipeBook,
@@ -54,6 +74,9 @@ class KSoolApp {
       suggestionService: this.suggestionService,
       brandResolver: this.brandResolver,
       audio: this.audio,
+      onOpenInspector: (suggestion) => {
+        this.recipeInspectorModalView.open(suggestion);
+      },
       onRecipePromoted: (newRecipe) => {
         this.renderHeader();
         this.renderCollectionView();

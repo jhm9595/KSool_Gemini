@@ -2008,6 +2008,46 @@ const SPRITE_DATA_HD = {
     },
 
     /**
+     * Get raw 32x32 HD sprite definition { key, name, innerSvg } for an item or key
+     */
+    getHdSprite: function(item) {
+      const key = this.resolveKey(item);
+      return (key && SPRITE_DATA_HD[key]) ? SPRITE_DATA_HD[key] : null;
+    },
+
+    /**
+     * Dynamically register or update a custom sprite at runtime (Dot & HD)
+     * @param {object} config - { key, name, dotInnerSvg, hdInnerSvg, aliases }
+     */
+    registerCustomSprite: function(config) {
+      if (!config || !config.key) return false;
+      const key = String(config.key).trim();
+      const name = config.name || key;
+      if (config.dotInnerSvg) {
+        SPRITE_DATA_DOT[key] = {
+          key: key,
+          name: name,
+          innerSvg: config.dotInnerSvg
+        };
+      }
+      if (config.hdInnerSvg) {
+        SPRITE_DATA_HD[key] = {
+          key: key,
+          name: name,
+          innerSvg: config.hdInnerSvg
+        };
+      }
+      if (Array.isArray(config.aliases)) {
+        config.aliases.forEach(a => {
+          if (a !== undefined && a !== null) ALIAS_MAP[String(a)] = key;
+        });
+      }
+      ALIAS_MAP[key] = key;
+      ALIAS_MAP[name] = key;
+      return true;
+    },
+
+    /**
      * Get all registered keys
      */
     getAllKeys: function() {

@@ -1,12 +1,13 @@
 window.KSool = window.KSool || {};
 
 /**
- * 6) 초간단 조합 추천 & 관리자 '딸깍' 뷰 (SuggestionBoardView)
+ * 6) 초간단 조합 추천 & 관리자 '딸깍' 및 '🔬스마트 분석' 뷰 (SuggestionBoardView)
  * - 이름/설명 없이 오직 [재료 아이콘 + 비율] 및 👍 / 👎 버튼만 표시
- * - 관리자 모드가 켜져 있으면 우측에 [⚡적용] 버튼이 나타나 누르는 즉시 정식 도감에 반영되고 목록에서 사라짐
+ * - 관리자 모드가 켜져 있으면 우측에 [🔬분석] 및 [⚡적용] 버튼 노출
+ * - [🔬분석] 클릭 시: 선행 의존성, 최소 안전 번호(minSafeNumber), 3종 미니게임 실루엣 실시간 검증 모달 오픈
  */
 class SuggestionBoardView {
-  constructor({ config, recipeBook, craftingPot, suggestionService, brandResolver, audio, onRecipePromoted }) {
+  constructor({ config, recipeBook, craftingPot, suggestionService, brandResolver, audio, onRecipePromoted, onOpenInspector }) {
     this.config = config;
     this.recipeBook = recipeBook;
     this.craftingPot = craftingPot;
@@ -14,6 +15,7 @@ class SuggestionBoardView {
     this.brandResolver = brandResolver;
     this.audio = audio;
     this.onRecipePromoted = onRecipePromoted;
+    this.onOpenInspector = onOpenInspector;
   }
 
   render() {
@@ -65,7 +67,10 @@ class SuggestionBoardView {
 
           const myVote = this.suggestionService.userVotes[sug.suggestion_key];
           const adminBtnHtml = this.config.isAdminMode
-            ? `<button class="admin-apply-btn" data-admin-apply="${sug.suggestion_key}" title="정식 도감에 즉시 반영하고 목록에서 제거">⚡적용</button>`
+            ? `
+              <button class="admin-inspect-btn" data-admin-inspect="${sug.suggestion_key}" title="의존성/난이도 분석 및 3종 미니게임 실루엣 실시간 검증">🔬분석</button>
+              <button class="admin-apply-btn" data-admin-apply="${sug.suggestion_key}" title="정식 도감에 즉시 반영하고 목록에서 제거">⚡적용</button>
+            `
             : '';
 
           return `
@@ -151,6 +156,19 @@ class SuggestionBoardView {
       };
     });
 
+    // 🔬 관리자 스마트 분석 & 검증 모달 열기
+    container.querySelectorAll('[data-admin-inspect]').forEach(btn => {
+      btn.onclick = () => {
+        const key = btn.getAttribute('data-admin-inspect');
+        const sug = this.suggestionService.suggestions.find(s => s.suggestion_key === key);
+        if (sug && this.onOpenInspector) {
+          this.audio.playTap();
+          this.onOpenInspector(sug);
+        }
+      };
+    });
+
+    // ⚡ 관리자 초간단 딸깍 즉시 편입
     container.querySelectorAll('[data-admin-apply]').forEach(btn => {
       btn.onclick = () => {
         const key = btn.getAttribute('data-admin-apply');
