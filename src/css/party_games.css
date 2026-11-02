@@ -3393,15 +3393,15 @@
 }
 
 .market-chain-viewport {
-  height: 148px;
-  max-height: 155px;
+  height: 156px;
+  max-height: 156px;
   overflow-y: auto;
   overflow-x: hidden;
   scroll-behavior: smooth;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 6px 4px;
+  gap: 16px;
+  padding: 8px 6px;
   box-sizing: border-box;
 }
 
@@ -3418,46 +3418,57 @@
 .market-snake-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 4px;
   position: relative;
   width: 100%;
   flex-shrink: 0;
 }
 
-.market-snake-row.ltr {
+.market-snake-row.ltr,
+.market-snake-row.rtl {
   flex-direction: row;
 }
 
-.market-snake-row.rtl {
-  flex-direction: row-reverse;
-}
-
 .market-snake-arrow {
-  font-size: 1.25rem;
+  width: 14px;
+  flex: 0 0 14px;
+  text-align: center;
+  font-size: 1.15rem;
   font-weight: 900;
   color: #64748b;
-  margin: 0 2px;
+  margin: 0;
   user-select: none;
+}
+
+.market-snake-arrow.hidden {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .market-corner-turn {
   position: absolute;
-  bottom: -14px;
-  font-size: 1rem;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.95rem;
   font-weight: 900;
   color: #38bdf8;
-  user-select: none;
-}
-
-.market-corner-turn.turn-right {
-  right: 22px;
-}
-
-.market-corner-turn.turn-left {
-  left: 22px;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 5;
+  text-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
 }
 
 /* 주조실 재료 슬롯 네모칸 스타일 (.market-pot-slot) */
+.market-pot-slot.ghost {
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  border: none;
+  background: transparent;
+}
+
 .market-pot-slot {
   width: 58px;
   height: 58px;
