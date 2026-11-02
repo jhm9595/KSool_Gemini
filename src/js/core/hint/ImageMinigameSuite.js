@@ -538,6 +538,21 @@ class ImageMinigameSuite {
     }
   }
 
+  setNonogramTool(tool) {
+    if (this.gameType === 'NONOGRAM' && this.nonogramState) {
+      this.nonogramState.toolMode = (tool === 'X' || tool === 'MARK') ? 'X' : 'FILL';
+    }
+  }
+
+  resetNonogram() {
+    if (this.gameType === 'NONOGRAM' && this.nonogramState) {
+      for (let r = 0; r < this.nonogramState.rows; r++) {
+        this.nonogramState.board[r].fill(0);
+      }
+      this.audio?.playTap?.();
+    }
+  }
+
   fireLaser() {
     if (this.gameType === 'BRICK_BREAKER' && this.bbState) {
       const st = this.bbState;
@@ -2387,13 +2402,9 @@ class ImageMinigameSuite {
   // =========================================================================
   _initNonogram() {
     const dotInfo = this._parseDotSprite(this.recipe);
-    const minR = dotInfo.minR;
-    const maxR = dotInfo.maxR;
-    const minC = dotInfo.minC;
-    const maxC = dotInfo.maxC;
-
-    const rows = maxR - minR + 1;
-    const cols = maxC - minC + 1;
+    // 모든 재료 16x16 동일한 그리드로 통일
+    const rows = 16;
+    const cols = 16;
 
     const target = Array.from({ length: rows }, () => Array(cols).fill(false));
     const targetColor = Array.from({ length: rows }, () => Array(cols).fill(null));
@@ -2401,7 +2412,7 @@ class ImageMinigameSuite {
 
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        const color = dotInfo.grid[minR + r][minC + c];
+        const color = dotInfo.grid[r][c];
         if (color) {
           target[r][c] = true;
           targetColor[r][c] = color;
@@ -2449,33 +2460,24 @@ class ImageMinigameSuite {
     // Board State: 0: Empty, 1: Filled, 2: X Mark
     const board = Array.from({ length: rows }, () => Array(cols).fill(0));
 
-    // Dynamic Sizing & Positioning
+    // 고정 16x16 정밀 레이아웃 & 비율 계산
+    const cellSize = 19;
+    const gridW = cols * cellSize; // 304px
+    const gridH = rows * cellSize; // 304px
+
     const maxRowNums = Math.max(1, ...rowClues.map(c => c.length));
     const maxColNums = Math.max(1, ...colClues.map(c => c.length));
 
-    const leftClueW = Math.max(50, Math.min(85, maxRowNums * 15 + 12));
-    const topClueH = Math.max(45, Math.min(75, maxColNums * 14 + 10));
-
-    const availW = this.width - leftClueW - 24;
-    const availH = this.height - topClueH - 120;
-
-    let cellSize = Math.min(Math.floor(availW / cols), Math.floor(availH / rows), 24);
-    cellSize = Math.max(cellSize, 16);
-
-    const gridW = cols * cellSize;
-    const gridH = rows * cellSize;
+    const leftClueW = Math.max(56, Math.min(76, maxRowNums * 13 + 12));
+    const topClueH = Math.max(52, Math.min(76, maxColNums * 13 + 10));
 
     const totalPuzzleW = leftClueW + gridW;
     const leftX = Math.floor((this.width - totalPuzzleW) / 2);
     const gridX = leftX + leftClueW;
-    const clueTopY = 48;
-    const gridY = clueTopY + topClueH;
 
-    // Bottom control buttons
-    const btnY = gridY + gridH + 16;
-    const btnH = 34;
-    const totalBtnW = 275;
-    const btnStartX = Math.floor((this.width - totalBtnW) / 2);
+    const totalPuzzleH = topClueH + gridH;
+    const clueTopY = Math.max(46, Math.floor((this.height - totalPuzzleH) / 2) - 8);
+    const gridY = clueTopY + topClueH;
 
     this.nonogramState = {
       rows,
@@ -2497,12 +2499,7 @@ class ImageMinigameSuite {
       gridY,
       clueTopY,
       gridW,
-      gridH,
-      buttons: {
-        fill: { x: btnStartX, y: btnY, w: 90, h: btnH },
-        cross: { x: btnStartX + 98, y: btnY, w: 90, h: btnH },
-        reset: { x: btnStartX + 196, y: btnY, w: 75, h: btnH }
-      }
+      gridH
     };
 
     this.gameState = 'PLAYING';
@@ -2556,27 +2553,6 @@ class ImageMinigameSuite {
       const pos = getCanvasPos(clientX, clientY);
       const st = this.nonogramState;
       if (!st) return;
-
-      // Check bottom buttons
-      const bFill = st.buttons.fill;
-      const bCross = st.buttons.cross;
-      const bReset = st.buttons.reset;
-
-      if (pos.x >= bFill.x && pos.x <= bFill.x + bFill.w && pos.y >= bFill.y && pos.y <= bFill.y + bFill.h) {
-        st.toolMode = 'FILL';
-        this.audio?.playTap?.();
-        return;
-      }
-      if (pos.x >= bCross.x && pos.x <= bCross.x + bCross.w && pos.y >= bCross.y && pos.y <= bCross.y + bCross.h) {
-        st.toolMode = 'X';
-        this.audio?.playTap?.();
-        return;
-      }
-      if (pos.x >= bReset.x && pos.x <= bReset.x + bReset.w && pos.y >= bReset.y && pos.y <= bReset.y + bReset.h) {
-        for (let r = 0; r < st.rows; r++) st.board[r].fill(0);
-        this.audio?.playTap?.();
-        return;
-      }
 
       // Check grid
       const col = Math.floor((pos.x - st.gridX) / st.cellSize);
@@ -2647,32 +2623,33 @@ class ImageMinigameSuite {
 
     this.canvas.addEventListener('mousedown', onMouseDown);
     this.canvas.addEventListener('mousemove', onMouseMove);
-    this.canvas.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('mouseup', onMouseUp);
     this.canvas.addEventListener('contextmenu', onContextMenu);
     this.canvas.addEventListener('touchstart', onTouchStart, { passive: false });
     this.canvas.addEventListener('touchmove', onTouchMove, { passive: false });
-    this.canvas.addEventListener('touchend', onTouchEnd);
+    window.addEventListener('touchend', onTouchEnd);
 
     this._cleanupInputHandlers = () => {
       this.canvas.removeEventListener('mousedown', onMouseDown);
       this.canvas.removeEventListener('mousemove', onMouseMove);
-      this.canvas.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('mouseup', onMouseUp);
       this.canvas.removeEventListener('contextmenu', onContextMenu);
       this.canvas.removeEventListener('touchstart', onTouchStart);
       this.canvas.removeEventListener('touchmove', onTouchMove);
-      this.canvas.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchend', onTouchEnd);
     };
   }
 
   _checkNonogramWin() {
     const st = this.nonogramState;
-    if (!st || this.gameState !== 'PLAYING') return;
+    if (!st || this.gameState !== 'PLAYING' || st.totalTargetFilled <= 0) return;
 
+    // 무조건 100% 똑같이 맞춰야만 Clear (256칸 전수 일치 검증)
     let isSolved = true;
     for (let r = 0; r < st.rows; r++) {
       for (let c = 0; c < st.cols; c++) {
         const isFilled = (st.board[r][c] === 1);
-        const shouldBeFilled = st.target[r][c];
+        const shouldBeFilled = Boolean(st.target[r][c]);
         if (isFilled !== shouldBeFilled) {
           isSolved = false;
           break;
@@ -2733,7 +2710,7 @@ class ImageMinigameSuite {
     ctx.font = 'bold 15px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText('🧩 네모네모 로직', 20, 26);
+    ctx.fillText('🧩 네모네모 로직', 20, 24);
 
     let filledCount = 0;
     for (let r = 0; r < st.rows; r++) {
@@ -2746,7 +2723,7 @@ class ImageMinigameSuite {
     ctx.textAlign = 'right';
     ctx.font = '12px sans-serif';
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText(`채운 칸: ${filledCount} / ${st.totalTargetFilled} (${pct}%)`, this.width - 20, 26);
+    ctx.fillText(`${filledCount} / ${st.totalTargetFilled} (${pct}%)`, this.width - 20, 24);
 
     // 3. 상단 열(Column) 힌트 숫자
     ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
@@ -2759,14 +2736,15 @@ class ImageMinigameSuite {
 
       const clues = st.colClues[c];
       const cx = st.gridX + c * st.cellSize + st.cellSize / 2;
-      const startNumY = st.clueTopY + st.topClueH - 8 - (clues.length - 1) * 14;
+      const spacing = Math.min(13, Math.floor((st.topClueH - 8) / Math.max(1, clues.length)));
+      const startNumY = st.clueTopY + st.topClueH - 7 - (clues.length - 1) * spacing;
 
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = isDone ? 'bold 11px sans-serif' : '11px sans-serif';
 
       for (let i = 0; i < clues.length; i++) {
-        const ny = startNumY + i * 14;
+        const ny = startNumY + i * spacing;
         ctx.fillStyle = isDone ? '#10b981' : '#cbd5e1';
         ctx.fillText(String(clues[i]), cx, ny);
       }
@@ -2790,14 +2768,15 @@ class ImageMinigameSuite {
 
       const clues = st.rowClues[r];
       const cy = st.gridY + r * st.cellSize + st.cellSize / 2;
-      const endX = st.leftX + st.leftClueW - 8;
+      const endX = st.leftX + st.leftClueW - 7;
+      const spacing = Math.min(13, Math.floor((st.leftClueW - 10) / Math.max(1, clues.length)));
 
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
       ctx.font = isDone ? 'bold 11px sans-serif' : '11px sans-serif';
 
       for (let i = clues.length - 1; i >= 0; i--) {
-        const nx = endX - (clues.length - 1 - i) * 14;
+        const nx = endX - (clues.length - 1 - i) * spacing;
         ctx.fillStyle = isDone ? '#10b981' : '#cbd5e1';
         ctx.fillText(String(clues[i]), nx, cy);
       }
@@ -2896,47 +2875,6 @@ class ImageMinigameSuite {
     ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 2;
     ctx.strokeRect(st.gridX, st.gridY, st.gridW, st.gridH);
-
-    // 6. 하단 조작 버튼 3종 (플레이 중에만 렌더링)
-    if (!isWin) {
-      const bFill = st.buttons.fill;
-      const bCross = st.buttons.cross;
-      const bReset = st.buttons.reset;
-
-      // Fill Button
-      const isFillActive = st.toolMode === 'FILL';
-      ctx.fillStyle = isFillActive ? 'rgba(14, 165, 233, 0.25)' : 'rgba(30, 41, 59, 0.7)';
-      ctx.strokeStyle = isFillActive ? '#38bdf8' : '#475569';
-      ctx.lineWidth = isFillActive ? 2 : 1;
-      this._roundRect(ctx, bFill.x, bFill.y, bFill.w, bFill.h, 8, true, true);
-
-      ctx.fillStyle = isFillActive ? '#38bdf8' : '#94a3b8';
-      ctx.font = 'bold 13px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('⬛ 채우기', bFill.x + bFill.w / 2, bFill.y + bFill.h / 2);
-
-      // Cross Button
-      const isCrossActive = st.toolMode === 'X';
-      ctx.fillStyle = isCrossActive ? 'rgba(244, 63, 94, 0.25)' : 'rgba(30, 41, 59, 0.7)';
-      ctx.strokeStyle = isCrossActive ? '#f43f5e' : '#475569';
-      ctx.lineWidth = isCrossActive ? 2 : 1;
-      this._roundRect(ctx, bCross.x, bCross.y, bCross.w, bCross.h, 8, true, true);
-
-      ctx.fillStyle = isCrossActive ? '#f43f5e' : '#94a3b8';
-      ctx.font = 'bold 13px sans-serif';
-      ctx.fillText('❌ 표시', bCross.x + bCross.w / 2, bCross.y + bCross.h / 2);
-
-      // Reset Button
-      ctx.fillStyle = 'rgba(30, 41, 59, 0.7)';
-      ctx.strokeStyle = '#475569';
-      ctx.lineWidth = 1;
-      this._roundRect(ctx, bReset.x, bReset.y, bReset.w, bReset.h, 8, true, true);
-
-      ctx.fillStyle = '#cbd5e1';
-      ctx.font = '12px sans-serif';
-      ctx.fillText('↺ 초기화', bReset.x + bReset.w / 2, bReset.y + bReset.h / 2);
-    }
   }
 
   _roundRect(ctx, x, y, w, h, r, fill, stroke) {
