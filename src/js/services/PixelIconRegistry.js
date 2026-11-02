@@ -305,8 +305,8 @@
   },
   "rec_blue_lemon_soju": {
     "key": "rec_blue_lemon_soju",
-    "name": "블루레몬주",
-    "innerSvg": "<rect x=\"4\" y=\"4\" width=\"1\" height=\"11\" fill=\"#e2e8f0\"/><rect x=\"11\" y=\"4\" width=\"1\" height=\"11\" fill=\"#cbd5e1\"/><rect x=\"5\" y=\"14\" width=\"6\" height=\"1\" fill=\"#94a3b8\"/><rect x=\"5\" y=\"5\" width=\"6\" height=\"9\" fill=\"#0284c7\"/><rect x=\"6\" y=\"6\" width=\"2\" height=\"3\" fill=\"#ffffff\"/><rect x=\"3\" y=\"3\" width=\"4\" height=\"4\" fill=\"#fde047\"/><rect x=\"4\" y=\"4\" width=\"2\" height=\"2\" fill=\"#fef08a\"/>"
+    "name": "레몬소주",
+    "innerSvg": "<rect x=\"4\" y=\"4\" width=\"1\" height=\"11\" fill=\"#e2e8f0\"/><rect x=\"11\" y=\"4\" width=\"1\" height=\"11\" fill=\"#cbd5e1\"/><rect x=\"5\" y=\"14\" width=\"6\" height=\"1\" fill=\"#94a3b8\"/><rect x=\"5\" y=\"5\" width=\"6\" height=\"9\" fill=\"#fef08a\"/><rect x=\"6\" y=\"6\" width=\"2\" height=\"3\" fill=\"#ffffff\"/><rect x=\"3\" y=\"3\" width=\"4\" height=\"4\" fill=\"#eab308\"/><rect x=\"4\" y=\"4\" width=\"2\" height=\"2\" fill=\"#facc15\"/>"
   },
   "rec_mango_ringo": {
     "key": "rec_mango_ringo",
@@ -435,8 +435,8 @@
   },
   "blue_lemonade": {
     "key": "blue_lemonade",
-    "name": "블루레몬에이드",
-    "innerSvg": "<rect x=\"4\" y=\"4\" width=\"8\" height=\"11\" fill=\"#0284c7\"/><rect x=\"3\" y=\"4\" width=\"1\" height=\"11\" fill=\"#38bdf8\"/><rect x=\"12\" y=\"4\" width=\"1\" height=\"11\" fill=\"#0369a1\"/><rect x=\"6\" y=\"6\" width=\"4\" height=\"4\" fill=\"#fde047\"/><rect x=\"7\" y=\"7\" width=\"2\" height=\"2\" fill=\"#fef08a\"/><rect x=\"9\" y=\"1\" width=\"1\" height=\"5\" fill=\"#ffffff\"/>"
+    "name": "레몬에이드",
+    "innerSvg": "<rect x=\"4\" y=\"4\" width=\"8\" height=\"11\" fill=\"#facc15\"/><rect x=\"3\" y=\"4\" width=\"1\" height=\"11\" fill=\"#fde047\"/><rect x=\"12\" y=\"4\" width=\"1\" height=\"11\" fill=\"#eab308\"/><rect x=\"6\" y=\"6\" width=\"4\" height=\"4\" fill=\"#ca8a04\"/><rect x=\"7\" y=\"7\" width=\"2\" height=\"2\" fill=\"#fef9c3\"/><rect x=\"9\" y=\"1\" width=\"1\" height=\"5\" fill=\"#f43f5e\"/>"
   },
   "pomegranate_juice": {
     "key": "pomegranate_juice",
@@ -655,7 +655,8 @@
   "energy_drink": "⚡",
   "ion_drink": "🎽",
   "milksoda": "🫧",
-  "blue_lemonade": "🩵",
+  "blue_lemonade": "🍋",
+  "lemonade": "🍋",
   "cider": "🥤",
   "cola": "🥤",
   "tomato_juice": "🍅",
@@ -690,7 +691,8 @@
   "rec_hongchaju": "🫖",
   "rec_kibum_tea": "🗝️",
   "rec_energy_soju": "⚡",
-  "rec_blue_lemon_soju": "🩵",
+  "rec_blue_lemon_soju": "🍋",
+  "rec_lemon_soju": "🍋",
   "rec_boksosa": "🍷",
   "rec_icetea": "🍹",
   "rec_mango_ringo": "🥭",
@@ -1036,9 +1038,15 @@ const SPRITE_DATA_HD = {
   },
   "blue_lemonade": {
     "key": "blue_lemonade",
-    "name": "블루레몬에이드",
+    "name": "레몬에이드",
     "viewBox": "0 0 32 32",
-    "innerSvg": "<path d=\"M 9,8 L 23,8 L 21,27 C 21,28.5 19,29.5 16,29.5 C 13,29.5 11,28.5 11,27 Z\" fill=\"#0284c7\"/><path d=\"M 10,9 L 22,9 L 20,26 C 20,27.5 18,28.5 16,28.5 C 14,28.5 12,27.5 12,26 Z\" fill=\"#06b6d4\"/><ellipse cx=\"16\" cy=\"9.5\" rx=\"5.5\" ry=\"1.5\" fill=\"#67e8f9\"/><circle cx=\"14\" cy=\"14\" r=\"4\" fill=\"#facc15\"/><circle cx=\"14\" cy=\"14\" r=\"3\" fill=\"#fef08a\"/><line x1=\"14\" y1=\"11\" x2=\"14\" y2=\"17\" stroke=\"#ca8a04\" stroke-width=\"0.8\"/><line x1=\"11\" y1=\"14\" x2=\"17\" y2=\"14\" stroke=\"#ca8a04\" stroke-width=\"0.8\"/><line x1=\"19\" y1=\"2\" x2=\"15\" y2=\"24\" stroke=\"#f43f5e\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"19\" y1=\"2\" x2=\"15\" y2=\"24\" stroke=\"#ffffff\" stroke-width=\"0.8\" stroke-dasharray=\"2,2\"/>"
+    "innerSvg": "<path d=\"M 9,8 L 23,8 L 21,27 C 21,28.5 19,29.5 16,29.5 C 13,29.5 11,28.5 11,27 Z\" fill=\"#d97706\"/><path d=\"M 10,9 L 22,9 L 20,26 C 20,27.5 18,28.5 16,28.5 C 14,28.5 12,27.5 12,26 Z\" fill=\"#facc15\"/><ellipse cx=\"16\" cy=\"9.5\" rx=\"5.5\" ry=\"1.5\" fill=\"#fef08a\"/><circle cx=\"14\" cy=\"14\" r=\"4\" fill=\"#eab308\"/><circle cx=\"14\" cy=\"14\" r=\"3\" fill=\"#fef9c3\"/><line x1=\"14\" y1=\"11\" x2=\"14\" y2=\"17\" stroke=\"#ca8a04\" stroke-width=\"0.8\"/><line x1=\"11\" y1=\"14\" x2=\"17\" y2=\"14\" stroke=\"#ca8a04\" stroke-width=\"0.8\"/><line x1=\"19\" y1=\"2\" x2=\"15\" y2=\"24\" stroke=\"#f43f5e\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"19\" y1=\"2\" x2=\"15\" y2=\"24\" stroke=\"#ffffff\" stroke-width=\"0.8\" stroke-dasharray=\"2,2\"/><circle cx=\"18\" cy=\"18\" r=\"1\" fill=\"#ffffff\" opacity=\"0.7\"/><circle cx=\"13\" cy=\"22\" r=\"1.2\" fill=\"#ffffff\" opacity=\"0.6\"/>"
+  },
+  "rec_blue_lemon_soju": {
+    "key": "rec_blue_lemon_soju",
+    "name": "레몬소주",
+    "viewBox": "0 0 32 32",
+    "innerSvg": "<path d=\"M 8,7 L 24,7 L 22,28 C 22,29.5 20,30.5 16,30.5 C 12,30.5 10,29.5 10,28 Z\" fill=\"#cbd5e1\"/><path d=\"M 9,8 L 23,8 L 21,27.5 C 21,28.8 19.2,29.5 16,29.5 C 12.8,29.5 11,28.8 11,27.5 Z\" fill=\"#fef08a\"/><ellipse cx=\"16\" cy=\"8.5\" rx=\"6\" ry=\"1.5\" fill=\"#ffffff\" opacity=\"0.8\"/><rect x=\"13\" y=\"14\" width=\"5\" height=\"5\" rx=\"1\" fill=\"#ffffff\" opacity=\"0.6\"/><rect x=\"12\" y=\"20\" width=\"4\" height=\"4\" rx=\"1\" fill=\"#ffffff\" opacity=\"0.5\"/><circle cx=\"8\" cy=\"8\" r=\"5\" fill=\"#ca8a04\"/><circle cx=\"8\" cy=\"8\" r=\"4\" fill=\"#facc15\"/><circle cx=\"8\" cy=\"8\" r=\"3\" fill=\"#fef9c3\"/><line x1=\"8\" y1=\"5\" x2=\"8\" y2=\"11\" stroke=\"#ca8a04\" stroke-width=\"0.8\"/><line x1=\"5\" y1=\"8\" x2=\"11\" y2=\"8\" stroke=\"#ca8a04\" stroke-width=\"0.8\"/><line x1=\"11\" y1=\"10\" x2=\"11\" y2=\"25\" stroke=\"#ffffff\" stroke-width=\"1\" opacity=\"0.7\"/>"
   },
   "cider": {
     "key": "cider",
@@ -1480,6 +1488,11 @@ const SPRITE_DATA_HD = {
   "밀키스": "milksoda",
   "blue_lemonade": "blue_lemonade",
   "블루레몬에이드": "blue_lemonade",
+  "레몬에이드": "blue_lemonade",
+  "lemonade": "blue_lemonade",
+  "레몬소주": "rec_blue_lemon_soju",
+  "lemon_soju": "rec_blue_lemon_soju",
+  "rec_lemon_soju": "rec_blue_lemon_soju",
   "ing_605": "blue_lemonade",
   "rec_14": "blue_lemonade",
   "cider": "cider",
