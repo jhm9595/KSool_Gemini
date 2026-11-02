@@ -289,14 +289,4 @@
   box-sizing: border-box !important;
 }
 
-/* 🧊 냉장고를 부탁해: 대화면 / 태블릿 2-컬럼 와이드 분할 뷰 */
-@media (min-width: 760px) {
-  .fridge-view-container {
-    display: grid !important;
-    grid-template-columns: minmax(330px, 1fr) minmax(380px, 1.25fr) !important;
-    gap: 20px !important;
-    align-items: start !important;
-    max-width: 1040px;
-    margin: 0 auto;
-  }
-}
+
