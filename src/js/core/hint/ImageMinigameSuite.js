@@ -2485,7 +2485,7 @@ class ImageMinigameSuite {
 
       ctx.fillStyle = isCrossActive ? '#f43f5e' : '#94a3b8';
       ctx.font = 'bold 13px sans-serif';
-      ctx.fillText('❌ X 표시', bCross.x + bCross.w / 2, bCross.y + bCross.h / 2);
+      ctx.fillText('❌ 표시', bCross.x + bCross.w / 2, bCross.y + bCross.h / 2);
 
       // Reset Button
       ctx.fillStyle = 'rgba(30, 41, 59, 0.7)';
