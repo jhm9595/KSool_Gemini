@@ -179,41 +179,49 @@ class HintModalView {
         `;
       }
 
-      // 설명 힌트 영역 HTML (상단 넘버링/제목 바로 아래 은박 복권 / 해금 텍스트)
+      // 설명 힌트 영역 HTML (재료 설명 길이에 맞춰 영역 크기를 미리 잡고 버튼 클릭 전/후 동일한 은박 복권 영역 유지)
       let descSectionHtml = '';
       if (this.isScratchingActive) {
         descSectionHtml = `
           <div class="hint-desc-section">
-            <div class="hint-desc-scratch-active-wrap">
-              <div class="hint-desc-scratch-header">
-                <span class="foil-badge">🪙 은박 복권 긁는 중...</span>
-                <span class="foil-guide-text">손가락이나 마우스로 은박을 문질러보세요!</span>
+            <div class="hint-desc-card" id="hint-desc-card">
+              <div class="hint-desc-underlayer">
+                <span class="hint-bulb">💡</span>
+                <span class="hint-desc-text">${recipe.unlock_hint || '레시피 힌트가 없습니다.'}</span>
               </div>
-              <div id="scratch-card-mount-area" style="width:100%;"></div>
+              <canvas class="scratch-overlay-canvas" id="scratch-overlay-canvas"></canvas>
             </div>
           </div>
         `;
       } else if (isDescAvailable) {
         descSectionHtml = `
           <div class="hint-desc-section">
-            <div class="hint-desc-revealed-box">
-              <span class="hint-bulb">💡</span>
-              <span class="hint-desc-revealed-text">${recipe.unlock_hint || '레시피 힌트가 없습니다.'}</span>
+            <div class="hint-desc-card is-revealed" id="hint-desc-card">
+              <div class="hint-desc-underlayer">
+                <span class="hint-bulb">💡</span>
+                <span class="hint-desc-text">${recipe.unlock_hint || '레시피 힌트가 없습니다.'}</span>
+              </div>
             </div>
           </div>
         `;
       } else {
         descSectionHtml = `
           <div class="hint-desc-section">
-            <div class="hint-desc-foil-strip" id="foil-scratch-strip" role="button" tabindex="0" title="은박 복권을 긁어 설명 힌트를 확인하세요">
-              <div class="foil-strip-content">
-                <span class="foil-coin">🪙</span>
-                <span class="foil-placeholder">은박 복권을 긁어 설명 힌트 확인</span>
+            <div class="hint-desc-card" id="hint-desc-card">
+              <div class="hint-desc-underlayer" style="opacity: 0; user-select: none; pointer-events: none;" aria-hidden="true">
+                <span class="hint-bulb">💡</span>
+                <span class="hint-desc-text">${recipe.unlock_hint || '레시피 힌트가 없습니다.'}</span>
               </div>
-              <button type="button" class="btn-step-scratch" id="btn-start-scratch">
-                <span class="ad-tag">AD</span>
-                <span>복권 긁기 ➔</span>
-              </button>
+              <div class="hint-desc-foil-overlay" id="foil-scratch-strip" role="button" tabindex="0" title="은박 복권을 긁어 설명 힌트를 확인하세요">
+                <div class="foil-strip-content">
+                  <span class="foil-coin">🪙</span>
+                  <span class="foil-placeholder">은박 복권을 긁어 설명 힌트 확인</span>
+                </div>
+                <button type="button" class="btn-step-scratch" id="btn-start-scratch">
+                  <span class="ad-tag">AD</span>
+                  <span>복권 긁기 ➔</span>
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -290,12 +298,12 @@ class HintModalView {
 
       this._bindEvents(container);
 
-      // 만약 복권 긁기 모드가 활성화되어 있다면 ScratchCardView 마운트
+      // 만약 복권 긁기 모드가 활성화되어 있다면 ScratchCardView 초기화
       if (this.isScratchingActive) {
-        const mountEl = container.querySelector('#scratch-card-mount-area');
-        if (mountEl && window.KSool?.ScratchCardView) {
+        const cardEl = container.querySelector('#hint-desc-card');
+        if (cardEl && window.KSool?.ScratchCardView) {
           this.scratchCardInstance = new window.KSool.ScratchCardView({
-            containerId: 'scratch-card-box',
+            containerId: 'hint-desc-card',
             secretText: recipe.unlock_hint,
             audio: this.audio,
             threshold: 0.80,
@@ -311,7 +319,7 @@ class HintModalView {
               }, 700);
             }
           });
-          this.scratchCardInstance.render(mountEl);
+          this.scratchCardInstance.init(cardEl);
         }
       }
       return;
