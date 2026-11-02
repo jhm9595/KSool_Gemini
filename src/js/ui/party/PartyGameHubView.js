@@ -241,15 +241,23 @@ class PartyGameHubView {
 
     overlay.classList.add('active');
 
+    const openedTime = Date.now();
     const handleDismiss = (e) => {
+      // 리듬 연타 중 실수로 즉시 닫히는 현상 방지 (최소 500ms 쿨다운)
+      if (Date.now() - openedTime < 500) return;
       e.stopPropagation();
       overlay.classList.remove('active');
       overlay.removeEventListener('click', handleDismiss);
       overlay.removeEventListener('touchstart', handleDismiss);
       this.sound.playTap();
-      // 현재 게임 리셋
-      if (this.games[this.activeGameKey]) {
-        this.games[this.activeGameKey].reset();
+      // 현재 게임 리셋 또는 벌칙 종료 콜백 (아이엠그라운드 등 즉시 리셋 방지)
+      const curGame = this.games[this.activeGameKey];
+      if (curGame) {
+        if (typeof curGame.onPenaltyDismissed === 'function') {
+          curGame.onPenaltyDismissed();
+        } else {
+          curGame.reset();
+        }
       }
     };
 

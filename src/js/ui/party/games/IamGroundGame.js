@@ -85,6 +85,12 @@ class IamGroundGame {
     this.render();
   }
 
+  onPenaltyDismissed() {
+    // 벌칙 오버레이가 닫혀도 설정창으로 튕기지 않고, 게임오버 결과 화면에서 [바로 다시 시작] 제공
+    this.gameState = 'game_over';
+    this.render();
+  }
+
   destroy() {
     this._stopBeatLoop();
   }
@@ -315,9 +321,14 @@ class IamGroundGame {
     if (this.isFirstBeatOfBattle) {
       this.currentMeasureBeat = 0;
       this.isFirstBeatOfBattle = false;
+      this.currentSpeech = {};
+      this.laserTarget = null;
     } else {
       this.currentMeasureBeat = (this.currentMeasureBeat + 1) % totalBeats;
       if (this.currentMeasureBeat === 0) {
+        // 새 마디 시작 시 이전 턴 말풍선 및 레이저 완벽 초기화 (혼란 방지)
+        this.currentSpeech = {};
+        this.laserTarget = null;
         const shouldContinue = this._onMeasureCompleted(totalBeats);
         if (!shouldContinue) return;
       }
@@ -397,10 +408,14 @@ class IamGroundGame {
       }
     } else {
       if (!defender.isUser) {
-        const failChance = 0.08 + Math.min(0.20, this.rallyCount * 0.02);
-        if (Math.random() < failChance) {
-          this._triggerAiFail(defender, `${defender.name}님이 당황해서 박자를 놓쳤습니다!`);
-          return;
+        // AI 탈락 판정: 최소 3회 이상 랠리가 이어진 뒤, 마지막 수비 박자에서만 1회 판정 (초반 돌연사 방지)
+        const isLastRequiredBeat = beat === this.defenseRequiredBeats[this.defenseRequiredBeats.length - 1];
+        if (isLastRequiredBeat && this.rallyCount >= 3) {
+          const failChance = 0.05 + Math.min(0.20, (this.rallyCount - 3) * 0.03);
+          if (Math.random() < failChance) {
+            this._triggerAiFail(defender, `${defender.name}님이 당황해서 박자를 놓쳤습니다!`);
+            return;
+          }
         }
 
         this.hub.sound.playRhythmHit?.(false);
@@ -430,6 +445,8 @@ class IamGroundGame {
       this.userDefenseHits = [];
       this.userDefendRhythmHits = new Set();
       this.userAttackRhythmHits = new Set();
+      this.currentSpeech = {};
+      this.laserTarget = null;
 
       this.defenseRequiredBeats = [];
       const startBeat = totalBeats - count;
@@ -481,6 +498,8 @@ class IamGroundGame {
       this.userAttackRhythmHits = new Set();
       this.userAttackTargetChosen = null;
       this.userAttackCountChosen = null;
+      this.currentSpeech = {};
+      this.laserTarget = null;
       return true;
     }
     return true;
@@ -541,9 +560,13 @@ class IamGroundGame {
             this._showFeedback('PERFECT! 🥁', 'perfect');
             this.render();
           } else if (beat === nameBeat) {
-            this._triggerUserFail('지목 타이밍에는 상대방 이름 버튼을 눌러야 합니다!');
+            if (this.userAttackTargetChosen === null) {
+              this._showFeedback('상대방 이름을 탭하세요! 👤', 'miss');
+            }
           } else if (beat === countBeat) {
-            this._triggerUserFail('숫자 외치기 타이밍에는 숫자 버튼을 눌러야 합니다!');
+            if (this.userAttackCountChosen === null) {
+              this._showFeedback('숫자를 탭하세요! 🔢', 'miss');
+            }
           }
         } else {
           this.currentSpeech[0] = { text: isEven ? '쿵!' : '짝!', type: 'rhythm', time: Date.now() };
@@ -563,7 +586,7 @@ class IamGroundGame {
             this._showFeedback('HIT! 🥁', 'hit');
             this.render();
           } else {
-            this._triggerUserFail('이름을 외쳐야 하는 타이밍에는 내 이름 버튼을 눌러야 합니다!');
+            this._showFeedback('내 이름을 탭하세요! 🙋', 'miss');
           }
         } else {
           this.currentSpeech[0] = { text: isEven ? '쿵!' : '짝!', type: 'rhythm', time: Date.now() };
@@ -608,9 +631,10 @@ class IamGroundGame {
         const attacker = this.players[this.activeAttackerIdx];
         if (attacker.isUser) {
           const nameBeat = this.beatMode - 2;
-          if (this.currentMeasureBeat === nameBeat) {
+          // 지목 타이밍 또는 1박자 전 선입력 허용
+          if (this.currentMeasureBeat === nameBeat || this.currentMeasureBeat === nameBeat - 1) {
             if (player.isUser) {
-              this._triggerUserFail('자신을 공격 대상으로 지목할 수 없습니다!');
+              this._showFeedback('자신을 공격할 수 없습니다! 🙅', 'miss');
               return;
             }
             this.userAttackTargetChosen = playerIdx;
@@ -625,7 +649,7 @@ class IamGroundGame {
             this._showFeedback(`${player.name}! 🎯`, 'hit');
             this.render();
           } else {
-            this._triggerUserFail('이름을 부르지 않는 타이밍에는 동그란 비트 버튼을 눌러야 합니다!');
+            this._showFeedback('지목 타이밍에 이름을 누르세요! 👤', 'miss');
           }
         }
         return;
@@ -636,7 +660,7 @@ class IamGroundGame {
         const defender = this.players[this.activeDefenderIdx];
         if (defender.isUser) {
           if (!player.isUser) {
-            this._triggerUserFail('수비할 때는 자신의 이름을 외쳐야 합니다!');
+            this._showFeedback('수비할 때는 내 이름을 눌러야 합니다! 🙋', 'miss');
             return;
           }
           const beat = this.currentMeasureBeat;
@@ -648,7 +672,7 @@ class IamGroundGame {
             this._showFeedback(`HIT! (${this.userDefenseHits.length}/${this.targetCount}) 🔥`, 'perfect');
             this.render();
           } else if (!this.defenseRequiredBeats.includes(beat)) {
-            this._triggerUserFail('이름을 부르지 않는 타이밍에는 동그란 비트 버튼을 눌러야 합니다!');
+            this._showFeedback('박자 타이밍에 맞춰 이름을 외치세요!', 'miss');
           }
         }
       }
@@ -665,9 +689,11 @@ class IamGroundGame {
       const attacker = this.players[this.activeAttackerIdx];
       if (attacker.isUser) {
         const countBeat = this.beatMode - 1;
-        if (this.currentMeasureBeat === countBeat) {
+        const nameBeat = this.beatMode - 2;
+        // 이름이 이미 지목되었고, countBeat 또는 nameBeat 직후에 누른 경우 유연하게 수용
+        if (this.currentMeasureBeat === countBeat || (this.currentMeasureBeat === nameBeat && this.userAttackTargetChosen !== null)) {
           if (this.userAttackTargetChosen === null) {
-            this._triggerUserFail('이름을 먼저 지목해야 합니다!');
+            this._showFeedback('상대방 이름을 먼저 탭하세요! 👤', 'miss');
             return;
           }
           this.userAttackCountChosen = count;
@@ -686,7 +712,7 @@ class IamGroundGame {
           this._showFeedback(`${target.name} ${countKor}! ⚡`, 'perfect');
           this.render();
         } else {
-          this._triggerUserFail('숫자 외치기 타이밍이 아닙니다!');
+          this._showFeedback('지목 타이밍에 맞춰 숫자를 선택하세요!', 'miss');
         }
       }
     }
@@ -701,6 +727,9 @@ class IamGroundGame {
     this.hub.sound.playRhythmMiss?.();
     this.hub.sound.playExplosion?.();
     this.gameState = 'game_over';
+    this.lastGameOverTitle = '🚨 박자 삑사리! 원샷!';
+    this.lastGameOverReason = reason;
+    this.lastGameOverIcon = '🎙️';
 
     this.hub.triggerPenalty({
       title: '🚨 박자 삑사리! 원샷!',
@@ -716,6 +745,9 @@ class IamGroundGame {
     this.hub.sound.playRhythmMiss?.();
     this.hub.sound.playCurtainReveal?.();
     this.gameState = 'game_over';
+    this.lastGameOverTitle = `🎉 ${aiPlayer.name} 탈락! 벌칙 당첨!`;
+    this.lastGameOverReason = `${reason} 유저 승리! 벌칙주 원샷!`;
+    this.lastGameOverIcon = '🏆';
 
     this.hub.triggerPenalty({
       title: `🎉 ${aiPlayer.name} 탈락! 벌칙 당첨!`,
@@ -950,7 +982,8 @@ class IamGroundGame {
                            (this.phase === 'battle' && this.turnMode === 'defend' && this.activeDefenderIdx === idx);
 
             const isTargeted = this.laserTarget && this.laserTarget.to === idx;
-            const speech = this.currentSpeech[idx];
+            // 자기 턴이거나 타깃(패닉)인 경우에만 말풍선 표시, 턴이 끝나면 즉시 사라져 혼란 방지
+            const speech = (isTurn || isTargeted) ? this.currentSpeech[idx] : null;
 
             return `
               <div class="iamground-player-card ${isTurn ? 'active-turn' : ''} ${isTargeted ? 'targeted-shake' : ''}" 
@@ -1014,6 +1047,28 @@ class IamGroundGame {
             `;
           }).join('')}
         </div>
+
+        <!-- 4-B. 게임 오버 결과 오버레이 (설정창으로 튕기지 않고 같은 설정으로 즉시 재도전) -->
+        ${this.gameState === 'game_over' ? `
+          <div class="iamground-gameover-overlay">
+            <div class="iamground-gameover-card">
+              <div class="iamground-gameover-icon">${this.lastGameOverIcon || '🚨'}</div>
+              <h3 class="iamground-gameover-title">${this.lastGameOverTitle || '게임 종료'}</h3>
+              <p class="iamground-gameover-desc">${this.lastGameOverReason || ''}</p>
+              <div class="iamground-gameover-stat">
+                <span>최종 랠리 기록: <b>${this.rallyCount}회</b></span>
+              </div>
+              <div class="iamground-gameover-btns">
+                <button type="button" class="iamground-replay-btn" id="btn-iamground-replay">
+                  🔥 바로 다시 시작
+                </button>
+                <button type="button" class="iamground-config-btn" id="btn-iamground-goto-setup">
+                  ⚙️ 설정 변경하기
+                </button>
+              </div>
+            </div>
+          </div>
+        ` : ''}
 
         <!-- 5. 하단 3종 컨트롤 버튼 바 (아래부터: 동그란 버튼 -> 숫자 -> 이름) -->
         <div class="iamground-controls-box">
@@ -1124,6 +1179,23 @@ class IamGroundGame {
     const resetBtn = container.querySelector('#btn-iamground-reset');
     if (resetBtn) {
       resetBtn.onclick = (e) => {
+        e.stopPropagation();
+        this.hub.sound.playTap();
+        this.reset();
+      };
+    }
+
+    const replayBtn = container.querySelector('#btn-iamground-replay');
+    if (replayBtn) {
+      replayBtn.onclick = (e) => {
+        e.stopPropagation();
+        this.startGame();
+      };
+    }
+
+    const gotoSetupBtn = container.querySelector('#btn-iamground-goto-setup');
+    if (gotoSetupBtn) {
+      gotoSetupBtn.onclick = (e) => {
         e.stopPropagation();
         this.hub.sound.playTap();
         this.reset();
