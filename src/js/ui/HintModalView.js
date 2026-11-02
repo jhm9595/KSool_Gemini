@@ -83,6 +83,8 @@ class HintModalView {
     this.isScratchingActive = false;
     this.scratchCardInstance = null;
     this._clearActiveRecipeHistory();
+    document.getElementById('hint-modal')?.classList.remove('spa-arcade-view');
+    document.getElementById('hint-modal-content')?.classList.remove('spa-arcade-content');
     document.getElementById('hint-modal-content')?.classList.remove('minigame-card-expanded');
     document.getElementById('hint-modal').classList.remove('active');
     if (this.onDescUnlocked) {
@@ -125,9 +127,14 @@ class HintModalView {
     const recipe = this.recipeBook.getRecipe(this.activeRecipeId);
     if (!recipe || !container) return;
 
-    if (this.viewMode === 'MINIGAME_PLAY') {
+    const modalEl = document.getElementById('hint-modal');
+    if (this.viewMode === 'MINIGAME_PLAY' || this.viewMode === 'MINIGAME_SELECT') {
+      modalEl?.classList.add('spa-arcade-view');
+      container.classList.add('spa-arcade-content');
       container.classList.add('minigame-card-expanded');
     } else {
+      modalEl?.classList.remove('spa-arcade-view');
+      container.classList.remove('spa-arcade-content');
       container.classList.remove('minigame-card-expanded');
       this._stopMinigame();
     }
@@ -313,68 +320,113 @@ class HintModalView {
     // =========================================================================
     // [모드 2] 그림 해금 미니게임 선택 화면
     // =========================================================================
+    // =========================================================================
+    // [모드 2] 🕹️ 미니게임 아케이드 선택 로비 (SPA 풀페이지 뷰)
+    // =========================================================================
     if (this.viewMode === 'MINIGAME_SELECT') {
+      const isImageUnlocked = this.inventory.isRecipeUnlocked(this.activeRecipeId) || this.inventory.isRecipeImageUnlocked(this.activeRecipeId);
+      const recipeIconHtml = window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 20) : (recipe.emoji || '🍹');
+
       container.innerHTML = `
-        <div class="hint-top-header">
-          <div style="display:flex; align-items:center; gap:6px;">
-            <button class="hint-back-choice-btn" id="hint-back-choice-btn" title="선택 화면으로">←</button>
-            <div class="modal-title">🕹️ 그림 해금 아케이드</div>
-          </div>
-          <button class="modal-close-x" id="hint-close-btn">✕</button>
-        </div>
+        <div class="arcade-spa-shell arcade-lobby-view">
+          <header class="arcade-spa-header">
+            <div class="arcade-hdr-left">
+              <button class="arcade-hdr-btn back-btn" id="mg-back-choice-btn" title="단계별 힌트 화면으로">
+                <span class="hdr-icon">←</span>
+                <span class="hdr-label">도감</span>
+              </button>
+              <div class="arcade-recipe-badge">
+                <span class="badge-emblem">${recipeIconHtml}</span>
+                <span class="badge-title">No.${recipe.id} ${recipe.name}</span>
+              </div>
+            </div>
+            <div class="arcade-hdr-center">
+              <span class="arcade-title-pill">🕹️ 힌트 아케이드</span>
+            </div>
+            <div class="arcade-hdr-right">
+              <button class="arcade-hdr-btn close-btn" id="hint-close-btn" title="닫기">✕</button>
+            </div>
+          </header>
 
-        <div class="minigame-select-intro">
-          미니게임 중 <b>원하는 게임을 클리어</b>해도 도감에서 <b>❓ 대신 실제 술 그림(${isImageUnlocked ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 20) : recipe.emoji) : '🖼️'})</b>이 즉시 해금됩니다!
-        </div>
+          <main class="arcade-lobby-body">
+            <div class="arcade-lobby-intro">
+              <div class="lobby-intro-badge">STEP 1 외형 그림 해금</div>
+              <h2 class="lobby-intro-title">원하는 미니게임을 클리어하고 실제 그림을 해금하세요!</h2>
+              <p class="lobby-intro-sub">
+                취향에 맞는 게임을 선택해 클리어하면 <b>No.${recipe.id} ${recipe.name}</b>의 실제 일러스트가 영구 해금됩니다.
+              </p>
+            </div>
 
-        <div class="minigame-cards-list">
-          <div class="minigame-select-card mg-card-brick" data-start-minigame="BRICK_BREAKER">
-            <div class="mg-card-left">
-              <span class="mg-card-icon">🧱</span>
-            </div>
-            <div class="mg-card-body">
-              <div class="mg-card-title-row">
-                <span class="mg-card-title">1. 벽돌깨기</span>
-                <span class="mg-diff-pill hard">도트 블록 100% 격파</span>
+            <div class="arcade-cards-grid">
+              <!-- 1. 벽돌깨기 카드 -->
+              <div class="arcade-select-card card-brick" data-start-minigame="BRICK_BREAKER">
+                <div class="card-glow-bg"></div>
+                <div class="card-head">
+                  <div class="card-icon-box">🧱</div>
+                  <div class="card-meta">
+                    <span class="card-tag">ARCADE ACTION</span>
+                    <h3 class="card-name">도트 아트 벽돌깨기</h3>
+                  </div>
+                  <span class="card-badge badge-pop">인기!</span>
+                </div>
+                <p class="card-desc">
+                  술의 고유 도트 블록을 정통 알카노이드 룰로 격파하세요! <b>빠른 시작 속도</b>, <b>멀티볼[M]</b>, <b>와이드 패들[W]</b>, <b>레이저 캐논[L]</b>, <b>⚡2X 터보 부스터</b>로 시원하게 파괴!
+                </p>
+                <div class="card-features-row">
+                  <span class="feat-pill">⚡ 쾌속 발사</span>
+                  <span class="feat-pill">🔵 멀티볼</span>
+                  <span class="feat-pill">🔴 레이저</span>
+                  <span class="feat-pill">⚡ 2X 터보</span>
+                </div>
+                <button class="card-play-cta">플레이 시작 ▶</button>
               </div>
-              <div class="mg-card-desc">
-                이 술의 <b>실제 도트 모양과 색상 그대로 배치된 벽돌 스테이지</b>를 격파하세요! 단단한 강철 범퍼와 떨어지는 <b>☠️독방울(라이프 감소)</b>, <b>❄️냉기(패들 축소)</b>를 피해 모두 파괴하면 해금!
-              </div>
-            </div>
-            <button class="mg-play-btn">도전 ➔</button>
-          </div>
 
-          <div class="minigame-select-card mg-card-qix" data-start-minigame="TERRITORY_QIX">
-            <div class="mg-card-left">
-              <span class="mg-card-icon">📐</span>
-            </div>
-            <div class="mg-card-body">
-              <div class="mg-card-title-row">
-                <span class="mg-card-title">2. 땅따먹기</span>
-                <span class="mg-diff-pill vhard">외곽 실루엣 100% 점령</span>
+              <!-- 2. 땅따먹기 카드 -->
+              <div class="arcade-select-card card-qix" data-start-minigame="TERRITORY_QIX">
+                <div class="card-glow-bg"></div>
+                <div class="card-head">
+                  <div class="card-icon-box">📐</div>
+                  <div class="card-meta">
+                    <span class="card-tag">TACTICAL SLICE</span>
+                    <h3 class="card-name">외곽 실루엣 땅따먹기</h3>
+                  </div>
+                  <span class="card-badge badge-tact">정통 Qix</span>
+                </div>
+                <p class="card-desc">
+                  암전 속에서 네온 선을 그어 술의 영토를 도려내세요! <b>화면 어디서나 즉시 스와이프</b> & <b>대형 십자키</b>, <b>⚡고속 대시</b>로 보스를 피해 <b>75% 영토 점령</b> 시 승리!
+                </p>
+                <div class="card-features-row">
+                  <span class="feat-pill">👆 화면 스와이프</span>
+                  <span class="feat-pill">🕹️ 아케이드 십자키</span>
+                  <span class="feat-pill">⚡ 고속 대시</span>
+                  <span class="feat-pill">🏆 75% 점령</span>
+                </div>
+                <button class="card-play-cta">플레이 시작 ▶</button>
               </div>
-              <div class="mg-card-desc">
-                완전 암전된 영역 속에서 <b>술의 외곽선 네온 실루엣</b>을 따라 영역을 온전히 도려내세요! <b>보스 코어와 고속 탄막</b>을 피해 <b>실루엣 내부를 100% 점령</b>하면 즉시 해금!
-              </div>
-            </div>
-            <button class="mg-play-btn">도전 ➔</button>
-          </div>
 
-          <div class="minigame-select-card mg-card-nonogram" data-start-minigame="NONOGRAM">
-            <div class="mg-card-left">
-              <span class="mg-card-icon">🧩</span>
-            </div>
-            <div class="mg-card-body">
-              <div class="mg-card-title-row">
-                <span class="mg-card-title">3. 네모네모 로직</span>
-                <span class="mg-diff-pill easy">숫자 퍼즐로 그림 완성</span>
+              <!-- 3. 네모네모 로직 카드 -->
+              <div class="arcade-select-card card-nonogram" data-start-minigame="NONOGRAM">
+                <div class="card-glow-bg"></div>
+                <div class="card-head">
+                  <div class="card-icon-box">🧩</div>
+                  <div class="card-meta">
+                    <span class="card-tag">LOGIC PUZZLE</span>
+                    <h3 class="card-name">네모네모 로직</h3>
+                  </div>
+                  <span class="card-badge badge-brain">두뇌 추리</span>
+                </div>
+                <p class="card-desc">
+                  가로·세로 숫자를 단서로 빈칸을 채워 술 그림을 완성하는 피크로스 퍼즐! 시간제한 없이 차분하게 추리하며 실제 도트 그림을 완성하세요.
+                </p>
+                <div class="card-features-row">
+                  <span class="feat-pill">🔢 가로/세로 숫자</span>
+                  <span class="feat-pill">✏️ 칸 채우기 & X</span>
+                  <span class="feat-pill">💡 무제한 추리</span>
+                </div>
+                <button class="card-play-cta">플레이 시작 ▶</button>
               </div>
-              <div class="mg-card-desc">
-                가로·세로 숫자를 단서로 빈칸을 채워 술 그림을 완성하세요! 오답 페널티 없이 마음껏 추리하고, 100% 일치하면 즉시 해금!
-              </div>
             </div>
-            <button class="mg-play-btn">도전 ➔</button>
-          </div>
+          </main>
         </div>
       `;
 
@@ -383,44 +435,98 @@ class HintModalView {
     }
 
     // =========================================================================
-    // [모드 3] 미니게임 아케이드 플레이 화면 (60fps HTML5 Canvas)
+    // [모드 3] 🎮 미니게임 아케이드 플레이 화면 (SPA 풀페이지 아케이드 캐비닛)
     // =========================================================================
     if (this.viewMode === 'MINIGAME_PLAY') {
       const gameTitles = {
-        BRICK_BREAKER: '🧱 벽돌깨기',
-        TERRITORY_QIX: '📐 땅따먹기',
+        BRICK_BREAKER: '🧱 도트 벽돌깨기',
+        TERRITORY_QIX: '📐 실루엣 땅따먹기',
         NONOGRAM: '🧩 네모네모 로직'
       };
+      const recipeIconHtml = window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 20) : (recipe.emoji || '🍹');
 
-      container.innerHTML = `
-        <div class="hint-top-header">
-          <div style="display:flex; align-items:center; gap:6px;">
-            <button class="hint-back-choice-btn" id="mg-back-select-top-btn" title="게임 선택 화면으로">←</button>
-            <div class="modal-title">${gameTitles[this.selectedMinigameType] || '🕹️ 미니게임'}</div>
+      let consoleControlsHtml = '';
+      if (this.selectedMinigameType === 'BRICK_BREAKER') {
+        consoleControlsHtml = `
+          <div class="brick-console-box">
+            <div class="brick-powerups-ribbon">
+              <span class="pw-badge" title="공 3개 분열">[M] 멀티볼</span>
+              <span class="pw-badge" title="패들 폭 1.45배 확장">[W] 와이드</span>
+              <span class="pw-badge" title="화면 탭 시 관통 레이저 발사">[L] 레이저</span>
+              <span class="pw-badge" title="벽돌 관통 파이어볼">[F] 파이어</span>
+              <span class="pw-badge" title="바닥 레이저 안전 방어막">[S] 배리어</span>
+            </div>
+            <div class="brick-buttons-row">
+              <button class="arcade-action-btn launch-action-btn" id="mg-launch-btn">🚀 공 발사 (LAUNCH)</button>
+              <button class="arcade-action-btn turbo-action-btn" id="mg-turbo-btn">⚡ 2X 터보</button>
+            </div>
+            <div class="arcade-instruction-text">패들을 좌우로 드래그하여 조준 및 공을 받아치세요 (터보로 쾌속 진행)</div>
           </div>
-          <button class="modal-close-x" id="hint-close-btn">✕</button>
-        </div>
-
-        <div class="arcade-cabinet-box">
-          <div class="arcade-canvas-wrapper" id="arcade-canvas-wrapper">
-            <canvas id="minigame-canvas" width="420" height="520" class="minigame-canvas"></canvas>
-          </div>
-          <!-- 탕탕특공대 스타일 하단 중앙 가상 조이스틱 (땅따먹기 전용) -->
-          <div id="qix-joystick-zone" class="qix-joystick-zone ${this.selectedMinigameType === 'TERRITORY_QIX' ? 'active' : ''}">
-            <div class="qix-joystick-pad" id="qix-joystick-pad" title="조이스틱을 밀어 4방향으로 이동">
-              <div class="qix-joystick-arrows">
-                <span class="qix-arrow arrow-up">▲</span>
-                <span class="qix-arrow arrow-right">▶</span>
-                <span class="qix-arrow arrow-down">▼</span>
-                <span class="qix-arrow arrow-left">◀</span>
-              </div>
-              <div class="qix-joystick-center-dot"></div>
-              <div class="qix-joystick-knob" id="qix-joystick-knob">
-                <div class="qix-knob-thumb"></div>
+        `;
+      } else if (this.selectedMinigameType === 'TERRITORY_QIX') {
+        consoleControlsHtml = `
+          <div class="qix-console-box">
+            <div class="qix-dpad-module">
+              <div class="qix-dpad-grid">
+                <button class="dpad-key key-up" data-qix-dir="0,-1" aria-label="위">▲</button>
+                <button class="dpad-key key-left" data-qix-dir="-1,0" aria-label="왼쪽">◀</button>
+                <div class="dpad-center-hub"></div>
+                <button class="dpad-key key-right" data-qix-dir="1,0" aria-label="오른쪽">▶</button>
+                <button class="dpad-key key-down" data-qix-dir="0,1" aria-label="아래">▼</button>
               </div>
             </div>
-            <div class="qix-joystick-guide-text">조이스틱으로 4방향 이동</div>
+            <div class="qix-side-module">
+              <button class="arcade-action-btn dash-action-btn" id="mg-dash-btn">⚡ DASH (고속 절단)</button>
+              <div class="qix-rule-badge">목표: 영토 75% 점령</div>
+            </div>
           </div>
+          <div class="arcade-instruction-text">화면 스와이프 or 십자키로 4방향 이동 / 대시로 고속 절단</div>
+        `;
+      } else {
+        consoleControlsHtml = `
+          <div class="nonogram-console-box">
+            <div class="nonogram-buttons-row">
+              <button class="arcade-action-btn nono-action-btn active" id="nono-mode-fill">✏️ 칠하기</button>
+              <button class="arcade-action-btn nono-action-btn" id="nono-mode-mark">❌ X표시</button>
+              <button class="arcade-action-btn nono-action-btn reset" id="nono-reset-btn">🔄 리셋</button>
+            </div>
+            <div class="arcade-instruction-text">가로/세로 숫자에 맞춰 칸을 채워 숨겨진 그림을 완성하세요</div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        <div class="arcade-spa-shell arcade-playing-view">
+          <!-- 상단 네비게이션 헤더 바 -->
+          <header class="arcade-spa-header">
+            <div class="arcade-hdr-left">
+              <button class="arcade-hdr-btn back-btn" id="mg-back-select-top-btn" title="게임 선택으로">
+                <span class="hdr-icon">←</span>
+                <span class="hdr-label">선택</span>
+              </button>
+              <div class="arcade-recipe-badge">
+                <span class="badge-emblem">${recipeIconHtml}</span>
+                <span class="badge-title">No.${recipe.id} ${recipe.name}</span>
+              </div>
+            </div>
+            <div class="arcade-hdr-center">
+              <span class="arcade-title-pill">${gameTitles[this.selectedMinigameType] || '🕹️ 미니게임'}</span>
+            </div>
+            <div class="arcade-hdr-right">
+              <button class="arcade-hdr-btn restart-btn" id="mg-restart-btn" title="다시 시작">🔄</button>
+              <button class="arcade-hdr-btn close-btn" id="hint-close-btn" title="닫기">✕</button>
+            </div>
+          </header>
+
+          <!-- 중앙 게임 캔버스 스테이지 -->
+          <main class="arcade-spa-stage" id="arcade-canvas-wrapper">
+            <canvas id="minigame-canvas" width="420" height="520" class="minigame-canvas"></canvas>
+          </main>
+
+          <!-- 하단 아케이드 컨트롤 콘솔 -->
+          <footer class="arcade-spa-console" id="arcade-spa-controls">
+            ${consoleControlsHtml}
+          </footer>
         </div>
       `;
 
@@ -428,7 +534,6 @@ class HintModalView {
       this._startCanvasMinigame(recipe);
       return;
     }
-
     // =========================================================================
     // [모드 4] ⚾ 베이스볼 & 황금비율 Up/Down 추리 화면
     // =========================================================================
@@ -990,8 +1095,8 @@ class HintModalView {
 
     // 선택 화면으로 돌아가기
     const backChoiceBtn = container.querySelector('#hint-back-choice-btn');
-    if (backChoiceBtn) {
-      backChoiceBtn.onclick = () => {
+    if (mgBackChoiceBtn) {
+      mgBackChoiceBtn.onclick = () => {
         this._clearActiveRecipeHistory();
         this.viewMode = 'CHOICE';
         this.audio.playTap();
@@ -1051,18 +1156,107 @@ class HintModalView {
       };
     }
 
-    // 땅따먹기(QIX) 온스크린 방향키 D-Pad 조작
+    // 로비 뒤로가기 버튼 -> 단계별 힌트 화면으로
+    const mgBackChoiceBtn = container.querySelector('#mg-back-choice-btn');
+    if (mgBackChoiceBtn) {
+      mgBackChoiceBtn.onclick = () => {
+        this.viewMode = 'CHOICE';
+        this.audio?.playTap?.();
+        this.render();
+      };
+    }
+
+    // 아케이드 다시 시작 버튼
+    const restartTopBtn = container.querySelector('#mg-restart-btn');
+    if (restartTopBtn) {
+      restartTopBtn.onclick = () => {
+        this.minigameStatus = 'PLAYING';
+        this.audio?.playTap?.();
+        const recipe = this.recipeBook.getRecipe(this.activeRecipeId);
+        if (recipe) this._startCanvasMinigame(recipe);
+      };
+    }
+
+    // 벽돌깨기: 공 발사 버튼
+    const launchBtn = container.querySelector('#mg-launch-btn');
+    if (launchBtn) {
+      launchBtn.onclick = () => {
+        if (this.minigameInstance?.launchBall) {
+          this.minigameInstance.launchBall();
+        }
+      };
+    }
+
+    // 벽돌깨기: 2X 터보 토글 버튼
+    const turboBtn = container.querySelector('#mg-turbo-btn');
+    if (turboBtn) {
+      turboBtn.onclick = () => {
+        if (this.minigameInstance?.toggleTurbo) {
+          const isTurbo = this.minigameInstance.toggleTurbo();
+          turboBtn.classList.toggle('active', isTurbo);
+        }
+      };
+    }
+
+    // 땅따먹기: 대시 버튼
+    const dashBtn = container.querySelector('#mg-dash-btn');
+    if (dashBtn) {
+      dashBtn.onclick = () => {
+        if (this.minigameInstance?.toggleDash) {
+          const isDash = this.minigameInstance.toggleDash();
+          dashBtn.classList.toggle('active', isDash);
+        }
+      };
+    }
+
+    // 땅따먹기: 4방향 아케이드 D-Pad
     container.querySelectorAll('[data-qix-dir]').forEach(btn => {
-      const handleDir = (e) => {
+      const [dc, dr] = btn.getAttribute('data-qix-dir').split(',').map(Number);
+      const onDirPress = (e) => {
         if (e.cancelable) e.preventDefault();
-        const [dc, dr] = btn.getAttribute('data-qix-dir').split(',').map(Number);
+        btn.classList.add('active');
         if (this.minigameInstance) {
           this.minigameInstance.setQixDirection(dc, dr);
         }
       };
-      btn.onmousedown = handleDir;
-      btn.ontouchstart = handleDir;
+      const onDirRelease = () => {
+        btn.classList.remove('active');
+      };
+      btn.addEventListener('pointerdown', onDirPress, { passive: false });
+      btn.addEventListener('pointerup', onDirRelease, { passive: true });
+      btn.addEventListener('pointercancel', onDirRelease, { passive: true });
+      btn.addEventListener('pointerleave', onDirRelease, { passive: true });
     });
+
+    // 네모네모 로직 버튼군
+    const fillBtn = container.querySelector('#nono-mode-fill');
+    const markBtn = container.querySelector('#nono-mode-mark');
+    const nonoResetBtn = container.querySelector('#nono-reset-btn');
+    if (fillBtn && markBtn) {
+      fillBtn.onclick = () => {
+        this.audio?.playTap?.();
+        fillBtn.classList.add('active');
+        markBtn.classList.remove('active');
+        if (this.minigameInstance?.nonoState) {
+          this.minigameInstance.nonoState.mode = 'FILL';
+        }
+      };
+      markBtn.onclick = () => {
+        this.audio?.playTap?.();
+        markBtn.classList.add('active');
+        fillBtn.classList.remove('active');
+        if (this.minigameInstance?.nonoState) {
+          this.minigameInstance.nonoState.mode = 'MARK';
+        }
+      };
+    }
+    if (nonoResetBtn) {
+      nonoResetBtn.onclick = () => {
+        this.audio?.playTap?.();
+        const recipe = this.recipeBook.getRecipe(this.activeRecipeId);
+        if (recipe) this._startCanvasMinigame(recipe);
+      };
+    }
 
     // 2단계 카테고리 탭 전환
     container.querySelectorAll('[data-bb-stage2-cat]').forEach(btn => {
