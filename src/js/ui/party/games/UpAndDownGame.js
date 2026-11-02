@@ -351,29 +351,6 @@ class UpAndDownGame {
     `;
   }
 
-  _renderRangeTrack() {
-    if (this.isEditingMax) return '';
-    const minVal = this.lastUpVal;
-    const maxVal = this.hasDownUpdated ? this.lastDownVal : this.maxNumber;
-    const remainingCount = Math.max(0, maxVal - minVal - 1);
-    const rangeSpan = Math.max(1, this.maxNumber - 1);
-    const leftPercent = Math.max(0, Math.min(100, ((minVal - 1) / rangeSpan) * 100));
-    const widthPercent = Math.max(4, Math.min(100 - leftPercent, ((maxVal - minVal) / rangeSpan) * 100));
-
-    return `
-      <div class="updown-range-track-card">
-        <div class="updown-range-labels">
-          <span class="range-min-badge">${minVal} 초과</span>
-          <span class="range-count-badge">${this.hasStarted ? `${remainingCount}개 남음` : `범위 1 ~ ${this.maxNumber}`}</span>
-          <span class="range-max-badge">${maxVal} 미만</span>
-        </div>
-        <div class="updown-range-bar-track">
-          <div class="updown-range-bar-fill" style="left: ${leftPercent.toFixed(1)}%; width: ${widthPercent.toFixed(1)}%;"></div>
-        </div>
-      </div>
-    `;
-  }
-
   _renderStation(isTop = false, isSolo = false) {
     const flipClass = isTop ? 'top-station' : (isSolo ? 'bottom-station updown-solo-station' : 'bottom-station');
     const placeholderText = this.isEditingMax ? 'MAX ?' : '· ·';
@@ -384,15 +361,12 @@ class UpAndDownGame {
           ${this._renderStationStatus()}
         </div>
 
-        <!-- 2. 1인 모드 전용: 남은 숫자 범위 트랙 시각화 (대칭 제거 공간 활용) -->
-        ${isSolo ? this._renderRangeTrack() : ''}
-
-        <!-- 3. 입력된 숫자 디스플레이 -->
+        <!-- 2. 입력된 숫자 디스플레이 -->
         <div class="party-number-display ${isSolo ? 'solo' : ''} ${this.isEditingMax ? 'editing-max' : ''} ${!this.inputVal ? 'placeholder' : ''}">
           ${this.inputVal || placeholderText}
         </div>
 
-        <!-- 4. 3x4 스마트폰 다이얼 패드 -->
+        <!-- 3. 3x4 스마트폰 다이얼 패드 -->
         <div class="party-numpad-grid ${isSolo ? 'solo' : 'compact'}">
           <button type="button" class="party-num-key" data-digit="1">1</button>
           <button type="button" class="party-num-key" data-digit="2">2</button>

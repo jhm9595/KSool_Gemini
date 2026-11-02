@@ -1101,56 +1101,6 @@
   min-height: 44px;
 }
 
-/* 1인 단독 모드 범위 시각화 바 (대칭 제거 공간 적극 활용) */
-.updown-range-track-card {
-  width: 100%;
-  max-width: 300px;
-  background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(56, 189, 248, 0.2);
-  border-radius: 10px;
-  padding: 4px 10px 6px;
-  box-sizing: border-box;
-}
-
-.updown-range-labels {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.72rem;
-  font-weight: 800;
-}
-
-.range-min-badge {
-  color: #38bdf8;
-}
-
-.range-count-badge {
-  color: #facc15;
-}
-
-.range-max-badge {
-  color: #f43f5e;
-}
-
-.updown-range-bar-track {
-  width: 100%;
-  height: 4px;
-  background: rgba(51, 65, 85, 0.5);
-  border-radius: 2px;
-  position: relative;
-  margin-top: 4px;
-  overflow: hidden;
-}
-
-.updown-range-bar-fill {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  background: linear-gradient(90deg, #38bdf8, #facc15, #f43f5e);
-  border-radius: 2px;
-  transition: all 0.3s ease;
-}
-
 .party-number-display.solo {
   font-size: 1.6rem;
   padding: 4px 16px;
