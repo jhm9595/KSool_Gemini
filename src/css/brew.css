@@ -318,6 +318,9 @@
 .slot-emoji {
   font-size: 1.45rem;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .slot-name {

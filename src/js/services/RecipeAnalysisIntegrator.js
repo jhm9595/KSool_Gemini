@@ -72,6 +72,7 @@ class RecipeAnalysisIntegrator {
       return {
         ingredient_id: ingId,
         detail_id: detId,
+        target: target,
         ratio: Number(it.ratio) || 1,
         name,
         emoji,

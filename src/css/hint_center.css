@@ -334,6 +334,9 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .bb-option-btn:hover {

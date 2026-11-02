@@ -79,7 +79,7 @@ class RecipeInspectorModalView {
       return `
         <div class="pot-slot filled sug-slot-card insp-slot-card">
           ${detailBadge}
-          <span class="slot-emoji">${it.emoji}</span>
+          <span class="slot-emoji">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(it.target || it, 24) : it.emoji}</span>
           <span class="slot-name">${it.name}</span>
           ${countBadge}
         </div>
@@ -158,7 +158,7 @@ class RecipeInspectorModalView {
       return `
         <div class="insp-item-row">
           <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:1.1rem;">${it.emoji}</span>
+            <span style="display:inline-flex; align-items:center;">${window.KSool?.pixelIcon ? window.KSool.pixelIcon(it.target || it, 22) : it.emoji}</span>
             <div style="display:flex; flex-direction:column;">
               <span style="font-size:0.8rem; font-weight:800; color:#f8fafc;">${it.name} (${it.ratio}개)</span>
               <span style="font-size:0.7rem; color:#94a3b8;">${it.reason}</span>

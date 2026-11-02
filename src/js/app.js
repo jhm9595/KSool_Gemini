@@ -1104,9 +1104,9 @@ class KSoolApp {
         const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
         const base = this.recipeBook.getBaseIngredient(it.ingredient_id);
         const target = det || base;
-        const icon = window.KSool?.pixelIcon ? window.KSool.pixelIcon(target, 18) : target.emoji;
-        return `${icon} ${this.brandResolver.resolveName(target)}(${it.ratio})`;
-      }).join(' + ');
+        const icon = window.KSool?.pixelIcon ? window.KSool.pixelIcon(target, 22) : target.emoji;
+        return `<span style="display:inline-flex; align-items:center; gap:4px; vertical-align:middle;">${icon}<span>${this.brandResolver.resolveName(target)}(${it.ratio})</span></span>`;
+      }).join(' <span style="color:#64748b; font-weight:400; margin:0 4px;">+</span> ');
 
       if (!isNew) {
         // [도감/힌트 탭에서 레시피 열람] 기존 방식대로 깔끔한 레시피 정보 카드 표시
@@ -1254,9 +1254,9 @@ class KSoolApp {
         const det = this.recipeBook.getDetailIngredient(s.detailId);
         const base = this.recipeBook.getBaseIngredient(s.baseId);
         const target = det || base;
-        const icon = window.KSool?.pixelIcon ? window.KSool.pixelIcon(target, 18) : target.emoji;
-        return `${icon} ${this.brandResolver.resolveName(target)}(${s.count})`;
-      }).join(' + ');
+        const icon = window.KSool?.pixelIcon ? window.KSool.pixelIcon(target, 20) : target.emoji;
+        return `<span style="display:inline-flex; align-items:center; gap:4px; vertical-align:middle;">${icon}<span>${this.brandResolver.resolveName(target)}(${s.count})</span></span>`;
+      }).join(' <span style="color:#64748b; margin:0 4px;">+</span> ');
 
       const failGuideText = '비율이나 재료 조합이 맞지 않습니다! [도감·힌트] 탭이나 퀴즈 카드의 [힌트] 버튼을 눌러 힌트를 확인해보세요.';
 
