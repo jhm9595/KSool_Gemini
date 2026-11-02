@@ -48,7 +48,7 @@ class KoreaMapPickerModal extends BaseDetailPickerModal {
       </div>
 
       <button class="picker-default-btn" id="picker-select-default">
-        <span>${baseIng.emoji}</span>
+        <span>${window.KSool?.pixelIcon ? window.KSool.pixelIcon(baseIng, 24) : baseIng.emoji}</span>
         <span>${config.default_label || `일반 ${baseName} (대표 재료 그대로 넣기)`}</span>
       </button>
 
@@ -94,7 +94,7 @@ class SojuBrandShowcaseModal extends BaseDetailPickerModal {
           <div class="bottle-visual">
             <div class="bottle-silhouette" style="background: ${bottleColor};">
               <div class="bottle-cap" style="background: ${capColor};"></div>
-              <span>${det.emoji || '🍶'}</span>
+              <span>${window.KSool?.pixelIcon ? window.KSool.pixelIcon(det, 22) : (det.emoji || '🍶')}</span>
             </div>
             <div class="bottle-meta">
               <div class="bottle-title">${detName}</div>
@@ -116,7 +116,7 @@ class SojuBrandShowcaseModal extends BaseDetailPickerModal {
       </div>
 
       <button class="picker-default-btn" id="picker-select-default">
-        <span>${baseIng.emoji}</span>
+        <span>${window.KSool?.pixelIcon ? window.KSool.pixelIcon(baseIng, 24) : baseIng.emoji}</span>
         <span>${config.default_label || `일반 ${baseName} (대표 재료로 바로 넣기)`}</span>
       </button>
 
@@ -148,7 +148,7 @@ class BeerTapShowcaseModal extends BaseDetailPickerModal {
              data-detail-id="${det.detail_id}">
           <div class="bottle-visual">
             <div class="bottle-silhouette" style="background: ${canColor}; border-radius: 6px; width: 26px;">
-              <span>🍺</span>
+              <span>${window.KSool?.pixelIcon ? window.KSool.pixelIcon(det, 22) : (det.emoji || '🍺')}</span>
             </div>
             <div class="bottle-meta">
               <div class="bottle-title">${detName}</div>
@@ -170,7 +170,7 @@ class BeerTapShowcaseModal extends BaseDetailPickerModal {
       </div>
 
       <button class="picker-default-btn" id="picker-select-default">
-        <span>${baseIng.emoji}</span>
+        <span>${window.KSool?.pixelIcon ? window.KSool.pixelIcon(baseIng, 24) : baseIng.emoji}</span>
         <span>${config.default_label || `일반 ${baseName} (대표 재료로 바로 넣기)`}</span>
       </button>
 
@@ -195,7 +195,7 @@ class DefaultShelfPickerModal extends BaseDetailPickerModal {
       return `
         <div class="bottle-showcase-card"
              data-detail-id="${det.detail_id}">
-          <div class="bottle-title">${det.emoji || baseIng.emoji} ${detName}</div>
+          <div class="bottle-title" style="display:inline-flex; align-items:center; gap:6px;"><span>${window.KSool?.pixelIcon ? window.KSool.pixelIcon(det, 22) : (det.emoji || baseIng.emoji)}</span><span>${detName}</span></div>
           <div class="bottle-desc">${det.description || ''}</div>
         </div>
       `;
@@ -203,7 +203,7 @@ class DefaultShelfPickerModal extends BaseDetailPickerModal {
 
     return `
       <div class="modal-header">
-        <div class="modal-title">${baseIng.emoji} ${baseName} 상세 선택</div>
+        <div class="modal-title" style="display:inline-flex; align-items:center; gap:6px;"><span>${window.KSool?.pixelIcon ? window.KSool.pixelIcon(baseIng, 24) : baseIng.emoji}</span><span>${baseName} 상세 선택</span></div>
         <button class="modal-close-x" id="picker-close-btn">✕</button>
       </div>
       <button class="picker-default-btn" id="picker-select-default">

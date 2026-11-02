@@ -259,6 +259,7 @@ class HintModalView {
         <div class="bb-target-info-card" style="margin-bottom:10px;">
           <div class="bb-target-title-row">
             <div style="display:flex; align-items:center; gap:8px;">
+              <span class="bb-target-icon" style="display:inline-flex; align-items:center;">${(isImageUnlocked || isRecipeUnlocked) ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 32) : recipe.emoji) : '❓'}</span>
               <span class="bb-target-num">${recipe.formatted_number || ''}</span>
               <span class="bb-target-name">${resolvedName}</span>
             </div>
@@ -369,7 +370,7 @@ class HintModalView {
         </div>
 
         <div class="minigame-select-intro">
-          미니게임 중 <b>원하는 게임을 클리어</b>해도 도감에서 <b>❓ 대신 실제 술 그림(${isImageUnlocked ? recipe.emoji : '🖼️'})</b>이 즉시 해금됩니다!
+          미니게임 중 <b>원하는 게임을 클리어</b>해도 도감에서 <b>❓ 대신 실제 술 그림(${isImageUnlocked ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 20) : recipe.emoji) : '🖼️'})</b>이 즉시 해금됩니다!
         </div>
 
         <div class="minigame-cards-list">
@@ -533,9 +534,17 @@ class HintModalView {
       // [A] 베이스볼 진행 중 (비율 영역은 완전히 숨김!)
       const slotsHtml = this.currentGuessSlots.map((slot, idx) => {
         if (slot) {
+          let slotIcon = '';
+          if (slot.item && window.KSool?.pixelIcon) {
+            slotIcon = window.KSool.pixelIcon(slot.item, 28);
+          } else if (window.KSool?.pixelIcon) {
+            slotIcon = window.KSool.pixelIcon(slot.token || slot.name, 28);
+          } else {
+            slotIcon = slot.emoji || '🍶';
+          }
           return `
             <div class="pot-slot filled sug-slot-card bb-slot-card" data-bb-slot="${idx}" title="클릭하면 비워집니다">
-              <span class="slot-emoji">${slot.emoji}</span>
+              <span class="slot-emoji">${slotIcon}</span>
               <span class="slot-name">${slot.name}</span>
             </div>
           `;
@@ -553,13 +562,17 @@ class HintModalView {
 
       const renderOptionBtn = (opt) => {
         const isPicked = this.currentGuessSlots.some(s => s && String(s.token) === String(opt.token));
+        const iconHtml = (opt.item && window.KSool?.pixelIcon)
+          ? window.KSool.pixelIcon(opt.item, 20)
+          : (window.KSool?.pixelIcon ? window.KSool.pixelIcon(opt.token || opt.name, 20) : `<span class="bb-option-emoji">${opt.emoji}</span>`);
         return `
           <button class="bb-option-btn ${isPicked ? 'picked' : ''}"
                   data-bb-token="${opt.token}"
                   data-bb-emoji="${opt.emoji}"
                   data-bb-name="${opt.name}"
                   data-bb-label="${opt.label}">
-            ${opt.label}
+            <span class="bb-option-icon" style="display:inline-flex; align-items:center;">${iconHtml}</span>
+            <span class="bb-option-name">${opt.name}</span>
           </button>
         `;
       };
@@ -662,11 +675,13 @@ class HintModalView {
           badgeHtml = `<span class="slot-count-badge ${solvedVal ? 'is-solved' : 'is-question'}">${solvedVal ? solvedVal : '?'}</span>`;
         }
 
+        const iconHtml = target ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(target, 28) : target.emoji) : '🍶';
+
         return `
           <div class="pot-slot filled sug-slot-card hint-ratio-slot ${isSelected ? 'active-ratio-slot' : ''} ${solvedVal ? 'solved-ratio-slot' : ''}"
                ${(!isUnitRatio && !isAllRatiosSolved) ? `data-updown-slot="${it.slot_order}" title="클릭하여 비율 Up/Down 추리하기"` : `style="cursor:default;"`}>
             ${detailBadge}
-            <span class="slot-emoji">${target ? target.emoji : '🍶'}</span>
+            <span class="slot-emoji">${iconHtml}</span>
             <span class="slot-name">${target ? this.brandResolver.resolveName(target) : ''}</span>
             ${badgeHtml}
           </div>
@@ -772,10 +787,15 @@ class HintModalView {
       </div>
     ` : '';
 
+    const targetProductIcon = (isImageUnlocked || isRecipeUnlocked)
+      ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 28) : recipe.emoji)
+      : '❓';
+
     const targetInfoCardHtml = `
       <div class="bb-target-info-card">
         <div class="bb-target-title-row">
-          <div style="display:flex; align-items:center; gap:6px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="bb-target-icon" style="display:inline-flex; align-items:center;">${targetProductIcon}</span>
             <span class="bb-target-num">${recipe.formatted_number || ''}</span>
             <span class="bb-target-name">${resolvedName}</span>
           </div>
@@ -866,7 +886,8 @@ class HintModalView {
           token: c.category_id,
           emoji: c.emoji,
           name: c.name,
-          label: `${c.emoji} ${c.name}`
+          label: `${c.emoji} ${c.name}`,
+          item: c
         }));
     }
 
@@ -882,7 +903,8 @@ class HintModalView {
             token: String(ing.ingredient_id),
             emoji: ing.emoji,
             name: resolvedName,
-            label: `${ing.emoji} ${resolvedName}`
+            label: `${ing.emoji} ${resolvedName}`,
+            item: ing
           };
         });
     }
@@ -896,7 +918,8 @@ class HintModalView {
           token: `D:${det.detail_id}`,
           emoji: det.emoji || '✨',
           name: resolvedName,
-          label: `${det.emoji || '✨'} ${resolvedName}`
+          label: `${det.emoji || '✨'} ${resolvedName}`,
+          item: det
         };
       });
     const baseOpts = unlockedBaseIngs
@@ -907,7 +930,8 @@ class HintModalView {
           token: `B:${ing.ingredient_id}`,
           emoji: ing.emoji,
           name: resolvedName,
-          label: `${ing.emoji} ${resolvedName}`
+          label: `${ing.emoji} ${resolvedName}`,
+          item: ing
         };
       });
     return [...detailOpts, ...baseOpts];
@@ -1131,11 +1155,16 @@ class HintModalView {
         const emptyIdx = this.currentGuessSlots.findIndex(s => s === null);
         if (emptyIdx === -1) return;
 
+        const currentStage = this.baseballEngine.getCurrentActiveStage(this.activeRecipeId);
+        const options = this._getOptionsForStage(currentStage);
+        const opt = options.find(o => String(o.token) === String(token));
+
         this.currentGuessSlots[emptyIdx] = {
           token,
           emoji: btn.getAttribute('data-bb-emoji'),
           name: btn.getAttribute('data-bb-name'),
-          label: btn.getAttribute('data-bb-label')
+          label: btn.getAttribute('data-bb-label'),
+          item: opt ? opt.item : null
         };
         this.audio.playTap();
         this.render();

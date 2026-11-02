@@ -35,7 +35,7 @@ class SuggestionBoardView {
           return `
             <div class="pot-slot filled sug-slot-card">
               ${detailBadge}
-              <span class="slot-emoji">${target ? target.emoji : '🍶'}</span>
+              <span class="slot-emoji">${target ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(target, 28) : target.emoji) : '🍶'}</span>
               <span class="slot-name">${this.brandResolver.resolveName(target)}</span>
               ${countBadge}
             </div>
@@ -58,7 +58,7 @@ class SuggestionBoardView {
             return `
               <div class="pot-slot filled sug-slot-card">
                 ${detailBadge}
-                <span class="slot-emoji">${emoji}</span>
+                <span class="slot-emoji">${target ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(target, 28) : (emoji || '🍶')) : '🍶'}</span>
                 <span class="slot-name">${name}</span>
                 ${ratioBadge}
               </div>
