@@ -39,6 +39,7 @@ class IamGroundGame {
     this.introBeat = 0;
     this.selfIntroPlayerIdx = 0;
     this.userIntroHit = false;
+    this.userIntroRhythmHits = new Set();
 
     // 배틀 (공격 & 수비) 상태
     this.turnMode = 'attack'; // 'attack' | 'defend'
@@ -47,8 +48,10 @@ class IamGroundGame {
     this.targetCount = 0;
     this.userAttackTargetChosen = null;
     this.userAttackCountChosen = null;
+    this.userAttackRhythmHits = new Set();
     this.defenseRequiredBeats = [];
     this.userDefenseHits = [];
+    this.userDefendRhythmHits = new Set();
 
     // 시각 연출 상태
     this.currentSpeech = {}; // { [playerIdx]: { text, type, time } }
@@ -74,6 +77,11 @@ class IamGroundGame {
     this.currentSpeech = {};
     this.laserTarget = null;
     this.feedbackText = '';
+    this.userIntroHit = false;
+    this.userIntroRhythmHits = new Set();
+    this.userAttackRhythmHits = new Set();
+    this.userDefenseHits = [];
+    this.userDefendRhythmHits = new Set();
     this.render();
   }
 
@@ -242,15 +250,18 @@ class IamGroundGame {
     } else {
       this.currentMeasureBeat = (this.currentMeasureBeat + 1) % 4;
       if (this.currentMeasureBeat === 0) {
-        // 이전 플레이어 결과 검증
+        // 이전 플레이어 결과 검증 (유저는 비트 3회 + 이름 1회 모두 성공해야 함)
         const prevPlayer = this.players[this.selfIntroPlayerIdx];
-        if (prevPlayer && prevPlayer.isUser && !this.userIntroHit) {
-          this._triggerUserFail(`${prevPlayer.name}님이 4번째 박자에 자기 이름을 누르지 못했습니다!`);
-          return;
+        if (prevPlayer && prevPlayer.isUser) {
+          if (this.userIntroRhythmHits.size < 3 || !this.userIntroHit) {
+            this._triggerUserFail(`${prevPlayer.name}님이 박자에 맞춰 비트 버튼과 이름을 다 누르지 못했습니다!`);
+            return;
+          }
         }
 
         this.selfIntroPlayerIdx++;
         this.userIntroHit = false;
+        this.userIntroRhythmHits = new Set();
 
         if (this.selfIntroPlayerIdx >= this.players.length) {
           this._finishSelfIntroPhase();
@@ -395,8 +406,9 @@ class IamGroundGame {
       const attacker = this.players[this.activeAttackerIdx];
 
       if (attacker.isUser) {
-        if (this.userAttackTargetChosen === null || this.userAttackCountChosen === null) {
-          this._triggerUserFail(`${attacker.name}님이 박자에 맞춰 공격 대상을 지목하지 못했습니다!`);
+        const requiredRhythmCount = totalBeats - 2;
+        if (this.userAttackRhythmHits.size < requiredRhythmCount || this.userAttackTargetChosen === null || this.userAttackCountChosen === null) {
+          this._triggerUserFail(`${attacker.name}님이 비트 버튼과 대상을 박자에 맞춰 지목하지 못했습니다!`);
           return false;
         }
       }
@@ -408,6 +420,8 @@ class IamGroundGame {
       this.activeDefenderIdx = targetIdx;
       this.targetCount = count;
       this.userDefenseHits = [];
+      this.userDefendRhythmHits = new Set();
+      this.userAttackRhythmHits = new Set();
 
       this.defenseRequiredBeats = [];
       const startBeat = totalBeats - count;
@@ -423,8 +437,9 @@ class IamGroundGame {
       const defender = this.players[this.activeDefenderIdx];
 
       if (defender.isUser) {
-        if (this.userDefenseHits.length < this.targetCount) {
-          this._triggerUserFail(`${defender.name}님이 이름을 ${this.targetCount}번 다 부르지 못하고 박자를 놓쳤습니다!`);
+        const requiredRhythmCount = totalBeats - this.targetCount;
+        if (this.userDefendRhythmHits.size < requiredRhythmCount || this.userDefenseHits.length < this.targetCount) {
+          this._triggerUserFail(`${defender.name}님이 수비 박자(비트+이름)를 다 채우지 못하고 놓쳤습니다!`);
           return false;
         }
       }
@@ -445,6 +460,8 @@ class IamGroundGame {
       this.targetCount = 0;
       this.defenseRequiredBeats = [];
       this.userDefenseHits = [];
+      this.userDefendRhythmHits = new Set();
+      this.userAttackRhythmHits = new Set();
       this.userAttackTargetChosen = null;
       this.userAttackCountChosen = null;
       return true;
@@ -456,6 +473,92 @@ class IamGroundGame {
   // 유저 컨트롤 핸들러
   // =========================================================================
 
+  /**
+   * 동그란 비트 버튼 탭 핸들러 (이름을 부르지 않는 타이밍에 누르는 버튼)
+   */
+  handleRoundBeatButtonClick() {
+    if (this.gameState !== 'playing') return;
+
+    const beat = this.currentMeasureBeat;
+    const isEven = beat % 2 === 0;
+
+    if (isEven) {
+      this.hub.sound.playRhythmThud?.();
+    } else {
+      this.hub.sound.playRhythmClap?.();
+    }
+    this.hub.vibrateShort();
+
+    // 1. 자기소개 단계
+    if (this.phase === 'self_intro') {
+      const curPlayer = this.players[this.selfIntroPlayerIdx];
+      if (curPlayer && curPlayer.isUser) {
+        if (beat < 3) {
+          this.userIntroRhythmHits.add(beat);
+          this.currentSpeech[0] = { text: isEven ? '쿵!' : '짝!', type: 'rhythm', time: Date.now() };
+          this._showFeedback('PERFECT! 🥁', 'perfect');
+          this.render();
+        } else {
+          // 4번째 박자에는 자기 이름을 눌러야 함
+          this._triggerUserFail('4번째 박자에는 자기 이름 버튼을 눌러야 합니다!');
+        }
+      } else {
+        // AI 자기소개 중에는 박자 연습 자유
+        this.currentSpeech[0] = { text: isEven ? '쿵!' : '짝!', type: 'rhythm', time: Date.now() };
+        this.render();
+      }
+      return;
+    }
+
+    // 2. 배틀 단계
+    if (this.phase === 'battle') {
+      // 2-A. 공격 모드
+      if (this.turnMode === 'attack') {
+        const attacker = this.players[this.activeAttackerIdx];
+        if (attacker.isUser) {
+          const nameBeat = this.beatMode - 2;
+          const countBeat = this.beatMode - 1;
+          if (beat < nameBeat) {
+            this.userAttackRhythmHits.add(beat);
+            this.currentSpeech[0] = { text: isEven ? '쿵!' : '짝!', type: 'rhythm', time: Date.now() };
+            this._showFeedback('PERFECT! 🥁', 'perfect');
+            this.render();
+          } else if (beat === nameBeat) {
+            this._triggerUserFail('지목 타이밍에는 상대방 이름 버튼을 눌러야 합니다!');
+          } else if (beat === countBeat) {
+            this._triggerUserFail('숫자 외치기 타이밍에는 숫자 버튼을 눌러야 합니다!');
+          }
+        } else {
+          this.currentSpeech[0] = { text: isEven ? '쿵!' : '짝!', type: 'rhythm', time: Date.now() };
+          this.render();
+        }
+        return;
+      }
+
+      // 2-B. 수비 모드
+      if (this.turnMode === 'defend') {
+        const defender = this.players[this.activeDefenderIdx];
+        if (defender.isUser) {
+          const isNameBeat = this.defenseRequiredBeats.includes(beat);
+          if (!isNameBeat) {
+            this.userDefendRhythmHits.add(beat);
+            this.currentSpeech[0] = { text: isEven ? '쿵!' : '짝!', type: 'rhythm', time: Date.now() };
+            this._showFeedback('HIT! 🥁', 'hit');
+            this.render();
+          } else {
+            this._triggerUserFail('이름을 외쳐야 하는 타이밍에는 내 이름 버튼을 눌러야 합니다!');
+          }
+        } else {
+          this.currentSpeech[0] = { text: isEven ? '쿵!' : '짝!', type: 'rhythm', time: Date.now() };
+          this.render();
+        }
+      }
+    }
+  }
+
+  /**
+   * 이름 버튼 탭 핸들러 (Row 1 - 맨 위)
+   */
   handleNameButtonClick(playerIdx) {
     if (this.gameState !== 'playing') return;
     const player = this.players[playerIdx];
@@ -475,7 +578,7 @@ class IamGroundGame {
         } else if (!player.isUser) {
           this._triggerUserFail('자기소개에서는 자신의 이름을 눌러야 합니다!');
         } else if (this.currentMeasureBeat !== 3) {
-          this._triggerUserFail('4번째 박자가 아닌 타이밍에 이름을 눌렀습니다!');
+          this._triggerUserFail('이름을 부르지 않는 타이밍에는 동그란 비트 버튼을 눌러야 합니다!');
         }
       }
       return;
@@ -501,7 +604,7 @@ class IamGroundGame {
             this._showFeedback(`${player.name}! 🎯`, 'hit');
             this.render();
           } else {
-            this._triggerUserFail('지목 타이밍 박자가 아닙니다!');
+            this._triggerUserFail('이름을 부르지 않는 타이밍에는 동그란 비트 버튼을 눌러야 합니다!');
           }
         }
         return;
@@ -524,13 +627,16 @@ class IamGroundGame {
             this._showFeedback(`HIT! (${this.userDefenseHits.length}/${this.targetCount}) 🔥`, 'perfect');
             this.render();
           } else if (!this.defenseRequiredBeats.includes(beat)) {
-            this._triggerUserFail('수비 박자가 아닌 타이밍에 이름을 불렀습니다!');
+            this._triggerUserFail('이름을 부르지 않는 타이밍에는 동그란 비트 버튼을 눌러야 합니다!');
           }
         }
       }
     }
   }
 
+  /**
+   * 숫자 버튼 탭 핸들러 (Row 2 - 중간)
+   */
   handleNumberButtonClick(count) {
     if (this.gameState !== 'playing') return;
 
@@ -555,7 +661,7 @@ class IamGroundGame {
           this._showFeedback(`${target.name} ${countKor}! ⚡`, 'perfect');
           this.render();
         } else {
-          this._triggerUserFail('숫자 외치기 타이밍 박자가 아닙니다!');
+          this._triggerUserFail('숫자 외치기 타이밍이 아닙니다!');
         }
       }
     }
@@ -884,16 +990,17 @@ class IamGroundGame {
           }).join('')}
         </div>
 
-        <!-- 5. 하단 2종 컨트롤 버튼 바 -->
+        <!-- 5. 하단 3종 컨트롤 버튼 바 (아래부터: 동그란 버튼 -> 숫자 -> 이름) -->
         <div class="iamground-controls-box">
+          <!-- 1) 맨 위: 참여자 이름 버튼 한 줄 -->
           <div class="iamground-controls-label">
             <span>👤 참여자 이름 (지목 / 내 이름 외치기)</span>
           </div>
           <div class="iamground-names-row">
             ${this.players.map((p, idx) => {
               let isHighlighted = false;
-              if (isUserIntroAction && p.isUser) isHighlighted = true;
-              if (isUserDefendAction && p.isUser) isHighlighted = true;
+              if (isUserIntroAction && p.isUser && curBeat === 3) isHighlighted = true;
+              if (isUserDefendAction && p.isUser && this.defenseRequiredBeats.includes(curBeat)) isHighlighted = true;
               if (isUserAttackNameAction && !p.isUser) isHighlighted = true;
 
               return `
@@ -907,6 +1014,7 @@ class IamGroundGame {
             }).join('')}
           </div>
 
+          <!-- 2) 중간: 박자에 따른 1~8 숫자 버튼 한 줄 -->
           <div class="iamground-controls-label">
             <span>🔢 공격 횟수 선택 (1 ~ ${this.beatMode})</span>
           </div>
@@ -922,6 +1030,29 @@ class IamGroundGame {
                 </button>
               `;
             }).join('')}
+          </div>
+
+          <!-- 3) 맨 아래: 동그란 비트 버튼 (이름 부르지 않는 타이밍에 누르는 버튼) -->
+          <div class="iamground-controls-label">
+            <span>🥁 비트 타기 (이름을 부르지 않는 타이밍에 탭)</span>
+          </div>
+          <div class="iamground-beat-btn-row">
+            ${(() => {
+              const isUserIntroRhythm = isUserIntroAction && curBeat < 3;
+              const isUserAttackRhythm = this.phase === 'battle' && this.turnMode === 'attack' && this.players[this.activeAttackerIdx]?.isUser && curBeat < (this.beatMode - 2);
+              const isUserDefendRhythm = isUserDefendAction && !this.defenseRequiredBeats.includes(curBeat);
+              const isRoundHighlighted = isUserIntroRhythm || isUserAttackRhythm || isUserDefendRhythm;
+
+              return `
+                <button type="button" 
+                        class="iamground-round-beat-btn ${isRoundHighlighted ? 'highlight-pulse' : ''}" 
+                        id="btn-iamground-beat"
+                        title="이름을 부르지 않는 박자에 탭!">
+                  <span class="m-round-btn-icon">${curBeat % 2 === 0 ? '👞' : '👏'}</span>
+                  <span class="m-round-btn-label">${curBeat % 2 === 0 ? '쿵 (1·3박)' : '짝 (2·4박)'}</span>
+                </button>
+              `;
+            })()}
           </div>
         </div>
       </div>
@@ -953,6 +1084,18 @@ class IamGroundGame {
       btn.onclick = (e) => e.preventDefault();
     });
 
+    // 3. 동그란 비트 버튼 탭
+    const beatBtn = container.querySelector('#btn-iamground-beat');
+    if (beatBtn) {
+      const handleTap = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.handleRoundBeatButtonClick();
+      };
+      beatBtn.addEventListener('pointerdown', handleTap);
+      beatBtn.onclick = (e) => e.preventDefault();
+    }
+
     const resetBtn = container.querySelector('#btn-iamground-reset');
     if (resetBtn) {
       resetBtn.onclick = (e) => {
@@ -965,3 +1108,6 @@ class IamGroundGame {
 }
 
 window.KSool.IamGroundGame = IamGroundGame;
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = IamGroundGame;
+}

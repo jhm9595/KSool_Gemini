@@ -4362,6 +4362,54 @@
   transform: scale(1.05);
 }
 
+/* 맨 아래: 동그란 비트 버튼 */
+.iamground-beat-btn-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 2px 0 1px;
+}
+
+.iamground-round-beat-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #334155, #0f172a);
+  border: 2.5px solid #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  user-select: none;
+}
+
+.iamground-round-beat-btn:active {
+  transform: scale(0.9);
+}
+
+.iamground-round-beat-btn.highlight-pulse {
+  border-color: #38bdf8;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.9);
+  animation: iamgroundPulse 0.35s infinite alternate;
+  transform: scale(1.08);
+}
+
+.m-round-btn-icon {
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.m-round-btn-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  margin-top: 1px;
+}
+
 /* 애니메이션 */
 @keyframes iamgroundBounce {
   0% { transform: translateY(0); }
