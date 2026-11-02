@@ -85,6 +85,22 @@ class PartyGameHubView {
         badge: '조합 탐색',
         accentColor: '#0ea5e9',
         desc: '현재 만들 수 있는 술 조합 찾기'
+      },
+      {
+        key: 'baskin',
+        emoji: '🍨',
+        title: '배불러라빈스 31',
+        badge: '31 카운트다운',
+        accentColor: '#f43f5e',
+        desc: '1~3개씩 숫자를 외쳐 31을 피하는 술게임'
+      },
+      {
+        key: 'market',
+        emoji: '🧺',
+        title: '시장에 가면',
+        badge: '기억력 릴레이',
+        accentColor: '#10b981',
+        desc: '이전 재료를 순서대로 기억하고 새 재료를 추가하는 게임'
       }
     ];
 
@@ -96,7 +112,9 @@ class PartyGameHubView {
       bottlespin: new window.KSool.BottleSpinGame(this),
       hunmin: new window.KSool.HunminBombGame(this),
       penaltycocktail: new window.KSool.PenaltyCocktailGame(this),
-      fridge: new window.KSool.FridgePartyGame(this)
+      fridge: new window.KSool.FridgePartyGame(this),
+      baskin: new window.KSool.Baskin31Game(this),
+      market: new window.KSool.MarketMemoryGame(this)
     };
 
     this._setupWakeLockListener();
@@ -319,7 +337,7 @@ class PartyGameHubView {
       return Boolean(hasSoju && hasBeer);
     }
 
-    if (gameKey === 'fridge') {
+    if (gameKey === 'fridge' || gameKey === 'market') {
       // 전체 도감 레시피의 50% 이상 해금 시 오픈
       const ratio = typeof inv.getUnlockProgressRatio === 'function' ? inv.getUnlockProgressRatio() : 0;
       return ratio >= 0.5;
@@ -342,6 +360,11 @@ class PartyGameHubView {
       const ratio = inv && typeof inv.getUnlockProgressRatio === 'function' ? inv.getUnlockProgressRatio() : 0;
       const pct = Math.round(ratio * 100);
       return `🔒 [냉장고를 부탁해]\n도감 50% 이상 달성 시 열립니다! (현재: ${pct}%)`;
+    }
+    if (gameKey === 'market') {
+      const ratio = inv && typeof inv.getUnlockProgressRatio === 'function' ? inv.getUnlockProgressRatio() : 0;
+      const pct = Math.round(ratio * 100);
+      return `🔒 [시장에 가면]\n도감 50% 이상 달성 시 열립니다! (현재: ${pct}%)`;
     }
     return '🔒 아직 해금되지 않은 게임입니다.';
   }
