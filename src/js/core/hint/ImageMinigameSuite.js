@@ -456,9 +456,9 @@ class ImageMinigameSuite {
       this.gameState = 'PLAYING';
       this.qixState.lastTime = performance.now();
       this.qixState.player.moveAccum = 0;
-      this.audio.playTap();
+      this.audio?.playTap?.();
     } else if (this.gameState === 'OVER') {
-      this.audio.playTap();
+      this.audio?.playTap?.();
       this._resetTerritoryQixState();
       this.gameState = 'PLAYING';
     }
@@ -472,11 +472,18 @@ class ImageMinigameSuite {
 
     // 1. 자기 자신의 선(2)으로 돌진하는 것은 즉사이므로 원천 차단
     if (nextCell === 2) return;
-    // 2. 선을 긋고 있는 도중 180도 역주행 완전 차단 (직각 회전만 허용)
+    // 2. 선을 긋고 있는 도중 180도 역주행 완전 차단
     if (isDrawing && isReverse) return;
 
     pl.dc = dc;
     pl.dr = dr;
+    pl.pendingDir = null;
+  }
+
+  setQixPendingDirection(dc, dr) {
+    if (!this.isRunning || this.gameType !== 'TERRITORY_QIX' || !this.qixState) return;
+    const pl = this.qixState.player;
+    pl.pendingDir = { dc, dr, expireAt: performance.now() + 400 };
   }
 
   stopQixPlayer() {
@@ -484,6 +491,90 @@ class ImageMinigameSuite {
     const pl = this.qixState.player;
     pl.dc = 0;
     pl.dr = 0;
+    pl.pendingDir = null;
+  }
+
+  launchBall() {
+    if (this.gameType === 'BRICK_BREAKER' && this.bbState) {
+      const st = this.bbState;
+      if (this.gameState === 'READY' || !st.isLaunched) {
+        st.isLaunched = true;
+        this.gameState = 'PLAYING';
+        st.lastTime = performance.now();
+        const b = st.balls[0];
+        if (b) {
+          const baseSpeed = 7.6; // 상쾌하고 빠른 시작 속도 (대기 시간 제로!)
+          b.vx = Math.cos(st.aimAngle) * baseSpeed;
+          b.vy = Math.sin(st.aimAngle) * baseSpeed;
+        }
+        this.audio?.playTap?.();
+      }
+    }
+  }
+
+  toggleTurbo() {
+    if (this.gameType === 'BRICK_BREAKER' && this.bbState) {
+      this.bbState.isTurbo = !this.bbState.isTurbo;
+      this.audio?.playTap?.();
+      return this.bbState.isTurbo;
+    }
+    return false;
+  }
+
+  toggleDash() {
+    if (this.gameType === 'TERRITORY_QIX' && this.qixState) {
+      this.qixState.isDash = !this.qixState.isDash;
+      this.audio?.playTap?.();
+      return this.qixState.isDash;
+    }
+    return false;
+  }
+
+  setDash(bool) {
+    if (this.gameType === 'TERRITORY_QIX' && this.qixState) {
+      this.qixState.isDash = !!bool;
+    }
+  }
+
+  fireLaser() {
+    if (this.gameType === 'BRICK_BREAKER' && this.bbState) {
+      const st = this.bbState;
+      if (st.activePowerups?.laserTimer > 0) {
+        const p = st.paddle;
+        st.lasers.push(
+          { x: p.x + 8, y: p.y - 4, vy: -13 },
+          { x: p.x + p.w - 8, y: p.y - 4, vy: -13 }
+        );
+        this.audio?.playTap?.();
+      }
+    }
+  }
+
+  getGameStats() {
+    if (this.gameType === 'BRICK_BREAKER' && this.bbState) {
+      const st = this.bbState;
+      const pct = (st.brokenCount / Math.max(1, st.totalBreakable)) * 100;
+      return {
+        lives: st.lives,
+        brokenCount: st.brokenCount,
+        totalBreakable: st.totalBreakable,
+        progressPct: pct,
+        isTurbo: st.isTurbo,
+        isLaunched: st.isLaunched,
+        combo: st.combo,
+        activePowerups: { ...st.activePowerups }
+      };
+    }
+    if (this.gameType === 'TERRITORY_QIX' && this.qixState) {
+      const st = this.qixState;
+      return {
+        lives: st.lives,
+        claimedTerritoryPct: st.claimedTerritoryPct || 0,
+        silhouetteRevealedPct: st.silhouetteRevealedPct || 0,
+        isDash: st.isDash
+      };
+    }
+    return null;
   }
 
   /**
@@ -780,27 +871,25 @@ class ImageMinigameSuite {
   }
 
   // =========================================================================
-  // 1. 🧱 도트 아트 벽돌깨기 (술 모양 도트 벽돌 + 전략적 강철 범퍼)
+  // 1. 🧱 도트 아트 벽돌깨기 (알카노이드 정통 룰 + 쾌속 발사 + 파워업 캡슐)
   // =========================================================================
   _initBrickBreaker() {
     const dotInfo = this._parseDotSprite(this.recipe);
 
-    // 16x16 도트 좌표계 기준 벽돌 레이아웃 구성
     const cols = 16;
     const rows = 16;
     const bw = 20;
     const bh = 13;
     const gapX = 2;
     const gapY = 2;
-    const pitchX = bw + gapX; // 22px
-    const pitchY = bh + gapY; // 15px
+    const pitchX = bw + gapX;
+    const pitchY = bh + gapY;
 
-    const stageW = cols * pitchX - gapX; // 350px
-    const stageH = rows * pitchY - gapY; // 238px
-    const padX = Math.floor((this.width - stageW) / 2); // 좌우 여백 (420 - 350) / 2 = 35px
-    const topY = 44; // 상단 여백 (HUD 32px 아래)
+    const stageW = cols * pitchX - gapX;
+    const stageH = rows * pitchY - gapY;
+    const padX = Math.floor((this.width - stageW) / 2);
+    const topY = 44;
 
-    // 숨겨진 실제 도트 아트를 벽돌 그리드 좌표계와 1:1로 완벽히 일치하도록 렌더링
     this._renderBrickHiddenArtwork(dotInfo, {
       padX,
       topY,
@@ -816,42 +905,54 @@ class ImageMinigameSuite {
       lastTime: performance.now(),
       targetPct: 100,
       blockAreaBottom: topY + stageH,
+      isLaunched: false,
+      aimAngle: -Math.PI / 2, // 기본 상향 (-90도)
+      isTurbo: false,
       paddle: {
         x: this.width / 2 - 44,
-        y: this.height - 28,
+        y: this.height - 30,
         w: 88,
         baseW: 88,
         h: 12,
-        shrinkTimer: 0,
         keyDir: 0
       },
-      ball: {
-        x: this.width / 2,
-        y: this.height - 44,
-        vx: 0,
-        vy: 0,
-        r: 7,
-        speedMultiplier: 0.65
+      balls: [
+        {
+          x: this.width / 2,
+          y: this.height - 44,
+          vx: 0,
+          vy: 0,
+          r: 7,
+          isFireball: false
+        }
+      ],
+      powerups: [], // 낙하 파워업 캡슐
+      lasers: [],   // 레이저 포탑 탄환
+      activePowerups: {
+        wideTimer: 0,
+        laserTimer: 0,
+        fireTimer: 0,
+        barrierHits: 0
       },
+      lastLaserShot: 0,
+      combo: 0,
+      floatingTexts: [],
       blocks: [],
-      hazards: [], // 낙하 독방울(☠️) / 빙결함정(❄️)
       totalBreakable: 0,
       brokenCount: 0
     };
 
-    // 전략적 강철 블록(파괴 불가 범퍼) 위치 선정
+    // 전략적 강철 블록 위치 선정
     const centerC = Math.round((dotInfo.minC + dotInfo.maxC) / 2);
     const shoulderR = dotInfo.minR + Math.floor((dotInfo.maxR - dotInfo.minR) * 0.35);
 
     const steelCoords = new Set();
-    // 1. 상단 병뚜껑/마개 중앙 (1~2개)
     for (const p of dotInfo.activePixels) {
       if (p.r === dotInfo.minR && (p.c === centerC || p.c === centerC - 1)) {
         steelCoords.add(`${p.r},${p.c}`);
         if (steelCoords.size >= 2) break;
       }
     }
-    // 2. 어깨 부위 범퍼 (1개)
     if (steelCoords.size < 3 && dotInfo.maxR - dotInfo.minR >= 7) {
       for (const p of dotInfo.activePixels) {
         if (p.r === shoulderR && (p.c === dotInfo.minC || p.c === dotInfo.maxC)) {
@@ -860,7 +961,6 @@ class ImageMinigameSuite {
         }
       }
     }
-    // 예외 안전장치: 최소 1개 강철 범퍼 보장
     if (steelCoords.size === 0 && dotInfo.activePixels.length > 0) {
       steelCoords.add(`${dotInfo.activePixels[0].r},${dotInfo.activePixels[0].c}`);
     }
@@ -868,7 +968,6 @@ class ImageMinigameSuite {
     const labelMinR = dotInfo.minR + (dotInfo.maxR - dotInfo.minR) * 0.4;
     const labelMaxR = dotInfo.minR + (dotInfo.maxR - dotInfo.minR) * 0.65;
 
-    // 각 활성 도트 픽셀을 고유 블록으로 생성
     for (const p of dotInfo.activePixels) {
       const coordKey = `${p.r},${p.c}`;
       const isSteel = steelCoords.has(coordKey);
@@ -877,7 +976,6 @@ class ImageMinigameSuite {
       if (isSteel) {
         hp = 999;
       } else {
-        // 중앙 라벨/코어 부위는 HP 2
         if (p.r >= labelMinR && p.r <= labelMaxR && p.c > dotInfo.minC && p.c < dotInfo.maxC) {
           hp = 2;
         }
@@ -912,23 +1010,33 @@ class ImageMinigameSuite {
       return false;
     };
 
-    const launchBall = () => {
+    const doLaunchBall = () => {
       if (handleWinClose()) return;
-      if (this.gameState === 'READY') {
+      if (this.gameState === 'READY' || !this.bbState.isLaunched) {
+        this.bbState.isLaunched = true;
         this.gameState = 'PLAYING';
         this.bbState.lastTime = performance.now();
-        this.audio.playTap();
-        const b = this.bbState.ball;
-        b.vy = -4.2;
-        b.vx = (Math.random() > 0.5 ? 1 : -1) * (2.8 + Math.random() * 0.8);
+        const b = this.bbState.balls[0];
+        if (b) {
+          const baseSpeed = 7.6; // 상쾌하고 빠른 시작 속도!
+          b.vx = Math.cos(this.bbState.aimAngle) * baseSpeed;
+          b.vy = Math.sin(this.bbState.aimAngle) * baseSpeed;
+        }
+        this.audio?.playTap?.();
       } else if (this.gameState === 'OVER') {
-        this.audio.playTap();
+        this.audio?.playTap?.();
         this.start('BRICK_BREAKER');
         this.gameState = 'PLAYING';
+        this.bbState.isLaunched = true;
         this.bbState.lastTime = performance.now();
-        const b = this.bbState.ball;
-        b.vy = -4.2;
-        b.vx = (Math.random() > 0.5 ? 1 : -1) * (2.8 + Math.random() * 0.8);
+        const b = this.bbState.balls[0];
+        if (b) {
+          const baseSpeed = 7.6;
+          b.vx = Math.cos(this.bbState.aimAngle) * baseSpeed;
+          b.vy = Math.sin(this.bbState.aimAngle) * baseSpeed;
+        }
+      } else if (this.bbState.activePowerups?.laserTimer > 0) {
+        this.fireLaser();
       }
     };
 
@@ -938,75 +1046,67 @@ class ImageMinigameSuite {
       const x = (clientX - rect.left) * scaleX;
       const p = this.bbState.paddle;
       p.x = Math.max(6, Math.min(this.width - p.w - 6, x - p.w / 2));
-      if (this.gameState === 'READY') {
-        this.bbState.ball.x = p.x + p.w / 2;
-        this.bbState.ball.y = p.y - this.bbState.ball.r - 2;
+
+      if (!this.bbState.isLaunched && this.bbState.balls[0]) {
+        const b = this.bbState.balls[0];
+        b.x = p.x + p.w / 2;
+        b.y = p.y - b.r - 2;
+        // 패들 위치에 따라 조준선 각도 미세 동적 틸트
+        const relX = (b.x / this.width) - 0.5;
+        this.bbState.aimAngle = -Math.PI / 2 + relX * 0.7;
       }
     };
 
-    const onMouseDown = (e) => {
+    let isPointerDragging = false;
+
+    const onPointerDown = (e) => {
+      if (e.cancelable) e.preventDefault();
       if (handleWinClose()) return;
+      isPointerDragging = true;
       movePaddle(e.clientX);
-      launchBall();
+      if (!this.bbState.isLaunched || this.bbState.activePowerups?.laserTimer > 0) {
+        doLaunchBall();
+      }
     };
 
-    const onMouseMove = (e) => {
+    const onPointerMove = (e) => {
+      if (!isPointerDragging && e.buttons === 0) return;
       movePaddle(e.clientX);
     };
 
-    const onTouchStart = (e) => {
-      if (handleWinClose()) {
-        if (e.cancelable) e.preventDefault();
-        return;
-      }
-      if (e.touches && e.touches[0]) {
-        e.preventDefault();
-        movePaddle(e.touches[0].clientX);
-        launchBall();
-      }
-    };
-
-    const onTouchMove = (e) => {
-      if (e.touches && e.touches[0]) {
-        e.preventDefault();
-        movePaddle(e.touches[0].clientX);
-      }
+    const onPointerUp = (e) => {
+      isPointerDragging = false;
     };
 
     const onKeyDown = (e) => {
       if (handleWinClose()) return;
       if (e.key === 'ArrowLeft' || e.key === 'a') {
         this.bbState.paddle.keyDir = -1;
-        launchBall();
       } else if (e.key === 'ArrowRight' || e.key === 'd') {
         this.bbState.paddle.keyDir = 1;
-        launchBall();
       } else if (e.key === ' ' || e.key === 'Enter') {
-        launchBall();
+        doLaunchBall();
+      } else if (e.key === 't' || e.key === 'T') {
+        this.toggleTurbo();
       }
     };
 
     const onKeyUp = (e) => {
-      if (
-        (e.key === 'ArrowLeft' || e.key === 'a') && this.bbState.paddle.keyDir === -1 ||
-        (e.key === 'ArrowRight' || e.key === 'd') && this.bbState.paddle.keyDir === 1
-      ) {
+      if (['ArrowLeft', 'ArrowRight', 'a', 'd'].includes(e.key)) {
         this.bbState.paddle.keyDir = 0;
       }
     };
 
-    this.canvas.addEventListener('mousedown', onMouseDown);
-    this.canvas.addEventListener('mousemove', onMouseMove);
-    this.canvas.addEventListener('touchstart', onTouchStart, { passive: false });
-    this.canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+    this.canvas.addEventListener('pointerdown', onPointerDown, { passive: false });
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerup', onPointerUp, { passive: true });
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
     this._cleanupInputHandlers = () => {
-      this.canvas.removeEventListener('mousedown', onMouseDown);
-      this.canvas.removeEventListener('mousemove', onMouseMove);
-      this.canvas.removeEventListener('touchstart', onTouchStart);
-      this.canvas.removeEventListener('touchmove', onTouchMove);
+      this.canvas.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
@@ -1019,178 +1119,367 @@ class ImageMinigameSuite {
     st.lastTime = now;
     st.elapsed += dt;
 
+    const timeScale = st.isTurbo ? 1.7 : 1.0;
     const p = st.paddle;
-    if (p.shrinkTimer > 0) {
-      p.shrinkTimer -= dt;
-      if (p.shrinkTimer <= 0) {
-        p.w = p.baseW;
+
+    // 파워업 타이머 갱신
+    const ap = st.activePowerups;
+    if (ap.wideTimer > 0) {
+      ap.wideTimer -= dt;
+      if (ap.wideTimer <= 0) p.w = p.baseW;
+    }
+    if (ap.fireTimer > 0) {
+      ap.fireTimer -= dt;
+      if (ap.fireTimer <= 0) {
+        for (const b of st.balls) b.isFireball = false;
       }
     }
+    if (ap.laserTimer > 0) {
+      ap.laserTimer -= dt;
+      if (now - st.lastLaserShot > 380) {
+        st.lastLaserShot = now;
+        st.lasers.push(
+          { x: p.x + 8, y: p.y - 4, vy: -13 },
+          { x: p.x + p.w - 8, y: p.y - 4, vy: -13 }
+        );
+        this.audio?.playTap?.();
+      }
+    }
+
+    // 패들 키보드 이동
     if (p.keyDir !== 0) {
-      p.x = Math.max(6, Math.min(this.width - p.w - 6, p.x + p.keyDir * 340 * dt));
+      p.x = Math.max(6, Math.min(this.width - p.w - 6, p.x + p.keyDir * 420 * dt));
+      if (!st.isLaunched && st.balls[0]) {
+        st.balls[0].x = p.x + p.w / 2;
+        const relX = (st.balls[0].x / this.width) - 0.5;
+        st.aimAngle = -Math.PI / 2 + relX * 0.7;
+      }
     }
 
-    // 초반에는 안정적인 속도(65%)로 출발하여, 진행도에 따라 최대 118%까지 시원하게 가속
-    const timeProgress = Math.min(1, Math.max(0, st.elapsed / 32));
-    const breakProgress = st.brokenCount / Math.max(1, st.totalBreakable);
-    const ramp = Math.max(timeProgress * 0.8, breakProgress);
-
-    const b = st.ball;
-    b.speedMultiplier = 0.65 + 0.53 * ramp;
-    b.x += b.vx * b.speedMultiplier;
-    b.y += b.vy * b.speedMultiplier;
-
-    // 좌우 벽 반사
-    if (b.x - b.r < 4) {
-      b.x = 4 + b.r;
-      b.vx = Math.abs(b.vx);
-    } else if (b.x + b.r > this.width - 4) {
-      b.x = this.width - 4 - b.r;
-      b.vx = -Math.abs(b.vx);
-    }
-
-    // 상단 천장 반사
-    if (b.y - b.r < 34) {
-      b.y = 34 + b.r;
-      b.vy = Math.abs(b.vy);
-    }
-
-    // 패들 충돌
-    if (
-      b.vy > 0 &&
-      b.y + b.r >= p.y &&
-      b.y - b.r <= p.y + p.h &&
-      b.x >= p.x - 4 &&
-      b.x <= p.x + p.w + 4
-    ) {
-      const hitOffset = (b.x - (p.x + p.w / 2)) / (p.w / 2); // -1 ~ 1
-      const speed = Math.hypot(b.vx, b.vy);
-      const angle = hitOffset * (Math.PI / 3); // 최대 60도 굴절
-      b.vx = Math.sin(angle) * speed;
-      b.vy = -Math.cos(angle) * speed;
-      b.y = p.y - b.r - 1;
-      this.audio.playTap();
-    }
-
-    // 블럭 충돌 검사
-    for (const blk of st.blocks) {
-      if (!blk.alive) continue;
-      if (
-        b.x + b.r > blk.x &&
-        b.x - b.r < blk.x + blk.w &&
-        b.y + b.r > blk.y &&
-        b.y - b.r < blk.y + blk.h
-      ) {
-        // 반사 방향 계산
-        const overlapLeft = b.x + b.r - blk.x;
-        const overlapRight = blk.x + blk.w - (b.x - b.r);
-        const overlapTop = b.y + b.r - blk.y;
-        const overlapBottom = blk.y + blk.h - (b.y - b.r);
-        const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
-
-        if (minOverlap === overlapLeft || minOverlap === overlapRight) {
-          b.vx = -b.vx;
-        } else {
-          b.vy = -b.vy;
-        }
-
-        if (blk.isSteel) {
-          this.shakeTicks = 4;
-          this._spawnParticles(b.x, b.y, '#94a3b8', 6);
-          this.audio.playTap();
-        } else {
-          blk.hp--;
-          this.audio.playTap();
-          if (blk.hp <= 0) {
-            blk.alive = false;
-            st.brokenCount++;
-            this.shakeTicks = 5;
-            this._spawnParticles(blk.x + blk.w / 2, blk.y + blk.h / 2, blk.color, 14);
-
-            // 15% 확률로 함정 낙하물(☠️ 독방울 또는 ❄️ 패들축소) 생성
-            if (Math.random() < 0.15) {
-              st.hazards.push({
-                x: blk.x + blk.w / 2,
-                y: blk.y + blk.h / 2,
-                vy: 2.2 + Math.random() * 1.2,
-                type: Math.random() < 0.5 ? 'POISON' : 'FREEZE'
-              });
+    // 1. 레이저 탄환 업데이트
+    for (let i = st.lasers.length - 1; i >= 0; i--) {
+      const lz = st.lasers[i];
+      lz.y += lz.vy * timeScale;
+      let hit = false;
+      for (const blk of st.blocks) {
+        if (!blk.alive) continue;
+        if (lz.x >= blk.x && lz.x <= blk.x + blk.w && lz.y >= blk.y && lz.y <= blk.y + blk.h) {
+          hit = true;
+          if (!blk.isSteel) {
+            blk.hp--;
+            if (blk.hp <= 0) {
+              blk.alive = false;
+              st.brokenCount++;
+              st.combo++;
+              this._onBlockDestroyed(blk);
+            } else {
+              this._spawnParticles(lz.x, lz.y, blk.color || '#38bdf8', 4);
             }
           } else {
-            this._spawnParticles(b.x, b.y, '#fcd34d', 7);
+            this._spawnParticles(lz.x, lz.y, '#94a3b8', 4);
           }
+          break;
         }
-        break;
+      }
+      if (hit || lz.y < 30) {
+        st.lasers.splice(i, 1);
       }
     }
 
-    // 낙하 함정 업데이트
-    for (let i = st.hazards.length - 1; i >= 0; i--) {
-      const hz = st.hazards[i];
-      hz.y += hz.vy;
+    // 2. 낙하 파워업 캡슐 업데이트
+    for (let i = st.powerups.length - 1; i >= 0; i--) {
+      const pw = st.powerups[i];
+      pw.y += pw.vy * timeScale;
+      // 패들 획득 판정
       if (
-        hz.y >= p.y - 6 &&
-        hz.y <= p.y + p.h + 6 &&
-        hz.x >= p.x &&
-        hz.x <= p.x + p.w
+        pw.y >= p.y - 8 &&
+        pw.y <= p.y + p.h + 6 &&
+        pw.x >= p.x - 6 &&
+        pw.x <= p.x + p.w + 6
       ) {
-        st.hazards.splice(i, 1);
-        this.shakeTicks = 10;
-        if (hz.type === 'POISON') {
-          st.lives--;
-          this.audio.playFail();
-          this._spawnParticles(hz.x, p.y, '#ef4444', 18);
-          if (st.lives <= 0) {
-            this.gameState = 'OVER';
-            if (this.onLose) this.onLose();
-            return;
-          }
-        } else {
-          // FREEZE: 패들 폭 40% 축소
-          p.w = Math.max(46, p.baseW * 0.6);
-          p.shrinkTimer = 5.5;
-          this._spawnParticles(hz.x, p.y, '#38bdf8', 14);
-        }
+        st.powerups.splice(i, 1);
+        this._applyPowerup(pw.type);
         continue;
       }
-      if (hz.y > this.height) {
-        st.hazards.splice(i, 1);
+      if (pw.y > this.height) {
+        st.powerups.splice(i, 1);
       }
     }
 
-    // 바닥 추락 시 라이프 차감
-    if (b.y - b.r > this.height) {
+    // 3. 플로팅 텍스트 업데이트
+    for (let i = st.floatingTexts.length - 1; i >= 0; i--) {
+      const ft = st.floatingTexts[i];
+      ft.life -= dt;
+      ft.y -= 24 * dt;
+      if (ft.life <= 0) {
+        st.floatingTexts.splice(i, 1);
+      }
+    }
+
+    // 공이 아직 발사 전이면 패들 상단 대기
+    if (!st.isLaunched) {
+      if (st.balls[0]) {
+        st.balls[0].x = p.x + p.w / 2;
+        st.balls[0].y = p.y - st.balls[0].r - 2;
+      }
+      return;
+    }
+
+    // 4. 모든 공 물리 연산
+    for (let bi = st.balls.length - 1; bi >= 0; bi--) {
+      const b = st.balls[bi];
+      b.x += b.vx * timeScale;
+      b.y += b.vy * timeScale;
+
+      // 좌우 벽 반사
+      if (b.x - b.r < 4) {
+        b.x = 4 + b.r;
+        b.vx = Math.abs(b.vx);
+      } else if (b.x + b.r > this.width - 4) {
+        b.x = this.width - 4 - b.r;
+        b.vx = -Math.abs(b.vx);
+      }
+
+      // 상단 천장 반사
+      if (b.y - b.r < 34) {
+        b.y = 34 + b.r;
+        b.vy = Math.abs(b.vy);
+      }
+
+      // 바닥 배리어 방어막 충돌
+      if (ap.barrierHits > 0 && b.y + b.r >= this.height - 10 && b.vy > 0) {
+        b.y = this.height - 10 - b.r;
+        b.vy = -Math.abs(b.vy);
+        ap.barrierHits--;
+        this.audio?.playTap?.();
+        this._spawnParticles(b.x, this.height - 10, '#38bdf8', 14);
+        this._addFloatingText('SAFETY BOUNCE!', b.x, this.height - 30, '#38bdf8');
+      }
+
+      // 패들 충돌 판정
+      if (
+        b.vy > 0 &&
+        b.y + b.r >= p.y &&
+        b.y - b.r <= p.y + p.h &&
+        b.x >= p.x - 6 &&
+        b.x <= p.x + p.w + 6
+      ) {
+        const hitOffset = (b.x - (p.x + p.w / 2)) / (p.w / 2); // -1 ~ 1
+        const speed = Math.min(11.2, Math.max(7.2, Math.hypot(b.vx, b.vy) * 1.01));
+        const angle = hitOffset * (Math.PI * 0.38); // 최대 68도 정밀 굴절
+        b.vx = Math.sin(angle) * speed;
+        b.vy = -Math.cos(angle) * speed;
+        b.y = p.y - b.r - 1;
+        st.combo = 0; // 패들에 닿으면 콤보 리셋
+        this.audio?.playTap?.();
+        this._spawnParticles(b.x, p.y, '#fde047', 6);
+      }
+
+      // 블럭 충돌 검사
+      for (const blk of st.blocks) {
+        if (!blk.alive) continue;
+        if (
+          b.x + b.r > blk.x &&
+          b.x - b.r < blk.x + blk.w &&
+          b.y + b.r > blk.y &&
+          b.y - b.r < blk.y + blk.h
+        ) {
+          const isFire = b.isFireball || ap.fireTimer > 0;
+
+          if (!blk.isSteel && isFire) {
+            // 파이어볼: 일반 블록을 튕기지 않고 관통하여 2HP 즉시 격파!
+            blk.hp -= 2;
+            if (blk.hp <= 0) {
+              blk.alive = false;
+              st.brokenCount++;
+              st.combo++;
+              this._onBlockDestroyed(blk);
+            } else {
+              this._spawnParticles(b.x, b.y, '#f97316', 6);
+            }
+          } else {
+            // 일반 반사 계산
+            const overlapLeft = b.x + b.r - blk.x;
+            const overlapRight = blk.x + blk.w - (b.x - b.r);
+            const overlapTop = b.y + b.r - blk.y;
+            const overlapBottom = blk.y + blk.h - (b.y - b.r);
+            const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+
+            if (minOverlap === overlapLeft || minOverlap === overlapRight) {
+              b.vx = -b.vx;
+            } else {
+              b.vy = -b.vy;
+            }
+
+            if (blk.isSteel) {
+              this.shakeTicks = 3;
+              this._spawnParticles(b.x, b.y, '#94a3b8', 6);
+              this.audio?.playTap?.();
+            } else {
+              blk.hp--;
+              if (blk.hp <= 0) {
+                blk.alive = false;
+                st.brokenCount++;
+                st.combo++;
+                this._onBlockDestroyed(blk);
+              } else {
+                this.audio?.playTap?.();
+                this._spawnParticles(b.x, b.y, blk.color || '#38bdf8', 6);
+              }
+            }
+          }
+          break;
+        }
+      }
+
+      // 공 바닥 추락
+      if (b.y - b.r > this.height) {
+        st.balls.splice(bi, 1);
+      }
+    }
+
+    // 5. 공이 전부 소진되었을 때 라이프 차감 및 재장전
+    if (st.balls.length === 0) {
       st.lives--;
       this.shakeTicks = 12;
-      this.audio.playFail();
+      this.audio?.playFail?.();
+      st.activePowerups.laserTimer = 0;
+      st.activePowerups.fireTimer = 0;
+      st.combo = 0;
+
       if (st.lives <= 0) {
         this.gameState = 'OVER';
         if (this.onLose) this.onLose();
         return;
       }
+
       this.gameState = 'READY';
-      b.x = p.x + p.w / 2;
-      b.y = p.y - b.r - 2;
-      b.vx = 0;
-      b.vy = 0;
+      st.isLaunched = false;
+      st.balls = [
+        {
+          x: p.x + p.w / 2,
+          y: p.y - 44,
+          vx: 0,
+          vy: 0,
+          r: 7,
+          isFireball: false
+        }
+      ];
     }
 
-    // 승리 판정: 파괴 가능한 블록을 예외 없이 100% 모두 깨야만 승리! (단 1개라도 남으면 클리어 불가)
-    const pct = (st.brokenCount / Math.max(1, st.totalBreakable)) * 100;
+    // 6. 승리 판정
     if (st.brokenCount >= st.totalBreakable) {
       this.gameState = 'WIN';
       this.winTimestamp = performance.now();
-      this.audio.playSuccess();
+      this.audio?.playSuccess?.();
       if (this.onWin) this.onWin();
     }
+  }
+
+  _onBlockDestroyed(blk) {
+    this.audio?.playTap?.();
+    this._spawnParticles(blk.x + blk.w / 2, blk.y + blk.h / 2, blk.color || '#38bdf8', 12);
+
+    // 콤보 팝업
+    if (this.bbState.combo >= 2) {
+      this._addFloatingText(`x${this.bbState.combo} COMBO!`, blk.x, blk.y - 10, '#fde047');
+    }
+
+    // 알카노이드 정통 파워업 캡슐 드롭 (26% 확률)
+    if (Math.random() < 0.26) {
+      const types = ['MULTI', 'WIDE', 'LASER', 'FIRE', 'BARRIER'];
+      const randType = types[Math.floor(Math.random() * types.length)];
+      const icons = {
+        MULTI: '[M]',
+        WIDE: '[W]',
+        LASER: '[L]',
+        FIRE: '[F]',
+        BARRIER: '[S]'
+      };
+      const colors = {
+        MULTI: '#38bdf8',
+        WIDE: '#4ade80',
+        LASER: '#f43f5e',
+        FIRE: '#fb923c',
+        BARRIER: '#a855f7'
+      };
+
+      this.bbState.powerups.push({
+        x: blk.x + blk.w / 2,
+        y: blk.y + blk.h / 2,
+        vy: 2.8,
+        type: randType,
+        icon: icons[randType],
+        color: colors[randType]
+      });
+    }
+  }
+
+  _applyPowerup(type) {
+    this.audio?.playSuccess?.();
+    const st = this.bbState;
+    const ap = st.activePowerups;
+    const p = st.paddle;
+
+    if (type === 'MULTI') {
+      // 멀티볼: 살아있는 모든 공을 각 3개로 분열! (최대 9개)
+      const currentBalls = [...st.balls];
+      for (const b of currentBalls) {
+        if (st.balls.length >= 9) break;
+        const curSpd = Math.max(7.2, Math.hypot(b.vx, b.vy));
+        const curAng = Math.atan2(b.vy, b.vx);
+        st.balls.push(
+          {
+            x: b.x,
+            y: b.y,
+            vx: Math.cos(curAng - 0.38) * curSpd,
+            vy: Math.sin(curAng - 0.38) * curSpd,
+            r: b.r,
+            isFireball: b.isFireball
+          },
+          {
+            x: b.x,
+            y: b.y,
+            vx: Math.cos(curAng + 0.38) * curSpd,
+            vy: Math.sin(curAng + 0.38) * curSpd,
+            r: b.r,
+            isFireball: b.isFireball
+          }
+        );
+      }
+      this._addFloatingText('MULTI-BALL! x3', p.x + p.w / 2, p.y - 20, '#38bdf8');
+    } else if (type === 'WIDE') {
+      p.w = p.baseW * 1.45;
+      ap.wideTimer = 11.0;
+      this._addFloatingText('WIDE PADDLE!', p.x + p.w / 2, p.y - 20, '#4ade80');
+    } else if (type === 'LASER') {
+      ap.laserTimer = 10.0;
+      this._addFloatingText('LASER CANNON!', p.x + p.w / 2, p.y - 20, '#f43f5e');
+    } else if (type === 'FIRE') {
+      ap.fireTimer = 8.5;
+      for (const b of st.balls) b.isFireball = true;
+      this._addFloatingText('FIREBALL!', p.x + p.w / 2, p.y - 20, '#fb923c');
+    } else if (type === 'BARRIER') {
+      ap.barrierHits = 2;
+      this._addFloatingText('SAFETY BARRIER!', p.x + p.w / 2, p.y - 20, '#a855f7');
+    }
+  }
+
+  _addFloatingText(text, x, y, color = '#ffffff') {
+    this.bbState.floatingTexts.push({
+      text,
+      x: Math.max(30, Math.min(this.width - 60, x)),
+      y,
+      life: 0.9,
+      maxLife: 0.9,
+      color
+    });
   }
 
   _drawBrickBreaker(ctx) {
     const st = this.bbState;
 
-    // 1. 전체 캔버스 배경 및 숨겨진 아트 렌더링:
-    // 플레이 도중: 어두운 실루엣(#1e293b)만 노출 (살아있는 네온블루 벽돌과 확연한 명도/색상 대비!)
-    // 클리어 승리 시: 화려한 원본 풀컬러 도트 일러스트 전체 대공개!
+    // 1. 캔버스 배경 및 숨겨진 도트/실루엣 아트 렌더링
     ctx.fillStyle = '#070b14';
     ctx.fillRect(0, 0, this.width, this.height);
     if (this.gameState === 'WIN') {
@@ -1201,16 +1490,14 @@ class ImageMinigameSuite {
       ctx.drawImage(this.hiddenArtCanvas, 0, 0);
     }
 
-    // 2. 살아있는 도트 블럭 렌더링 (스포일러 방지 신비로운 네온 블루 덮개)
+    // 2. 블럭 렌더링
     for (const blk of st.blocks) {
       if (!blk.alive) continue;
 
-      // 미파괴 블럭 뒤쪽 그림 가리기용 암막 (1px 여유로 완전 차단)
       ctx.fillStyle = '#070b14';
       ctx.fillRect(blk.x - 1, blk.y - 1, blk.w + 2, blk.h + 2);
 
       if (blk.isSteel) {
-        // 강철 범퍼: 메탈릭 티타늄 그레이 + 리벳 장식
         const steelGrad = ctx.createLinearGradient(blk.x, blk.y, blk.x, blk.y + blk.h);
         steelGrad.addColorStop(0, '#475569');
         steelGrad.addColorStop(1, '#1e293b');
@@ -1223,7 +1510,6 @@ class ImageMinigameSuite {
         ctx.lineWidth = 1.5;
         ctx.strokeRect(blk.x, blk.y, blk.w, blk.h);
       } else if (blk.hp === 2) {
-        // 라벨/코어 2HP 블록: 짙은 사파이어 블루 + 골드 네온 테두리 (2회 타격 필요)
         const hp2Grad = ctx.createLinearGradient(blk.x, blk.y, blk.x, blk.y + blk.h);
         hp2Grad.addColorStop(0, '#1e3a8a');
         hp2Grad.addColorStop(1, '#0f172a');
@@ -1237,7 +1523,6 @@ class ImageMinigameSuite {
         ctx.fillStyle = '#fde047';
         ctx.fillRect(blk.x + blk.w / 2 - 3, blk.y + blk.h / 2 - 1, 6, 2);
       } else {
-        // 일반 블록: 스포일러 방지 신비로운 사이언/네온 블루 덮개!
         const blockGrad = ctx.createLinearGradient(blk.x, blk.y, blk.x, blk.y + blk.h);
         blockGrad.addColorStop(0, '#0284c7');
         blockGrad.addColorStop(0.5, '#0369a1');
@@ -1245,118 +1530,171 @@ class ImageMinigameSuite {
         ctx.fillStyle = blockGrad;
         ctx.fillRect(blk.x, blk.y, blk.w, blk.h);
 
-        // 상단 3D 하이라이트
         ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
         ctx.fillRect(blk.x + 1, blk.y + 1, blk.w - 2, 1.5);
 
-        // 사이언 네온 테두리
         ctx.strokeStyle = 'rgba(56, 189, 248, 0.55)';
         ctx.lineWidth = 1;
         ctx.strokeRect(blk.x, blk.y, blk.w, blk.h);
       }
     }
 
-    // 3. 낙하 함정 그리기
-    for (const hz of st.hazards) {
-      ctx.font = '16px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(hz.type === 'POISON' ? '☠️' : '❄️', hz.x, hz.y);
+    // 3. 바닥 안전 배리어 (남아있을 때)
+    if (st.activePowerups?.barrierHits > 0) {
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.moveTo(10, this.height - 10);
+      ctx.lineTo(this.width - 10, this.height - 10);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
     }
 
-    // 4. 패들 그리기
+    // 4. 레이저 탄환 렌더링
+    for (const lz of st.lasers) {
+      ctx.fillStyle = '#f43f5e';
+      ctx.shadowColor = '#f43f5e';
+      ctx.shadowBlur = 8;
+      ctx.fillRect(lz.x - 1.5, lz.y - 8, 3, 14);
+      ctx.shadowBlur = 0;
+    }
+
+    // 5. 파워업 캡슐 렌더링
+    for (const pw of st.powerups) {
+      ctx.save();
+      ctx.fillStyle = pw.color;
+      ctx.shadowColor = pw.color;
+      ctx.shadowBlur = 12;
+      this._roundRect(ctx, pw.x - 14, pw.y - 7, 28, 14, 7, pw.color, '#ffffff');
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(pw.icon, pw.x, pw.y);
+      ctx.restore();
+    }
+
+    // 6. 패들 렌더링
     const p = st.paddle;
-    ctx.fillStyle = p.shrinkTimer > 0 ? '#38bdf8' : '#3b82f6';
+    const paddleGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+    paddleGrad.addColorStop(0, '#38bdf8');
+    paddleGrad.addColorStop(1, '#0284c7');
+    ctx.fillStyle = paddleGrad;
     ctx.strokeStyle = '#e0f2fe';
     ctx.lineWidth = 2;
-    ctx.fillRect(p.x, p.y, p.w, p.h);
-    ctx.strokeRect(p.x, p.y, p.w, p.h);
+    this._roundRect(ctx, p.x, p.y, p.w, p.h, 6, paddleGrad, '#e0f2fe');
 
-    // 5. 공 그리기
-    const b = st.ball;
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-    ctx.fillStyle = '#f59e0b';
-    ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+    // 레이저 포탑 장착 시 패들 양끝에 네온 포탑 표시
+    if (st.activePowerups?.laserTimer > 0) {
+      ctx.fillStyle = '#f43f5e';
+      ctx.fillRect(p.x + 6, p.y - 5, 4, 6);
+      ctx.fillRect(p.x + p.w - 10, p.y - 5, 4, 6);
+    }
 
+    // 7. 발사 전 조준 궤적 점선 렌더링 (Aiming Trajectory Line)
+    if (!st.isLaunched && st.balls[0]) {
+      const b = st.balls[0];
+      const dotCount = 8;
+      for (let i = 1; i <= dotCount; i++) {
+        const dist = i * 20;
+        const dx = b.x + Math.cos(st.aimAngle) * dist;
+        const dy = b.y + Math.sin(st.aimAngle) * dist;
+        ctx.beginPath();
+        ctx.arc(dx, dy, Math.max(1.5, 4.5 - i * 0.35), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(56, 189, 248, ${0.9 - i * 0.09})`;
+        ctx.fill();
+      }
+    }
+
+    // 8. 공 렌더링 (복수 공 지원 + 파이어볼 이펙트)
+    for (const b of st.balls) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+
+      const isFire = b.isFireball || st.activePowerups?.fireTimer > 0;
+      if (isFire) {
+        ctx.fillStyle = '#f97316';
+        ctx.shadowColor = '#ea580c';
+        ctx.shadowBlur = 16;
+        ctx.fill();
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = '#f59e0b';
+        ctx.shadowColor = '#f59e0b';
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 9. 플로팅 텍스트 렌더링
+    for (const ft of st.floatingTexts) {
+      ctx.save();
+      ctx.font = '900 13px sans-serif';
+      ctx.fillStyle = ft.color;
+      ctx.shadowColor = ft.color;
+      ctx.shadowBlur = 8;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.globalAlpha = Math.max(0, ft.life / ft.maxLife);
+      ctx.fillText(ft.text, ft.x, ft.y);
+      ctx.restore();
+    }
+
+    // 10. 상단 HUD
     const pct = (st.brokenCount / Math.max(1, st.totalBreakable)) * 100;
     const remaining = Math.max(0, st.totalBreakable - st.brokenCount);
+    const turboLabel = st.isTurbo ? '⚡2X TURBO' : '';
     this._drawHUD(ctx, {
       lives: st.lives,
       progressPct: pct,
-      labelText: remaining === 0 ? '100% 완료!' : `${st.brokenCount}/${st.totalBreakable} (${Math.floor(pct)}%)`
+      labelText: remaining === 0 ? '100% 완료!' : `${st.brokenCount}/${st.totalBreakable} (${Math.floor(pct)}%) ${turboLabel}`
     });
   }
 
   // =========================================================================
-  // 2. 📐 외곽 실루엣 땅따먹기 (술의 외곽선 네온 가이드 + 실루엣 100% 점령)
+  // 2. 📐 외곽 실루엣 땅따먹기 (Qix 정통 룰 + 화면 스와이프 + 아케이드 십자키 + 75% 점령)
   // =========================================================================
   _createQixEnemies(cols, rows) {
-    const configs = [
-      { isBoss: true, baseSpeed: 23.5 },
-      { isBoss: false, baseSpeed: 27.5 },
-      { isBoss: false, baseSpeed: 28.2 }
+    return [
+      { isBoss: true, baseSpeed: 23.5, r: 16, c: 26, vr: 1.2, vc: 1.4 },
+      { isBoss: false, baseSpeed: 27.5, r: 24, c: 20, vr: -1.4, vc: 1.1 },
+      { isSparx: true, baseSpeed: 18.0, r: 0, c: Math.floor(cols / 2), dir: 1 },
+      { isSparx: true, baseSpeed: 18.0, r: rows - 1, c: Math.floor(cols / 2), dir: -1 }
     ];
-
-    // 플레이어 시작 지점과 떨어진 상/중단 구역 배치
-    const zones = [
-      { minC: cols * 0.12, maxC: cols * 0.38, minR: rows * 0.14, maxR: rows * 0.52 },
-      { minC: cols * 0.38, maxC: cols * 0.62, minR: rows * 0.14, maxR: rows * 0.48 },
-      { minC: cols * 0.62, maxC: cols * 0.88, minR: rows * 0.14, maxR: rows * 0.52 }
-    ];
-
-    zones.sort(() => Math.random() - 0.5);
-
-    return configs.map((cfg, idx) => {
-      const z = zones[idx];
-      const c = z.minC + Math.random() * (z.maxC - z.minC);
-      const r = z.minR + Math.random() * (z.maxR - z.minR);
-
-      let angle;
-      do {
-        angle = Math.random() * Math.PI * 2;
-      } while (Math.abs(Math.cos(angle)) < 0.35 || Math.abs(Math.sin(angle)) < 0.35);
-
-      return {
-        c,
-        r,
-        vc: Math.cos(angle) * cfg.baseSpeed,
-        vr: Math.sin(angle) * cfg.baseSpeed,
-        isBoss: cfg.isBoss,
-        baseSpeed: cfg.baseSpeed
-      };
-    });
   }
 
   _resetTerritoryQixState() {
     if (!this.qixState) return;
-    const st = this.qixState;
-    const { cols, rows } = st;
-
-    st.grid = Array.from({ length: rows }, (_, r) =>
-      Array.from({ length: cols }, (__, c) =>
-        r === 0 || r === rows - 1 || c === 0 || c === cols - 1 ? 1 : 0
-      )
-    );
-    st.lives = 3;
-    st.elapsed = 0;
-    st.lastTime = performance.now();
-    st.capturedSilhouetteCount = 0;
-    st.silhouetteRevealedPct = 0;
-    st.player = {
-      c: Math.floor(cols / 2),
-      r: rows - 1,
-      dc: 0,
-      dr: 0,
-      moveAccum: 0
-    };
-    st.enemies = this._createQixEnemies(cols, rows);
-    this.particles = [];
-    this.shakeTicks = 0;
-    this._resetJoystickUI?.();
+    const { cols, rows } = this.qixState;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        this.qixState.grid[r][c] = (r === 0 || r === rows - 1 || c === 0 || c === cols - 1) ? 1 : 0;
+      }
+    }
+    this.qixState.player.c = Math.floor(cols / 2);
+    this.qixState.player.r = rows - 1;
+    this.qixState.player.dc = 0;
+    this.qixState.player.dr = 0;
+    this.qixState.player.pendingDir = null;
+    this.qixState.player.moveAccum = 0;
+    this.qixState.lives = 3;
+    this.qixState.elapsed = 0;
+    this.qixState.isDash = false;
+    this.qixState.enemies = this._createQixEnemies(cols, rows);
+    this.qixState.capturedSilhouetteCount = 0;
+    this.qixState.silhouetteRevealedPct = 0;
+    this.qixState.claimedTerritoryPct = 0;
   }
 
   _initTerritoryQix() {
@@ -1366,7 +1704,6 @@ class ImageMinigameSuite {
     const cellW = this.width / cols;
     const cellH = (this.height - topOffset) / rows;
 
-    // 0: 미점령(100% 암전), 1: 안전지대/점령완료, 2: 현재 긋고 있는 선(Trail)
     const grid = Array.from({ length: rows }, (_, r) =>
       Array.from({ length: cols }, (__, c) =>
         r === 0 || r === rows - 1 || c === 0 || c === cols - 1 ? 1 : 0
@@ -1374,13 +1711,12 @@ class ImageMinigameSuite {
     );
 
     const artSize = 32;
-    const startC = Math.floor((cols - artSize) / 2); // 10
-    const startR = Math.floor((rows - artSize) / 2); // 10
+    const startC = Math.floor((cols - artSize) / 2);
+    const startR = Math.floor((rows - artSize) / 2);
 
     const targetSilhouetteCells = new Set();
     const isSilhouetteGrid = Array.from({ length: rows }, () => new Uint8Array(cols));
 
-    // 실제 화면에 렌더링되는 술 SVG 일러스트로부터 1:1 정밀 알파 마스크 추출
     let hasExactMask = false;
     if (this.recipe && window.KSool?.pixelIcon) {
       try {
@@ -1410,8 +1746,6 @@ class ImageMinigameSuite {
 
               if (rawCount > 0) {
                 hasExactMask = true;
-                // 실루엣이 실제 그림보다 약간 더 커서(사방 1셀 팽창) 그림 전체를 안전하게 품고,
-                // 잔의 대각선 라인을 따라 계단식(Stepped)으로 자연스럽게 외곽선이 형성되도록 처리
                 const dilatedMask = Array.from({ length: rows }, () => new Uint8Array(cols));
                 for (let r = 0; r < rows; r++) {
                   for (let c = 0; c < cols; c++) {
@@ -1420,7 +1754,7 @@ class ImageMinigameSuite {
                         for (let dc = -1; dc <= 1; dc++) {
                           const nr = r + dr;
                           const nc = c + dc;
-                          if (nr >= 1 && nr < rows - 1 && nc >= 1 && nc < cols - 1) {
+                          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
                             dilatedMask[nr][nc] = 1;
                           }
                         }
@@ -1429,20 +1763,26 @@ class ImageMinigameSuite {
                   }
                 }
 
-                // 술 안쪽의 미세한 틈새(얼음 틈이나 레몬 틈 등)로 인한 구멍 방지:
-                // 바깥 외곽(0,0)에서 Flood Fill하여 '바깥 영역'을 찾고, 바깥이 아닌 모든 영역을 실루엣 내부로 확정
                 const isOutside = Array.from({ length: rows }, () => new Uint8Array(cols));
-                const queue = [[0, 0]];
-                isOutside[0][0] = 1;
+                const queue = [];
+                for (let r = 0; r < rows; r++) {
+                  if (!dilatedMask[r][0]) { isOutside[r][0] = 1; queue.push([r, 0]); }
+                  if (!dilatedMask[r][cols - 1]) { isOutside[r][cols - 1] = 1; queue.push([r, cols - 1]); }
+                }
+                for (let c = 0; c < cols; c++) {
+                  if (!dilatedMask[0][c] && !isOutside[0][c]) { isOutside[0][c] = 1; queue.push([0, c]); }
+                  if (!dilatedMask[rows - 1][c] && !isOutside[rows - 1][c]) { isOutside[rows - 1][c] = 1; queue.push([rows - 1, c]); }
+                }
 
-                while (queue.length > 0) {
-                  const [qr, qc] = queue.pop();
-                  const nbrs = [
-                    [qr - 1, qc], [qr + 1, qc], [qr, qc - 1], [qr, qc + 1]
-                  ];
-                  for (const [nr, nc] of nbrs) {
+                let qHead = 0;
+                while (qHead < queue.length) {
+                  const [qr, qc] = queue[qHead++];
+                  const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+                  for (const [dr, dc] of dirs) {
+                    const nr = qr + dr;
+                    const nc = qc + dc;
                     if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
-                      if (!isOutside[nr][nc] && !dilatedMask[nr][nc]) {
+                      if (!dilatedMask[nr][nc] && !isOutside[nr][nc]) {
                         isOutside[nr][nc] = 1;
                         queue.push([nr, nc]);
                       }
@@ -1467,7 +1807,6 @@ class ImageMinigameSuite {
       }
     }
 
-    // SVG 파싱 실패 시 레트로 도트 스프라이트(16x16) 폴백 보장
     if (!hasExactMask || targetSilhouetteCells.size === 0) {
       const dotInfo = this._parseDotSprite(this.recipe);
       const scale = 2;
@@ -1489,7 +1828,6 @@ class ImageMinigameSuite {
       }
     }
 
-    // 도트 실루엣의 가장 바깥 외곽선(Boundary Edges) 산출 (계단식 경계선)
     const silhouetteEdges = [];
     for (const coord of targetSilhouetteCells) {
       const [gr, gc] = coord.split(',').map(Number);
@@ -1498,17 +1836,12 @@ class ImageMinigameSuite {
       const y1 = topOffset + gr * cellH;
       const y2 = topOffset + (gr + 1) * cellH;
 
-      // 상단 경계
       if (!isSilhouetteGrid[gr - 1]?.[gc]) silhouetteEdges.push({ x1, y1, x2, y2: y1 });
-      // 하단 경계
       if (!isSilhouetteGrid[gr + 1]?.[gc]) silhouetteEdges.push({ x1, y1: y2, x2, y2 });
-      // 좌측 경계
       if (!isSilhouetteGrid[gr]?.[gc - 1]) silhouetteEdges.push({ x1, y1, x2: x1, y2 });
-      // 우측 경계
       if (!isSilhouetteGrid[gr]?.[gc + 1]) silhouetteEdges.push({ x1: x2, y1, x2, y2 });
     }
 
-    // 숨겨진 완성 일러스트를 실루엣 위치에 1:1로 정확히 정렬
     const silX = startC * cellW;
     const silY = topOffset + startR * cellH;
     const silW = artSize * cellW;
@@ -1531,24 +1864,24 @@ class ImageMinigameSuite {
       lives: 3,
       elapsed: 0,
       lastTime: performance.now(),
-      targetPct: 100, // 술의 외곽 실루엣 내부 영역을 100% 모두 도려내야 승리!
+      targetPct: 75, // 정통 Qix 영토 75% 점령 시 승리!
       targetSilhouetteCells,
       totalSilhouetteCells: targetSilhouetteCells.size,
       capturedSilhouetteCount: 0,
       silhouetteRevealedPct: 0,
+      claimedTerritoryPct: 0,
       silhouetteEdges,
+      isDash: false,
       player: {
         c: Math.floor(cols / 2),
         r: rows - 1,
         dc: 0,
         dr: 0,
+        pendingDir: null,
         moveAccum: 0
       },
-      enemies: this._createQixEnemies(cols, rows),
-      capturedPct: 0
+      enemies: this._createQixEnemies(cols, rows)
     };
-
-    let qixIgnoreInputUntil = 0;
 
     const handleWinClose = () => {
       if (this.gameState === 'WIN' && performance.now() - this.winTimestamp > 250) {
@@ -1569,88 +1902,75 @@ class ImageMinigameSuite {
         this.gameState = 'PLAYING';
         this.qixState.lastTime = performance.now();
         this.qixState.player.moveAccum = 0;
-        this.qixState.player.dc = 0;
-        this.qixState.player.dr = 0;
-        qixIgnoreInputUntil = performance.now() + 280;
-        this.audio.playTap();
+        this.audio?.playTap?.();
         return true;
       } else if (this.gameState === 'OVER') {
-        this.audio.playTap();
+        this.audio?.playTap?.();
         this._resetTerritoryQixState();
         this.gameState = 'PLAYING';
         this.qixState.lastTime = performance.now();
-        this.qixState.player.moveAccum = 0;
-        this.qixState.player.dc = 0;
-        this.qixState.player.dr = 0;
-        qixIgnoreInputUntil = performance.now() + 280;
         return true;
       }
       return false;
     };
 
-    const steerToward = (clientX, clientY) => {
-      const wasStarting = handleQixAction();
-      if (wasStarting || performance.now() < qixIgnoreInputUntil) return;
+    // 1. 화면 다이렉트 스와이프 & 드래그 조작계 (조작감 대혁신!)
+    let isSwiping = false;
+    let startTouchX = 0;
+    let startTouchY = 0;
 
-      const rect = this.canvas.getBoundingClientRect();
-      const x = (clientX - rect.left) * (this.width / rect.width);
-      const y = (clientY - rect.top) * (this.height / rect.height) - topOffset;
-      const targetC = x / cellW;
-      const targetR = y / cellH;
-      const pl = this.qixState.player;
-      const dx = targetC - pl.c;
-      const dy = targetR - pl.r;
-      if (Math.abs(dx) < 0.8 && Math.abs(dy) < 0.8) return;
+    const onPointerDown = (e) => {
+      if (e.cancelable) e.preventDefault();
+      if (handleQixAction()) return;
+      isSwiping = true;
+      startTouchX = e.clientX;
+      startTouchY = e.clientY;
+    };
 
-      const candidates = [];
-      if (Math.abs(dx) >= Math.abs(dy)) {
-        if (Math.abs(dx) >= 0.8) candidates.push({ dc: dx > 0 ? 1 : -1, dr: 0 });
-        if (Math.abs(dy) >= 0.8) candidates.push({ dc: 0, dr: dy > 0 ? 1 : -1 });
-      } else {
-        if (Math.abs(dy) >= 0.8) candidates.push({ dc: 0, dr: dy > 0 ? 1 : -1 });
-        if (Math.abs(dx) >= 0.8) candidates.push({ dc: dx > 0 ? 1 : -1, dr: 0 });
-      }
+    const onPointerMove = (e) => {
+      if (!isSwiping) return;
+      const dx = e.clientX - startTouchX;
+      const dy = e.clientY - startTouchY;
+      const dist = Math.hypot(dx, dy);
 
-      const isDrawing = grid[pl.r] && grid[pl.r][pl.c] === 2;
-
-      for (const cand of candidates) {
-        const isReverse = (pl.dc !== 0 && cand.dc === -pl.dc) || (pl.dr !== 0 && cand.dr === -pl.dr);
-        const nc = pl.c + cand.dc;
-        const nr = pl.r + cand.dr;
-        const nextCell = grid[nr] ? grid[nr][nc] : null;
-
-        if (nextCell === 2) continue;
-        if (isDrawing && isReverse) continue;
-
-        pl.dc = cand.dc;
-        pl.dr = cand.dr;
-        return;
+      if (dist >= 14) {
+        let reqDc = 0, reqDr = 0;
+        if (Math.abs(dx) >= Math.abs(dy)) {
+          reqDc = dx > 0 ? 1 : -1;
+          reqDr = 0;
+        } else {
+          reqDc = 0;
+          reqDr = dy > 0 ? 1 : -1;
+        }
+        this.setQixDirection(reqDc, reqDr);
+        startTouchX = e.clientX;
+        startTouchY = e.clientY;
       }
     };
 
-    const onClick = (e) => {
-      if (handleWinClose()) {
-        if (e.cancelable) e.preventDefault();
-        return;
-      }
-      handleQixAction();
+    const onPointerUp = () => {
+      isSwiping = false;
     };
 
+    // 2. 키보드 조작
     const onKeyDown = (e) => {
       if (handleWinClose()) return;
       if (this.gameState === 'OVER') {
-        this.audio.playTap();
+        this.audio?.playTap?.();
         this._resetTerritoryQixState();
         this.gameState = 'PLAYING';
       }
       handleQixAction();
+
       let reqDc = 0, reqDr = 0;
       if (e.key === 'ArrowLeft' || e.key === 'a') reqDc = -1;
       else if (e.key === 'ArrowRight' || e.key === 'd') reqDc = 1;
       else if (e.key === 'ArrowUp' || e.key === 'w') reqDr = -1;
       else if (e.key === 'ArrowDown' || e.key === 's') reqDr = 1;
-      else if (e.key === ' ' || e.key === 'Enter') { handleQixAction(); return; }
-      else return;
+      else if (e.key === ' ' || e.key === 'Shift') {
+        this.toggleDash();
+        return;
+      } else return;
 
       this.setQixDirection(reqDc, reqDr);
     };
@@ -1661,12 +1981,16 @@ class ImageMinigameSuite {
       }
     };
 
-    this.canvas.addEventListener('click', onClick);
+    this.canvas.addEventListener('pointerdown', onPointerDown, { passive: false });
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerup', onPointerUp, { passive: true });
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
     this._cleanupInputHandlers = () => {
-      this.canvas.removeEventListener('click', onClick);
+      this.canvas.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
@@ -1692,14 +2016,12 @@ class ImageMinigameSuite {
     const st = this.qixState;
     const { grid, rows, cols } = st;
 
-    // 1. 모든 선(2)을 점령지(1)로 변경
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (grid[r][c] === 2) grid[r][c] = 1;
       }
     }
 
-    // 2. 미점령(0) 영역을 연결 요소(Connected Components) 단위로 분리
     const compMap = Array.from({ length: rows }, () => new Int32Array(cols).fill(-1));
     const components = [];
     const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -1731,8 +2053,8 @@ class ImageMinigameSuite {
       }
     }
 
-    // 3. 각 분할 영역에 속한 적 구체 수 집계
     for (const en of st.enemies) {
+      if (en.isSparx) continue;
       const er = Math.max(1, Math.min(rows - 2, Math.floor(en.r)));
       const ec = Math.max(1, Math.min(cols - 2, Math.floor(en.c)));
       const cid = compMap[er][ec];
@@ -1741,7 +2063,6 @@ class ImageMinigameSuite {
       }
     }
 
-    // 4. 영역 분할 시 1개의 메인 미점령 영역만 남기고 나머지 영역은 100% 점령
     if (components.length > 0) {
       const compsWithEnemies = components.filter(comp => comp.enemyCount > 0);
       const pool = compsWithEnemies.length > 0 ? compsWithEnemies : components;
@@ -1759,6 +2080,7 @@ class ImageMinigameSuite {
       if (survivorComp.cells.length > 0) {
         const fallbackCell = survivorComp.cells[Math.floor(survivorComp.cells.length / 2)];
         for (const en of st.enemies) {
+          if (en.isSparx) continue;
           const er = Math.max(1, Math.min(rows - 2, Math.floor(en.r)));
           const ec = Math.max(1, Math.min(cols - 2, Math.floor(en.c)));
           if (compMap[er][ec] !== survivorComp.id) {
@@ -1769,24 +2091,30 @@ class ImageMinigameSuite {
       }
     }
 
-    // 5. 도트 실루엣 영역 점령률 집계: "외곽 실루엣 내부를 100% 완전히 땄는가!"
-    let capturedCount = 0;
-    for (const coord of st.targetSilhouetteCells) {
-      const [gr, gc] = coord.split(',').map(Number);
-      if (grid[gr][gc] === 1) {
-        capturedCount++;
+    // 통계 산출
+    let capturedInner = 0;
+    const totalInner = (rows - 2) * (cols - 2);
+    for (let r = 1; r < rows - 1; r++) {
+      for (let c = 1; c < cols - 1; c++) {
+        if (grid[r][c] === 1) capturedInner++;
       }
     }
+    st.claimedTerritoryPct = (capturedInner / totalInner) * 100;
 
-    st.capturedSilhouetteCount = capturedCount;
-    st.silhouetteRevealedPct = (capturedCount / Math.max(1, st.totalSilhouetteCells)) * 100;
+    let capturedSilhouette = 0;
+    for (const coord of st.targetSilhouetteCells) {
+      const [gr, gc] = coord.split(',').map(Number);
+      if (grid[gr][gc] === 1) capturedSilhouette++;
+    }
+    st.capturedSilhouetteCount = capturedSilhouette;
+    st.silhouetteRevealedPct = (capturedSilhouette / Math.max(1, st.totalSilhouetteCells)) * 100;
 
-    this.audio.playTap();
+    this.audio?.playTap?.();
     this._spawnParticles(
       st.player.c * st.cellW,
       st.topOffset + st.player.r * st.cellH,
       '#10b981',
-      20
+      22
     );
   }
 
@@ -1797,18 +2125,40 @@ class ImageMinigameSuite {
     st.lastTime = now;
     st.elapsed += dt;
 
-    // 플레이어 이동 (초당 22칸)
     const pl = st.player;
-    pl.moveAccum += dt * 22;
+    // 대시 모드 시 초당 38칸, 일반 시 초당 22칸 고속 절단
+    const speed = st.isDash ? 38 : 22;
+    pl.moveAccum += dt * speed;
+
     while (pl.moveAccum >= 1) {
       pl.moveAccum -= 1;
+
+      // 코너 턴 예약 버퍼 적용
+      if (pl.pendingDir) {
+        const pd = pl.pendingDir;
+        if (now < pd.expireAt) {
+          const testC = pl.c + pd.dc;
+          const testR = pl.r + pd.dr;
+          const nextCState = st.grid[testR]?.[testC];
+          const isDrawing = st.grid[pl.r][pl.c] === 2;
+          const isRev = (pl.dc !== 0 && pd.dc === -pl.dc) || (pl.dr !== 0 && pd.dr === -pl.dr);
+          if (nextCState !== 2 && !(isDrawing && isRev)) {
+            pl.dc = pd.dc;
+            pl.dr = pd.dr;
+            pl.pendingDir = null;
+          }
+        } else {
+          pl.pendingDir = null;
+        }
+      }
+
       if (pl.dc !== 0 || pl.dr !== 0) {
         const nc = Math.max(0, Math.min(st.cols - 1, pl.c + pl.dc));
         const nr = Math.max(0, Math.min(st.rows - 1, pl.r + pl.dr));
         const prevState = st.grid[pl.r][pl.c];
         const nextState = st.grid[nr][nc];
 
-        // 자기 자신의 선(2)을 밟으면 라이프 차감
+        // 자기 자신의 선(2)을 밟으면 피격
         if (nextState === 2 && (nr !== pl.r || nc !== pl.c)) {
           this._onQixPlayerHit();
           return;
@@ -1818,18 +2168,21 @@ class ImageMinigameSuite {
         pl.r = nr;
 
         if (nextState === 0) {
-          st.grid[nr][nc] = 2; // 새로운 궤적 긋기
+          st.grid[nr][nc] = 2; // 새로운 절단 궤적 생성
+          if (st.isDash && Math.random() < 0.4) {
+            this._spawnParticles(nc * st.cellW, st.topOffset + nr * st.cellH, '#fb923c', 2);
+          }
         } else if (nextState === 1 && prevState === 2) {
-          // 안전지대 복귀 -> 영역 점령!
+          // 안전지대 복귀 -> 영역 점령 완료!
           pl.dc = 0;
           pl.dr = 0;
           this._floodFillCaptureQix();
 
-          // 술의 외곽 실루엣 내부를 100% 모두 점령했을 때 승리!
-          if (st.capturedSilhouetteCount >= st.totalSilhouetteCells || st.silhouetteRevealedPct >= 100) {
+          // 정통 룰: 영토 75% 이상 점령 또는 실루엣 100% 해금 시 승리!
+          if (st.claimedTerritoryPct >= 75 || st.silhouetteRevealedPct >= 100) {
             this.gameState = 'WIN';
             this.winTimestamp = performance.now();
-            this.audio.playSuccess();
+            this.audio?.playSuccess?.();
             if (this.onWin) this.onWin();
             return;
           }
@@ -1837,36 +2190,42 @@ class ImageMinigameSuite {
       }
     }
 
-    // 적 구체 이동 및 선(2) 충돌 검사
-    const timeProgress = Math.min(1, Math.max(0, st.elapsed / 24));
-    const captureProgress = Math.min(1, st.silhouetteRevealedPct / st.targetPct);
-    const ramp = Math.max(timeProgress, captureProgress * 0.85);
-    const speedMultiplier = 0.82 + 0.44 * ramp;
-
+    // 적 이동 및 충돌
     for (const en of st.enemies) {
-      if (!en.baseSpeed) en.baseSpeed = Math.hypot(en.vc, en.vr);
+      if (en.isSparx) {
+        // 스파크 순찰자: 외곽선 둘레를 시계/반시계 방향으로 순찰
+        en.c += en.dir * en.baseSpeed * dt * 0.4;
+        if (en.c >= st.cols - 1) { en.c = st.cols - 1; en.dir = -1; }
+        else if (en.c <= 0) { en.c = 0; en.dir = 1; }
 
-      const stepDist = Math.max(Math.abs(en.vc), Math.abs(en.vr)) * speedMultiplier * dt;
+        // 스파크가 플레이어와 직접 충돌
+        if (Math.hypot(en.c - pl.c, en.r - pl.r) < 1.4) {
+          this._onQixPlayerHit();
+          return;
+        }
+        continue;
+      }
+
+      // 보스 궤적 충돌
+      const stepDist = Math.max(Math.abs(en.vc), Math.abs(en.vr)) * dt;
       const subSteps = Math.max(1, Math.ceil(stepDist / 0.45));
       const subDt = dt / subSteps;
 
       for (let s = 0; s < subSteps; s++) {
-        const nextC = en.c + en.vc * speedMultiplier * subDt;
-        const nextR = en.r + en.vr * speedMultiplier * subDt;
+        const nextC = en.c + en.vc * subDt;
+        const nextR = en.r + en.vr * subDt;
         const checkC = Math.max(0, Math.min(st.cols - 1, Math.floor(nextC)));
         const checkR = Math.max(0, Math.min(st.rows - 1, Math.floor(nextR)));
 
-        // 적이 내 선(2)에 닿거나 선을 긋고 있는 플레이어와 부딪히면 피격
+        // 적이 플레이어의 선(2)을 타격하면 피격!
         if (st.grid[checkR][checkC] === 2 || (st.grid[pl.r][pl.c] === 2 && Math.hypot(en.c - pl.c, en.r - pl.r) < 1.6)) {
           this._onQixPlayerHit();
           return;
         }
 
-        let bounced = false;
         if (st.grid[checkR][Math.floor(en.c)] === 1) {
           en.vr = -en.vr;
           en.vc += (Math.random() - 0.5) * 1.5;
-          bounced = true;
         } else {
           en.r = nextR;
         }
@@ -1874,17 +2233,8 @@ class ImageMinigameSuite {
         if (st.grid[Math.floor(en.r)][checkC] === 1) {
           en.vc = -en.vc;
           en.vr += (Math.random() - 0.5) * 1.5;
-          bounced = true;
         } else {
           en.c = nextC;
-        }
-
-        if (bounced) {
-          const curSpd = Math.hypot(en.vc, en.vr);
-          if (curSpd > 0.1) {
-            en.vc = (en.vc / curSpd) * en.baseSpeed;
-            en.vr = (en.vr / curSpd) * en.baseSpeed;
-          }
         }
       }
     }
@@ -1894,111 +2244,158 @@ class ImageMinigameSuite {
     const st = this.qixState;
     st.lives--;
     this.shakeTicks = 12;
-    this.audio.playFail();
+    this.audio?.playFail?.();
     this._spawnParticles(
       st.player.c * st.cellW,
       st.topOffset + st.player.r * st.cellH,
       '#ef4444',
-      22
+      24
     );
+
     this._clearQixTrail();
-    st.player.c = Math.floor(st.cols / 2);
-    st.player.r = st.rows - 1;
     st.player.dc = 0;
     st.player.dr = 0;
-    st.player.moveAccum = 0;
-    st.lastTime = performance.now();
+    st.player.pendingDir = null;
 
     if (st.lives <= 0) {
       this.gameState = 'OVER';
-      this.stopQixPlayer();
-      this._resetJoystickUI?.();
       if (this.onLose) this.onLose();
-    } else {
-      this.gameState = 'READY';
-      this.stopQixPlayer();
-      this._resetJoystickUI?.();
+      return;
+    }
+
+    // 가장 가까운 안전지대(1)로 플레이어 복귀
+    for (let dist = 1; dist < st.rows; dist++) {
+      for (const [dr, dc] of [[0, dist], [0, -dist], [dist, 0], [-dist, 0]]) {
+        const nr = Math.max(0, Math.min(st.rows - 1, st.player.r + dr));
+        const nc = Math.max(0, Math.min(st.cols - 1, st.player.c + dc));
+        if (st.grid[nr][nc] === 1) {
+          st.player.r = nr;
+          st.player.c = nc;
+          return;
+        }
+      }
     }
   }
 
   _drawTerritoryQix(ctx) {
     const st = this.qixState;
 
-    // 1. 숨겨진 완성 일러스트를 전체 캔버스에 렌더링
-    ctx.drawImage(this.hiddenArtCanvas, 0, 0);
+    ctx.fillStyle = '#050811';
+    ctx.fillRect(0, 0, this.width, this.height);
 
-    // 2. 미점령 영역(0)을 100% 완전 불투명 암전으로 가려 사전 유출을 원천 차단
-    const { grid, rows, cols, cellW, cellH, topOffset } = st;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const val = grid[r][c];
-        const x = c * cellW;
-        const y = topOffset + r * cellH;
-        if (val === 0) {
-          ctx.fillStyle = '#070b14'; // 100% 완전 불투명 암전
-          ctx.fillRect(x - 0.5, y - 0.5, cellW + 1, cellH + 1);
-        } else if (val === 2) {
-          ctx.fillStyle = '#f59e0b'; // 선 긋기 트레일
-          ctx.fillRect(x, y, cellW + 1, cellH + 1);
+    // 1. 점령된 영토(1)에만 클리핑하여 숨겨진 원본 술 아트 렌더링
+    ctx.save();
+    ctx.beginPath();
+    let hasCapturedArea = false;
+    for (let r = 0; r < st.rows; r++) {
+      for (let c = 0; c < st.cols; c++) {
+        if (st.grid[r][c] === 1) {
+          ctx.rect(c * st.cellW, st.topOffset + r * st.cellH, st.cellW + 0.3, st.cellH + 0.3);
+          hasCapturedArea = true;
         }
       }
     }
+    if (hasCapturedArea) {
+      ctx.clip();
+      ctx.drawImage(this.hiddenArtCanvas, 0, 0);
+    }
+    ctx.restore();
 
-    // 3. 목표인 술의 고유 외곽 실루엣을 네온 가이드라인으로 렌더링
-    if (st.silhouetteEdges && st.silhouetteEdges.length > 0) {
-      const pulse = 0.82 + 0.18 * Math.sin(performance.now() * 0.006);
-      ctx.save();
-      ctx.shadowColor = st.silhouetteRevealedPct >= 100 ? '#10b981' : '#38bdf8';
-      ctx.shadowBlur = 8 * pulse;
-      ctx.strokeStyle = st.silhouetteRevealedPct >= 100
-        ? `rgba(16, 185, 129, ${0.9 * pulse})`
-        : `rgba(56, 189, 248, ${0.85 * pulse})`;
-      ctx.lineWidth = 2.2;
+    // 2. 미점령 영역 네온 격자 테두리 렌더링
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 1.8;
+    ctx.shadowColor = 'rgba(16, 185, 129, 0.6)';
+    ctx.shadowBlur = 6;
+    ctx.beginPath();
+    for (let r = 0; r < st.rows; r++) {
+      for (let c = 0; c < st.cols; c++) {
+        if (st.grid[r][c] === 1) {
+          const x = c * st.cellW;
+          const y = st.topOffset + r * st.cellH;
+          if (st.grid[r - 1]?.[c] === 0) { ctx.moveTo(x, y); ctx.lineTo(x + st.cellW, y); }
+          if (st.grid[r + 1]?.[c] === 0) { ctx.moveTo(x, y + st.cellH); ctx.lineTo(x + st.cellW, y + st.cellH); }
+          if (st.grid[r]?.[c - 1] === 0) { ctx.moveTo(x, y); ctx.lineTo(x, y + st.cellH); }
+          if (st.grid[r]?.[c + 1] === 0) { ctx.moveTo(x + st.cellW, y); ctx.lineTo(x + st.cellW, y + st.cellH); }
+        }
+      }
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // 3. 술 외곽 실루엣 가이드선 (목표 힌트)
+    if (this.gameState !== 'WIN' && st.silhouetteEdges?.length > 0) {
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
       ctx.beginPath();
       for (const e of st.silhouetteEdges) {
         ctx.moveTo(e.x1, e.y1);
         ctx.lineTo(e.x2, e.y2);
       }
       ctx.stroke();
-      ctx.restore();
+      ctx.setLineDash([]);
     }
 
-    // 4. 적 구체 렌더링 (네온 오라)
+    // 4. 플레이어 활성 궤적 선(2) 그리기
+    ctx.fillStyle = st.isDash ? '#fb923c' : '#38bdf8';
+    ctx.shadowColor = st.isDash ? '#ea580c' : '#38bdf8';
+    ctx.shadowBlur = st.isDash ? 14 : 8;
+    for (let r = 0; r < st.rows; r++) {
+      for (let c = 0; c < st.cols; c++) {
+        if (st.grid[r][c] === 2) {
+          ctx.fillRect(c * st.cellW, st.topOffset + r * st.cellH, st.cellW, st.cellH);
+        }
+      }
+    }
+    ctx.shadowBlur = 0;
+
+    // 5. 적 렌더링
     for (const en of st.enemies) {
-      const ex = en.c * cellW;
-      const ey = topOffset + en.r * cellH;
-      ctx.save();
-      ctx.shadowColor = en.isBoss ? '#ec4899' : '#ef4444';
-      ctx.shadowBlur = 8;
-      ctx.beginPath();
-      ctx.arc(ex, ey, en.isBoss ? 9 : 6, 0, Math.PI * 2);
-      ctx.fillStyle = en.isBoss ? '#ec4899' : '#ef4444';
-      ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      ctx.restore();
+      const ex = en.c * st.cellW;
+      const ey = st.topOffset + en.r * st.cellH;
+      if (en.isSparx) {
+        ctx.fillStyle = '#ef4444';
+        ctx.shadowColor = '#ef4444';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc(ex, ey, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      } else {
+        ctx.strokeStyle = en.isBoss ? '#f43f5e' : '#a855f7';
+        ctx.shadowColor = en.isBoss ? '#f43f5e' : '#a855f7';
+        ctx.shadowBlur = 10;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(ex, ey, en.isBoss ? 9 : 7, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
     }
 
-    // 5. 플레이어 네온 커서 렌더링
-    const px = st.player.c * cellW + cellW / 2;
-    const py = topOffset + st.player.r * cellH + cellH / 2;
+    // 6. 플레이어 아바타 렌더링
+    const pl = st.player;
+    const px = pl.c * st.cellW + st.cellW / 2;
+    const py = st.topOffset + pl.r * st.cellH + st.cellH / 2;
+    ctx.fillStyle = '#fde047';
+    ctx.shadowColor = '#facc15';
+    ctx.shadowBlur = 12;
     ctx.beginPath();
-    ctx.arc(px, py, 6.5, 0, Math.PI * 2);
-    ctx.fillStyle = '#10b981';
+    ctx.arc(px, py, 6, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 2;
     ctx.stroke();
+    ctx.shadowBlur = 0;
 
+    // 7. 상단 HUD
+    const dashLabel = st.isDash ? '⚡DASH' : '';
     this._drawHUD(ctx, {
       lives: st.lives,
-      progressPct: st.silhouetteRevealedPct,
-      labelText: `${Math.floor(st.silhouetteRevealedPct)}% / 100%`
+      progressPct: st.claimedTerritoryPct,
+      labelText: `영토: ${Math.floor(st.claimedTerritoryPct)}% (목표 75%) | 외형: ${Math.floor(st.silhouetteRevealedPct)}% ${dashLabel}`
     });
   }
-
-
   // =========================================================================
   // 3. 🧩 네모네모 로직 (Nonogram / Picross 숫자 퍼즐)
   // =========================================================================
