@@ -44,31 +44,25 @@ class FridgeRecommenderView {
     // 실제 술 조합에 쓰이는 해금된 냉장고 재료만 필터링
     const eligibleIngs = this.fridgeEngine.getEligibleFridgeIngredients() || [];
 
-    // 해금된 재료가 존재하는 재료 유형만 노출하고 '전체 재료'는 제일 마지막 탭으로 배치
+    // 해금된 재료가 존재하는 재료 유형만 노출
     const visibleCategories = (this.recipeBook.categories || []).filter(c =>
       eligibleIngs.some(ing => ing.category_id === c.category_id)
     );
 
     if (
-      this.selectedCategory !== 'ALL' &&
       !visibleCategories.some(c => c.category_id === this.selectedCategory) &&
       visibleCategories.length > 0
     ) {
       this.selectedCategory = visibleCategories[0].category_id;
     }
 
-    const filteredIngs = this.selectedCategory === 'ALL'
-      ? eligibleIngs
-      : eligibleIngs.filter(i => i.category_id === this.selectedCategory);
+    const filteredIngs = eligibleIngs.filter(i => i.category_id === this.selectedCategory);
 
-    const catChipsHtml = [
-      ...visibleCategories.map(c => `
-        <button class="cat-chip ${this.selectedCategory === c.category_id ? 'active' : ''}" data-fridge-cat="${c.category_id}">
-          ${c.name}
-        </button>
-      `),
-      `<button class="cat-chip ${this.selectedCategory === 'ALL' ? 'active' : ''}" data-fridge-cat="ALL">ALL</button>`
-    ].join('');
+    const catChipsHtml = visibleCategories.map(c => `
+      <button class="cat-chip ${this.selectedCategory === c.category_id ? 'active' : ''}" data-fridge-cat="${c.category_id}">
+        ${c.name}
+      </button>
+    `).join('');
 
     const ingGridHtml = filteredIngs.length > 0 ? filteredIngs.map(ing => {
       const checked = this.fridgeEngine.isSelected(ing.ingredient_id);

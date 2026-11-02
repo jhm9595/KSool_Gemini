@@ -718,7 +718,6 @@ class KSoolApp {
     );
 
     if (
-      this.selectedIngCategory !== 'ALL' &&
       !visibleCategories.some(c => c.category_id === this.selectedIngCategory) &&
       visibleCategories.length > 0
     ) {
@@ -731,10 +730,7 @@ class KSoolApp {
       </button>
     `).join('');
 
-    // 'ALL' 탭은 제일 마지막 탭으로 배치 (아이콘 없이 순수 텍스트 ALL)
-    const allChip = `<button class="cat-chip ${this.selectedIngCategory === 'ALL' ? 'active' : ''}" data-ing-cat="ALL">ALL</button>`;
-
-    bar.innerHTML = catChips + allChip;
+    bar.innerHTML = catChips;
     bar.querySelectorAll('[data-ing-cat]').forEach(btn => {
       btn.onclick = () => {
         this.selectedIngCategory = btn.getAttribute('data-ing-cat');
@@ -793,9 +789,7 @@ class KSoolApp {
 
     // 1. 모바일 전용: 카테고리 필터링 그리드
     if (grid) {
-      const filtered = this.selectedIngCategory === 'ALL'
-        ? unlockedBase
-        : unlockedBase.filter(i => i.category_id === this.selectedIngCategory);
+      const filtered = unlockedBase.filter(i => i.category_id === this.selectedIngCategory);
 
       filtered.sort((a, b) => a.ingredient_id - b.ingredient_id);
       grid.innerHTML = filtered.map(ing => this._createIngredientCardHtml(ing, potSlots)).join('');
