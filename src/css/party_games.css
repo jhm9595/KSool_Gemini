@@ -3765,3 +3765,623 @@
   transform: scale(1.02);
   box-shadow: 0 0 28px rgba(16, 185, 129, 0.7);
 }
+
+
+/* ==========================================================================
+   ⑩ 아이엠그라운드 (I Am Ground - 리듬 박자 술게임 에디션)
+   ========================================================================== */
+
+.iamground-setup-stage {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.iamground-setup-card {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1.5px solid rgba(236, 72, 153, 0.4);
+  border-radius: 20px;
+  padding: 18px 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 24px rgba(236, 72, 153, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.iamground-setup-header {
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.iamground-setup-badge {
+  font-size: 0.68rem;
+  font-weight: 900;
+  color: #ec4899;
+  letter-spacing: 1.5px;
+  background: rgba(236, 72, 153, 0.15);
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(236, 72, 153, 0.35);
+  display: inline-block;
+}
+
+.iamground-setup-title {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #f1f5f9;
+  margin: 6px 0 2px;
+}
+
+.iamground-setup-desc {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.iamground-setup-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.iamground-label {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #cbd5e1;
+}
+
+.iamground-nick-input-wrap {
+  width: 100%;
+}
+
+.iamground-nick-input {
+  width: 100%;
+  height: 44px;
+  background: #1e293b;
+  border: 1.5px solid #334155;
+  border-radius: 12px;
+  color: #f8fafc;
+  font-size: 1.15rem;
+  font-weight: 900;
+  text-align: center;
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.iamground-nick-input:focus {
+  border-color: #ec4899;
+  box-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
+}
+
+.iamground-quick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.iamground-chip {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 8px;
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.iamground-chip.active {
+  background: rgba(236, 72, 153, 0.25);
+  border-color: #ec4899;
+  color: #f472b6;
+  font-weight: 900;
+}
+
+.iamground-btn-group {
+  display: flex;
+  gap: 6px;
+}
+
+.iamground-sel-btn {
+  flex: 1;
+  height: 42px;
+  background: #1e293b;
+  border: 1.5px solid #334155;
+  border-radius: 10px;
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.iamground-sel-btn.active {
+  background: rgba(236, 72, 153, 0.25);
+  border-color: #ec4899;
+  color: #f472b6;
+  font-weight: 900;
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.35);
+}
+
+.iamground-start-btn {
+  width: 100%;
+  height: 50px;
+  background: linear-gradient(135deg, #ec4899, #be185d);
+  border: 1.5px solid #f472b6;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 900;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+  transition: all 0.15s ease;
+  margin-top: 4px;
+}
+
+.iamground-start-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 28px rgba(236, 72, 153, 0.7);
+}
+
+/* ==========================================================================
+   아이엠그라운드 플레이 화면
+   ========================================================================== */
+
+.iamground-stage {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 6px 10px 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+  user-select: none;
+}
+
+.iamground-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.iamground-stat-pill {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.iamground-stat-pill.highlight {
+  border-color: #ec4899;
+  color: #f472b6;
+  box-shadow: 0 0 8px rgba(236, 72, 153, 0.3);
+}
+
+.iamground-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #1e293b;
+  border: 1px solid #334155;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* 참가자 아레나 (상단) */
+.iamground-arena {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 8px 4px 6px;
+  flex-shrink: 0;
+  min-height: 130px;
+}
+
+.iamground-player-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  position: relative;
+  flex: 1;
+  max-width: 82px;
+  transition: transform 0.2s ease;
+}
+
+.iamground-player-card.active-turn .iamground-avatar-box {
+  border-color: #ec4899;
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.85);
+  transform: scale(1.08);
+}
+
+.iamground-player-card.targeted-shake {
+  animation: targetedShake 0.4s ease;
+}
+
+/* 만화 말풍선 */
+.iamground-speech-wrap {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all 0.15s ease;
+}
+
+.iamground-speech-wrap.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.iamground-speech-bubble {
+  display: inline-block;
+  padding: 3px 7px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  white-space: nowrap;
+  animation: speechPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  position: relative;
+}
+
+.iamground-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px 4px 0 4px;
+  border-style: solid;
+  border-color: inherit;
+}
+
+.iamground-speech-bubble.intro {
+  background: #f59e0b;
+  color: #0f172a;
+}
+.iamground-speech-bubble.rhythm {
+  background: #334155;
+  color: #cbd5e1;
+}
+.iamground-speech-bubble.name {
+  background: #10b981;
+  color: #ffffff;
+}
+.iamground-speech-bubble.attack {
+  background: #ec4899;
+  color: #ffffff;
+}
+.iamground-speech-bubble.defend {
+  background: #0284c7;
+  color: #ffffff;
+}
+.iamground-speech-bubble.panic {
+  background: #ef4444;
+  color: #ffffff;
+  animation: targetedShake 0.3s infinite;
+}
+
+/* 아바타 원형 박스 */
+.iamground-avatar-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #1e293b;
+  border: 2px solid #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.iamground-avatar-box.beat-bounce {
+  animation: iamgroundBounce 0.22s ease-out;
+}
+
+.iamground-avatar-emoji {
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.iamground-target-reticle {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 1.15rem;
+  animation: targetedShake 0.4s infinite;
+}
+
+/* 이름표 */
+.iamground-name-tag {
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 6px;
+  padding: 1px 5px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 100%;
+}
+
+.iamground-name-tag.user-tag {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+}
+
+.m-name-text {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.m-role-badge {
+  font-size: 0.52rem;
+  font-weight: 900;
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.2);
+  padding: 0 3px;
+  border-radius: 4px;
+}
+
+.user-tag .m-role-badge {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.25);
+}
+
+/* 액션 배너 & 판정 팝업 */
+.iamground-banner-section {
+  position: relative;
+  margin: 4px 0 2px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.iamground-action-banner {
+  width: 100%;
+  text-align: center;
+  padding: 6px 8px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  box-sizing: border-box;
+}
+
+.iamground-action-banner.user-action {
+  border-color: #ec4899;
+  background: rgba(236, 72, 153, 0.18);
+  color: #f472b6;
+  font-weight: 900;
+}
+
+.iamground-action-banner.user-defend {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  font-weight: 900;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+}
+
+.iamground-feedback-popup {
+  position: absolute;
+  top: -14px;
+  font-size: 1.15rem;
+  font-weight: 900;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  animation: speechPop 0.25s ease-out;
+}
+
+.iamground-feedback-popup.perfect {
+  color: #facc15;
+  text-shadow: 0 0 12px rgba(250, 204, 21, 0.8);
+}
+.iamground-feedback-popup.hit {
+  color: #38bdf8;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+}
+.iamground-feedback-popup.miss {
+  color: #ef4444;
+  text-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+}
+
+/* 네온 리듬 비트 트랙 (중앙) */
+.iamground-rhythm-track {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 0;
+  flex-shrink: 0;
+}
+
+.iamground-beat-pad {
+  flex: 1;
+  max-width: 48px;
+  height: 48px;
+  background: #1e293b;
+  border: 1.5px solid #334155;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+}
+
+.iamground-beat-pad.active {
+  background: #3b0764;
+  border-color: #ec4899;
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.85);
+  transform: scale(1.15);
+}
+
+.iamground-beat-pad.target-pulse {
+  border-color: #eab308;
+  box-shadow: 0 0 10px rgba(234, 179, 8, 0.6);
+}
+
+.m-beat-num {
+  font-size: 0.62rem;
+  font-weight: 900;
+  color: #94a3b8;
+}
+
+.m-beat-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+/* 하단 컨트롤 영역 */
+.iamground-controls-box {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1.5px solid rgba(236, 72, 153, 0.25);
+  border-radius: 16px;
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.iamground-controls-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.iamground-names-row {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.iamground-name-btn {
+  flex: 1;
+  height: 52px;
+  background: #1e293b;
+  border: 1.5px solid #334155;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  padding: 2px;
+}
+
+.iamground-name-btn:active {
+  transform: scale(0.92);
+}
+
+.iamground-name-btn.user-btn {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.iamground-name-btn.highlight-pulse {
+  border-color: #eab308;
+  box-shadow: 0 0 16px rgba(234, 179, 8, 0.85);
+  animation: iamgroundPulse 0.4s infinite alternate;
+  transform: scale(1.05);
+}
+
+.m-btn-emoji {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.m-btn-name {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  margin-top: 1px;
+}
+
+.iamground-numbers-row {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.iamground-num-btn {
+  flex: 1;
+  height: 48px;
+  background: #1e293b;
+  border: 1.5px solid #334155;
+  border-radius: 12px;
+  color: #f8fafc;
+  font-size: 1.15rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.iamground-num-btn:active {
+  transform: scale(0.92);
+}
+
+.iamground-num-btn.highlight-pulse {
+  border-color: #ec4899;
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.85);
+  animation: iamgroundPulse 0.4s infinite alternate;
+  transform: scale(1.05);
+}
+
+/* 애니메이션 */
+@keyframes iamgroundBounce {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-7px) scale(1.05); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes speechPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  80% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes targetedShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes iamgroundPulse {
+  0% { opacity: 0.85; }
+  100% { opacity: 1; }
+}
