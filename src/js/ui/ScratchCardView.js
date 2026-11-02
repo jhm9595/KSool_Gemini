@@ -33,7 +33,6 @@
             <span class="scratch-secret-content">${this.secretText}</span>
           </div>
           <canvas class="scratch-overlay-canvas"></canvas>
-          <button type="button" class="scratch-quick-reveal-btn" title="한 번에 긁기">✨ 즉시 공개</button>
         </div>
       `;
 
@@ -41,13 +40,6 @@
       this.canvas = parentEl.querySelector('.scratch-overlay-canvas');
       this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
 
-      const quickBtn = parentEl.querySelector('.scratch-quick-reveal-btn');
-      if (quickBtn) {
-        quickBtn.onclick = (e) => {
-          e.stopPropagation();
-          this.revealAll();
-        };
-      }
 
       // 캔버스 크기 측정 및 초기화
       requestAnimationFrame(() => {
