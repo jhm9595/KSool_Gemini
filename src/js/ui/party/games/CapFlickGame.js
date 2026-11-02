@@ -225,7 +225,7 @@ class CapFlickGame {
       }
     }
 
-    // 괄호 없이 임팩트 있는 톡, 딱!, 빡! 텍스트 (게이지와 뚜껑 사이 대칭 표시)
+    // 괄호 없이 임팩트 있는 톡, 딱!, 빡! 텍스트 (타격 강도 피드백)
     let hitWord = '';
     let hitClass = '';
 
@@ -339,7 +339,7 @@ class CapFlickGame {
   }
 
   // =========================================================================
-  // 미니멀 렌더링 & 이벤트 바인딩 (오프라인 양방향 대칭 게이지)
+  // 미니멀 렌더링 & 이벤트 바인딩
   // =========================================================================
 
   _getCapSvg() {
@@ -543,33 +543,22 @@ class CapFlickGame {
       </div>
     `;
 
-    const isSymmetrical = Boolean(this.hub?.isSymmetrical);
     const capSvg = this._getCapSvg();
 
     container.innerHTML = `
-      <div class="party-game-box capflick-minimal-box tabletop-symmetrical">
-        <!-- 1. 상단: 12시 방향 게이지 바 (대칭 모드일 때만 표시, 1인이면 숨김 처리) -->
-        <div class="flick-power-section top-symmetrical" ${isSymmetrical ? '' : 'style="visibility: hidden; pointer-events: none;" aria-hidden="true"'}>
-          ${meterHtml}
-        </div>
-
-        <!-- 2. 상단 타격 강도 피드백 (대칭 모드일 때만 표시, 1인이면 숨김 처리) -->
-        <div class="flick-hit-slot top-symmetrical" ${isSymmetrical ? '' : 'style="visibility: hidden; pointer-events: none;" aria-hidden="true"'}>
-          <div class="flick-hit-word" id="flick-hit-top"></div>
-        </div>
-
-        <!-- 3. 메인 인터랙션 아레나 (중앙 초록 병뚜껑 + 2배 길어진 꼬다리 와이어) -->
+      <div class="party-game-box capflick-minimal-box">
+        <!-- 1. 메인 인터랙션 아레나 (중앙 초록 병뚜껑 + 2배 길어진 꼬다리 와이어) -->
         <div class="capflick-center-stage" id="cap-flick-arena">
           ${capSvg}
         </div>
 
-        <!-- 4. 하단 타격 강도 피드백 (뚜껑과 게이지 사이, 정방향 0도, 정중앙 세로줄) -->
-        <div class="flick-hit-slot bottom-symmetrical">
+        <!-- 2. 타격 강도 피드백 (뚜껑과 게이지 사이, 정방향 0도, 정중앙 세로줄) -->
+        <div class="flick-hit-slot">
           <div class="flick-hit-word" id="flick-hit-bottom"></div>
         </div>
 
-        <!-- 5. 하단: 대칭 타이밍 파워 게이지 (내 쪽 플레이어용 정방향) -->
-        <div class="flick-power-section bottom-symmetrical">
+        <!-- 3. 하단: 타이밍 파워 게이지 -->
+        <div class="flick-power-section">
           ${meterHtml}
         </div>
       </div>

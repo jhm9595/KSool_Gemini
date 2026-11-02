@@ -100,53 +100,6 @@
   font-size: 1rem;
 }
 
-/* 탑바 대칭/1인 토글 버튼 */
-.party-symmetry-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(30, 41, 59, 0.95);
-  border: 1.5px solid rgba(148, 163, 184, 0.45);
-  color: #cbd5e1;
-  font-size: 0.8rem;
-  font-weight: 800;
-  padding: 5px 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  transition: all 0.15s ease;
-  user-select: none;
-}
-
-.party-symmetry-btn:hover {
-  background: #334155;
-  color: #f8fafc;
-  border-color: rgba(56, 189, 248, 0.6);
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
-}
-
-.party-symmetry-btn:active {
-  transform: scale(0.95);
-}
-
-.party-symmetry-btn.active {
-  background: rgba(14, 165, 233, 0.25);
-  border-color: #38bdf8;
-  color: #38bdf8;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
-}
-
-.party-symmetry-btn .sym-icon {
-  font-size: 0.95rem;
-  line-height: 1;
-}
-
-.party-symmetry-btn .sym-label {
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: -0.3px;
-}
-
 .party-topbar-spacer {
   flex-shrink: 0;
 }
@@ -569,8 +522,7 @@
 /* ==========================================================================
    ① Up & Down 전용 스타일
    ========================================================================== */
-.updown-box,
-.updown-box.tabletop-symmetrical {
+.updown-box {
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between !important;
@@ -586,7 +538,7 @@
   user-select: none;
 }
 
-/* 대칭 테이블탑 플레이어 스테이션 (상단 180도 / 하단 0도) */
+/* 플레이어 스테이션 */
 .updown-player-station {
   flex: 1;
   width: 100%;
@@ -600,16 +552,11 @@
   min-height: 0;
 }
 
-.updown-player-station.top-station {
-  transform: rotate(180deg);
-}
-
 .updown-player-station.bottom-station {
   transform: none;
 }
 
 /* 극사실적 3D 소주 병뚜껑 공통 스테이지 (CapFlick & UpAndDown 1:1 완벽 일치) */
-.capflick-center-stage,
 .updown-center-cap-wrap {
   flex: 0 0 auto;
   width: clamp(130px, 18vh, 160px);
@@ -623,9 +570,23 @@
 }
 
 .capflick-center-stage {
+  flex: 1;
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin: 0 auto;
+  z-index: 20;
   cursor: pointer;
   user-select: none;
   touch-action: none;
+}
+
+.capflick-center-stage .soju-cap-flick-svg {
+  width: clamp(150px, 22vh, 200px);
+  height: clamp(150px, 22vh, 200px);
 }
 
 .realistic-cap-container {
@@ -659,7 +620,7 @@
   user-select: none;
 }
 
-/* 뚜껑과 패드 사이 딱 중간 위치의 큼지막한 UP / DOWN 대칭 표시 */
+/* 뚜껑과 패드 사이 딱 중간 위치의 큼지막한 UP / DOWN 표시 */
 .updown-station-status-slot {
   flex: 1;
   width: 100%;
@@ -740,7 +701,7 @@
   text-shadow: 0 0 20px rgba(250, 204, 21, 0.8), 0 0 40px rgba(234, 179, 8, 0.5);
 }
 
-/* 4-2. 확인 시 n UP, n DOWN 자리에 즉시 나타나는 화살표 UP/DOWN 배너 (대칭) */
+/* 4-2. 확인 시 n UP, n DOWN 자리에 즉시 나타나는 화살표 UP/DOWN 배너 */
 .updown-status-anim-banner {
   display: flex;
   align-items: center;
@@ -1113,9 +1074,16 @@
    ② 꼬다리 치기 전용 스타일 (미니멀 물리 타격형)
    ========================================================================== */
 .capflick-minimal-box {
-  justify-content: space-between;
-  height: 100%;
-  padding-bottom: 8px;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  height: 100% !important;
+  width: 100% !important;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 8px 12px 14px;
+  box-sizing: border-box;
   touch-action: none !important;
 }
 
@@ -1129,14 +1097,7 @@
   -webkit-tap-highlight-color: transparent !important;
 }
 
-.capflick-minimal-box.tabletop-symmetrical {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-  height: 100% !important;
-  padding: 4px 10px 8px;
-  box-sizing: border-box;
-}
+
 
 
 
@@ -1178,9 +1139,9 @@
   50% { transform: translateY(2px); }
 }
 
-/* 게이지와 뚜껑 사이 대칭 타격 강도 텍스트 슬롯 (정중앙 세로줄 & 뚜껑-게이지 상하 정중앙 flex 배치) */
+/* 게이지와 뚜껑 사이 타격 강도 텍스트 슬롯 (정중앙 세로줄) */
 .flick-hit-slot {
-  flex: 1;
+  flex: 0 0 54px;
   width: 100%;
   max-width: 380px;
   margin: 0 auto;
@@ -1190,15 +1151,6 @@
   text-align: center;
   pointer-events: none;
   z-index: 15;
-  min-height: 50px;
-}
-
-.flick-hit-slot.top-symmetrical {
-  transform: rotate(180deg);
-}
-
-.flick-hit-slot.bottom-symmetrical {
-  transform: none;
 }
 
 .flick-hit-word {
@@ -1317,7 +1269,7 @@
 }
 
 
-/* 상하 대칭 왔다갔다 타이밍 파워 게이지 */
+/* 왔다갔다 타이밍 파워 게이지 */
 .flick-power-section {
   width: 100%;
   max-width: 360px;
@@ -1325,17 +1277,6 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-.flick-power-section.top-symmetrical {
-  transform: rotate(180deg);
-  margin-top: 2px;
-  margin-bottom: 2px;
-}
-
-.flick-power-section.bottom-symmetrical {
-  margin-top: 2px;
-  margin-bottom: 2px;
 }
 
 .flick-timing-meter {
@@ -2156,24 +2097,6 @@
   transition: background 0.2s ease;
 }
 
-.hunmin-pure-stage.tabletop-symmetrical {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  height: 100% !important;
-  width: 100% !important;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: none;
-  padding: 8px 12px 14px;
-  position: relative;
-  transition: background 0.2s ease;
-}
-
 /* 훈민정음 시한폭탄 1인 단독 모드 */
 .hunmin-pure-stage.hunmin-solo-stage {
   display: flex !important;
@@ -2245,42 +2168,8 @@
 }
 
 
-/* 대칭 자음 반쪽 영역 */
-.hunmin-symmetric-half {
-  flex: 1;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.hunmin-symmetric-half.top-half {
-  transform: rotate(180deg);
-}
-
-.hunmin-symmetric-half .pure-chosung-text {
-  font-size: min(5rem, 16vw);
-  font-weight: 900;
-  color: #fde047;
-  letter-spacing: 12px;
-  margin-left: 12px;
-  text-shadow: 0 0 24px rgba(253, 224, 71, 0.7), 0 6px 20px rgba(0, 0, 0, 0.8);
-  will-change: transform, opacity;
-}
 
 /* 중앙 가벼운 구분선 & 가운데 타이머 게이지 + 아이콘 전용 조작 버튼 */
-.hunmin-center-divider-zone {
-  width: 100%;
-  max-width: 440px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin: 6px 0;
-  z-index: 10;
-}
-
 .hunmin-light-divider {
   width: 100%;
   height: 1.5px;
