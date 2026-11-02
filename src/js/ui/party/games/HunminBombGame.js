@@ -286,82 +286,34 @@ class HunminBombGame {
     const isUnlimited = this.bombTimeSetting === 'unlimited';
     const timePercent = isUnlimited ? 100 : Math.max(0, Math.min(100, (this.remainingBombTime / this.bombTimeSetting) * 100));
     const isUrgent = !isUnlimited && this.remainingBombTime <= 1.5 && !this.isExploded;
-    const isSymmetrical = Boolean(this.hub?.isSymmetrical);
 
-    if (isSymmetrical) {
-      container.innerHTML = `
-        <div class="party-game-box hunmin-pure-stage tabletop-symmetrical ${isUrgent ? 'urgent' : ''}" id="hunmin-touch-screen">
-          <!-- 1. 상단 자음 (상대방 플레이어용 180도 회전 대칭) -->
-          <div class="hunmin-symmetric-half top-half">
-            <div class="pure-chosung-text pop-anim">
-              ${this.currentCho}
+    container.innerHTML = `
+      <div class="party-game-box hunmin-pure-stage hunmin-solo-stage ${isUrgent ? 'urgent' : ''}" id="hunmin-touch-screen">
+        <!-- 1. 상단 타이머 및 설정 메타 바 -->
+        <div class="hunmin-solo-meta-zone">
+          <div class="hunmin-center-timer solo">
+            <div class="hunmin-timer-track">
+              <div class="hunmin-timer-fill ${isUrgent ? 'danger' : ''}" id="hunmin-timer-fill" style="width:${timePercent}%;"></div>
             </div>
           </div>
-
-          <!-- 2. 중앙 영역 구분선 & 가운데 타이머 게이지 + 아이콘 조작 버튼 2개 (시간초 숫자 없이 순수 게이지) -->
-          <div class="hunmin-center-divider-zone">
-            <div class="hunmin-light-divider"></div>
-
-            <div class="hunmin-center-meta-row">
-              <!-- 가운데 타이머 (시간초 텍스트 없이 순수 게이지 바만 표시) -->
-              <div class="hunmin-center-timer">
-                <div class="hunmin-timer-track">
-                  <div class="hunmin-timer-fill ${isUrgent ? 'danger' : ''}" id="hunmin-timer-fill" style="width:${timePercent}%;"></div>
-                </div>
-              </div>
-
-              <!-- 아이콘 전용 조작 버튼 2개 (자음 변경, 시간 설정) -->
-              <div class="hunmin-center-action-icons">
-                <button type="button" class="hunmin-icon-btn" id="btn-shuffle-cho" title="자음 변경" aria-label="자음 변경">
-                  🔀
-                </button>
-                <button type="button" class="hunmin-icon-btn" id="btn-open-setup" title="시간 설정" aria-label="시간 설정">
-                  ⚙️
-                </button>
-              </div>
-            </div>
-
-            <div class="hunmin-light-divider"></div>
-          </div>
-
-          <!-- 3. 하단 자음 (내 쪽 플레이어용 정방향 0도) -->
-          <div class="hunmin-symmetric-half bottom-half">
-            <div class="pure-chosung-text pop-anim">
-              ${this.currentCho}
-            </div>
+          <div class="hunmin-center-action-icons solo">
+            <button type="button" class="hunmin-icon-btn" id="btn-shuffle-cho" title="자음 변경" aria-label="자음 변경">
+              🔀
+            </button>
+            <button type="button" class="hunmin-icon-btn" id="btn-open-setup" title="시간 설정" aria-label="시간 설정">
+              ⚙️
+            </button>
           </div>
         </div>
-      `;
-    } else {
-      container.innerHTML = `
-        <div class="party-game-box hunmin-pure-stage hunmin-solo-stage ${isUrgent ? 'urgent' : ''}" id="hunmin-touch-screen">
-          <!-- 1. 상단 타이머 및 설정 메타 바 -->
-          <div class="hunmin-solo-meta-zone">
-            <div class="hunmin-center-timer solo">
-              <div class="hunmin-timer-track">
-                <div class="hunmin-timer-fill ${isUrgent ? 'danger' : ''}" id="hunmin-timer-fill" style="width:${timePercent}%;"></div>
-              </div>
-            </div>
-            <div class="hunmin-center-action-icons solo">
-              <button type="button" class="hunmin-icon-btn" id="btn-shuffle-cho" title="자음 변경" aria-label="자음 변경">
-                🔀
-              </button>
-              <button type="button" class="hunmin-icon-btn" id="btn-open-setup" title="시간 설정" aria-label="시간 설정">
-                ⚙️
-              </button>
-            </div>
-          </div>
 
-          <!-- 2. 중앙 초대형 단독 자음 영역 (화면을 가득 채우는 시원한 타이포) -->
-          <div class="hunmin-solo-center-zone">
-            <div class="pure-chosung-text solo pop-anim">
-              ${this.currentCho}
-            </div>
+        <!-- 2. 중앙 초대형 단독 자음 영역 (화면을 가득 채우는 시원한 타이포) -->
+        <div class="hunmin-solo-center-zone">
+          <div class="pure-chosung-text solo pop-anim">
+            ${this.currentCho}
           </div>
-
         </div>
-      `;
-    }
+      </div>
+    `;
 
     this._bindPlayingEvents();
   }

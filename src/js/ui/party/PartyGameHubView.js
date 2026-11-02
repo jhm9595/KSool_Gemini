@@ -22,11 +22,6 @@ class PartyGameHubView {
     this.activeGameKey = null;
     this.wakeLock = null;
     this.toastTimer = null;
-    try {
-      this.isSymmetrical = localStorage.getItem('ksool_party_symmetrical') === 'true';
-    } catch (_) {
-      this.isSymmetrical = false;
-    }
 
     // 10대 술게임 메타데이터 목록 (해금률 및 필요 조건 순서대로 정렬)
     // 0%: 기본 즉시 플레이 가능 (7종)
@@ -159,9 +154,6 @@ class PartyGameHubView {
     return this.gamesList.find(g => g.key === key) || this.gamesList[0];
   }
 
-  isSymmetrySupported(gameKey = this.activeGameKey) {
-    return ['updown', 'capflick', 'hunmin'].includes(gameKey);
-  }
 
   async requestWakeLock() {
     if ('wakeLock' in navigator) {
@@ -500,19 +492,9 @@ class PartyGameHubView {
     const meta = this.getGameMeta(this.activeGameKey);
     this.requestWakeLock();
 
-    const supportsSymmetry = this.isSymmetrySupported(this.activeGameKey);
-    const symmetryBtnHtml = supportsSymmetry
-      ? `
-        <button type="button" class="party-symmetry-btn ${this.isSymmetrical ? 'active' : ''}" id="party-symmetry-btn" title="${this.isSymmetrical ? '대칭 2인 모드 (마주보기) - 클릭 시 1인 단독 모드로 전환' : '1인 단독 모드 (화면 크게) - 클릭 시 대칭 2인 모드로 전환'}">
-          <span class="sym-icon">${this.isSymmetrical ? '🪞' : '👤'}</span>
-          <span class="sym-label">${this.isSymmetrical ? '대칭' : '1인'}</span>
-        </button>
-      `
-      : '<div class="party-topbar-spacer" style="width:68px;"></div>';
-
     container.innerHTML = `
       <div class="party-fullscreen-wrapper party-game-${this.activeGameKey}" data-game="${this.activeGameKey}">
-        <!-- 상단 미니 탑바: 뒤로가기 버튼 + 현재 게임 뱃지 + 대칭/1인 전환 버튼 -->
+        <!-- 상단 미니 탑바: 뒤로가기 버튼 + 현재 게임 뱃지 -->
         <div class="party-game-top-bar">
           <button type="button" class="party-back-btn" id="party-back-btn">
             <span class="back-icon">‹</span>
@@ -522,7 +504,7 @@ class PartyGameHubView {
             <span class="pill-emoji">${meta.emoji}</span>
             <span class="pill-title">${meta.title}</span>
           </div>
-          ${symmetryBtnHtml}
+          <div class="party-topbar-spacer" style="width:68px;"></div>
         </div>
 
         <!-- 전체화면 가득 찬 게임 실행 영역 -->
@@ -542,33 +524,6 @@ class PartyGameHubView {
       };
     }
 
-    // 대칭/1인 모드 토글 버튼 이벤트
-    const symBtn = container.querySelector('#party-symmetry-btn');
-    if (symBtn) {
-      symBtn.onclick = (e) => {
-        if (e) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-        this.isSymmetrical = !this.isSymmetrical;
-        try {
-          localStorage.setItem('ksool_party_symmetrical', this.isSymmetrical ? 'true' : 'false');
-        } catch (_) {}
-        this.sound.playTap();
-        symBtn.classList.toggle('active', this.isSymmetrical);
-        const icon = symBtn.querySelector('.sym-icon');
-        const label = symBtn.querySelector('.sym-label');
-        if (icon) icon.textContent = this.isSymmetrical ? '🪞' : '👤';
-        if (label) label.textContent = this.isSymmetrical ? '대칭' : '1인';
-        symBtn.title = this.isSymmetrical
-          ? '대칭 2인 모드 (마주보기) - 클릭 시 1인 단독 모드로 전환'
-          : '1인 단독 모드 (화면 크게) - 클릭 시 대칭 2인 모드로 전환';
-
-        if (this.games[this.activeGameKey]) {
-          this.games[this.activeGameKey].render();
-        }
-      };
-    }
 
     // 선택된 게임 인스턴스 초기화 및 마운트
     if (this.games[this.activeGameKey]) {
