@@ -66,9 +66,10 @@ class HintModalView {
       const isRecipeUnlocked = this.inventory.isRecipeUnlocked(this.activeRecipeId);
       this.viewMode = (isDescUnlocked || isRecipeUnlocked) ? 'BASEBALL' : 'CHOICE';
     } else {
-      // 도감에서 미해금 카드를 누르면 [⚾ 베이스볼 / 🎮 그림 해금 게임 / (있을 경우 📺 힌트보기)] 선택 화면부터 노출
-      // 전체 해금 모드(unlockAllSandboxMode)일 때는 즉시 100% 해금된 베이스볼 & 황금비율 화면으로 직행
-      this.viewMode = this.inventory.unlockAllSandboxMode ? 'BASEBALL' : 'CHOICE';
+      // [온보딩 튜토리얼 룰] 전체 해금 모드이거나 No.01~No.03(정답 풀 공개)일 때는 즉시 100% 해금된 베이스볼&황금비율 정답 화면으로 직행
+      const recNum = this.inventory._getRecipeNumber ? this.inventory._getRecipeNumber(this.activeRecipeId) : 999;
+      const isAutoSolvedOnboarding = recNum <= 3;
+      this.viewMode = (this.inventory.unlockAllSandboxMode || isAutoSolvedOnboarding) ? 'BASEBALL' : 'CHOICE';
     }
 
     this.render();
@@ -290,23 +291,36 @@ class HintModalView {
           </div>
 
           <!-- STEP 3: 베이스볼 / 업앤다운 추리 (사이언 테마) -->
-          <div class="hint-step-card step-cyan ${isBaseballUnlocked ? (isRecipeUnlocked ? 'step-done' : 'step-active') : 'step-locked'}" id="choice-baseball-btn" role="button" tabindex="0">
-            <div class="step-card-icon-col">
-              <span class="step-main-icon">${isBaseballUnlocked ? (isUpAndDownChoice ? '🎯' : '⚾') : '🔒'}</span>
-            </div>
-            <div class="step-card-main-col">
-              <div class="step-card-header">
-                <div class="step-title-group">
-                  <span class="step-order-badge">STEP 3</span>
-                  <span class="step-main-title">${isUpAndDownChoice ? '업앤다운' : '베이스볼 추리'}</span>
+          ${(() => {
+            const isAllSolvedOnboarding = isBaseballDoneChoice && (!needsRatioGameChoice || this.ratioProvider.isRatioSolved(this.activeRecipeId, hintState.solvedRatios));
+            const isCardClear = isRecipeUnlocked || isAllSolvedOnboarding;
+            const cardStateClass = isBaseballUnlocked ? (isCardClear ? 'step-done' : 'step-active') : 'step-locked';
+            const tagStateClass = isBaseballUnlocked ? (isCardClear ? 'tag-done' : 'tag-active') : 'tag-locked';
+            const tagText = isBaseballUnlocked ? (isCardClear ? 'Clear' : '입장 ➔') : '🔒 2단계 필요';
+            const descText = isCardClear
+              ? '재료 & 황금비율 공식 100% 해금 완료!'
+              : (isBaseballUnlocked ? (isUpAndDownChoice ? '황금비율 추리 게임' : '재료 & 황금비율 추리 게임') : '2단계 설명 복권을 긁어야 입장 가능');
+
+            return `
+              <div class="hint-step-card step-cyan ${cardStateClass}" id="choice-baseball-btn" role="button" tabindex="0">
+                <div class="step-card-icon-col">
+                  <span class="step-main-icon">${isBaseballUnlocked ? (isCardClear ? '✨' : (isUpAndDownChoice ? '🎯' : '⚾')) : '🔒'}</span>
                 </div>
-                <span class="step-status-tag ${isBaseballUnlocked ? (isRecipeUnlocked ? 'tag-done' : 'tag-active') : 'tag-locked'}">
-                  ${isBaseballUnlocked ? (isRecipeUnlocked ? 'Clear' : '입장 ➔') : '🔒 2단계 필요'}
-                </span>
+                <div class="step-card-main-col">
+                  <div class="step-card-header">
+                    <div class="step-title-group">
+                      <span class="step-order-badge">STEP 3</span>
+                      <span class="step-main-title">${isCardClear ? '정답 공식 확인' : (isUpAndDownChoice ? '업앤다운' : '베이스볼 추리')}</span>
+                    </div>
+                    <span class="step-status-tag ${tagStateClass}">
+                      ${tagText}
+                    </span>
+                  </div>
+                  <div class="step-main-desc">${descText}</div>
+                </div>
               </div>
-              <div class="step-main-desc">${isBaseballUnlocked ? (isUpAndDownChoice ? '황금비율 추리 게임' : '재료 & 황금비율 추리 게임') : '2단계 설명 복권을 긁어야 입장 가능'}</div>
-            </div>
-          </div>
+            `;
+          })()}
 
           ${extHintCardHtml}
         </div>

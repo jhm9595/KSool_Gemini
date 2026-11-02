@@ -158,6 +158,28 @@ class InventoryManager {
     return this.unlockedIngredientIds.has(Number(ingredientId));
   }
 
+  _getRecipeNumber(recipeId) {
+    const rId = Number(recipeId);
+    if (this.recipeBook) {
+      const rec = this.recipeBook.getRecipe(rId);
+      if (rec) {
+        if (rec.formatted_number) {
+          const m = rec.formatted_number.match(/\d+/);
+          if (m) return parseInt(m[0], 10);
+        }
+        if (typeof rec.recipe_number === 'number') return rec.recipe_number;
+      }
+    }
+    if (window.KSool?.SeedDataBundle?.recipes) {
+      const rec = window.KSool.SeedDataBundle.recipes.find(r => r.recipe_id === rId);
+      if (rec && rec.formatted_number) {
+        const m = rec.formatted_number.match(/\d+/);
+        if (m) return parseInt(m[0], 10);
+      }
+    }
+    return 999;
+  }
+
   isRecipeUnlocked(recipeId) {
     return this.unlockedRecipeIds.has(Number(recipeId));
   }
@@ -165,6 +187,8 @@ class InventoryManager {
   isRecipeImageUnlocked(recipeId) {
     if (this.unlockAllSandboxMode) return true;
     const rId = Number(recipeId);
+    // [온보딩 튜토리얼 룰] No.01 ~ No.09는 외형 그림 기본 해금 (무료 공개)
+    if (this._getRecipeNumber(rId) <= 9) return true;
     return this.unlockedRecipeIds.has(rId) || this.unlockedImageRecipeIds.has(rId);
   }
 
@@ -179,6 +203,8 @@ class InventoryManager {
   isRecipeDescUnlocked(recipeId) {
     if (this.unlockAllSandboxMode) return true;
     const rId = Number(recipeId);
+    // [온보딩 튜토리얼 룰] No.01 ~ No.06은 설명 힌트 기본 해금 (무료 공개)
+    if (this._getRecipeNumber(rId) <= 6) return true;
     return this.unlockedRecipeIds.has(rId) || this.unlockedDescRecipeIds.has(rId);
   }
 
@@ -273,8 +299,15 @@ class InventoryManager {
   }
 
   getHintState(recipeId) {
-    if (this.unlockAllSandboxMode) {
-      const items = this.recipeBook ? (this.recipeBook.getRecipeItems(recipeId) || []) : [];
+    const rId = Number(recipeId);
+    const recNum = this._getRecipeNumber(rId);
+
+    // 전체 해금 샌드박스 모드이거나, [온보딩 튜토리얼 룰] No.01 ~ No.03은 베이스볼 & 황금비율 정답 100% 기본 공개
+    if (this.unlockAllSandboxMode || recNum <= 3) {
+      let items = this.recipeBook ? (this.recipeBook.getRecipeItems(rId) || []) : [];
+      if (items.length === 0 && window.KSool?.SeedDataBundle?.recipe_ingredients) {
+        items = window.KSool.SeedDataBundle.recipe_ingredients.filter(it => it.recipe_id === rId);
+      }
       const solvedRatios = {};
       items.forEach(it => {
         solvedRatios[String(it.slot_order)] = Number(it.ratio) || 1;
@@ -286,7 +319,7 @@ class InventoryManager {
       };
     }
 
-    const key = String(recipeId);
+    const key = String(rId);
     if (!this.hintProgressByRecipe[key]) {
       this.hintProgressByRecipe[key] = {
         stageCleared: [false, false, false],
