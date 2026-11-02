@@ -286,7 +286,7 @@ class IamGroundGame {
       this.currentSpeech[this.selfIntroPlayerIdx] = { text: '짝!', type: 'rhythm', time: Date.now() };
     } else if (beat === 3) {
       if (!curPlayer.isUser) {
-        this.hub.sound.playRhythmHit?.();
+        this.hub.sound.playRhythmHit?.(false);
         this.currentSpeech[this.selfIntroPlayerIdx] = { text: `${curPlayer.name}!`, type: 'name', time: Date.now() };
       }
     }
@@ -354,7 +354,11 @@ class IamGroundGame {
         const chosen = targets[Math.floor(Math.random() * targets.length)];
         this.userAttackTargetChosen = this.players.indexOf(chosen);
 
-        this.hub.sound.playRhythmHit?.();
+        if (this.hub.sound.playRhythmTarget) {
+          this.hub.sound.playRhythmTarget(false);
+        } else {
+          this.hub.sound.playRhythmHit?.(false);
+        }
         this.currentSpeech[this.activeAttackerIdx] = { text: `${chosen.name}!`, type: 'attack', time: Date.now() };
         this.laserTarget = { from: this.activeAttackerIdx, to: this.userAttackTargetChosen };
       }
@@ -367,7 +371,11 @@ class IamGroundGame {
         const target = this.players[this.userAttackTargetChosen];
         const countKor = this._getCountKorean(count);
 
-        this.hub.sound.playSnap?.();
+        if (this.hub.sound.playRhythmCount) {
+          this.hub.sound.playRhythmCount(count);
+        } else {
+          this.hub.sound.playSnap?.();
+        }
         this.currentSpeech[this.activeAttackerIdx] = { text: `${target.name} ${countKor}!`, type: 'attack', time: Date.now() };
         this.currentSpeech[this.userAttackTargetChosen] = { text: '앗! 나?! 😱', type: 'panic', time: Date.now() };
         this.laserTarget = { from: this.activeAttackerIdx, to: this.userAttackTargetChosen };
@@ -395,7 +403,7 @@ class IamGroundGame {
           return;
         }
 
-        this.hub.sound.playRhythmHit?.();
+        this.hub.sound.playRhythmHit?.(false);
         this.currentSpeech[this.activeDefenderIdx] = { text: `${defender.name}!`, type: 'defend', time: Date.now() };
       }
     }
@@ -445,12 +453,21 @@ class IamGroundGame {
       }
 
       this.rallyCount++;
-      this.hub.sound.playUp?.();
+      if (this.hub.sound.playRhythmSuccess) {
+        this.hub.sound.playRhythmSuccess();
+      } else {
+        this.hub.sound.playUp?.();
+      }
       this._showFeedback('DEFENSE SUCCESS! 🛡️✨', 'perfect');
 
       if (this.rallyCount % 4 === 0 && this.bpm < 125) {
         this.bpm += 3;
         this._startBeatLoop();
+        if (this.hub.sound.playRhythmSpeedUp) {
+          this.hub.sound.playRhythmSpeedUp();
+        } else {
+          this.hub.sound.playUp?.();
+        }
         this._showFeedback('🔥 SPEED UP! 박자가 빨라집니다!', 'perfect');
       }
 
@@ -483,9 +500,9 @@ class IamGroundGame {
     const isEven = beat % 2 === 0;
 
     if (isEven) {
-      this.hub.sound.playRhythmThud?.();
+      this.hub.sound.playRhythmThud?.(true);
     } else {
-      this.hub.sound.playRhythmClap?.();
+      this.hub.sound.playRhythmClap?.(true);
     }
     this.hub.vibrateShort();
 
@@ -570,7 +587,7 @@ class IamGroundGame {
       if (curPlayer && curPlayer.isUser) {
         if (player.isUser && this.currentMeasureBeat === 3) {
           this.userIntroHit = true;
-          this.hub.sound.playRhythmHit?.();
+          this.hub.sound.playRhythmHit?.(true);
           this.hub.vibrateShort();
           this.currentSpeech[0] = { text: `${player.name}!`, type: 'name', time: Date.now() };
           this._showFeedback('PERFECT! ✨', 'perfect');
@@ -598,7 +615,11 @@ class IamGroundGame {
             }
             this.userAttackTargetChosen = playerIdx;
             this.laserTarget = { from: 0, to: playerIdx };
-            this.hub.sound.playRhythmHit?.();
+            if (this.hub.sound.playRhythmTarget) {
+              this.hub.sound.playRhythmTarget(true);
+            } else {
+              this.hub.sound.playRhythmHit?.(true);
+            }
             this.hub.vibrateShort();
             this.currentSpeech[0] = { text: `${player.name}!`, type: 'attack', time: Date.now() };
             this._showFeedback(`${player.name}! 🎯`, 'hit');
@@ -621,7 +642,7 @@ class IamGroundGame {
           const beat = this.currentMeasureBeat;
           if (this.defenseRequiredBeats.includes(beat) && !this.userDefenseHits.includes(beat)) {
             this.userDefenseHits.push(beat);
-            this.hub.sound.playRhythmHit?.();
+            this.hub.sound.playRhythmHit?.(true);
             this.hub.vibrateShort();
             this.currentSpeech[0] = { text: `${player.name}!`, type: 'defend', time: Date.now() };
             this._showFeedback(`HIT! (${this.userDefenseHits.length}/${this.targetCount}) 🔥`, 'perfect');
@@ -653,7 +674,11 @@ class IamGroundGame {
           const target = this.players[this.userAttackTargetChosen];
           const countKor = this._getCountKorean(count);
 
-          this.hub.sound.playSnap?.();
+          if (this.hub.sound.playRhythmCount) {
+            this.hub.sound.playRhythmCount(count);
+          } else {
+            this.hub.sound.playSnap?.();
+          }
           this.hub.vibrateShort();
           this.currentSpeech[0] = { text: `${target.name} ${countKor}!`, type: 'attack', time: Date.now() };
           this.currentSpeech[this.userAttackTargetChosen] = { text: '앗! 나?! 😱', type: 'panic', time: Date.now() };

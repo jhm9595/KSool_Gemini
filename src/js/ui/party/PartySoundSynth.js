@@ -323,84 +323,322 @@ class PartySoundSynth {
     sirenOsc.stop(now + 0.65);
   }
 
-  playRhythmThud() {
-    const effVol = this._getEffectiveVolume();
-    if (effVol <= 0) return;
-    this._initContext();
-    if (!this.ctx) return;
-    const now = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(110, now);
-    osc.frequency.exponentialRampToValueAtTime(38, now + 0.12);
-    gain.gain.setValueAtTime(0.45 * effVol, now);
-    gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + 0.14);
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-    osc.start(now);
-    osc.stop(now + 0.15);
+  _getNoiseBuffer() {
+    if (!this.ctx) return null;
+    if (this._noiseBuffer) return this._noiseBuffer;
+    const bufferSize = Math.floor(this.ctx.sampleRate * 0.2); // 200ms 화이트 노이즈
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    this._noiseBuffer = buffer;
+    return this._noiseBuffer;
   }
 
-  playRhythmClap() {
+  /**
+   * 쿵! - 펀치감 넘치는 아케이드/EDM 킥 & 무릎치기
+   * 고주파 트랜지언트 클릭 + 바운시한 저음 펀치로 폰 스피커에서도 찰진 타격감 제공
+   */
+  playRhythmThud(isUser = false) {
     const effVol = this._getEffectiveVolume();
     if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
-    [0, 0.015].forEach((offset) => {
+    const minVol = Math.max(0.0001, 0.001 * effVol);
+
+    // 1. 선명한 어택 타격음 (폰 스피커 최적화 프론트 클릭)
+    const clickOsc = this.ctx.createOscillator();
+    const clickGain = this.ctx.createGain();
+    clickOsc.type = 'triangle';
+    const clickStart = isUser ? 540 : 440;
+    clickOsc.frequency.setValueAtTime(clickStart, now);
+    clickOsc.frequency.exponentialRampToValueAtTime(75, now + 0.025);
+    clickGain.gain.setValueAtTime((isUser ? 0.45 : 0.35) * effVol, now);
+    clickGain.gain.exponentialRampToValueAtTime(minVol, now + 0.028);
+    clickOsc.connect(clickGain);
+    clickGain.connect(this.ctx.destination);
+    clickOsc.start(now);
+    clickOsc.stop(now + 0.03);
+
+    // 2. 둥둥 울리는 바운시 킥 바디 (저음 펀치)
+    const bodyOsc = this.ctx.createOscillator();
+    const bodyGain = this.ctx.createGain();
+    bodyOsc.type = 'sine';
+    const bodyStart = isUser ? 165 : 140;
+    bodyOsc.frequency.setValueAtTime(bodyStart, now);
+    bodyOsc.frequency.exponentialRampToValueAtTime(45, now + 0.12);
+    bodyGain.gain.setValueAtTime((isUser ? 0.58 : 0.5) * effVol, now);
+    bodyGain.gain.exponentialRampToValueAtTime(minVol, now + 0.14);
+    bodyOsc.connect(bodyGain);
+    bodyGain.connect(this.ctx.destination);
+    bodyOsc.start(now);
+    bodyOsc.stop(now + 0.15);
+  }
+
+  /**
+   * 짝! - 스내피 808 멀티버스트 핸드클랩 & 찰진 손뼉치기
+   * 밴드패스 필터링된 화이트 노이즈 임펄스 + 토널 스냅으로 신나는 리듬감 연출
+   */
+  playRhythmClap(isUser = false) {
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
+    this._initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const minVol = Math.max(0.0001, 0.001 * effVol);
+
+    // 1. 멀티 임펄스 화이트 노이즈 (실제 손바닥이 부딪히는 다중 충격음)
+    const noiseBuf = this._getNoiseBuffer();
+    if (noiseBuf) {
+      const noiseNode = this.ctx.createBufferSource();
+      noiseNode.buffer = noiseBuf;
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(isUser ? 2100 : 1850, now);
+      filter.Q.setValueAtTime(1.8, now);
+
+      const noiseGain = this.ctx.createGain();
+      const peakVol = (isUser ? 0.55 : 0.45) * effVol;
+      // 0ms, 12ms, 24ms 3연속 마이크로 버스트 후 서스테인 감쇄
+      noiseGain.gain.setValueAtTime(peakVol * 0.4, now);
+      noiseGain.gain.setValueAtTime(peakVol * 0.7, now + 0.012);
+      noiseGain.gain.setValueAtTime(peakVol, now + 0.024);
+      noiseGain.gain.exponentialRampToValueAtTime(minVol, now + 0.12);
+
+      noiseNode.connect(filter);
+      filter.connect(noiseGain);
+      noiseGain.connect(this.ctx.destination);
+      noiseNode.start(now);
+      noiseNode.stop(now + 0.13);
+    }
+
+    // 2. 통통 튀는 경쾌한 타격 바디 (하이햇 / 림 톤)
+    const snapOsc = this.ctx.createOscillator();
+    const snapGain = this.ctx.createGain();
+    snapOsc.type = 'triangle';
+    snapOsc.frequency.setValueAtTime(isUser ? 960 : 840, now);
+    snapOsc.frequency.exponentialRampToValueAtTime(260, now + 0.05);
+    snapGain.gain.setValueAtTime((isUser ? 0.35 : 0.28) * effVol, now);
+    snapGain.gain.exponentialRampToValueAtTime(minVol, now + 0.06);
+    snapOsc.connect(snapGain);
+    snapGain.connect(this.ctx.destination);
+    snapOsc.start(now);
+    snapOsc.stop(now + 0.07);
+  }
+
+  /**
+   * 띵! - 영롱하고 경쾌한 아케이드 마림바 / 리듬게임 PERFECT 벨 차임
+   * 자기소개 4박자 외치기 또는 수비 성공 시 기분 좋은 도파민을 주는 화음 차임
+   */
+  playRhythmHit(isUserHit = false) {
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
+    this._initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const minVol = Math.max(0.0001, 0.001 * effVol);
+
+    const chord = isUserHit
+      ? [1046.5, 1318.51, 1567.98] // C6, E6, G6 (도-미-솔 아르페지오 팝)
+      : [880, 1174.66];            // A5, D6 (경쾌한 2화음 팝)
+
+    chord.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      const t = now + idx * 0.022;
+      osc.frequency.setValueAtTime(freq * 0.95, t);
+      osc.frequency.exponentialRampToValueAtTime(freq, t + 0.025);
+
+      const hitVol = (isUserHit ? 0.35 : 0.28) * effVol;
+      gain.gain.setValueAtTime(hitVol, t);
+      gain.gain.exponentialRampToValueAtTime(minVol, t + 0.16);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.18);
+    });
+
+    // 반짝이는 메탈릭 탑 핑
+    const pingOsc = this.ctx.createOscillator();
+    const pingGain = this.ctx.createGain();
+    pingOsc.type = 'triangle';
+    pingOsc.frequency.setValueAtTime(isUserHit ? 2093 : 1760, now);
+    pingGain.gain.setValueAtTime((isUserHit ? 0.28 : 0.18) * effVol, now);
+    pingGain.gain.exponentialRampToValueAtTime(minVol, now + 0.04);
+    pingOsc.connect(pingGain);
+    pingGain.connect(this.ctx.destination);
+    pingOsc.start(now);
+    pingOsc.stop(now + 0.05);
+  }
+
+  /**
+   * 🎯 지목! - 상대방을 지목할 때 경쾌하게 솟아오르는 신디사이저 레이저 핑
+   */
+  playRhythmTarget(isUser = false) {
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
+    this._initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const minVol = Math.max(0.0001, 0.001 * effVol);
+
+    const freqs = isUser ? [659.25, 987.77, 1318.51] : [587.33, 880, 1174.66]; // E5-B5-E6 or D5-A5-D6
+    freqs.forEach((freq, idx) => {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(1200, now + offset);
-      osc.frequency.exponentialRampToValueAtTime(450, now + offset + 0.08);
-      gain.gain.setValueAtTime(0.32 * effVol, now + offset);
-      gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + offset + 0.09);
+      const t = now + idx * 0.022;
+      osc.frequency.setValueAtTime(freq * 0.85, t);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.25, t + 0.06);
+
+      gain.gain.setValueAtTime(0.3 * effVol, t);
+      gain.gain.exponentialRampToValueAtTime(minVol, t + 0.09);
+
       osc.connect(gain);
       gain.connect(this.ctx.destination);
-      osc.start(now + offset);
-      osc.stop(now + offset + 0.1);
+      osc.start(t);
+      osc.stop(t + 0.1);
     });
   }
 
-  playRhythmHit() {
+  /**
+   * 🔢 숫자 외치기! - 리드미컬하고 통통 튀는 아케이드 우드블록 / 카우벨 팝
+   */
+  playRhythmCount(count = 1) {
     const effVol = this._getEffectiveVolume();
     if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
+    const minVol = Math.max(0.0001, 0.001 * effVol);
+
+    // 숫자가 높아질수록 피치가 살짝 올라가 긴장감과 리듬감 고조
+    const baseFreq = 720 + Math.min(count, 8) * 45;
+
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(784, now); // G5
-    osc.frequency.exponentialRampToValueAtTime(1046.5, now + 0.1); // C6
-    gain.gain.setValueAtTime(0.35 * effVol, now);
-    gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + 0.15);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(baseFreq * 1.5, now);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq, now + 0.015);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.85, now + 0.08);
+
+    gain.gain.setValueAtTime(0.42 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(minVol, now + 0.09);
+
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start(now);
-    osc.stop(now + 0.16);
+    osc.stop(now + 0.1);
+
+    // 청명한 공명음 벨 톤
+    const ringOsc = this.ctx.createOscillator();
+    const ringGain = this.ctx.createGain();
+    ringOsc.type = 'sine';
+    ringOsc.frequency.setValueAtTime(baseFreq * 2.3, now);
+    ringGain.gain.setValueAtTime(0.22 * effVol, now);
+    ringGain.gain.exponentialRampToValueAtTime(minVol, now + 0.06);
+    ringOsc.connect(ringGain);
+    ringGain.connect(this.ctx.destination);
+    ringOsc.start(now);
+    ringOsc.stop(now + 0.07);
   }
 
+  /**
+   * ✨ 랠리 성공! - 수비에 성공했을 때 터지는 신나는 팡파르 아르페지오
+   */
+  playRhythmSuccess() {
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
+    this._initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const minVol = Math.max(0.0001, 0.001 * effVol);
+
+    // 도 - 미 - 솔 - 높은도 4음 팡파르
+    [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      const t = now + idx * 0.045;
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(0.32 * effVol, t);
+      gain.gain.exponentialRampToValueAtTime(minVol, t + 0.18);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.2);
+    });
+  }
+
+  /**
+   * ⚡ 스피드 업! - BPM 상승 시 긴장감을 불어넣는 신스 글리산도
+   */
+  playRhythmSpeedUp() {
+    const effVol = this._getEffectiveVolume();
+    if (effVol <= 0) return;
+    this._initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const minVol = Math.max(0.0001, 0.001 * effVol);
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(440, now);
+    osc.frequency.exponentialRampToValueAtTime(1100, now + 0.22);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1200, now);
+    filter.frequency.exponentialRampToValueAtTime(3600, now + 0.22);
+
+    gain.gain.setValueAtTime(0.28 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(minVol, now + 0.24);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.25);
+  }
+
+  /**
+   * 🚨 박자 삑사리 / 탈락 - 익살스럽고 코믹한 스프링 보잉 & 피치 드롭
+   */
   playRhythmMiss() {
     const effVol = this._getEffectiveVolume();
     if (effVol <= 0) return;
     this._initContext();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
-    [165, 178].forEach((freq) => {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(freq, now);
-      osc.frequency.linearRampToValueAtTime(freq * 0.7, now + 0.22);
-      gain.gain.setValueAtTime(0.35 * effVol, now);
-      gain.gain.exponentialRampToValueAtTime(0.001 * effVol, now + 0.24);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.25);
-    });
+    const minVol = Math.max(0.0001, 0.001 * effVol);
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(540, now);
+    osc.frequency.linearRampToValueAtTime(140, now + 0.25);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1600, now);
+    filter.frequency.exponentialRampToValueAtTime(350, now + 0.25);
+
+    gain.gain.setValueAtTime(0.45 * effVol, now);
+    gain.gain.exponentialRampToValueAtTime(minVol, now + 0.28);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.3);
   }
 }
 
