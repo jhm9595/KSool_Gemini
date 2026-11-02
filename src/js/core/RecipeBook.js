@@ -48,12 +48,21 @@ class RecipeBook {
       this.recipeItemsByRecipeId.get(rId).push(item);
     });
 
-    // 유저 추천에서 관리자가 '딸깍' 승인하여 추가된 정식 레시피 병합
+    // 유저 추천에서 관리자가 '딸깍' 및 '스마트 분석' 승인하여 추가된 정식 레시피 병합
     (customPromotedRecipes || []).forEach(entry => {
       if (entry && entry.recipe && Array.isArray(entry.items)) {
         const rId = Number(entry.recipe.recipe_id);
         this.recipes.set(rId, entry.recipe);
         this.recipeItemsByRecipeId.set(rId, entry.items);
+        if (entry.dotInnerSvg && window.KSool?.PixelIconRegistry?.registerCustomSprite) {
+          window.KSool.PixelIconRegistry.registerCustomSprite({
+            key: 'rec_' + rId,
+            name: entry.recipe.display_name,
+            dotInnerSvg: entry.dotInnerSvg,
+            hdInnerSvg: entry.hdInnerSvg || null,
+            aliases: [rId, entry.recipe.display_name]
+          });
+        }
       }
     });
 
