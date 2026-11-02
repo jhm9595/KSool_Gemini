@@ -384,10 +384,10 @@
   {
     "ingredient_id": 605,
     "category_id": "DRINK",
-    "display_name": "블루레몬에이드",
-    "real_name": "블루레몬에이드",
+    "display_name": "레몬에이드",
+    "real_name": "레몬에이드",
     "is_licensed": false,
-    "emoji": "🩵",
+    "emoji": "🍋",
     "picker_component": "NONE",
     "picker_config": null
   },
