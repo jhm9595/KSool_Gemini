@@ -1195,6 +1195,28 @@ class KSoolApp {
   }
 
   _bindGlobalEvents() {
+    // [iOS / iPad Safari 더블탭 줌 및 핀치 제스처 원천 차단]
+    // 패드/모바일 환경에서 빠르게 연타(예: 병뚜껑 꼬다리 치기)하거나 멀티터치 시 브라우저 화면이 확대되는 현상 방지
+    document.addEventListener('gesturestart', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gesturechange', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gestureend', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    let lastGlobalTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = performance.now();
+      const isInput = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable);
+      if (!isInput && now - lastGlobalTouchEnd <= 320) {
+        if (e.cancelable) e.preventDefault();
+      }
+      lastGlobalTouchEnd = now;
+    }, { passive: false });
+
     // [관리자/개발자 툴바 제어] 일반 테스터/유저에게는 기본 숨김 (?admin URL 파라미터나 로고 5회 탭 시 토글)
     const urlParams = new URLSearchParams(window.location.search);
     const hasAdminParam = urlParams.has('admin') || urlParams.has('dev') || urlParams.has('debug');

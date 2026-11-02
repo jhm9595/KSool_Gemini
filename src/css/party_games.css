@@ -381,7 +381,7 @@
   justify-content: space-between;
   flex: 1;
   width: 100%;
-  max-width: 480px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -530,20 +530,21 @@
   align-items: center !important;
   height: 100% !important;
   width: 100% !important;
-  max-width: 440px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 4px 10px 8px;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
   user-select: none;
+  touch-action: manipulation;
 }
 
 /* 대칭 테이블탑 플레이어 스테이션 (상단 180도 / 하단 0도) */
 .updown-player-station {
   flex: 1;
   width: 100%;
-  max-width: 320px;
+  max-width: clamp(320px, 85vw, 560px);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -577,7 +578,7 @@
 .capflick-center-stage {
   flex: 1;
   width: 100%;
-  max-width: 440px;
+  max-width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -586,12 +587,13 @@
   z-index: 20;
   cursor: pointer;
   user-select: none;
-  touch-action: none;
+  touch-action: none !important;
 }
 
 .capflick-center-stage .soju-cap-flick-svg {
-  width: clamp(150px, 22vh, 200px);
-  height: clamp(150px, 22vh, 200px);
+  width: clamp(160px, 25vh, 260px);
+  height: clamp(160px, 25vh, 260px);
+  touch-action: none !important;
 }
 
 .realistic-cap-container {
@@ -1086,7 +1088,7 @@
   align-items: center !important;
   height: 100% !important;
   width: 100% !important;
-  max-width: 440px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 4px 10px 8px;
   box-sizing: border-box;
@@ -1149,7 +1151,7 @@
 .flick-hit-slot {
   flex: 1;
   width: 100%;
-  max-width: 380px;
+  max-width: clamp(380px, 85vw, 560px);
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -1287,7 +1289,7 @@
 /* 상하 대칭 왔다갔다 타이밍 파워 게이지 */
 .flick-power-section {
   width: 100%;
-  max-width: 360px;
+  max-width: clamp(340px, 85vw, 520px);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -2153,7 +2155,7 @@
 /* 중앙 가벼운 구분선 & 가운데 타이머 게이지 + 아이콘 전용 조작 버튼 */
 .hunmin-center-divider-zone {
   width: 100%;
-  max-width: 440px;
+  max-width: clamp(380px, 85vw, 560px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2437,7 +2439,7 @@
   justify-content: space-between !important;
   height: 100% !important;
   width: 100% !important;
-  max-width: 440px;
+  max-width: clamp(440px, 90vw, 640px);
   margin: 0 auto;
   padding: 8px 12px 14px;
   box-sizing: border-box;
@@ -3058,7 +3060,7 @@
   align-items: center !important;
   width: 100% !important;
   height: 100% !important;
-  max-width: 480px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 16px;
   box-sizing: border-box;
@@ -3225,7 +3227,7 @@
   align-items: stretch !important;
   width: 100% !important;
   height: 100% !important;
-  max-width: 480px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 6px 10px 10px;
   box-sizing: border-box;
@@ -3884,7 +3886,7 @@
   align-items: stretch !important;
   width: 100% !important;
   height: 100% !important;
-  max-width: 480px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 6px 10px 10px;
   box-sizing: border-box;
