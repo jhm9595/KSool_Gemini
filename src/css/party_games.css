@@ -522,7 +522,8 @@
 /* ==========================================================================
    ① Up & Down 전용 스타일
    ========================================================================== */
-.updown-box {
+.updown-box,
+.updown-box.tabletop-symmetrical {
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between !important;
@@ -531,14 +532,14 @@
   width: 100% !important;
   max-width: 440px;
   margin: 0 auto;
-  padding: 6px 12px 10px;
+  padding: 4px 10px 8px;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
   user-select: none;
 }
 
-/* 플레이어 스테이션 */
+/* 대칭 테이블탑 플레이어 스테이션 (상단 180도 / 하단 0도) */
 .updown-player-station {
   flex: 1;
   width: 100%;
@@ -550,6 +551,10 @@
   align-items: center;
   gap: 4px;
   min-height: 0;
+}
+
+.updown-player-station.top-station {
+  transform: rotate(180deg);
 }
 
 .updown-player-station.bottom-station {
@@ -1073,7 +1078,8 @@
 /* ==========================================================================
    ② 꼬다리 치기 전용 스타일 (미니멀 물리 타격형)
    ========================================================================== */
-.capflick-minimal-box {
+.capflick-minimal-box,
+.capflick-minimal-box.tabletop-symmetrical {
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between !important;
@@ -1082,7 +1088,7 @@
   width: 100% !important;
   max-width: 440px;
   margin: 0 auto;
-  padding: 8px 12px 14px;
+  padding: 4px 10px 8px;
   box-sizing: border-box;
   touch-action: none !important;
 }
@@ -1139,9 +1145,9 @@
   50% { transform: translateY(2px); }
 }
 
-/* 게이지와 뚜껑 사이 타격 강도 텍스트 슬롯 (정중앙 세로줄) */
+/* 게이지와 뚜껑 사이 대칭 타격 강도 텍스트 슬롯 (상단 180도 / 하단 0도 대칭) */
 .flick-hit-slot {
-  flex: 0 0 54px;
+  flex: 1;
   width: 100%;
   max-width: 380px;
   margin: 0 auto;
@@ -1151,6 +1157,15 @@
   text-align: center;
   pointer-events: none;
   z-index: 15;
+  min-height: 50px;
+}
+
+.flick-hit-slot.top-symmetrical {
+  transform: rotate(180deg);
+}
+
+.flick-hit-slot.bottom-symmetrical {
+  transform: none;
 }
 
 .flick-hit-word {
@@ -1269,7 +1284,7 @@
 }
 
 
-/* 왔다갔다 타이밍 파워 게이지 */
+/* 상하 대칭 왔다갔다 타이밍 파워 게이지 */
 .flick-power-section {
   width: 100%;
   max-width: 360px;
@@ -1277,6 +1292,17 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.flick-power-section.top-symmetrical {
+  transform: rotate(180deg);
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.flick-power-section.bottom-symmetrical {
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
 .flick-timing-meter {
@@ -2080,8 +2106,11 @@
   box-shadow: 0 0 28px rgba(239, 68, 68, 0.7);
 }
 
-/* 2. 순수 타이포그래피 인게임 스테이지 */
-.hunmin-pure-stage {
+/* 2. 대칭 테이블탑 인게임 스테이지 (마주보고 앉아 즐기는 대면 대칭 모드) */
+.hunmin-pure-stage,
+.hunmin-pure-stage.tabletop-symmetrical {
+  display: flex !important;
+  flex-direction: column !important;
   justify-content: space-between !important;
   align-items: center !important;
   height: 100% !important;
@@ -2092,46 +2121,13 @@
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: none;
-  padding: 16px 12px 24px;
+  padding: 8px 12px 14px;
   position: relative;
   transition: background 0.2s ease;
 }
 
-/* 훈민정음 시한폭탄 1인 단독 모드 */
-.hunmin-pure-stage.hunmin-solo-stage {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  height: 100% !important;
-  width: 100% !important;
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 12px 16px 20px;
-  box-sizing: border-box;
-  cursor: pointer;
-}
-
-.hunmin-solo-meta-zone {
-  flex: 0 0 auto;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 6px 4px 10px;
-}
-
-.hunmin-center-timer.solo {
-  flex: 1;
-}
-
-.hunmin-center-action-icons.solo {
-  display: flex;
-  gap: 8px;
-}
-
-.hunmin-solo-center-zone {
+/* 대칭 자음 반쪽 영역 (상단 180도 회전 / 하단 0도 정방향) */
+.hunmin-symmetric-half {
   flex: 1;
   width: 100%;
   display: flex;
@@ -2140,31 +2136,30 @@
   pointer-events: none;
 }
 
-.pure-chosung-text.solo {
-  font-size: min(8rem, 26vw);
+.hunmin-symmetric-half.top-half {
+  transform: rotate(180deg);
+}
+
+.hunmin-symmetric-half .pure-chosung-text {
+  font-size: min(5rem, 16vw);
   font-weight: 900;
   color: #fde047;
-  letter-spacing: 16px;
-  margin-left: 16px;
-  text-shadow: 0 0 32px rgba(253, 224, 71, 0.8), 0 8px 24px rgba(0, 0, 0, 0.9);
+  letter-spacing: 12px;
+  margin-left: 12px;
+  text-shadow: 0 0 24px rgba(253, 224, 71, 0.7), 0 6px 20px rgba(0, 0, 0, 0.8);
   will-change: transform, opacity;
 }
 
-.hunmin-solo-bottom-hint {
-  flex: 0 0 auto;
-  padding-bottom: 12px;
-  pointer-events: none;
-}
-
-.solo-hint-pill {
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: rgba(226, 232, 240, 0.7);
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  padding: 6px 14px;
-  border-radius: 20px;
-  backdrop-filter: blur(6px);
+/* 중앙 가벼운 구분선 & 가운데 타이머 게이지 + 아이콘 전용 조작 버튼 */
+.hunmin-center-divider-zone {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  z-index: 10;
 }
 
 

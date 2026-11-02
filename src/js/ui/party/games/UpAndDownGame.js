@@ -351,22 +351,23 @@ class UpAndDownGame {
     `;
   }
 
-  _renderStation() {
+  _renderStation(isTop = false) {
+    const flipClass = isTop ? 'top-station' : 'bottom-station';
     const placeholderText = this.isEditingMax ? 'MAX ?' : '· ·';
     return `
-      <div class="updown-player-station bottom-station updown-solo-station">
-        <!-- 1. 병뚜껑 쪽 인접: MAX 또는 UP / DOWN 표시 -->
-        <div class="updown-station-status-slot solo">
+      <div class="updown-player-station ${flipClass}">
+        <!-- 1. 병뚜껑 쪽 인접: MAX 또는 UP / DOWN 대칭 표시 (세로 중앙축 맞춤 대형 타이포) -->
+        <div class="updown-station-status-slot">
           ${this._renderStationStatus()}
         </div>
 
         <!-- 2. 입력된 숫자 디스플레이 -->
-        <div class="party-number-display solo ${this.isEditingMax ? 'editing-max' : ''} ${!this.inputVal ? 'placeholder' : ''}">
+        <div class="party-number-display ${this.isEditingMax ? 'editing-max' : ''} ${!this.inputVal ? 'placeholder' : ''}">
           ${this.inputVal || placeholderText}
         </div>
 
         <!-- 3. 3x4 스마트폰 다이얼 패드 -->
-        <div class="party-numpad-grid solo">
+        <div class="party-numpad-grid compact">
           <button type="button" class="party-num-key" data-digit="1">1</button>
           <button type="button" class="party-num-key" data-digit="2">2</button>
           <button type="button" class="party-num-key" data-digit="3">3</button>
@@ -379,13 +380,9 @@ class UpAndDownGame {
           <button type="button" class="party-num-key" data-digit="8">8</button>
           <button type="button" class="party-num-key" data-digit="9">9</button>
 
-          <button type="button" class="party-key-action restart btn-updown-restart" title="새 게임 시작">
-            New
-          </button>
+          <button type="button" class="party-num-key party-key-action btn-updown-restart" title="처음부터 다시">↺</button>
           <button type="button" class="party-num-key" data-digit="0">0</button>
-          <button type="button" class="party-key-action submit btn-updown-submit" title="${this.isEditingMax ? 'MAX 설정 완료' : '숫자 확인'}">
-            확인
-          </button>
+          <button type="button" class="party-num-key party-key-action btn-updown-submit" title="${this.isEditingMax ? 'MAX 설정 완료' : '입력 완료'}">↵</button>
         </div>
       </div>
     `;
@@ -396,18 +393,19 @@ class UpAndDownGame {
     if (!container) return;
 
     container.innerHTML = `
-      <div class="party-game-box updown-box updown-solo-mode">
-        <!-- 1. 상단: 큼지막한 극사실적 3D 소주 병뚜껑 -->
-        <div class="updown-solo-top-zone">
-          <div class="updown-center-cap-wrap">
-            <div class="realistic-cap-container ${this.isFinished ? 'exploded' : ''}">
-              ${this._getBottleCapSvg()}
-            </div>
+      <div class="party-game-box updown-box tabletop-symmetrical">
+        <!-- 1. 상단: 상대방 플레이어 스테이션 (180도 회전 대칭) -->
+        ${this._renderStation(true)}
+
+        <!-- 2. 중앙: 극사실적 3D 소주 병뚜껑 (CapFlick과 1:1 완벽 동일한 정중앙 위치 및 크기) -->
+        <div class="updown-center-cap-wrap">
+          <div class="realistic-cap-container ${this.isFinished ? 'exploded' : ''}">
+            ${this._getBottleCapSvg()}
           </div>
         </div>
 
-        <!-- 2. 하단: 큼직하고 널찍한 플레이어 스테이션 -->
-        ${this._renderStation()}
+        <!-- 3. 하단: 내 쪽 플레이어 스테이션 (정방향 0도) -->
+        ${this._renderStation(false)}
       </div>
     `;
 

@@ -546,19 +546,29 @@ class CapFlickGame {
     const capSvg = this._getCapSvg();
 
     container.innerHTML = `
-      <div class="party-game-box capflick-minimal-box">
-        <!-- 1. 메인 인터랙션 아레나 (중앙 초록 병뚜껑 + 2배 길어진 꼬다리 와이어) -->
+      <div class="party-game-box capflick-minimal-box tabletop-symmetrical">
+        <!-- 1. 상단: 대칭 타이밍 파워 게이지 (상대방 플레이어용 180도 회전) -->
+        <div class="flick-power-section top-symmetrical">
+          ${meterHtml}
+        </div>
+
+        <!-- 2. 상단 타격 강도 피드백 (게이지와 뚜껑 사이, 상대 180도 회전, 정중앙 세로줄) -->
+        <div class="flick-hit-slot top-symmetrical">
+          <div class="flick-hit-word" id="flick-hit-top"></div>
+        </div>
+
+        <!-- 3. 메인 인터랙션 아레나 (중앙 초록 병뚜껑 + 2배 길어진 꼬다리 와이어) -->
         <div class="capflick-center-stage" id="cap-flick-arena">
           ${capSvg}
         </div>
 
-        <!-- 2. 타격 강도 피드백 (뚜껑과 게이지 사이, 정방향 0도, 정중앙 세로줄) -->
-        <div class="flick-hit-slot">
+        <!-- 4. 하단 타격 강도 피드백 (뚜껑과 게이지 사이, 정방향 0도, 정중앙 세로줄) -->
+        <div class="flick-hit-slot bottom-symmetrical">
           <div class="flick-hit-word" id="flick-hit-bottom"></div>
         </div>
 
-        <!-- 3. 하단: 타이밍 파워 게이지 -->
-        <div class="flick-power-section">
+        <!-- 5. 하단: 대칭 타이밍 파워 게이지 (내 쪽 플레이어용 정방향) -->
+        <div class="flick-power-section bottom-symmetrical">
           ${meterHtml}
         </div>
       </div>
