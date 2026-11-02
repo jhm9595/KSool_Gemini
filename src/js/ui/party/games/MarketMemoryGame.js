@@ -129,6 +129,7 @@ class MarketMemoryGame {
     this.turnState = 'adding'; // 최초 턴은 첫 재료 등록부터 시작
     this.hub.sound.playTap();
     this.render();
+    this._scrollChainToActiveRow(true);
     this._startItemTimer();
   }
 
@@ -138,6 +139,7 @@ class MarketMemoryGame {
     this.turnState = 'recalling'; // 다음 사람은 처음부터 복기해야 함
     this.hub.sound.playTap();
     this.render();
+    this._scrollChainToActiveRow(true);
     this._startItemTimer();
   }
 
@@ -375,14 +377,15 @@ class MarketMemoryGame {
     `;
 
     this._bindPlayingEvents();
-    this._autoScrollChainViewport();
+    this._scrollChainToActiveRow(false);
   }
 
   /**
-   * 스네이크/지그재그 체인 HTML 생성 (Row당 4개씩, 짝수행 L->R, 홀수행 R->L)
+   * 스네이크/지그재그 체인 HTML 생성 (Row당 4칸 고정 그리드, 짝수행 L->R, 홀수행 R->L)
+   * - 4칸 폭을 고정 유지하고 빈 칸은 ghost 슬롯으로 채워 새 재료 추가 시 위치가 튀지 않음
+   * - 홀수행(RTL)은 윗줄 끝(Col 3) 바로 아래에서 왼쪽으로 순차 누적
    */
   _buildSnakeRowsHtml() {
-    // 렌더링할 전체 슬롯 목록 (체인에 등록된 것들 + 현재 진행 중인 자리)
     const displaySlots = [];
 
     this.chain.forEach((item, idx) => {
@@ -401,14 +404,14 @@ class MarketMemoryGame {
       });
     });
 
-    // 새 재료를 추가하는 중이거나 복기 중일 때, 맨 끝에 들어갈 자리 [+] 표시
-    if (this.turnState === 'adding' || this.turnState === 'recalling') {
+    // 새 재료를 추가하는 중일 때만 맨 끝에 들어갈 자리 [+] 표시
+    if (this.turnState === 'adding') {
       displaySlots.push({
         idx: this.chain.length,
         isNewPlaceholder: true,
         isRevealed: false,
         item: null,
-        isActiveTarget: this.turnState === 'adding'
+        isActiveTarget: true
       });
     }
 
@@ -420,72 +423,158 @@ class MarketMemoryGame {
       `;
     }
 
-    // 4개씩 행으로 분할
-    const rows = [];
-    for (let i = 0; i < displaySlots.length; i += this.ITEMS_PER_ROW) {
-      rows.push(displaySlots.slice(i, i + this.ITEMS_PER_ROW));
-    }
+    const totalSlots = displaySlots.length;
+    const numRows = Math.ceil(totalSlots / this.ITEMS_PER_ROW);
+    let rowsHtml = '';
 
-    return rows.map((rowSlots, rowIdx) => {
-      const isEvenRow = rowIdx % 2 === 0; // 짝수행: L->R, 홀수행: R->L
-      const hasNextRow = rowIdx < rows.length - 1;
-
-      // 슬롯 아이템 렌더링
-      const orderedSlots = isEvenRow ? rowSlots : [...rowSlots].reverse();
+    for (let r = 0; r < numRows; r++) {
+      const isEvenRow = r % 2 === 0;
+      const hasNextRow = (r + 1) * this.ITEMS_PER_ROW < totalSlots;
       const arrowSymbol = isEvenRow ? '›' : '‹';
 
-      const slotsHtml = orderedSlots.map((slot, sIdx) => {
-        const isLastInRow = sIdx === orderedSlots.length - 1;
-        const arrowHtml = !isLastInRow ? `<span class="market-snake-arrow">${arrowSymbol}</span>` : '';
+      let cellsHtml = '';
 
-        if (slot.isNewPlaceholder) {
-          return `
-            <div class="market-pot-slot placeholder ${slot.isActiveTarget ? 'active-target' : ''}">
-              <span class="m-slot-plus">➕</span>
-              <span class="m-slot-label">새 재료</span>
-            </div>
-            ${arrowHtml}
-          `;
+      for (let col = 0; col < this.ITEMS_PER_ROW; col++) {
+        // 짝수행 (LTR): Col 0 -> Col 1 -> Col 2 -> Col 3
+        // 홀수행 (RTL): Col 0 <- Col 1 <- Col 2 <- Col 3
+        // DOM은 시각적 왼쪽에서 오른쪽으로 [Col 0, Col 1, Col 2, Col 3] 고정 배치하되,
+        // RTL 행은 Col 3(우측)이 r*4+0(윗줄 끝 바로 아래)이고 Col 0(좌측)이 r*4+3이 됨.
+        const slotIdx = isEvenRow 
+          ? (r * this.ITEMS_PER_ROW + col) 
+          : (r * this.ITEMS_PER_ROW + (this.ITEMS_PER_ROW - 1 - col));
+        const isLastCol = col === this.ITEMS_PER_ROW - 1;
+
+        let slotHtml = '';
+
+        if (slotIdx < totalSlots) {
+          const slot = displaySlots[slotIdx];
+
+          // 코너 꺾임 화살표 (↓):
+          // 짝수행은 우측 끝(Col 3) 아래, 홀수행은 좌측 끝(Col 0) 아래에 슬롯 중심 정렬로 배치
+          let cornerHtml = '';
+          if (hasNextRow) {
+            if (isEvenRow && col === this.ITEMS_PER_ROW - 1) {
+              cornerHtml = '<div class="market-corner-turn turn-right">↓</div>';
+            } else if (!isEvenRow && col === 0) {
+              cornerHtml = '<div class="market-corner-turn turn-left">↓</div>';
+            }
+          }
+
+          if (slot.isNewPlaceholder) {
+            slotHtml = `
+              <div class="market-pot-slot placeholder ${slot.isActiveTarget ? 'active-target' : ''}" data-slot-idx="${slot.idx}">
+                <span class="m-slot-plus">➕</span>
+                <span class="m-slot-label">새 재료</span>
+                ${cornerHtml}
+              </div>
+            `;
+          } else if (!slot.isRevealed) {
+            slotHtml = `
+              <div class="market-pot-slot blind ${slot.isActiveTarget ? 'active-target' : ''}" data-slot-idx="${slot.idx}">
+                <span class="m-slot-q">❓</span>
+                <span class="m-slot-idx">#${slot.idx + 1}</span>
+                ${cornerHtml}
+              </div>
+            `;
+          } else {
+            const iconHtml = window.KSool?.pixelIcon 
+              ? window.KSool.pixelIcon(slot.item.raw || slot.item, 28) 
+              : slot.item.emoji;
+            slotHtml = `
+              <div class="market-pot-slot filled pop-anim" data-slot-idx="${slot.idx}">
+                <span class="m-slot-idx-badge">${slot.idx + 1}</span>
+                <span class="m-slot-emoji">${iconHtml}</span>
+                <span class="m-slot-name">${slot.item.name}</span>
+                ${cornerHtml}
+              </div>
+            `;
+          }
+        } else {
+          // 4칸 고정 그리드 폭 유지를 위한 투명 슬롯
+          slotHtml = '<div class="market-pot-slot ghost" aria-hidden="true"></div>';
         }
 
-        if (!slot.isRevealed) {
-          return `
-            <div class="market-pot-slot blind ${slot.isActiveTarget ? 'active-target' : ''}">
-              <span class="m-slot-q">❓</span>
-              <span class="m-slot-idx">#${slot.idx + 1}</span>
-            </div>
-            ${arrowHtml}
-          `;
+        // 인라인 화살표 표시 여부
+        let showArrow = false;
+        if (!isLastCol) {
+          if (isEvenRow) {
+            // LTR: Col 0 -> Col 1 -> Col 2 -> Col 3
+            showArrow = (slotIdx + 1) < totalSlots;
+          } else {
+            // RTL: Col 3 -> Col 2 -> Col 1 -> Col 0
+            // 현재 컬럼(col)과 다음 컬럼(col + 1) 사이 화살표는 slotIdx(col 슬롯)가 존재할 때 표시
+            showArrow = slotIdx < totalSlots;
+          }
         }
 
-        // 공개된 주조실 네모칸 스타일 슬롯
-        const iconHtml = window.KSool?.pixelIcon ? window.KSool.pixelIcon(slot.item.raw || slot.item, 28) : slot.item.emoji;
-        return `
-          <div class="market-pot-slot filled pop-anim">
-            <span class="m-slot-idx-badge">${slot.idx + 1}</span>
-            <span class="m-slot-emoji">${iconHtml}</span>
-            <span class="m-slot-name">${slot.item.name}</span>
-          </div>
-          ${arrowHtml}
-        `;
-      }).join('');
+        const arrowHtml = (!isLastCol)
+          ? `<span class="market-snake-arrow ${showArrow ? '' : 'hidden'}">${arrowSymbol}</span>`
+          : '';
 
-      return `
-        <div class="market-snake-row ${isEvenRow ? 'ltr' : 'rtl'}" data-row-idx="${rowIdx}">
-          ${slotsHtml}
-          ${hasNextRow ? `<div class="market-corner-turn ${isEvenRow ? 'turn-right' : 'turn-left'}">↓</div>` : ''}
+        cellsHtml += slotHtml + arrowHtml;
+      }
+
+      rowsHtml += `
+        <div class="market-snake-row ${isEvenRow ? 'ltr' : 'rtl'}" data-row-idx="${r}">
+          ${cellsHtml}
         </div>
       `;
-    }).join('');
+    }
+
+    return rowsHtml;
   }
 
-  _autoScrollChainViewport() {
+  /**
+   * 뷰포트 스마트 2줄 트래킹 스크롤
+   * - 턴 시작(startNextTurn): 맨 위(scrollTop = 0)로 즉시 리셋하여 1번부터 보이게 보장
+   * - 복기/추가 진행 중: 현재 눌러야 할 라인(activeRowIdx)과 그 바로 윗줄(activeRowIdx - 1) 2줄만 화면에 보이도록
+   *   Row (activeRowIdx - 1)을 뷰포트 맨 위에 오도록 프레이밍 스크롤!
+   *   (미도달된 아래쪽 행들은 뷰포트 밖으로 숨김)
+   */
+  _scrollChainToActiveRow(immediate = false) {
     const doScroll = () => {
       const vp = document.getElementById('market-chain-viewport');
-      if (vp) {
-        vp.scrollTop = vp.scrollHeight;
+      if (!vp) return;
+
+      let targetIdx = 0;
+      if (this.turnState === 'recalling') {
+        targetIdx = this.recallIndex;
+      } else if (this.turnState === 'adding') {
+        targetIdx = this.chain.length;
+      } else {
+        targetIdx = Math.max(0, this.chain.length - 1);
+      }
+
+      const activeRowIdx = Math.floor(targetIdx / this.ITEMS_PER_ROW);
+
+      if (activeRowIdx <= 0) {
+        if (immediate) {
+          vp.scrollTop = 0;
+        } else {
+          vp.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        return;
+      }
+
+      // activeRowIdx >= 1: 내가 누를 차례인 라인 바로 윗줄(activeRowIdx - 1)이 상단에 오도록 정렬
+      const prevRowIdx = activeRowIdx - 1;
+      const prevRowEl = vp.querySelector(`[data-row-idx="${prevRowIdx}"]`);
+      if (prevRowEl) {
+        const vpRect = vp.getBoundingClientRect();
+        const rowRect = prevRowEl.getBoundingClientRect();
+        const computedStyle = (typeof window !== 'undefined' && window.getComputedStyle) ? window.getComputedStyle(vp) : null;
+        const padTop = computedStyle ? (parseFloat(computedStyle.paddingTop) || 8) : 8;
+        const targetScrollTop = vp.scrollTop + (rowRect.top - vpRect.top) - padTop;
+        const clampedScrollTop = Math.max(0, targetScrollTop);
+
+        if (immediate) {
+          vp.scrollTop = clampedScrollTop;
+        } else {
+          vp.scrollTo({ top: clampedScrollTop, behavior: 'smooth' });
+        }
       }
     };
+
     if (typeof requestAnimationFrame === 'function') {
       requestAnimationFrame(doScroll);
     } else if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
