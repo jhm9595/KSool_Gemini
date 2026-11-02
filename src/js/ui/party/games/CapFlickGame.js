@@ -14,6 +14,7 @@ class CapFlickGame {
     this.currentFatigue = 0; // 누적 피로도 (유저에게 절대 비공개)
     this.isBroken = false;
     this.showQuestionMark = false;
+    this.hitCount = 0;
     this.breakTimestamp = 0;
     this.baseAngle = 0; // 최초 생성 시 병뚜껑 본체 & 꼬다리 연결 부위의 무작위 배치 각도 (0° ~ 360°)
     this.bendAngle = 0; // 꼬다리와 뚜껑 접점(100px 25px)을 축으로 한 좌우 휨 각도
@@ -47,6 +48,7 @@ class CapFlickGame {
     }
     this.maxFatigue = Math.floor(Math.random() * 11) + 18; // 18 ~ 28회 상당 피로도
     this.currentFatigue = 0;
+    this.hitCount = 0;
     this.isBroken = false;
     this.showQuestionMark = false;
     this.breakTimestamp = 0;
@@ -131,6 +133,9 @@ class CapFlickGame {
 
   _executeFlickHit(fatigueInc, powerLevel) {
     this.currentFatigue += fatigueInc;
+    this.hitCount = (this.hitCount || 0) + 1;
+    const countEl = document.getElementById('flick-count-val');
+    if (countEl) countEl.textContent = this.hitCount;
 
     const startAngle = this.bendAngle || 0;
 
@@ -573,19 +578,40 @@ class CapFlickGame {
     } else {
       container.innerHTML = `
         <div class="party-game-box capflick-minimal-box capflick-solo-mode">
-          <!-- 1. 메인 인터랙션 아레나 (화면 가득 시원하게 1인 단독 플레이) -->
+          <!-- 1. 상단: 누적 타격 수 & 새 뚜껑 리셋 바 (대칭 게이지 제거 공간 활용) -->
+          <div class="capflick-solo-top-zone">
+            <div class="capflick-status-pill">
+              <span class="status-icon">💥</span>
+              <span class="status-text">누적 타격 <b id="flick-count-val">${this.hitCount || 0}</b>회</span>
+            </div>
+            <button type="button" class="capflick-restart-pill-btn" id="btn-capflick-restart" title="새 병뚜껑으로 다시 시작">
+              <span>🔄</span> 새 뚜껑
+            </button>
+          </div>
+
+          <!-- 2. 상단 타격 강도 피드백 (대칭 모드의 상단 피드백 슬롯 자리 활용) -->
+          <div class="flick-hit-slot top-slot">
+            <div class="flick-hit-word" id="flick-hit-top"></div>
+          </div>
+
+          <!-- 3. 메인 인터랙션 아레나 (대칭 모드와 동일한 현실감 있는 병뚜껑 크기) -->
           <div class="capflick-center-stage solo" id="cap-flick-arena">
             ${capSvg}
           </div>
 
-          <!-- 2. 하단 타격 강도 피드백 -->
+          <!-- 4. 하단 타격 강도 피드백 (대칭 모드와 100% 동일) -->
           <div class="flick-hit-slot bottom-symmetrical solo">
             <div class="flick-hit-word" id="flick-hit-bottom"></div>
           </div>
 
-          <!-- 3. 하단: 타이밍 파워 게이지 -->
+          <!-- 5. 하단: 타이밍 파워 게이지 (대칭 모드와 100% 동일) -->
           <div class="flick-power-section bottom-symmetrical solo">
             ${meterHtml}
+          </div>
+
+          <!-- 6. 하단 조작 팁 -->
+          <div class="capflick-solo-guide-pill">
+            <span>💡 게이지를 길게 누르면 파워 진동! 타이밍 맞춰 떼세요</span>
           </div>
         </div>
       `;
@@ -598,8 +624,23 @@ class CapFlickGame {
     const stage = document.querySelector('.capflick-minimal-box') || document.getElementById('cap-flick-arena');
     if (!stage) return;
 
+    // 1인 모드 전용 새 뚜껑 버튼
+    const restartBtn = document.getElementById('btn-capflick-restart');
+    if (restartBtn) {
+      restartBtn.onpointerdown = (e) => e.stopPropagation();
+      restartBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.hub.sound.playTap();
+        this.reset();
+      };
+    }
+
     // 포인터 다운 (누르기 시작: 파워 차징 시작 또는 ? 버튼 처리)
     const onStart = (e) => {
+      if (e.target && e.target.closest('#btn-capflick-restart')) {
+        return;
+      }
       // 1. 병뚜껑 가운데 ? 버튼 클릭 시 Up & Down 화면으로 즉시 전환
       if (e.target && e.target.closest('#cap-question-btn')) {
         e.preventDefault();
