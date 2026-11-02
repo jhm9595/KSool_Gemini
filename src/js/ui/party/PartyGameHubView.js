@@ -28,7 +28,10 @@ class PartyGameHubView {
       this.isSymmetrical = false;
     }
 
-    // 7대 술게임 메타데이터 목록 (로비 카드 렌더링용)
+    // 10대 술게임 메타데이터 목록 (해금률 및 필요 조건 순서대로 정렬)
+    // 0%: 기본 즉시 플레이 가능 (7종)
+    // 10%: 주조실 소주·맥주 기본 재료 해금 (1종)
+    // 50%: 도감 레시피 50% 이상 달성 (2종)
     this.gamesList = [
       {
         key: 'updown',
@@ -36,7 +39,8 @@ class PartyGameHubView {
         title: 'Up & Down',
         badge: '벌칙자 지목',
         accentColor: '#38bdf8',
-        desc: '병뚜껑 속 숫자를 맞히는 게임'
+        desc: '병뚜껑 속 숫자를 맞히는 게임',
+        unlockReq: 0
       },
       {
         key: 'capflick',
@@ -44,7 +48,8 @@ class PartyGameHubView {
         title: '병뚜껑 꼬다리 치기',
         badge: '릴레이 타격',
         accentColor: '#10b981',
-        desc: '병뚜껑 꼬다리를 쳐서 날려버리는 게임'
+        desc: '병뚜껑 꼬다리를 쳐서 날려버리는 게임',
+        unlockReq: 0
       },
       {
         key: 'surface',
@@ -52,7 +57,8 @@ class PartyGameHubView {
         title: '표면장력 소주잔 채우기',
         badge: '블라인드 서바이벌',
         accentColor: '#06b6d4',
-        desc: '표면장력 한계까지 술 채우기'
+        desc: '표면장력 한계까지 술 채우기',
+        unlockReq: 0
       },
       {
         key: 'bottlespin',
@@ -60,7 +66,8 @@ class PartyGameHubView {
         title: '소주병 돌리기',
         badge: '테이블 중앙',
         accentColor: '#f59e0b',
-        desc: '소주병을 돌려 벌칙자를 지목하는 게임'
+        desc: '소주병을 돌려 벌칙자를 지목하는 게임',
+        unlockReq: 0
       },
       {
         key: 'hunmin',
@@ -68,23 +75,8 @@ class PartyGameHubView {
         title: '훈민정음 시한폭탄',
         badge: '폭탄 돌리기',
         accentColor: '#ef4444',
-        desc: '초성의 단어를 외치며 폭탄을 넘기는 게임'
-      },
-      {
-        key: 'penaltycocktail',
-        emoji: '🍹',
-        title: '랜덤 벌칙주 제조기',
-        badge: '벌칙주',
-        accentColor: '#a855f7',
-        desc: '선택한 재료로 랜덤 비율의 벌칙주 제조'
-      },
-      {
-        key: 'fridge',
-        emoji: '🧊',
-        title: '냉장고를 부탁해',
-        badge: '조합 탐색',
-        accentColor: '#0ea5e9',
-        desc: '현재 만들 수 있는 술 조합 찾기'
+        desc: '초성의 단어를 외치며 폭탄을 넘기는 게임',
+        unlockReq: 0
       },
       {
         key: 'baskin',
@@ -92,15 +84,8 @@ class PartyGameHubView {
         title: '배불러라빈스 31',
         badge: '31 카운트다운',
         accentColor: '#f43f5e',
-        desc: '1~3개씩 숫자를 외쳐 31을 피하는 술게임'
-      },
-      {
-        key: 'market',
-        emoji: '🧺',
-        title: '시장에 가면',
-        badge: '기억력 릴레이',
-        accentColor: '#10b981',
-        desc: '이전 재료를 순서대로 기억하고 새 재료를 추가하는 게임'
+        desc: '1~3개씩 숫자를 외쳐 31을 피하는 술게임',
+        unlockReq: 0
       },
       {
         key: 'iamground',
@@ -108,7 +93,35 @@ class PartyGameHubView {
         title: '아이엠그라운드',
         badge: '박자 리듬 릴레이',
         accentColor: '#ec4899',
-        desc: '박자에 맞춰 자기소개와 상대 지목을 이어가는 리듬 술게임'
+        desc: '박자에 맞춰 자기소개와 상대 지목을 이어가는 리듬 술게임',
+        unlockReq: 0
+      },
+      {
+        key: 'penaltycocktail',
+        emoji: '🍹',
+        title: '랜덤 벌칙주 제조기',
+        badge: '벌칙주',
+        accentColor: '#a855f7',
+        desc: '선택한 재료로 랜덤 비율의 벌칙주 제조',
+        unlockReq: 10
+      },
+      {
+        key: 'fridge',
+        emoji: '🧊',
+        title: '냉장고를 부탁해',
+        badge: '조합 탐색',
+        accentColor: '#0ea5e9',
+        desc: '현재 만들 수 있는 술 조합 찾기',
+        unlockReq: 50
+      },
+      {
+        key: 'market',
+        emoji: '🧺',
+        title: '시장에 가면',
+        badge: '기억력 릴레이',
+        accentColor: '#10b981',
+        desc: '이전 재료를 순서대로 기억하고 새 재료를 추가하는 게임',
+        unlockReq: 50
       }
     ];
 
@@ -128,6 +141,18 @@ class PartyGameHubView {
 
     this._setupWakeLockListener();
     this._setupHistoryListener();
+  }
+
+  /**
+   * 해금률/조건에 따라 정렬된 게임 목록 반환
+   * (0% 기본 해금 -> 소주·맥주 재료 해금 -> 도감 50% 해금)
+   */
+  _getSortedGamesList() {
+    return [...this.gamesList].sort((a, b) => {
+      const aReq = a.unlockReq ?? 0;
+      const bReq = b.unlockReq ?? 0;
+      return aReq - bReq;
+    });
   }
 
   getGameMeta(key) {
@@ -413,13 +438,13 @@ class PartyGameHubView {
 
         <!-- 중앙 게임 선택 카드 목록 -->
         <div class="party-games-grid-menu">
-          ${this.gamesList.map(g => {
+          ${this._getSortedGamesList().map(g => {
             const unlocked = this._isGameUnlocked(g.key);
             let badgeHtml = `<span class="lobby-card-badge" style="color:${g.accentColor}; border-color:${g.accentColor};">${g.badge}</span>`;
             if (!unlocked) {
               if (g.key === 'penaltycocktail') {
                 badgeHtml = `<span class="lobby-card-badge lock-badge">🔒 소주·맥주 필요</span>`;
-              } else if (g.key === 'fridge') {
+              } else if (g.key === 'fridge' || g.key === 'market') {
                 badgeHtml = `<span class="lobby-card-badge lock-badge">🔒 도감 50% (${fridgePercent}%)</span>`;
               }
             }
