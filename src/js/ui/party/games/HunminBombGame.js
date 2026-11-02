@@ -359,10 +359,6 @@ class HunminBombGame {
             </div>
           </div>
 
-          <!-- 3. 하단 탭 안내 힌트 -->
-          <div class="hunmin-solo-bottom-hint">
-            <span class="solo-hint-pill">화면 어디든 탭하여 패스</span>
-          </div>
         </div>
       `;
     }
