@@ -546,76 +546,34 @@ class CapFlickGame {
     const isSymmetrical = Boolean(this.hub?.isSymmetrical);
     const capSvg = this._getCapSvg();
 
-    if (isSymmetrical) {
-      container.innerHTML = `
-        <div class="party-game-box capflick-minimal-box tabletop-symmetrical">
-          <!-- 1. 상단: 대칭 타이밍 파워 게이지 (상대방 플레이어용 180도 회전) -->
-          <div class="flick-power-section top-symmetrical">
-            ${meterHtml}
-          </div>
-
-          <!-- 2. 상단 타격 강도 피드백 (게이지와 뚜껑 사이, 대칭 180도 회전, 정중앙 세로줄) -->
-          <div class="flick-hit-slot top-symmetrical">
-            <div class="flick-hit-word" id="flick-hit-top"></div>
-          </div>
-
-          <!-- 3. 메인 인터랙션 아레나 (중앙 초록 병뚜껑 + 2배 길어진 꼬다리 와이어) -->
-          <div class="capflick-center-stage" id="cap-flick-arena">
-            ${capSvg}
-          </div>
-
-          <!-- 4. 하단 타격 강도 피드백 (뚜껑과 게이지 사이, 정방향 0도, 정중앙 세로줄) -->
-          <div class="flick-hit-slot bottom-symmetrical">
-            <div class="flick-hit-word" id="flick-hit-bottom"></div>
-          </div>
-
-          <!-- 5. 하단: 대칭 타이밍 파워 게이지 (내 쪽 플레이어용 정방향) -->
-          <div class="flick-power-section bottom-symmetrical">
-            ${meterHtml}
-          </div>
+    container.innerHTML = `
+      <div class="party-game-box capflick-minimal-box tabletop-symmetrical">
+        <!-- 1. 상단: 12시 방향 게이지 바 (대칭 모드일 때만 표시, 1인이면 숨김 처리) -->
+        <div class="flick-power-section top-symmetrical" ${isSymmetrical ? '' : 'style="visibility: hidden; pointer-events: none;" aria-hidden="true"'}>
+          ${meterHtml}
         </div>
-      `;
-    } else {
-      container.innerHTML = `
-        <div class="party-game-box capflick-minimal-box capflick-solo-mode">
-          <!-- 1. 상단: 누적 타격 수 & 새 뚜껑 리셋 바 (대칭 게이지 제거 공간 활용) -->
-          <div class="capflick-solo-top-zone">
-            <div class="capflick-status-pill">
-              <span class="status-icon">💥</span>
-              <span class="status-text">누적 타격 <b id="flick-count-val">${this.hitCount || 0}</b>회</span>
-            </div>
-            <button type="button" class="capflick-restart-pill-btn" id="btn-capflick-restart" title="새 병뚜껑으로 다시 시작">
-              <span>🔄</span> 새 뚜껑
-            </button>
-          </div>
 
-          <!-- 2. 상단 타격 강도 피드백 (대칭 모드의 상단 피드백 슬롯 자리 활용) -->
-          <div class="flick-hit-slot top-slot">
-            <div class="flick-hit-word" id="flick-hit-top"></div>
-          </div>
-
-          <!-- 3. 메인 인터랙션 아레나 (대칭 모드와 동일한 현실감 있는 병뚜껑 크기) -->
-          <div class="capflick-center-stage solo" id="cap-flick-arena">
-            ${capSvg}
-          </div>
-
-          <!-- 4. 하단 타격 강도 피드백 (대칭 모드와 100% 동일) -->
-          <div class="flick-hit-slot bottom-symmetrical solo">
-            <div class="flick-hit-word" id="flick-hit-bottom"></div>
-          </div>
-
-          <!-- 5. 하단: 타이밍 파워 게이지 (대칭 모드와 100% 동일) -->
-          <div class="flick-power-section bottom-symmetrical solo">
-            ${meterHtml}
-          </div>
-
-          <!-- 6. 하단 조작 팁 -->
-          <div class="capflick-solo-guide-pill">
-            <span>💡 게이지를 길게 누르면 파워 진동! 타이밍 맞춰 떼세요</span>
-          </div>
+        <!-- 2. 상단 타격 강도 피드백 (대칭 모드일 때만 표시, 1인이면 숨김 처리) -->
+        <div class="flick-hit-slot top-symmetrical" ${isSymmetrical ? '' : 'style="visibility: hidden; pointer-events: none;" aria-hidden="true"'}>
+          <div class="flick-hit-word" id="flick-hit-top"></div>
         </div>
-      `;
-    }
+
+        <!-- 3. 메인 인터랙션 아레나 (중앙 초록 병뚜껑 + 2배 길어진 꼬다리 와이어) -->
+        <div class="capflick-center-stage" id="cap-flick-arena">
+          ${capSvg}
+        </div>
+
+        <!-- 4. 하단 타격 강도 피드백 (뚜껑과 게이지 사이, 정방향 0도, 정중앙 세로줄) -->
+        <div class="flick-hit-slot bottom-symmetrical">
+          <div class="flick-hit-word" id="flick-hit-bottom"></div>
+        </div>
+
+        <!-- 5. 하단: 대칭 타이밍 파워 게이지 (내 쪽 플레이어용 정방향) -->
+        <div class="flick-power-section bottom-symmetrical">
+          ${meterHtml}
+        </div>
+      </div>
+    `;
 
     this._bindTouchEvents();
   }
@@ -624,26 +582,26 @@ class CapFlickGame {
     const stage = document.querySelector('.capflick-minimal-box') || document.getElementById('cap-flick-arena');
     if (!stage) return;
 
-    // 1인 모드 전용 새 뚜껑 버튼
-    const restartBtn = document.getElementById('btn-capflick-restart');
-    if (restartBtn) {
-      restartBtn.onpointerdown = (e) => e.stopPropagation();
-      restartBtn.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.hub.sound.playTap();
-        this.reset();
-      };
+    // 텍스트 선택 및 모바일 롱프레스 '복사하기 / 오려오기' 시스템 팝업 원천 차단
+    if (this._preventCallouts && this._currentStage) {
+      this._currentStage.removeEventListener('contextmenu', this._preventCallouts);
+      this._currentStage.removeEventListener('selectstart', this._preventCallouts);
     }
+
+    const preventCallouts = (e) => {
+      if (e.cancelable) e.preventDefault();
+      return false;
+    };
+    stage.addEventListener('contextmenu', preventCallouts, { passive: false });
+    stage.addEventListener('selectstart', preventCallouts, { passive: false });
+    this._preventCallouts = preventCallouts;
+    this._currentStage = stage;
 
     // 포인터 다운 (누르기 시작: 파워 차징 시작 또는 ? 버튼 처리)
     const onStart = (e) => {
-      if (e.target && e.target.closest('#btn-capflick-restart')) {
-        return;
-      }
       // 1. 병뚜껑 가운데 ? 버튼 클릭 시 Up & Down 화면으로 즉시 전환
       if (e.target && e.target.closest('#cap-question-btn')) {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         e.stopPropagation();
         this._goToUpDown();
         return;
@@ -652,7 +610,7 @@ class CapFlickGame {
       // 2. ? 버튼이 떠 있는 상태에서 화면의 다른 곳을 터치하면: ? 사라지고 꼬다리 치기 계속 (리셋)
       if (this.showQuestionMark) {
         if (performance.now() - this.breakTimestamp < 350) return;
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         e.stopPropagation();
         this.hub.sound.playTap();
         this.reset();
@@ -660,14 +618,14 @@ class CapFlickGame {
       }
 
       // 3. 정상 상태: 파워 차징 시작
-      e.preventDefault();
+      if (e.cancelable) e.preventDefault();
       this._startCharging();
     };
 
     // 포인터 업 (손 떼기: 파워 결정 및 타격)
     const onEnd = (e) => {
       if (this.showQuestionMark) return;
-      e.preventDefault();
+      if (e.cancelable) e.preventDefault();
       this._releaseAndFlick();
     };
 
@@ -688,7 +646,7 @@ class CapFlickGame {
     const qBtn = document.getElementById('cap-question-btn');
     if (qBtn) {
       const handleQ = (e) => {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         e.stopPropagation();
         this._goToUpDown();
       };
@@ -708,10 +666,22 @@ class CapFlickGame {
     }
     this.isCharging = false;
     this.showQuestionMark = false;
+    if (this._currentStage && this._preventCallouts) {
+      this._currentStage.removeEventListener('contextmenu', this._preventCallouts);
+      this._currentStage.removeEventListener('selectstart', this._preventCallouts);
+      this._preventCallouts = null;
+      this._currentStage = null;
+    }
+    const stage = document.querySelector('.capflick-minimal-box') || document.getElementById('cap-flick-arena');
     if (window.PointerEvent) {
+      if (stage) stage.onpointerdown = null;
       window.onpointerup = null;
       window.onpointercancel = null;
     } else {
+      if (stage) {
+        stage.ontouchstart = null;
+        stage.onmousedown = null;
+      }
       window.ontouchend = null;
       window.ontouchcancel = null;
       window.onmouseup = null;
