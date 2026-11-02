@@ -64,7 +64,8 @@ class HintModalView {
     } else if (initialMode === 'BASEBALL' || initialMode === 'baseball') {
       const isImageUnlocked = this.inventory.isRecipeImageUnlocked(this.activeRecipeId);
       const isRecipeUnlocked = this.inventory.isRecipeUnlocked(this.activeRecipeId);
-      this.viewMode = (isImageUnlocked || isRecipeUnlocked) ? 'BASEBALL' : 'CHOICE';
+      const isSandbox = Boolean(this.inventory.unlockAllSandboxMode);
+      this.viewMode = (isImageUnlocked || isRecipeUnlocked || isSandbox) ? 'BASEBALL' : 'CHOICE';
     } else {
       // 전체 해금 샌드박스 모드일 때만 BASEBALL 직행, 그 외에는 항상 2단계 선택 화면(CHOICE)
       this.viewMode = this.inventory.unlockAllSandboxMode ? 'BASEBALL' : 'CHOICE';
@@ -143,6 +144,9 @@ class HintModalView {
     const extHints = this.recipeBook.getExternalHints(this.activeRecipeId);
     const hasExtHint = extHints && extHints.length > 0;
     const isImageUnlocked = this.inventory.isRecipeImageUnlocked(this.activeRecipeId);
+    const isDescUnlocked = this.inventory.isRecipeDescUnlocked(this.activeRecipeId);
+    const isRecipeUnlocked = this.inventory.isRecipeUnlocked(this.activeRecipeId);
+    const hintState = this.inventory.getHintState(this.activeRecipeId);
     const resolvedName = this.brandResolver.resolveName(recipe) || recipe.display_name || '이 술';
     const targetLabel = `${recipe.formatted_number || ''} ${resolvedName}`.trim();
     const targetBadgeHtml = `<span style="color:#60a5fa; font-weight:900; font-size:0.78rem;">${recipe.formatted_number || ''}</span> <span style="color:#fde047; font-weight:900; font-size:0.84rem;">${resolvedName}</span>`;
@@ -151,15 +155,12 @@ class HintModalView {
     // [모드 1] 2단계 힌트 추리 메인 화면 (상단: 설명 힌트 은박 복권 / STEP 1: 외형 그림 ➔ STEP 2: 베이스볼 추리)
     // =========================================================================
     if (this.viewMode === 'CHOICE') {
-      const isImageUnlocked = this.inventory.isRecipeImageUnlocked(this.activeRecipeId);
-      const isDescUnlocked = this.inventory.isRecipeDescUnlocked(this.activeRecipeId);
-      const isRecipeUnlocked = this.inventory.isRecipeUnlocked(this.activeRecipeId);
       const isDescAvailable = isDescUnlocked || isRecipeUnlocked;
 
       const isBaseballDoneChoice = this.baseballEngine.isAllStagesCleared(this.activeRecipeId);
       const needsRatioGameChoice = this.ratioProvider.requiresRatioGame(this.activeRecipeId);
       const isUpAndDownChoice = isBaseballDoneChoice && needsRatioGameChoice;
-      const isBaseballUnlocked = isImageUnlocked || isRecipeUnlocked;
+      const isBaseballUnlocked = isImageUnlocked || isRecipeUnlocked || Boolean(this.inventory.unlockAllSandboxMode);
 
       // 1. 외부 힌트 (있을 경우만)
       let extHintCardHtml = '';
@@ -228,7 +229,8 @@ class HintModalView {
         `;
       }
 
-      const isAllSolvedOnboarding = isBaseballDoneChoice && (!needsRatioGameChoice || this.ratioProvider.isRatioSolved(this.activeRecipeId, hintState.solvedRatios));
+      const isAllRatiosSolvedChoice = !needsRatioGameChoice || items.every(it => Boolean(hintState.solvedRatios[String(it.slot_order)]));
+      const isAllSolvedOnboarding = isBaseballDoneChoice && isAllRatiosSolvedChoice;
       const isCardClear = isRecipeUnlocked || isAllSolvedOnboarding;
       const cardStateClass = isBaseballUnlocked ? (isCardClear ? 'step-done' : 'step-active') : 'step-locked';
       const tagStateClass = isBaseballUnlocked ? (isCardClear ? 'tag-done' : 'tag-active') : 'tag-locked';
@@ -493,7 +495,6 @@ class HintModalView {
     // =========================================================================
     // [모드 4] ⚾ 베이스볼 & 황금비율 Up/Down 추리 화면
     // =========================================================================
-    const hintState = this.inventory.getHintState(this.activeRecipeId);
     const maxStage = this.baseballEngine.getMaxStageForRecipe(recipe);
     const currentStage = this.baseballEngine.getCurrentActiveStage(this.activeRecipeId);
     const isBaseballDone = this.baseballEngine.isAllStagesCleared(this.activeRecipeId);
@@ -871,7 +872,13 @@ class HintModalView {
         this._updateMinigameControlsOnly(recipe);
       },
       () => {
-        this.close();
+        // Clear 후 캔버스 탭 시 힌트 선택 화면(CHOICE)으로 자연스럽게 복귀
+        if (this.minigameStatus === 'WIN') {
+          this.viewMode = 'CHOICE';
+          this.render();
+        } else {
+          this.close();
+        }
       }
     );
     this.minigameInstance.start(this.selectedMinigameType);
@@ -890,8 +897,10 @@ class HintModalView {
   }
 
   _getOptionsForStage(stage, overrideCatId = null) {
+    const recipeItems = this.recipeBook.getRecipeItems(this.activeRecipeId);
+    const targetBaseIds = new Set(recipeItems.map(it => Number(it.ingredient_id)));
     const unlockedBaseIngs = Array.from(this.recipeBook.baseIngredients.values()).filter(ing =>
-      this.inventory.isIngredientAvailable(ing.ingredient_id)
+      targetBaseIds.has(Number(ing.ingredient_id)) || this.inventory.isIngredientAvailable(ing.ingredient_id)
     );
 
     if (stage === 1) {
@@ -926,7 +935,7 @@ class HintModalView {
 
     const solvedBaseIds = this.baseballEngine.getAnswerTokens(this.activeRecipeId, 2).map(Number);
     const detailOpts = Array.from(this.recipeBook.detailIngredients.values())
-      .filter(det => solvedBaseIds.includes(Number(det.base_ingredient_id)) && this.inventory.isIngredientAvailable(det.base_ingredient_id))
+      .filter(det => solvedBaseIds.includes(Number(det.base_ingredient_id)) && (targetBaseIds.has(Number(det.base_ingredient_id)) || this.inventory.isIngredientAvailable(det.base_ingredient_id)))
       .map(det => {
         const resolvedName = this.brandResolver.resolveName(det);
         return {
@@ -1021,9 +1030,10 @@ class HintModalView {
       choiceBaseballBtn.onclick = () => {
         const isImageUnlocked = this.inventory.isRecipeImageUnlocked(this.activeRecipeId);
         const isRecipeUnlocked = this.inventory.isRecipeUnlocked(this.activeRecipeId);
+        const isSandbox = Boolean(this.inventory.unlockAllSandboxMode);
 
-        if (!isImageUnlocked && !isRecipeUnlocked) {
-          this.audio.playTap();
+        if (!isImageUnlocked && !isRecipeUnlocked && !isSandbox) {
+          this.audio?.playTap?.();
           alert('🔒 1단계 외형 그림 미니게임을 먼저 클리어해야 베이스볼 추리에 입장할 수 있습니다!');
           return;
         }
@@ -1031,7 +1041,7 @@ class HintModalView {
         this._clearActiveRecipeHistory();
         this._resetGuessSlots();
         this.viewMode = 'BASEBALL';
-        this.audio.playTap();
+        this.audio?.playTap?.();
         this.render();
       };
     }
