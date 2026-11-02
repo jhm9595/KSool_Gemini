@@ -82,6 +82,8 @@ class PartyGameHubView {
         desc: '1~3개씩 숫자를 외쳐 31을 피하는 술게임',
         unlockReq: 0
       },
+      // [임시 숨김] 아이엠그라운드 - 완성도 및 밸런스 보강 시 재오픈
+      /*
       {
         key: 'iamground',
         emoji: '🎙️',
@@ -91,6 +93,7 @@ class PartyGameHubView {
         desc: '박자에 맞춰 자기소개와 상대 지목을 이어가는 리듬 술게임',
         unlockReq: 0
       },
+      */
       {
         key: 'penaltycocktail',
         emoji: '🍹',
@@ -275,7 +278,7 @@ class PartyGameHubView {
    * 게임 선택 -> 전체화면 몰입형 플레이 화면 진입
    */
   playGame(gameKey) {
-    if (!this.games[gameKey]) return;
+    if (!this.games[gameKey] || !this.gamesList.some(g => g.key === gameKey)) return;
 
     // 이전 실행 중인 게임 클린업
     if (this.activeGameKey && this.games[this.activeGameKey] && typeof this.games[this.activeGameKey].destroy === 'function') {
