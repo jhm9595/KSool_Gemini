@@ -1510,23 +1510,4 @@
   transition: opacity 0.65s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-.scratch-quick-reveal-btn {
-  position: absolute;
-  bottom: 4px;
-  right: 6px;
-  z-index: 3;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid #d97706;
-  color: #fef3c7;
-  font-size: 0.62rem;
-  font-weight: 800;
-  padding: 2px 7px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
 
-.scratch-quick-reveal-btn:hover {
-  border-color: #fbbf24;
-  color: #ffffff;
-}

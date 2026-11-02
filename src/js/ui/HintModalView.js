@@ -270,7 +270,7 @@ class HintModalView {
           <!-- STEP 1: 외형 그림 (퍼플 테마) -->
           <div class="hint-step-card step-purple ${isImageUnlocked ? 'step-done' : 'step-active'}" id="choice-minigame-btn" role="button" tabindex="0">
             <div class="step-card-icon-col">
-              <span class="step-main-icon">${isImageUnlocked ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(recipe, 32) : recipe.emoji) : '🎮'}</span>
+              <span class="step-main-icon">🎮</span>
             </div>
             <div class="step-card-main-col">
               <div class="step-card-header">
