@@ -98,6 +98,57 @@
   font-size: 1rem;
 }
 
+/* 탑바 대칭/1인 토글 버튼 */
+.party-symmetry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(30, 41, 59, 0.95);
+  border: 1.5px solid rgba(148, 163, 184, 0.45);
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 5px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.party-symmetry-btn:hover {
+  background: #334155;
+  color: #f8fafc;
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+}
+
+.party-symmetry-btn:active {
+  transform: scale(0.95);
+}
+
+.party-symmetry-btn.active {
+  background: rgba(14, 165, 233, 0.25);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.party-symmetry-btn .sym-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.party-symmetry-btn .sym-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.party-topbar-spacer {
+  flex-shrink: 0;
+}
+
 /* ==========================================================================
    [게임 선택 로비 (Lobby)]
    ========================================================================== */
@@ -973,6 +1024,73 @@
   100% { opacity: 0; }
 }
 
+
+
+/* Up & Down 1인 단독 모드 */
+.updown-box.updown-solo-mode {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  height: 100% !important;
+  width: 100% !important;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 8px 14px 14px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.updown-solo-top-zone {
+  flex: 0 0 auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0 4px;
+}
+
+.updown-solo-top-zone .updown-center-cap-wrap {
+  width: clamp(140px, 22vh, 180px);
+  height: clamp(140px, 22vh, 180px);
+}
+
+.updown-player-station.updown-solo-station {
+  flex: 1;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 8px;
+  min-height: 0;
+}
+
+.updown-station-status-slot.solo {
+  min-height: 48px;
+}
+
+.party-number-display.solo {
+  font-size: clamp(2.2rem, 6vh, 2.8rem);
+  padding: 6px 16px;
+  min-height: 52px;
+  max-width: 300px;
+}
+
+.party-numpad-grid.solo {
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.party-numpad-grid.solo .party-num-key,
+.party-numpad-grid.solo .party-key-action {
+  height: clamp(44px, 6.5vh, 56px);
+  font-size: clamp(1.2rem, 3vh, 1.5rem);
+}
+
 /* ==========================================================================
    ② 꼬다리 치기 전용 스타일 (미니멀 물리 타격형)
    ========================================================================== */
@@ -990,6 +1108,50 @@
   padding: 4px 10px 8px;
   box-sizing: border-box;
 }
+
+/* 병뚜껑 꼬다리 치기 1인 단독 모드 */
+.capflick-minimal-box.capflick-solo-mode {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  height: 100% !important;
+  width: 100% !important;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 10px 14px 16px;
+  box-sizing: border-box;
+}
+
+.capflick-center-stage.solo {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  min-height: 240px;
+  max-height: 58vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto 0;
+}
+
+.capflick-center-stage.solo .soju-cap-flick-svg {
+  width: clamp(220px, 46vh, 340px);
+  height: clamp(220px, 46vh, 340px);
+}
+
+.flick-hit-slot.solo {
+  flex: 0 0 auto;
+  margin-bottom: 6px;
+}
+
+.flick-power-section.solo {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 340px;
+}
+
 
 
 
@@ -1877,6 +2039,77 @@
   position: relative;
   transition: background 0.2s ease;
 }
+
+/* 훈민정음 시한폭탄 1인 단독 모드 */
+.hunmin-pure-stage.hunmin-solo-stage {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  height: 100% !important;
+  width: 100% !important;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 12px 16px 20px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.hunmin-solo-meta-zone {
+  flex: 0 0 auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 4px 10px;
+}
+
+.hunmin-center-timer.solo {
+  flex: 1;
+}
+
+.hunmin-center-action-icons.solo {
+  display: flex;
+  gap: 8px;
+}
+
+.hunmin-solo-center-zone {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.pure-chosung-text.solo {
+  font-size: min(8rem, 26vw);
+  font-weight: 900;
+  color: #fde047;
+  letter-spacing: 16px;
+  margin-left: 16px;
+  text-shadow: 0 0 32px rgba(253, 224, 71, 0.8), 0 8px 24px rgba(0, 0, 0, 0.9);
+  will-change: transform, opacity;
+}
+
+.hunmin-solo-bottom-hint {
+  flex: 0 0 auto;
+  padding-bottom: 12px;
+  pointer-events: none;
+}
+
+.solo-hint-pill {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: rgba(226, 232, 240, 0.7);
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  padding: 6px 14px;
+  border-radius: 20px;
+  backdrop-filter: blur(6px);
+}
+
 
 /* 대칭 자음 반쪽 영역 */
 .hunmin-symmetric-half {

@@ -351,23 +351,23 @@ class UpAndDownGame {
     `;
   }
 
-  _renderStation(isTop = false) {
-    const flipClass = isTop ? 'top-station' : 'bottom-station';
+  _renderStation(isTop = false, isSolo = false) {
+    const flipClass = isTop ? 'top-station' : (isSolo ? 'bottom-station updown-solo-station' : 'bottom-station');
     const placeholderText = this.isEditingMax ? 'MAX ?' : '· ·';
     return `
       <div class="updown-player-station ${flipClass}">
         <!-- 1. 병뚜껑 쪽 인접: MAX 또는 UP / DOWN 대칭 표시 (세로 중앙축 맞춤 대형 타이포) -->
-        <div class="updown-station-status-slot">
+        <div class="updown-station-status-slot ${isSolo ? 'solo' : ''}">
           ${this._renderStationStatus()}
         </div>
 
         <!-- 2. 입력된 숫자 디스플레이 -->
-        <div class="party-number-display ${this.isEditingMax ? 'editing-max' : ''} ${!this.inputVal ? 'placeholder' : ''}">
+        <div class="party-number-display ${isSolo ? 'solo' : ''} ${this.isEditingMax ? 'editing-max' : ''} ${!this.inputVal ? 'placeholder' : ''}">
           ${this.inputVal || placeholderText}
         </div>
 
         <!-- 3. 3x4 스마트폰 다이얼 패드 -->
-        <div class="party-numpad-grid compact">
+        <div class="party-numpad-grid ${isSolo ? 'solo' : 'compact'}">
           <button type="button" class="party-num-key" data-digit="1">1</button>
           <button type="button" class="party-num-key" data-digit="2">2</button>
           <button type="button" class="party-num-key" data-digit="3">3</button>
@@ -396,22 +396,42 @@ class UpAndDownGame {
     const container = document.getElementById('party-game-stage');
     if (!container) return;
 
-    container.innerHTML = `
-      <div class="party-game-box updown-box tabletop-symmetrical">
-        <!-- 1. 상단: 상대방 플레이어 스테이션 (180도 회전 대칭) -->
-        ${this._renderStation(true)}
+    const isSymmetrical = Boolean(this.hub?.isSymmetrical);
 
-        <!-- 2. 중앙: 극사실적 3D 소주 병뚜껑 (CapFlick과 1:1 완벽 동일한 정중앙 위치 및 크기) -->
-        <div class="updown-center-cap-wrap">
-          <div class="realistic-cap-container ${this.isFinished ? 'exploded' : ''}">
-            ${this._getBottleCapSvg()}
+    if (isSymmetrical) {
+      container.innerHTML = `
+        <div class="party-game-box updown-box tabletop-symmetrical">
+          <!-- 1. 상단: 상대방 플레이어 스테이션 (180도 회전 대칭) -->
+          ${this._renderStation(true, false)}
+
+          <!-- 2. 중앙: 극사실적 3D 소주 병뚜껑 (CapFlick과 1:1 완벽 동일한 정중앙 위치 및 크기) -->
+          <div class="updown-center-cap-wrap">
+            <div class="realistic-cap-container ${this.isFinished ? 'exploded' : ''}">
+              ${this._getBottleCapSvg()}
+            </div>
           </div>
-        </div>
 
-        <!-- 3. 하단: 내 쪽 플레이어 스테이션 (정방향 0도) -->
-        ${this._renderStation(false)}
-      </div>
-    `;
+          <!-- 3. 하단: 내 쪽 플레이어 스테이션 (정방향 0도) -->
+          ${this._renderStation(false, false)}
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="party-game-box updown-box updown-solo-mode">
+          <!-- 1. 상단: 큼지막한 극사실적 3D 소주 병뚜껑 (1인 단독 화면 크게 쓰기) -->
+          <div class="updown-solo-top-zone">
+            <div class="updown-center-cap-wrap">
+              <div class="realistic-cap-container ${this.isFinished ? 'exploded' : ''}">
+                ${this._getBottleCapSvg()}
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. 하단: 큼직하고 널찍한 1인 플레이어 스테이션 -->
+          ${this._renderStation(false, true)}
+        </div>
+      `;
+    }
 
     this._bindEvents();
   }
