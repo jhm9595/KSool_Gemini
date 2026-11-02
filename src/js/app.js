@@ -268,6 +268,22 @@ class KSoolApp {
       this.inventory.save();
       if (shouldQueue) this.pendingTabIntroQueue.push('suggestions');
     }
+
+    // [튜토리얼 혜택 종료 안내 1] No.03 완료 시 외형 그림 무료 제공 종료 안내
+    const isNo3Done = this.inventory.isRecipeUnlocked(3) || this.inventory.unlockedRecipeIds.size >= 3;
+    if (!this.inventory.shownTabIntros.noticeNo3 && isNo3Done) {
+      this.inventory.shownTabIntros.noticeNo3 = true;
+      this.inventory.save();
+      if (shouldQueue) this.pendingTabIntroQueue.push('noticeNo3');
+    }
+
+    // [튜토리얼 혜택 종료 안내 2] No.06 완료 시 설명 힌트 무료 제공 종료 안내
+    const isNo6Done = this.inventory.isRecipeUnlocked(6) || this.inventory.unlockedRecipeIds.size >= 6;
+    if (!this.inventory.shownTabIntros.noticeNo6 && isNo6Done) {
+      this.inventory.shownTabIntros.noticeNo6 = true;
+      this.inventory.save();
+      if (shouldQueue) this.pendingTabIntroQueue.push('noticeNo6');
+    }
   }
 
   _showNextPendingTabIntro() {
@@ -327,6 +343,20 @@ class KSoolApp {
         title: '[조합추천] 탭이 열렸습니다!',
         desc: '모든 공식 레시피(100%)를 마스터하셨습니다! 이제 이 게임에 아직 없는 나만의 비법 레시피를 <b>[👍 조합추천]</b> 탭에 등록해 투표를 나누고, <b>[🧊 냉장고를 부탁해]</b>에서도 유저들의 조합추천 레시피를 함께 만나보세요!',
         btnLabel: '👍 조합추천 보러가기'
+      },
+      noticeNo3: {
+        emoji: '🎨',
+        badge: '튜토리얼 혜택 안내',
+        title: '외형 그림 기본 제공 종료',
+        desc: 'No.03 레시피를 완료하셨습니다!<br/><br/>이제부터(No.04~)는 <b>외형 그림 힌트</b>가 기본 제공되지 않으며, <b>벽돌깨기 · 땅따먹기 · 네모로직</b> 미니게임을 직접 클리어하여 해금해야 합니다.<br/><br/><span style="color:#fde047; font-weight:700;">※ 설명 힌트는 No.06까지 계속 무료로 제공됩니다.</span>',
+        btnLabel: '확인 및 계속하기'
+      },
+      noticeNo6: {
+        emoji: '📜',
+        badge: '튜토리얼 혜택 안내',
+        title: '설명 힌트 기본 제공 종료',
+        desc: 'No.06 레시피를 완료하셨습니다!<br/><br/>이제부터(No.07~)는 <b>설명 힌트</b>도 기본 제공되지 않으며, <b>은박 복권 긁기(AD)</b>를 통해 직접 힌트를 해금해야 합니다.<br/><br/><span style="color:#38bdf8; font-weight:700;">※ 힌트 센터에서 미니게임과 은박 복권을 활용해 다음 레시피를 추리해보세요!</span>',
+        btnLabel: '확인 및 계속하기'
       }
     }[tabKey];
 
@@ -361,6 +391,8 @@ class KSoolApp {
         this.audio.playTap();
         if (tabKey === 'detailPicker') {
           this.switchTab('brew');
+        } else if (tabKey === 'noticeNo3' || tabKey === 'noticeNo6') {
+          // 알림 팝업 확인 시 현재 탭 유지
         } else {
           this.switchTab(tabKey);
         }
