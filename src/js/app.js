@@ -732,7 +732,7 @@ class KSoolApp {
         this.craftingPot.decrementSlot(idx);
         this.audio.playTap();
         this._renderPotSlots();
-        this._renderIngredientsGrid();
+        this._updateIngredientsPotBadges();
         this.suggestionBoardView.render();
       };
     });
@@ -806,9 +806,65 @@ class KSoolApp {
       `;
   }
 
+  _bindIngredientsGridEvents() {
+    const grid = document.getElementById('ingredients-grid');
+    if (!grid || grid._hasBoundEvents) return;
+    grid._hasBoundEvents = true;
+
+    // 이벤트 위임(Event Delegation)으로 카드 파괴/재생성 시에도 리스너 유실 없이 연속 빠른 탭 100% 포착
+    grid.addEventListener('click', (e) => {
+      const pickerBtn = e.target.closest('[data-open-detail-picker]');
+      if (pickerBtn) {
+        e.stopPropagation();
+        const baseId = Number(pickerBtn.getAttribute('data-open-detail-picker'));
+        const baseIng = this.recipeBook.getBaseIngredient(baseId);
+        const details = this.recipeBook.getDetailsForBase(baseId);
+        this.audio.playTap();
+        this.openDetailPickerModal(baseIng, details);
+        return;
+      }
+
+      const card = e.target.closest('[data-base-ing-id]');
+      if (card) {
+        const baseId = Number(card.getAttribute('data-base-ing-id'));
+        this._addIngredientToPot(baseId, null);
+      }
+    });
+  }
+
+  _updateIngredientsPotBadges() {
+    const grid = document.getElementById('ingredients-grid');
+    if (!grid) return;
+    const potSlots = this.craftingPot.getSlots();
+    const countMap = new Map();
+    for (const s of potSlots) {
+      countMap.set(s.baseId, (countMap.get(s.baseId) || 0) + s.count);
+    }
+
+    // DOM 노드를 파괴하지 않고 기존 카드들의 뱃지와 in-pot 상태만 실시간 갱신하여 연속 터치 씹힘 원천 방지
+    grid.querySelectorAll('[data-base-ing-id]').forEach(card => {
+      const id = Number(card.getAttribute('data-base-ing-id'));
+      const count = countMap.get(id) || 0;
+      card.classList.toggle('in-pot', count > 0);
+      let badge = card.querySelector('.slot-count-badge');
+      if (count > 1) {
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'slot-count-badge';
+          card.appendChild(badge);
+        }
+        badge.textContent = count;
+      } else if (badge) {
+        badge.remove();
+      }
+    });
+  }
+
   _renderIngredientsGrid() {
     const grid = document.getElementById('ingredients-grid');
     if (!grid) return;
+
+    this._bindIngredientsGridEvents();
 
     // 미해금된 재료는 화면에 아예 보이지 않도록 필터링
     const unlockedBase = Array.from(this.recipeBook.baseIngredients.values()).filter(ing =>
@@ -820,27 +876,6 @@ class KSoolApp {
     const filtered = unlockedBase.filter(i => i.category_id === this.selectedIngCategory);
     filtered.sort((a, b) => a.ingredient_id - b.ingredient_id);
     grid.innerHTML = filtered.map(ing => this._createIngredientCardHtml(ing, potSlots)).join('');
-
-    // 상세재료 버튼(브랜드/브루어리/팔도지도) 클릭 시에만 상세 선택 모달 오픈
-    grid.querySelectorAll('[data-open-detail-picker]').forEach(btn => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        const baseId = Number(btn.getAttribute('data-open-detail-picker'));
-        const baseIng = this.recipeBook.getBaseIngredient(baseId);
-        const details = this.recipeBook.getDetailsForBase(baseId);
-        this.audio.playTap();
-        this.openDetailPickerModal(baseIng, details);
-      };
-    });
-
-    // 대표 재료 카드(아이콘/영역) 클릭 시 즉시 기본 재료로 가마솥에 투입
-    grid.querySelectorAll('[data-base-ing-id]').forEach(card => {
-      card.onclick = (e) => {
-        if (e.target.closest('[data-open-detail-picker]')) return;
-        const baseId = Number(card.getAttribute('data-base-ing-id'));
-        this._addIngredientToPot(baseId, null);
-      };
-    });
   }
 
   _addIngredientToPot(baseId, detailId = null) {
@@ -854,7 +889,8 @@ class KSoolApp {
     }
     this.audio.playTap();
     this._renderPotSlots();
-    this._renderIngredientsGrid();
+    // 전체 DOM 재생성 대신 뱃지만 업데이트하여 연타 시 터치 씹힘 완벽 방지
+    this._updateIngredientsPotBadges();
     this.suggestionBoardView.render();
   }
 
@@ -1246,8 +1282,11 @@ class KSoolApp {
     let lastGlobalTouchEnd = 0;
     document.addEventListener('touchend', (e) => {
       const now = performance.now();
-      const isInput = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable);
-      if (!isInput && now - lastGlobalTouchEnd <= 320) {
+      // 버튼, 재료 카드, 슬롯 등 인터랙티브 요소는 탭 간격과 무관하게 항상 클릭 허용 (빠른 재료 연타 씹힘 원천 방지)
+      const isInteractive = e.target && Boolean(
+        e.target.closest('button, [role="button"], .ing-card, [data-base-ing-id], [data-pot-slot-idx], .tab-btn, .toolbar-toggle, .arcade-action-btn, .modal-card, a, input, textarea, select, label')
+      );
+      if (!isInteractive && now - lastGlobalTouchEnd <= 320) {
         if (e.cancelable) e.preventDefault();
       }
       lastGlobalTouchEnd = now;
