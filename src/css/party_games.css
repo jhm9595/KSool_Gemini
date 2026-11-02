@@ -3630,7 +3630,9 @@
   overflow-y: auto;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
-  gap: 6px;
+  grid-auto-rows: 64px;
+  align-content: start;
+  gap: 8px 6px;
   padding: 4px 2px 14px;
   min-height: 0;
 }
