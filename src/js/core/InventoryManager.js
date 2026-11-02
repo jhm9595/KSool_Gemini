@@ -18,7 +18,9 @@ class InventoryManager {
       collection: false,
       fridge: false,
       suggestions: false,
-      detailPicker: false
+      detailPicker: false,
+      noticeNo3: false,
+      noticeNo6: false
     };
     this.unlockAllSandboxMode = false; // 모든 재료/단계 즉시 실험해보기 토글용
   }
@@ -34,7 +36,9 @@ class InventoryManager {
       collection: false,
       fridge: false,
       suggestions: false,
-      detailPicker: false
+      detailPicker: false,
+      noticeNo3: false,
+      noticeNo6: false
     };
 
     // 1. 저장된 상태 복원 (해금한 레시피 목록 기준)
@@ -67,7 +71,9 @@ class InventoryManager {
           collection: Boolean(saved.shownTabIntros.collection),
           fridge: Boolean(saved.shownTabIntros.fridge),
           suggestions: Boolean(saved.shownTabIntros.suggestions),
-          detailPicker: Boolean(saved.shownTabIntros.detailPicker)
+          detailPicker: Boolean(saved.shownTabIntros.detailPicker),
+          noticeNo3: Boolean(saved.shownTabIntros.noticeNo3),
+          noticeNo6: Boolean(saved.shownTabIntros.noticeNo6)
         };
       }
     }
@@ -187,8 +193,8 @@ class InventoryManager {
   isRecipeImageUnlocked(recipeId) {
     if (this.unlockAllSandboxMode) return true;
     const rId = Number(recipeId);
-    // [온보딩 튜토리얼 룰] No.01 ~ No.09는 외형 그림 기본 해금 (무료 공개)
-    if (this._getRecipeNumber(rId) <= 9) return true;
+    // [온보딩 튜토리얼 룰] No.01 ~ No.03은 외형 그림 기본 해금 (무료 공개)
+    if (this._getRecipeNumber(rId) <= 3) return true;
     return this.unlockedRecipeIds.has(rId) || this.unlockedImageRecipeIds.has(rId);
   }
 
@@ -302,8 +308,8 @@ class InventoryManager {
     const rId = Number(recipeId);
     const recNum = this._getRecipeNumber(rId);
 
-    // 전체 해금 샌드박스 모드이거나, [온보딩 튜토리얼 룰] No.01 ~ No.03은 베이스볼 & 황금비율 정답 100% 기본 공개
-    if (this.unlockAllSandboxMode || recNum <= 3) {
+    // 전체 해금 샌드박스 모드일 때만 베이스볼 & 황금비율 정답 100% 기본 공개 (일반 플레이 시 항상 직접 추리)
+    if (this.unlockAllSandboxMode) {
       let items = this.recipeBook ? (this.recipeBook.getRecipeItems(rId) || []) : [];
       if (items.length === 0 && window.KSool?.SeedDataBundle?.recipe_ingredients) {
         items = window.KSool.SeedDataBundle.recipe_ingredients.filter(it => it.recipe_id === rId);
