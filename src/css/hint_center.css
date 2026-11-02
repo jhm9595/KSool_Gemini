@@ -893,6 +893,13 @@
   box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
 }
 
+.minigame-select-card.mg-card-nonogram {
+  border-color: rgba(168, 85, 247, 0.55);
+}
+.minigame-select-card.mg-card-nonogram:hover {
+  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.25);
+}
+
 .mg-card-left {
   width: 44px;
   height: 44px;

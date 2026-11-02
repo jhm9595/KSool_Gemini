@@ -437,6 +437,8 @@ class ImageMinigameSuite {
       this._initBrickBreaker();
     } else if (gameType === 'TERRITORY_QIX') {
       this._initTerritoryQix();
+    } else if (gameType === 'NONOGRAM') {
+      this._initNonogram();
     }
 
     const loop = () => {
@@ -1939,6 +1941,576 @@ class ImageMinigameSuite {
     });
   }
 
+
+  // =========================================================================
+  // 3. 🧩 네모네모 로직 (Nonogram / Picross 숫자 퍼즐)
+  // =========================================================================
+  _initNonogram() {
+    const dotInfo = this._parseDotSprite(this.recipe);
+    const minR = dotInfo.minR;
+    const maxR = dotInfo.maxR;
+    const minC = dotInfo.minC;
+    const maxC = dotInfo.maxC;
+
+    const rows = maxR - minR + 1;
+    const cols = maxC - minC + 1;
+
+    const target = Array.from({ length: rows }, () => Array(cols).fill(false));
+    const targetColor = Array.from({ length: rows }, () => Array(cols).fill(null));
+    let totalTargetFilled = 0;
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const color = dotInfo.grid[minR + r][minC + c];
+        if (color) {
+          target[r][c] = true;
+          targetColor[r][c] = color;
+          totalTargetFilled++;
+        }
+      }
+    }
+
+    // Row Clues (가로 숫자)
+    const rowClues = [];
+    for (let r = 0; r < rows; r++) {
+      const clues = [];
+      let count = 0;
+      for (let c = 0; c < cols; c++) {
+        if (target[r][c]) {
+          count++;
+        } else if (count > 0) {
+          clues.push(count);
+          count = 0;
+        }
+      }
+      if (count > 0) clues.push(count);
+      if (clues.length === 0) clues.push(0);
+      rowClues.push(clues);
+    }
+
+    // Col Clues (세로 숫자)
+    const colClues = [];
+    for (let c = 0; c < cols; c++) {
+      const clues = [];
+      let count = 0;
+      for (let r = 0; r < rows; r++) {
+        if (target[r][c]) {
+          count++;
+        } else if (count > 0) {
+          clues.push(count);
+          count = 0;
+        }
+      }
+      if (count > 0) clues.push(count);
+      if (clues.length === 0) clues.push(0);
+      colClues.push(clues);
+    }
+
+    // Board State: 0: Empty, 1: Filled, 2: X Mark
+    const board = Array.from({ length: rows }, () => Array(cols).fill(0));
+
+    // Dynamic Sizing & Positioning
+    const maxRowNums = Math.max(1, ...rowClues.map(c => c.length));
+    const maxColNums = Math.max(1, ...colClues.map(c => c.length));
+
+    const leftClueW = Math.max(50, Math.min(85, maxRowNums * 15 + 12));
+    const topClueH = Math.max(45, Math.min(75, maxColNums * 14 + 10));
+
+    const availW = this.width - leftClueW - 24;
+    const availH = this.height - topClueH - 120;
+
+    let cellSize = Math.min(Math.floor(availW / cols), Math.floor(availH / rows), 24);
+    cellSize = Math.max(cellSize, 16);
+
+    const gridW = cols * cellSize;
+    const gridH = rows * cellSize;
+
+    const totalPuzzleW = leftClueW + gridW;
+    const leftX = Math.floor((this.width - totalPuzzleW) / 2);
+    const gridX = leftX + leftClueW;
+    const clueTopY = 48;
+    const gridY = clueTopY + topClueH;
+
+    // Bottom control buttons
+    const btnY = gridY + gridH + 16;
+    const btnH = 34;
+    const totalBtnW = 275;
+    const btnStartX = Math.floor((this.width - totalBtnW) / 2);
+
+    this.nonogramState = {
+      rows,
+      cols,
+      target,
+      targetColor,
+      totalTargetFilled,
+      board,
+      rowClues,
+      colClues,
+      toolMode: 'FILL',
+      isDragging: false,
+      dragVal: 0,
+      cellSize,
+      leftClueW,
+      topClueH,
+      leftX,
+      gridX,
+      gridY,
+      clueTopY,
+      gridW,
+      gridH,
+      buttons: {
+        fill: { x: btnStartX, y: btnY, w: 90, h: btnH },
+        cross: { x: btnStartX + 98, y: btnY, w: 90, h: btnH },
+        reset: { x: btnStartX + 196, y: btnY, w: 75, h: btnH }
+      }
+    };
+
+    this.gameState = 'PLAYING';
+
+    const handleWinClose = () => {
+      if (this.gameState === 'WIN' && performance.now() - this.winTimestamp > 250) {
+        this.audio?.playTap?.();
+        this.stop();
+        if (this.onClose) {
+          this.onClose();
+        } else {
+          document.getElementById('hint-close-btn')?.click();
+        }
+        return true;
+      }
+      return false;
+    };
+
+    const getCanvasPos = (clientX, clientY) => {
+      const rect = this.canvas.getBoundingClientRect();
+      const scaleX = this.width / rect.width;
+      const scaleY = this.height / rect.height;
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+      };
+    };
+
+    const applyCellAction = (r, c, forceTool = null) => {
+      const st = this.nonogramState;
+      if (!st || r < 0 || r >= st.rows || c < 0 || c >= st.cols) return;
+      const tool = forceTool || st.toolMode;
+
+      if (tool === 'FILL') {
+        const nextVal = st.board[r][c] === 1 ? 0 : 1;
+        st.board[r][c] = nextVal;
+        st.dragVal = nextVal;
+      } else if (tool === 'X') {
+        const nextVal = st.board[r][c] === 2 ? 0 : 2;
+        st.board[r][c] = nextVal;
+        st.dragVal = nextVal;
+      }
+      this.audio?.playTap?.();
+      this._checkNonogramWin();
+    };
+
+    const handlePointerDown = (clientX, clientY, isRightClick = false) => {
+      if (handleWinClose()) return;
+      if (this.gameState !== 'PLAYING') return;
+
+      const pos = getCanvasPos(clientX, clientY);
+      const st = this.nonogramState;
+      if (!st) return;
+
+      // Check bottom buttons
+      const bFill = st.buttons.fill;
+      const bCross = st.buttons.cross;
+      const bReset = st.buttons.reset;
+
+      if (pos.x >= bFill.x && pos.x <= bFill.x + bFill.w && pos.y >= bFill.y && pos.y <= bFill.y + bFill.h) {
+        st.toolMode = 'FILL';
+        this.audio?.playTap?.();
+        return;
+      }
+      if (pos.x >= bCross.x && pos.x <= bCross.x + bCross.w && pos.y >= bCross.y && pos.y <= bCross.y + bCross.h) {
+        st.toolMode = 'X';
+        this.audio?.playTap?.();
+        return;
+      }
+      if (pos.x >= bReset.x && pos.x <= bReset.x + bReset.w && pos.y >= bReset.y && pos.y <= bReset.y + bReset.h) {
+        for (let r = 0; r < st.rows; r++) st.board[r].fill(0);
+        this.audio?.playTap?.();
+        return;
+      }
+
+      // Check grid
+      const col = Math.floor((pos.x - st.gridX) / st.cellSize);
+      const row = Math.floor((pos.y - st.gridY) / st.cellSize);
+
+      if (col >= 0 && col < st.cols && row >= 0 && row < st.rows) {
+        st.isDragging = true;
+        const tool = isRightClick ? 'X' : st.toolMode;
+        applyCellAction(row, col, tool);
+      }
+    };
+
+    const handlePointerMove = (clientX, clientY) => {
+      const st = this.nonogramState;
+      if (!st || !st.isDragging || this.gameState !== 'PLAYING') return;
+
+      const pos = getCanvasPos(clientX, clientY);
+      const col = Math.floor((pos.x - st.gridX) / st.cellSize);
+      const row = Math.floor((pos.y - st.gridY) / st.cellSize);
+
+      if (col >= 0 && col < st.cols && row >= 0 && row < st.rows) {
+        if (st.board[row][col] !== st.dragVal) {
+          st.board[row][col] = st.dragVal;
+          this.audio?.playTap?.();
+          this._checkNonogramWin();
+        }
+      }
+    };
+
+    const handlePointerUp = () => {
+      if (this.nonogramState) {
+        this.nonogramState.isDragging = false;
+      }
+    };
+
+    const onMouseDown = (e) => {
+      handlePointerDown(e.clientX, e.clientY, e.button === 2);
+    };
+    const onMouseMove = (e) => {
+      handlePointerMove(e.clientX, e.clientY);
+    };
+    const onMouseUp = () => {
+      handlePointerUp();
+    };
+    const onContextMenu = (e) => {
+      e.preventDefault();
+    };
+
+    const onTouchStart = (e) => {
+      if (handleWinClose()) {
+        if (e.cancelable) e.preventDefault();
+        return;
+      }
+      if (e.touches && e.touches[0]) {
+        if (e.cancelable) e.preventDefault();
+        handlePointerDown(e.touches[0].clientX, e.touches[0].clientY, false);
+      }
+    };
+    const onTouchMove = (e) => {
+      if (e.touches && e.touches[0]) {
+        if (e.cancelable) e.preventDefault();
+        handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+    const onTouchEnd = () => {
+      handlePointerUp();
+    };
+
+    this.canvas.addEventListener('mousedown', onMouseDown);
+    this.canvas.addEventListener('mousemove', onMouseMove);
+    this.canvas.addEventListener('mouseup', onMouseUp);
+    this.canvas.addEventListener('contextmenu', onContextMenu);
+    this.canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+    this.canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+    this.canvas.addEventListener('touchend', onTouchEnd);
+
+    this._cleanupInputHandlers = () => {
+      this.canvas.removeEventListener('mousedown', onMouseDown);
+      this.canvas.removeEventListener('mousemove', onMouseMove);
+      this.canvas.removeEventListener('mouseup', onMouseUp);
+      this.canvas.removeEventListener('contextmenu', onContextMenu);
+      this.canvas.removeEventListener('touchstart', onTouchStart);
+      this.canvas.removeEventListener('touchmove', onTouchMove);
+      this.canvas.removeEventListener('touchend', onTouchEnd);
+    };
+  }
+
+  _checkNonogramWin() {
+    const st = this.nonogramState;
+    if (!st || this.gameState !== 'PLAYING') return;
+
+    let isSolved = true;
+    for (let r = 0; r < st.rows; r++) {
+      for (let c = 0; c < st.cols; c++) {
+        const isFilled = (st.board[r][c] === 1);
+        const shouldBeFilled = st.target[r][c];
+        if (isFilled !== shouldBeFilled) {
+          isSolved = false;
+          break;
+        }
+      }
+      if (!isSolved) break;
+    }
+
+    if (isSolved) {
+      this.gameState = 'WIN';
+      this.winTimestamp = performance.now();
+      this.audio?.playSuccess?.();
+      this._spawnParticles(this.width / 2, this.height / 2, '#38bdf8', 25);
+      this._spawnParticles(this.width / 2, this.height / 2, '#fde047', 25);
+      this._spawnParticles(this.width / 2, this.height / 2, '#10b981', 25);
+      if (this.onWin) {
+        this.onWin();
+      }
+    }
+  }
+
+  _isLineMatching(line, clues) {
+    const runs = [];
+    let count = 0;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === 1) {
+        count++;
+      } else if (count > 0) {
+        runs.push(count);
+        count = 0;
+      }
+    }
+    if (count > 0) runs.push(count);
+    if (runs.length === 0) runs.push(0);
+
+    if (runs.length !== clues.length) return false;
+    return runs.every((r, idx) => r === clues[idx]);
+  }
+
+  _updateNonogram() {
+    // Nonogram uses event-driven state updates, animations handled by particle tick
+  }
+
+  _drawNonogram(ctx) {
+    const st = this.nonogramState;
+    if (!st) return;
+
+    // 1. 방사형 배경
+    const bgRad = ctx.createRadialGradient(this.width / 2, this.height / 2, 30, this.width / 2, this.height / 2, this.width * 0.75);
+    bgRad.addColorStop(0, '#111827');
+    bgRad.addColorStop(0.6, '#0b0f19');
+    bgRad.addColorStop(1, '#050811');
+    ctx.fillStyle = bgRad;
+    ctx.fillRect(0, 0, this.width, this.height);
+
+    // 2. 상단 HUD
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = 'bold 15px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🧩 네모네모 로직', 20, 26);
+
+    let filledCount = 0;
+    for (let r = 0; r < st.rows; r++) {
+      for (let c = 0; c < st.cols; c++) {
+        if (st.board[r][c] === 1) filledCount++;
+      }
+    }
+    const pct = Math.min(100, Math.floor((filledCount / Math.max(1, st.totalTargetFilled)) * 100));
+
+    ctx.textAlign = 'right';
+    ctx.font = '12px sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText(`채운 칸: ${filledCount} / ${st.totalTargetFilled} (${pct}%)`, this.width - 20, 26);
+
+    // 3. 상단 열(Column) 힌트 숫자
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+    ctx.fillRect(st.gridX, st.clueTopY, st.gridW, st.topClueH);
+
+    for (let c = 0; c < st.cols; c++) {
+      const colLine = [];
+      for (let r = 0; r < st.rows; r++) colLine.push(st.board[r][c]);
+      const isDone = this._isLineMatching(colLine, st.colClues[c]);
+
+      const clues = st.colClues[c];
+      const cx = st.gridX + c * st.cellSize + st.cellSize / 2;
+      const startNumY = st.clueTopY + st.topClueH - 8 - (clues.length - 1) * 14;
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = isDone ? 'bold 11px sans-serif' : '11px sans-serif';
+
+      for (let i = 0; i < clues.length; i++) {
+        const ny = startNumY + i * 14;
+        ctx.fillStyle = isDone ? '#10b981' : '#cbd5e1';
+        ctx.fillText(String(clues[i]), cx, ny);
+      }
+
+      // 세로 구분선
+      ctx.strokeStyle = (c % 5 === 0 && c > 0) ? 'rgba(148, 163, 184, 0.4)' : 'rgba(51, 65, 85, 0.4)';
+      ctx.lineWidth = (c % 5 === 0 && c > 0) ? 1.5 : 0.8;
+      ctx.beginPath();
+      ctx.moveTo(st.gridX + c * st.cellSize, st.clueTopY);
+      ctx.lineTo(st.gridX + c * st.cellSize, st.clueTopY + st.topClueH);
+      ctx.stroke();
+    }
+
+    // 4. 좌측 행(Row) 힌트 숫자
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+    ctx.fillRect(st.leftX, st.gridY, st.leftClueW, st.gridH);
+
+    for (let r = 0; r < st.rows; r++) {
+      const rowLine = st.board[r];
+      const isDone = this._isLineMatching(rowLine, st.rowClues[r]);
+
+      const clues = st.rowClues[r];
+      const cy = st.gridY + r * st.cellSize + st.cellSize / 2;
+      const endX = st.leftX + st.leftClueW - 8;
+
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.font = isDone ? 'bold 11px sans-serif' : '11px sans-serif';
+
+      for (let i = clues.length - 1; i >= 0; i--) {
+        const nx = endX - (clues.length - 1 - i) * 14;
+        ctx.fillStyle = isDone ? '#10b981' : '#cbd5e1';
+        ctx.fillText(String(clues[i]), nx, cy);
+      }
+
+      // 가로 구분선
+      ctx.strokeStyle = (r % 5 === 0 && r > 0) ? 'rgba(148, 163, 184, 0.4)' : 'rgba(51, 65, 85, 0.4)';
+      ctx.lineWidth = (r % 5 === 0 && r > 0) ? 1.5 : 0.8;
+      ctx.beginPath();
+      ctx.moveTo(st.leftX, st.gridY + r * st.cellSize);
+      ctx.lineTo(st.leftX + st.leftClueW, st.gridY + r * st.cellSize);
+      ctx.stroke();
+    }
+
+    // 5. 그리드 셀 (Board Cells)
+    const isWin = (this.gameState === 'WIN');
+
+    for (let r = 0; r < st.rows; r++) {
+      for (let c = 0; c < st.cols; c++) {
+        const bx = st.gridX + c * st.cellSize;
+        const by = st.gridY + r * st.cellSize;
+        const cs = st.cellSize;
+
+        if (isWin) {
+          // 승리 시: 풀컬러 도트 픽셀 아트 대공개!
+          if (st.target[r][c] && st.targetColor[r][c]) {
+            ctx.fillStyle = st.targetColor[r][c];
+            ctx.fillRect(bx, by, cs, cs);
+
+            // 입체 도트 베벨
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+            ctx.fillRect(bx, by, cs, 1.2);
+            ctx.fillRect(bx, by, 1.2, cs);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.fillRect(bx, by + cs - 1.2, cs, 1.2);
+            ctx.fillRect(bx + cs - 1.2, by, 1.2, cs);
+          } else {
+            ctx.fillStyle = '#0b0f19';
+            ctx.fillRect(bx, by, cs, cs);
+          }
+        } else {
+          // 플레이 중: 세련된 다크 그리드 & 네온 큐브
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(bx, by, cs, cs);
+
+          if (st.board[r][c] === 1) {
+            // 채운 칸 (네온 블루/사이언 큐브)
+            ctx.fillStyle = '#0284c7';
+            ctx.fillRect(bx + 1.2, by + 1.2, cs - 2.4, cs - 2.4);
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(bx + 1.2, by + 1.2, cs - 2.4, 1.5);
+            ctx.fillRect(bx + 1.2, by + 1.2, 1.5, cs - 2.4);
+
+            ctx.fillStyle = '#0369a1';
+            ctx.fillRect(bx + 1.2, by + cs - 2.7, cs - 2.4, 1.5);
+            ctx.fillRect(bx + cs - 2.7, by + 1.2, 1.5, cs - 2.4);
+          } else if (st.board[r][c] === 2) {
+            // X 표시
+            ctx.strokeStyle = '#f43f5e';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(bx + 4, by + 4);
+            ctx.lineTo(bx + cs - 4, by + cs - 4);
+            ctx.moveTo(bx + cs - 4, by + 4);
+            ctx.lineTo(bx + 4, by + cs - 4);
+            ctx.stroke();
+          }
+        }
+
+        // 기본 셀 얇은 경계선
+        ctx.strokeStyle = 'rgba(71, 85, 105, 0.35)';
+        ctx.lineWidth = 0.6;
+        ctx.strokeRect(bx, by, cs, cs);
+      }
+    }
+
+    // 5x5 블록 강조선 (Picross 전형적인 굵은 가이드선)
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.55)';
+    ctx.lineWidth = 1.8;
+    for (let c = 5; c < st.cols; c += 5) {
+      const gx = st.gridX + c * st.cellSize;
+      ctx.beginPath();
+      ctx.moveTo(gx, st.gridY);
+      ctx.lineTo(gx, st.gridY + st.gridH);
+      ctx.stroke();
+    }
+    for (let r = 5; r < st.rows; r += 5) {
+      const gy = st.gridY + r * st.cellSize;
+      ctx.beginPath();
+      ctx.moveTo(st.gridX, gy);
+      ctx.lineTo(st.gridX + st.gridW, gy);
+      ctx.stroke();
+    }
+
+    // 그리드 전체 외곽 테두리
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(st.gridX, st.gridY, st.gridW, st.gridH);
+
+    // 6. 하단 조작 버튼 3종 (플레이 중에만 렌더링)
+    if (!isWin) {
+      const bFill = st.buttons.fill;
+      const bCross = st.buttons.cross;
+      const bReset = st.buttons.reset;
+
+      // Fill Button
+      const isFillActive = st.toolMode === 'FILL';
+      ctx.fillStyle = isFillActive ? 'rgba(14, 165, 233, 0.25)' : 'rgba(30, 41, 59, 0.7)';
+      ctx.strokeStyle = isFillActive ? '#38bdf8' : '#475569';
+      ctx.lineWidth = isFillActive ? 2 : 1;
+      this._roundRect(ctx, bFill.x, bFill.y, bFill.w, bFill.h, 8, true, true);
+
+      ctx.fillStyle = isFillActive ? '#38bdf8' : '#94a3b8';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⬛ 채우기', bFill.x + bFill.w / 2, bFill.y + bFill.h / 2);
+
+      // Cross Button
+      const isCrossActive = st.toolMode === 'X';
+      ctx.fillStyle = isCrossActive ? 'rgba(244, 63, 94, 0.25)' : 'rgba(30, 41, 59, 0.7)';
+      ctx.strokeStyle = isCrossActive ? '#f43f5e' : '#475569';
+      ctx.lineWidth = isCrossActive ? 2 : 1;
+      this._roundRect(ctx, bCross.x, bCross.y, bCross.w, bCross.h, 8, true, true);
+
+      ctx.fillStyle = isCrossActive ? '#f43f5e' : '#94a3b8';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.fillText('❌ X 표시', bCross.x + bCross.w / 2, bCross.y + bCross.h / 2);
+
+      // Reset Button
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.7)';
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1;
+      this._roundRect(ctx, bReset.x, bReset.y, bReset.w, bReset.h, 8, true, true);
+
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('↺ 초기화', bReset.x + bReset.w / 2, bReset.y + bReset.h / 2);
+    }
+  }
+
+  _roundRect(ctx, x, y, w, h, r, fill, stroke) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
+  }
+
   _update() {
     this._updateParticles();
     if (this.gameState !== 'PLAYING') {
@@ -1952,6 +2524,7 @@ class ImageMinigameSuite {
     }
     if (this.gameType === 'BRICK_BREAKER') this._updateBrickBreaker();
     else if (this.gameType === 'TERRITORY_QIX') this._updateTerritoryQix();
+    else if (this.gameType === 'NONOGRAM') this._updateNonogram();
   }
 
   _draw() {
@@ -1965,6 +2538,7 @@ class ImageMinigameSuite {
     }
     if (this.gameType === 'BRICK_BREAKER') this._drawBrickBreaker(ctx);
     else if (this.gameType === 'TERRITORY_QIX') this._drawTerritoryQix(ctx);
+    else if (this.gameType === 'NONOGRAM') this._drawNonogram(ctx);
     this._drawParticles(ctx);
 
     if (this.gameState === 'READY') {
