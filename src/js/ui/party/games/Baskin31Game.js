@@ -1,18 +1,21 @@
 window.KSool = window.KSool || {};
 
 /**
- * ⑧ 배불러라빈스 31 (Baskin Robbins 31 패러디 술게임)
- * - 1부터 31까지 턴마다 1~3개의 숫자를 순서대로 외치고, 마지막 31을 누른 사람이 패배!
- * - 메인 인터랙션: 화면에 현재 진행 중인 3개의 숫자 네모칸 + 하단 [확인] 버튼 (딱 4개 버튼)
- * - 첫 번째 칸부터 순서대로 눌러 1~3개 선택 후 확인을 누르면 다음 사람으로 턴 패스
- * - 대칭 없이 시원하고 큼직한 풀스크린 단독 뷰
+ * ⑧ 배불러라빈스 31 (Baskin Robbins 31 패러디 술게임 - 원터치 미니멀 에디션)
+ * - 불필요한 상단 정보, 하단 확인 버튼, 설명 문구 일체 제거!
+ * - 화면 중앙에 오직 3개의 대형 숫자 네모칸 버튼만 시원하게 배치
+ * - 3개 중 하나를 누르면 누른 만큼 1초간 활성화 보여주고, 애니메이션과 함께 다음 숫자로 즉시 전환!
+ * - 마지막 31을 누른 사람이 패배 (벌칙자 당첨)
  */
 class Baskin31Game {
   constructor(hub) {
     this.hub = hub;
     this.currentNumber = 0; // 0부터 시작, 1~31
-    this.selectedCount = 0; // 0, 1, 2, 3
+    this.selectedCount = 0; // 1초간 보여줄 활성화 개수 (0, 1, 2, 3)
+    this.isTransitioning = false; // 1초 딜레이 중 중복 터치 방지
+    this.isAnimatingIn = false; // 새 숫자 등장 애니메이션 트리거
     this.isFinished = false;
+    this.transitionTimer = null;
   }
 
   init() {
@@ -20,114 +23,100 @@ class Baskin31Game {
   }
 
   reset() {
+    if (this.transitionTimer) {
+      clearTimeout(this.transitionTimer);
+      this.transitionTimer = null;
+    }
     this.currentNumber = 0;
     this.selectedCount = 0;
+    this.isTransitioning = false;
+    this.isAnimatingIn = false;
     this.isFinished = false;
     this.render();
   }
 
   /**
-   * n번째 네모칸 클릭 (1, 2, 3)
-   * 첫 번째 것부터 순서대로 누를 수 있게 처리
+   * 3개 버튼 중 하나를 클릭했을 때 원터치 진행
+   * @param {number} count 1, 2, 3개 중 선택한 수
    */
-  handleSlotClick(slotIndex) {
-    if (this.isFinished) return;
-
-    const targetNum = this.currentNumber + slotIndex;
-    if (targetNum > 31) return;
-
-    if (slotIndex === 1) {
-      this.selectedCount = this.selectedCount === 1 ? 0 : 1;
-    } else if (slotIndex === 2) {
-      this.selectedCount = this.selectedCount === 2 ? 1 : 2;
-    } else if (slotIndex === 3) {
-      this.selectedCount = this.selectedCount === 3 ? 2 : 3;
-    }
-
-    this.hub.sound.playTap();
-    this.hub.vibrateShort();
-    this.render();
-  }
-
-  /**
-   * [확인] 버튼 클릭 -> 선택한 숫자만큼 진행 및 다음 사람 차례
-   */
-  submitTurn() {
+  handleSelectCount(count) {
     if (this.isFinished) {
       this.reset();
       return;
     }
+    if (this.isTransitioning) return;
 
-    if (this.selectedCount === 0) return;
+    const targetNum = this.currentNumber + count;
+    if (this.currentNumber + 1 > 31) return;
 
-    const nextNumber = this.currentNumber + this.selectedCount;
-
-    // 31 도달 시 -> 탈락/벌칙 발동!
-    if (nextNumber >= 31) {
-      this.currentNumber = 31;
-      this.isFinished = true;
-      this.hub.sound.playExplosion();
-      this.hub.triggerPenalty({
-        title: '31 당첨! 원샷!',
-        subtitle: '배불러라빈스 31 탈락!',
-        accentColor: '#f43f5e',
-        icon: '🍨'
-      });
-      this.render();
-      return;
-    }
-
-    // 정상 진행 -> 다음 사람에게 넘김
-    this.currentNumber = nextNumber;
-    this.selectedCount = 0;
+    // 1초간 선택된 버튼들 활성화 유지
+    this.isTransitioning = true;
+    this.selectedCount = count;
     this.hub.sound.playTap();
+    this.hub.vibrateShort();
     this.render();
+
+    // 1초 보여주고 다음 숫자로 부드럽게 전환!
+    this.transitionTimer = setTimeout(() => {
+      const nextNumber = this.currentNumber + count;
+
+      // 31 도달 시 -> 탈락/벌칙 발동!
+      if (nextNumber >= 31) {
+        this.currentNumber = 31;
+        this.isFinished = true;
+        this.isTransitioning = false;
+        this.hub.sound.playExplosion();
+        this.hub.triggerPenalty({
+          title: '31 당첨! 원샷!',
+          subtitle: '배불러라빈스 31 탈락!',
+          accentColor: '#f43f5e',
+          icon: '🍨'
+        });
+        this.render();
+        return;
+      }
+
+      // 정상 진행 -> 다음 사람을 위한 다음 3개 숫자 등장
+      this.currentNumber = nextNumber;
+      this.selectedCount = 0;
+      this.isTransitioning = false;
+      this.isAnimatingIn = true;
+      this.hub.sound.playUp();
+      this.render();
+
+      setTimeout(() => {
+        this.isAnimatingIn = false;
+        const slotsRow = document.querySelector('.baskin-slots-row');
+        if (slotsRow) slotsRow.classList.remove('entering');
+      }, 400);
+    }, 1000);
   }
 
   render() {
     const container = document.getElementById('party-game-stage');
     if (!container) return;
 
-    const progressPct = Math.min(100, (this.currentNumber / 31) * 100);
     const n1 = this.currentNumber + 1;
     const n2 = this.currentNumber + 2;
     const n3 = this.currentNumber + 3;
 
     // 슬롯 3개 메타데이터
     const slots = [
-      { idx: 1, num: n1, available: n1 <= 31, active: this.selectedCount >= 1 },
-      { idx: 2, num: n2, available: n2 <= 31, active: this.selectedCount >= 2 },
-      { idx: 3, num: n3, available: n3 <= 31, active: this.selectedCount >= 3 }
+      { count: 1, num: n1, available: n1 <= 31, active: this.selectedCount >= 1 },
+      { count: 2, num: n2, available: n2 <= 31, active: this.selectedCount >= 2 },
+      { count: 3, num: n3, available: n3 <= 31, active: this.selectedCount >= 3 }
     ];
 
-    // 선택된 숫자 텍스트 (예: "14, 15 외치기")
-    let chosenWords = [];
-    for (let i = 1; i <= this.selectedCount; i++) {
-      chosenWords.push(this.currentNumber + i);
-    }
-    const chosenSummary = chosenWords.length > 0 ? chosenWords.join(', ') : '';
-
     container.innerHTML = `
-      <div class="party-game-box baskin-stage ${this.isFinished ? 'finished' : ''}">
-        <!-- 1. 상단 미니 진행도 & 리셋 버튼 -->
-        <div class="baskin-header-meta">
-          <div class="baskin-progress-group">
-            <div class="baskin-count-label">
-              <span class="label-text">현재 숫자</span>
-              <span class="label-nums"><strong>${this.currentNumber}</strong> / 31</span>
-            </div>
-            <div class="baskin-progress-track">
-              <div class="baskin-progress-fill" style="width: ${progressPct}%;"></div>
-            </div>
-          </div>
-          <button type="button" class="baskin-reset-btn" id="btn-baskin-reset" title="새 게임 시작">
-            New
-          </button>
-        </div>
+      <div class="party-game-box baskin-stage minimal-pure ${this.isFinished ? 'finished' : ''}">
+        <!-- 화면 우측 상단 미니멀 리셋 아이콘 -->
+        <button type="button" class="baskin-floating-reset-btn" id="btn-baskin-reset" title="새 게임 시작">
+          🔄
+        </button>
 
-        <!-- 2. 중앙 메인: 현재 진행 중인 3개 숫자 네모칸 (첫 번째부터 순서대로 활성화) -->
-        <div class="baskin-center-zone">
-          <div class="baskin-slots-row">
+        <!-- 화면 정중앙: 오직 3개의 대형 숫자 네모칸 버튼 -->
+        <div class="baskin-pure-center">
+          <div class="baskin-slots-row ${this.isAnimatingIn ? 'entering' : ''}">
             ${slots.map(s => {
               if (!s.available) {
                 return `
@@ -140,36 +129,14 @@ class Baskin31Game {
               return `
                 <button type="button" 
                         class="baskin-slot ${s.active ? 'active' : ''} ${isDanger ? 'danger' : ''}" 
-                        data-baskin-slot="${s.idx}"
-                        aria-label="${s.num} 선택">
+                        data-baskin-count="${s.count}"
+                        aria-label="${s.num}까지 선택">
                   <span class="slot-num">${s.num}</span>
                   ${isDanger ? '<span class="baskin-skull-pill">💀 31</span>' : ''}
                 </button>
               `;
             }).join('')}
           </div>
-
-          <!-- 상태 힌트 문구 -->
-          <div class="baskin-hint-text">
-            ${this.isFinished 
-              ? '<span class="hint-danger">💥 31에 당첨되었습니다! 벌칙 원샷!</span>'
-              : (this.selectedCount > 0 
-                  ? `<span class="hint-active">선택한 숫자: [ <strong>${chosenSummary}</strong> ]</span>`
-                  : '숫자를 1~3개 선택한 후 확인을 누르세요')}
-          </div>
-        </div>
-
-        <!-- 3. 하단 메인: [확인] 버튼 (딱 4번째 메인 버튼) -->
-        <div class="baskin-action-zone">
-          <button type="button" 
-                  class="baskin-submit-btn ${this.selectedCount > 0 ? 'ready' : ''} ${this.isFinished ? 'restart' : ''}" 
-                  id="btn-baskin-submit">
-            ${this.isFinished 
-              ? '🔄 새 게임 시작하기' 
-              : (this.selectedCount > 0 
-                  ? `👉 [ ${chosenSummary} ] 외치고 턴 넘기기` 
-                  : '숫자를 선택해 주세요 (1~3개)')}
-          </button>
         </div>
       </div>
     `;
@@ -181,25 +148,16 @@ class Baskin31Game {
     const container = document.getElementById('party-game-stage');
     if (!container) return;
 
-    // 슬롯 1, 2, 3 클릭 이벤트
-    container.querySelectorAll('[data-baskin-slot]').forEach(btn => {
+    // 3개 버튼 클릭
+    container.querySelectorAll('[data-baskin-count]').forEach(btn => {
       btn.onclick = (e) => {
         e.stopPropagation();
-        const idx = Number(btn.getAttribute('data-baskin-slot'));
-        this.handleSlotClick(idx);
+        const count = Number(btn.getAttribute('data-baskin-count'));
+        this.handleSelectCount(count);
       };
     });
 
-    // 하단 확인 / 턴 넘기기 버튼 이벤트
-    const submitBtn = container.querySelector('#btn-baskin-submit');
-    if (submitBtn) {
-      submitBtn.onclick = (e) => {
-        e.stopPropagation();
-        this.submitTurn();
-      };
-    }
-
-    // New 리셋 버튼
+    // 플로팅 리셋 버튼
     const resetBtn = container.querySelector('#btn-baskin-reset');
     if (resetBtn) {
       resetBtn.onclick = (e) => {
@@ -208,10 +166,25 @@ class Baskin31Game {
         this.reset();
       };
     }
+
+    // 게임 종료 상태에서 화면 어디든 탭하면 재시작
+    if (this.isFinished) {
+      const stage = container.querySelector('.baskin-stage');
+      if (stage) {
+        stage.onclick = (e) => {
+          e.stopPropagation();
+          this.hub.sound.playTap();
+          this.reset();
+        };
+      }
+    }
   }
 
   destroy() {
-    // 클린업
+    if (this.transitionTimer) {
+      clearTimeout(this.transitionTimer);
+      this.transitionTimer = null;
+    }
   }
 }
 
