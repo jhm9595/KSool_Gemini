@@ -4569,3 +4569,106 @@
   0% { opacity: 0.85; }
   100% { opacity: 1; }
 }
+
+
+/* 아이엠그라운드 게임 오버 결과 오버레이 (설정창 튕김 방지 & 원클릭 즉시 재시작) */
+.iamground-gameover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.iamground-gameover-card {
+  width: 100%;
+  max-width: 320px;
+  background: #1e293b;
+  border: 1.5px solid rgba(244, 114, 182, 0.45);
+  border-radius: 20px;
+  padding: 22px 18px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 20px rgba(236, 72, 153, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.iamground-gameover-icon {
+  font-size: 2.6rem;
+  margin-bottom: 2px;
+  animation: iamgroundBounce 0.8s infinite alternate;
+}
+
+.iamground-gameover-title {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #f472b6;
+  margin: 0;
+}
+
+.iamground-gameover-desc {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.iamground-gameover-stat {
+  font-size: 0.92rem;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 12px;
+  padding: 6px 14px;
+  margin: 4px 0;
+}
+
+.iamground-gameover-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.iamground-replay-btn {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  border: 1.5px solid #f472b6;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 900;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.4);
+  transition: all 0.15s ease;
+}
+
+.iamground-replay-btn:active {
+  transform: scale(0.97);
+}
+
+.iamground-config-btn {
+  background: #334155;
+  border: 1px solid #475569;
+  color: #cbd5e1;
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 9px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.iamground-config-btn:active {
+  transform: scale(0.97);
+}
