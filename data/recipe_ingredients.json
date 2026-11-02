@@ -232,30 +232,6 @@
     "ratio": 1
   },
   {
-    "id": 30,
-    "recipe_id": 13,
-    "slot_order": 1,
-    "ingredient_id": 601,
-    "detail_ingredient_id": null,
-    "ratio": 1
-  },
-  {
-    "id": 31,
-    "recipe_id": 13,
-    "slot_order": 2,
-    "ingredient_id": 201,
-    "detail_ingredient_id": null,
-    "ratio": 1
-  },
-  {
-    "id": 32,
-    "recipe_id": 13,
-    "slot_order": 3,
-    "ingredient_id": 301,
-    "detail_ingredient_id": null,
-    "ratio": 1
-  },
-  {
     "id": 33,
     "recipe_id": 14,
     "slot_order": 1,
