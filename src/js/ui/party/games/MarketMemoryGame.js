@@ -93,10 +93,23 @@ class MarketMemoryGame {
     }
   }
 
+  _getIngName(ing) {
+    if (!ing) return '';
+    if (this.brandResolver && typeof this.brandResolver.resolveName === 'function') {
+      return this.brandResolver.resolveName(ing);
+    }
+    const resolver = this.hub?.brandResolver || window.ksoolApp?.brandResolver || window.app?.brandResolver;
+    if (resolver && typeof resolver.resolveName === 'function') {
+      return resolver.resolveName(ing);
+    }
+    return ing.display_name || ing.name || ing.real_name || (ing.ingredient_id ? `재료 #${ing.ingredient_id}` : '');
+  }
+
   _triggerTimeoutFail() {
     this.hub.sound.playExplosion();
     const expected = this.chain[this.recallIndex];
-    const hint = expected ? `정답: [ ${expected.name} ]` : '시간 초과!';
+    const expectedName = expected ? (expected.name || this._getIngName(expected.raw)) : '';
+    const hint = expectedName ? `정답: [ ${expectedName} ]` : '시간 초과!';
     this.hub.triggerPenalty({
       title: '시간 초과! 원샷!',
       subtitle: `제한시간 안에 기억해내지 못했습니다! (${hint})`,
@@ -111,9 +124,11 @@ class MarketMemoryGame {
     this._clearTimer();
     this.hub.sound.playExplosion();
     const expected = this.chain[this.recallIndex];
+    const selectedName = this._getIngName(selectedIng);
+    const expectedName = expected ? (expected.name || this._getIngName(expected.raw)) : '?';
     this.hub.triggerPenalty({
       title: '땡! 순서가 틀렸습니다!',
-      subtitle: `누른 재료: ${selectedIng.name} ❌ (정답: ${expected ? expected.name : '?'})`,
+      subtitle: `누른 재료: ${selectedName} ❌ (정답: ${expectedName})`,
       accentColor: '#ef4444',
       icon: '🚨'
     });
@@ -179,7 +194,7 @@ class MarketMemoryGame {
 
     // 2. 새 재료 추가 모드 ('adding'): 체인 맨 뒤에 추가
     if (this.turnState === 'adding') {
-      const ingName = this.brandResolver ? this.brandResolver.resolveName(ing) : ing.name;
+      const ingName = this._getIngName(ing);
       const ingEmoji = ing.emoji || '🍶';
 
       this.chain.push({
@@ -359,7 +374,7 @@ class MarketMemoryGame {
           <!-- 재료 선택 그리드 -->
           <div class="market-ings-grid">
             ${filteredIngs.map(ing => {
-              const name = this.brandResolver ? this.brandResolver.resolveName(ing) : ing.name;
+              const name = this._getIngName(ing);
               const iconHtml = window.KSool?.pixelIcon ? window.KSool.pixelIcon(ing, 32) : ing.emoji;
               return `
                 <button type="button" 
