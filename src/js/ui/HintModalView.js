@@ -421,19 +421,8 @@ class HintModalView {
       let consoleControlsHtml = '';
       if (this.selectedMinigameType === 'BRICK_BREAKER') {
         consoleControlsHtml = `
-          <div class="brick-console-box">
-            <div class="brick-powerups-ribbon">
-              <span class="pw-badge" title="공 3개 분열">[M] 멀티볼</span>
-              <span class="pw-badge" title="패들 폭 1.45배 확장">[W] 와이드</span>
-              <span class="pw-badge" title="화면 탭 시 관통 레이저 발사">[L] 레이저</span>
-              <span class="pw-badge" title="벽돌 관통 파이어볼">[F] 파이어</span>
-              <span class="pw-badge" title="바닥 레이저 안전 방어막">[S] 배리어</span>
-            </div>
-            <div class="brick-buttons-row">
-              <button class="arcade-action-btn launch-action-btn" id="mg-launch-btn">🚀 공 발사 (LAUNCH)</button>
-              <button class="arcade-action-btn turbo-action-btn" id="mg-turbo-btn">⚡ 2X 터보</button>
-            </div>
-            <div class="arcade-instruction-text">패들을 좌우로 드래그하여 조준 및 공을 받아치세요 (터보로 쾌속 진행)</div>
+          <div class="brick-console-box" style="display:flex; justify-content:center; gap:10px;">
+            <button class="arcade-action-btn turbo-action-btn" id="mg-turbo-btn">⚡ 2X 터보</button>
           </div>
         `;
       } else if (this.selectedMinigameType === 'TERRITORY_QIX') {
@@ -449,21 +438,18 @@ class HintModalView {
               </div>
             </div>
             <div class="qix-side-module">
-              <button class="arcade-action-btn dash-action-btn" id="mg-dash-btn">⚡ DASH (고속 절단)</button>
-              <div class="qix-rule-badge">목표: 영토 75% 점령</div>
+              <button class="arcade-action-btn dash-action-btn" id="mg-dash-btn">⚡ 대시</button>
             </div>
           </div>
-          <div class="arcade-instruction-text">화면 스와이프 or 십자키로 4방향 이동 / 대시로 고속 절단</div>
         `;
       } else {
         consoleControlsHtml = `
           <div class="nonogram-console-box">
             <div class="nonogram-buttons-row">
               <button class="arcade-action-btn nono-action-btn active" id="nono-mode-fill">✏️ 칠하기</button>
-              <button class="arcade-action-btn nono-action-btn" id="nono-mode-mark">❌ X표시</button>
+              <button class="arcade-action-btn nono-action-btn" id="nono-mode-mark">❌ X</button>
               <button class="arcade-action-btn nono-action-btn reset" id="nono-reset-btn">🔄 리셋</button>
             </div>
-            <div class="arcade-instruction-text">가로/세로 숫자에 맞춰 칸을 채워 숨겨진 그림을 완성하세요</div>
           </div>
         `;
       }

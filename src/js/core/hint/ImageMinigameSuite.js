@@ -497,15 +497,17 @@ class ImageMinigameSuite {
   launchBall() {
     if (this.gameType === 'BRICK_BREAKER' && this.bbState) {
       const st = this.bbState;
-      if (this.gameState === 'READY' || !st.isLaunched) {
+      if (!st.isLaunched || this.gameState === 'READY') {
         st.isLaunched = true;
         this.gameState = 'PLAYING';
         st.lastTime = performance.now();
-        const b = st.balls[0];
+        const b = st.balls ? st.balls[0] : null;
         if (b) {
-          const baseSpeed = 7.6; // 상쾌하고 빠른 시작 속도 (대기 시간 제로!)
-          b.vx = Math.cos(st.aimAngle) * baseSpeed;
-          b.vy = Math.sin(st.aimAngle) * baseSpeed;
+          const baseSpeed = 8.2;
+          const angle = st.aimAngle || (-Math.PI / 2 + (Math.random() - 0.5) * 0.3);
+          b.vx = Math.cos(angle) * baseSpeed;
+          b.vy = Math.sin(angle) * baseSpeed;
+          if (b.vy > -4) b.vy = -baseSpeed;
         }
         this.audio?.playTap?.();
       }
@@ -903,6 +905,7 @@ class ImageMinigameSuite {
       lives: 3,
       elapsed: 0,
       lastTime: performance.now(),
+      readyTime: performance.now(),
       targetPct: 100,
       blockAreaBottom: topY + stageH,
       isLaunched: false,
@@ -1064,8 +1067,10 @@ class ImageMinigameSuite {
       if (handleWinClose()) return;
       isPointerDragging = true;
       movePaddle(e.clientX);
-      if (!this.bbState.isLaunched || this.bbState.activePowerups?.laserTimer > 0) {
-        doLaunchBall();
+      if (!this.bbState.isLaunched) {
+        this.launchBall();
+      } else if (this.bbState.activePowerups?.laserTimer > 0) {
+        this.fireLaser();
       }
     };
 
@@ -1355,10 +1360,11 @@ class ImageMinigameSuite {
 
       this.gameState = 'READY';
       st.isLaunched = false;
+      st.readyTime = performance.now();
       st.balls = [
         {
           x: p.x + p.w / 2,
-          y: p.y - 44,
+          y: p.y - 12,
           vx: 0,
           vy: 0,
           r: 7,
@@ -1653,12 +1659,11 @@ class ImageMinigameSuite {
 
     // 10. 상단 HUD
     const pct = (st.brokenCount / Math.max(1, st.totalBreakable)) * 100;
-    const remaining = Math.max(0, st.totalBreakable - st.brokenCount);
-    const turboLabel = st.isTurbo ? '⚡2X TURBO' : '';
+    const turboLabel = st.isTurbo ? '⚡터보' : '';
     this._drawHUD(ctx, {
       lives: st.lives,
       progressPct: pct,
-      labelText: remaining === 0 ? '100% 완료!' : `${st.brokenCount}/${st.totalBreakable} (${Math.floor(pct)}%) ${turboLabel}`
+      labelText: `${Math.floor(pct)}% ${turboLabel}`.trim()
     });
   }
 
@@ -1667,10 +1672,8 @@ class ImageMinigameSuite {
   // =========================================================================
   _createQixEnemies(cols, rows) {
     return [
-      { isBoss: true, baseSpeed: 23.5, r: 16, c: 26, vr: 1.2, vc: 1.4 },
-      { isBoss: false, baseSpeed: 27.5, r: 24, c: 20, vr: -1.4, vc: 1.1 },
-      { isSparx: true, baseSpeed: 18.0, r: 0, c: Math.floor(cols / 2), dir: 1 },
-      { isSparx: true, baseSpeed: 18.0, r: rows - 1, c: Math.floor(cols / 2), dir: -1 }
+      { isBoss: true, r: Math.floor(rows * 0.35), c: Math.floor(cols * 0.5), vr: 12.0, vc: 14.0 },
+      { isBoss: false, r: Math.floor(rows * 0.65), c: Math.floor(cols * 0.4), vr: -13.5, vc: 11.5 }
     ];
   }
 
@@ -2178,8 +2181,8 @@ class ImageMinigameSuite {
           pl.dr = 0;
           this._floodFillCaptureQix();
 
-          // 정통 룰: 영토 75% 이상 점령 또는 실루엣 100% 해금 시 승리!
-          if (st.claimedTerritoryPct >= 75 || st.silhouetteRevealedPct >= 100) {
+          // 실루엣 100% 해금 시에만 승리! (외곽 빈 영토만 잘라먹어서는 해금 불가)
+          if (st.silhouetteRevealedPct >= 100 || st.capturedSilhouetteCount >= st.totalSilhouetteCells) {
             this.gameState = 'WIN';
             this.winTimestamp = performance.now();
             this.audio?.playSuccess?.();
@@ -2190,23 +2193,8 @@ class ImageMinigameSuite {
       }
     }
 
-    // 적 이동 및 충돌
+    // 내부 적 이동 및 충돌 (바깥쪽 스파크 적은 완전 삭제, 내부 적 속도 대폭 상향)
     for (const en of st.enemies) {
-      if (en.isSparx) {
-        // 스파크 순찰자: 외곽선 둘레를 시계/반시계 방향으로 순찰
-        en.c += en.dir * en.baseSpeed * dt * 0.4;
-        if (en.c >= st.cols - 1) { en.c = st.cols - 1; en.dir = -1; }
-        else if (en.c <= 0) { en.c = 0; en.dir = 1; }
-
-        // 스파크가 플레이어와 직접 충돌
-        if (Math.hypot(en.c - pl.c, en.r - pl.r) < 1.4) {
-          this._onQixPlayerHit();
-          return;
-        }
-        continue;
-      }
-
-      // 보스 궤적 충돌
       const stepDist = Math.max(Math.abs(en.vc), Math.abs(en.vr)) * dt;
       const subSteps = Math.max(1, Math.ceil(stepDist / 0.45));
       const subDt = dt / subSteps;
@@ -2217,7 +2205,7 @@ class ImageMinigameSuite {
         const checkC = Math.max(0, Math.min(st.cols - 1, Math.floor(nextC)));
         const checkR = Math.max(0, Math.min(st.rows - 1, Math.floor(nextR)));
 
-        // 적이 플레이어의 선(2)을 타격하면 피격!
+        // 적이 플레이어의 궤적(2)을 타격하면 피격!
         if (st.grid[checkR][checkC] === 2 || (st.grid[pl.r][pl.c] === 2 && Math.hypot(en.c - pl.c, en.r - pl.r) < 1.6)) {
           this._onQixPlayerHit();
           return;
@@ -2225,16 +2213,24 @@ class ImageMinigameSuite {
 
         if (st.grid[checkR][Math.floor(en.c)] === 1) {
           en.vr = -en.vr;
-          en.vc += (Math.random() - 0.5) * 1.5;
+          en.vc += (Math.random() - 0.5) * 3;
         } else {
           en.r = nextR;
         }
 
         if (st.grid[Math.floor(en.r)][checkC] === 1) {
           en.vc = -en.vc;
-          en.vr += (Math.random() - 0.5) * 1.5;
+          en.vr += (Math.random() - 0.5) * 3;
         } else {
           en.c = nextC;
+        }
+
+        // 속도 유지 보정
+        const spd = Math.hypot(en.vc, en.vr);
+        if (spd < 13.0 || spd > 22.0) {
+          const factor = 17.0 / (spd || 1);
+          en.vc *= factor;
+          en.vr *= factor;
         }
       }
     }
@@ -2353,24 +2349,14 @@ class ImageMinigameSuite {
     for (const en of st.enemies) {
       const ex = en.c * st.cellW;
       const ey = st.topOffset + en.r * st.cellH;
-      if (en.isSparx) {
-        ctx.fillStyle = '#ef4444';
-        ctx.shadowColor = '#ef4444';
-        ctx.shadowBlur = 12;
-        ctx.beginPath();
-        ctx.arc(ex, ey, 5.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      } else {
-        ctx.strokeStyle = en.isBoss ? '#f43f5e' : '#a855f7';
-        ctx.shadowColor = en.isBoss ? '#f43f5e' : '#a855f7';
-        ctx.shadowBlur = 10;
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.arc(ex, ey, en.isBoss ? 9 : 7, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-      }
+      ctx.strokeStyle = en.isBoss ? '#f43f5e' : '#a855f7';
+      ctx.shadowColor = en.isBoss ? '#f43f5e' : '#a855f7';
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(ex, ey, en.isBoss ? 9 : 7, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
     }
 
     // 6. 플레이어 아바타 렌더링
@@ -2388,12 +2374,12 @@ class ImageMinigameSuite {
     ctx.stroke();
     ctx.shadowBlur = 0;
 
-    // 7. 상단 HUD
-    const dashLabel = st.isDash ? '⚡DASH' : '';
+    // 7. 상단 HUD (실루엣 해금 진행도만 깔끔하게 표시)
+    const dashLabel = st.isDash ? '⚡대시' : '';
     this._drawHUD(ctx, {
       lives: st.lives,
-      progressPct: st.claimedTerritoryPct,
-      labelText: `영토: ${Math.floor(st.claimedTerritoryPct)}% (목표 75%) | 외형: ${Math.floor(st.silhouetteRevealedPct)}% ${dashLabel}`
+      progressPct: st.silhouetteRevealedPct,
+      labelText: `실루엣 ${Math.floor(st.silhouetteRevealedPct)}% ${dashLabel}`.trim()
     });
   }
   // =========================================================================
@@ -2970,9 +2956,15 @@ class ImageMinigameSuite {
     if (this.gameState !== 'PLAYING') {
       if (this.gameState === 'READY' && this.gameType === 'BRICK_BREAKER' && this.bbState) {
         const p = this.bbState.paddle;
-        const b = this.bbState.ball;
-        b.x = p.x + p.w / 2;
-        b.y = p.y - b.r - 2;
+        const b = this.bbState.balls ? this.bbState.balls[0] : null;
+        if (b && p) {
+          b.x = p.x + p.w / 2;
+          b.y = p.y - b.r - 2;
+        }
+        // 시작 후 0.6초 경과 시 자동 발사 (플레이어가 아무것도 안 눌러도 즉시 동작)
+        if (performance.now() - (this.bbState.readyTime || 0) > 600) {
+          this.launchBall();
+        }
       }
       return;
     }
