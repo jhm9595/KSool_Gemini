@@ -18,6 +18,7 @@ class InventoryManager {
       collection: false,
       fridge: false,
       suggestions: false,
+      tycoon: false,
       detailPicker: false,
       noticeNo3: false,
       noticeNo6: false
@@ -36,6 +37,7 @@ class InventoryManager {
       collection: false,
       fridge: false,
       suggestions: false,
+      tycoon: false,
       detailPicker: false,
       noticeNo3: false,
       noticeNo6: false
@@ -71,6 +73,7 @@ class InventoryManager {
           collection: Boolean(saved.shownTabIntros.collection),
           fridge: Boolean(saved.shownTabIntros.fridge),
           suggestions: Boolean(saved.shownTabIntros.suggestions),
+          tycoon: Boolean(saved.shownTabIntros.tycoon),
           detailPicker: Boolean(saved.shownTabIntros.detailPicker),
           noticeNo3: Boolean(saved.shownTabIntros.noticeNo3),
           noticeNo6: Boolean(saved.shownTabIntros.noticeNo6)
@@ -88,7 +91,10 @@ class InventoryManager {
     if (this.isDetailPickerUnlocked()) this.shownTabIntros.detailPicker = true;
     if (this.getUnlockProgressRatio() >= 0.5) this.shownTabIntros.fridge = true;
     const totalRecs = this.recipeBook.getAllRecipes().length;
-    if (totalRecs > 0 && this.unlockedRecipeIds.size >= totalRecs) this.shownTabIntros.suggestions = true;
+    if (totalRecs > 0 && this.unlockedRecipeIds.size >= totalRecs) {
+      this.shownTabIntros.suggestions = true;
+      this.shownTabIntros.tycoon = true;
+    }
   }
 
   /**
@@ -365,11 +371,24 @@ class InventoryManager {
     );
   }
 
+  /**
+   * 🏮 타이쿤 탭 해금 조건: 도감 100% 모두 해금했을 때만(또는 전체해금 샌드박스 모드) 오픈!
+   */
+  isTycoonTabUnlocked() {
+    const total = this.recipeBook.getAllRecipes().length;
+    return Boolean(
+      this.unlockAllSandboxMode ||
+      (total > 0 && this.unlockedRecipeIds.size >= total) ||
+      this.shownTabIntros.tycoon
+    );
+  }
+
   isTabUnlocked(tabKey) {
     if (tabKey === 'brew') return true;
     if (tabKey === 'collection') return this.isCollectionTabUnlocked();
     if (tabKey === 'fridge') return this.isFridgeTabUnlocked();
     if (tabKey === 'suggestions') return this.isSuggestionTabUnlocked();
+    if (tabKey === 'tycoon') return this.isTycoonTabUnlocked();
     if (tabKey === 'party') return true; // 오프라인 술자리 미니게임 탭은 언제든지 바로 플레이 가능
     return false;
   }
