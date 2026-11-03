@@ -1,27 +1,18 @@
 window.KSool = window.KSool || {};
 
 /**
- * 🏮 주막 타이쿤 (Tycoon Main Game) - 메인 뷰 컨트롤러
+ * 🏮 주막 타이쿤 (Tycoon Main Game) - 100vh 노스크롤 분할 & 비주얼 아이콘 중심 뷰
  *
- * [해금 조건]
- * - 공식 레시피 100% 해금 달성 유저(또는 전체해금 샌드박스 모드)에게만 열리는 최종 본게임 탭!
- *
- * [제공 화면 및 기능]
- * 1. 상단 대시보드 & 모드 스위처:
- *    - ♾️ 무한 서바이벌 모드 (목숨 ❤️❤️❤️ 3개, 웨이브가 오를수록 다중 조합 -> 빼기 주문 -> "늘 먹던 걸로" 단골 기억 주문)
- *    - ⏱️ 타임어택 랭킹전 (180초 제한, 서빙 수 & 매출 기준 글로벌 Top 100 랭킹 보드)
- *    - 📖 단골 손님 수첩 모달 (유니크하지만 헷갈리는 모자/수염/안경/복장 손님들의 인상착의 및 최애 술 기록장)
- *    - 🏆 Top 100 전체 랭킹 모달 (Supabase 실시간 연동)
- * 2. 주막 홀 & 좌석 안내 시스템:
- *    - 입구 대기 손님을 클릭한 빈 좌석(1~4번 테이블)에 안내하거나 [자동 착석 안내] 토글로 즉시 착석
- *    - 선택한 테이블 손님의 고유 외형 아바타, 말풍선 주문, 1원 단위 예상 판매 가격(예: 47원, 118원),
- *      [📋 레시피 힌트/원클릭 세팅] 보조 기능 제공
- * 3. 재고 선반 (Stockpile Shelf):
- *    - 주조해서 만든 조합(재료 or 완성품, 그리고 🚫빼기 표기된 특제 조합)이 1개씩 쌓이는 공간
- *    - 선반의 술 카드를 누르면 현재 선택된 테이블의 손님에게 즉시 서빙하고 1원 단위 대금을 정산!
- * 4. 타이쿤 전용 양조 가마솥 (Omission Tagging 지원):
- *    - 슬롯에 재료를 모두 올린 뒤, 특정 재료 슬롯의 [➖빼기] 버튼을 누르면
- *      실제 슬롯에서 사라져 다른 레시피와 겹치는 일을 방지하고 `🚫빼기 표기`된 상태로 정확히 조합!
+ * [레이아웃 & UX 핵심 구조]
+ * 1. 화면 스크롤 제거 (1개 모바일 뷰포트에 100vh 고정):
+ *    - 인게임 진행 중(`status === 'PLAYING'`)에는 하단 글로벌 탭바(`.tab-bar`) 및 상단 글로벌 헤더를 `display: none` 처리하여
+ *      모바일 1화면(100dvh) 전체를 타이쿤 작업 영역으로 온전히 확보합니다.
+ * 2. 상단 45% / 하단 55% 고정 분할:
+ *    - [상단 45%: 주막 홀] 컴팩트 상단 바 + 2x2 테이블 4개 (손님 아바타 + 요구 주류 아이콘 + 개별 대기시간 게이지 바 + 주문 아이콘 옆 심플한 `[서빙]` 버튼)
+ *    - [하단 55%: 주조대] 가마솥 슬롯(➖빼기 태그 지원) + 카테고리/재료 선택 그리드 + 완성 선반(Stockpile)
+ * 3. 텍스트 다이어트 & 시각화:
+ *    - 손님 카드의 긴 외형 설명문('민트 비니 · 굵은 뿔테안경...' 등)과 긴 대사 박스를 완전 숨김!
+ *    - 오직 [손님 아바타 + 요구 주류 아이콘(빼기 뱃지 포함) + 남은 시간 게이지 바]와 주문 아이콘 옆 심플한 `[서빙]` 원터치 버튼만 노출합니다.
  */
 class TycoonView {
   constructor(containerId, { app, config, recipeBook, inventory, brandResolver, pickerRegistry, audio }) {
@@ -51,6 +42,22 @@ class TycoonView {
 
   onLeaveTab() {
     this._stopTimerLoop();
+    this._syncGlobalTabBarVisibility(false);
+  }
+
+  /**
+   * 인게임 진행 중(PLAYING)일 때는 하단 글로벌 탭바(.tab-bar)와 글로벌 헤더를 숨겨 100vh 전체 작업 영역 확보
+   */
+  _syncGlobalTabBarVisibility(isPlayingInTycoon) {
+    const isTycoonTabActive = this.app && this.app.currentTab === 'tycoon';
+    const shouldHideGlobalBars = Boolean(isTycoonTabActive && isPlayingInTycoon);
+
+    document.body.classList.toggle('tycoon-playing-fullscreen', shouldHideGlobalBars);
+
+    const tabBar = document.querySelector('.tab-bar');
+    if (tabBar) {
+      tabBar.style.display = shouldHideGlobalBars ? 'none' : '';
+    }
   }
 
   _startTimerLoop() {
@@ -58,7 +65,10 @@ class TycoonView {
     this.timerInterval = setInterval(() => {
       const s = this.engine.session;
       if (!s || s.status !== 'PLAYING') return;
+
       s.elapsedSec += 1;
+
+      // 1) 타임어택 전체 제한시간 감소
       if (s.mode === 'TIME_ATTACK') {
         s.timeLeftSec = Math.max(0, s.timeLeftSec - 1);
         const timerEl = document.getElementById('tycoon-live-timer');
@@ -68,13 +78,41 @@ class TycoonView {
         }
         if (s.timeLeftSec <= 0) {
           s.status = 'GAMEOVER';
-          s.lastLogMessage = `⏰ [타임어택 종료!] 총 ${s.servedCount}명의 손님에게 서빙하여 ${s.totalEarnings.toLocaleString()}원을 벌었습니다! Top 100 랭킹에 등록해보세요!`;
           this.audio?.playSuccess?.();
           this._stopTimerLoop();
           this.render();
+          return;
         }
       }
+
+      // 2) 테이블 4개의 개별 대기시간 게이지(Patience) 실시간 감소
+      const tickRes = this.engine.tickPatience(1);
+      if (tickRes.isGameOver || tickRes.expiredCount > 0) {
+        if (tickRes.isGameOver) {
+          this._stopTimerLoop();
+        }
+        this.render();
+        return;
+      }
+
+      // 전체 리렌더링 없이 각 좌석의 게이지 바 너비와 색상만 부드럽게 DOM 업데이트
+      this._updatePatienceBarsInDom();
     }, 1000);
+  }
+
+  _updatePatienceBarsInDom() {
+    const s = this.engine.session;
+    if (!s || s.status !== 'PLAYING') return;
+    s.tables.forEach((t, idx) => {
+      const fillEl = document.querySelector(`[data-seat-gauge-fill="${idx}"]`);
+      if (!fillEl || !t.order) return;
+      const maxP = t.order.maxPatienceSec || 40;
+      const curP = Math.max(0, t.order.patienceSec || 0);
+      const pct = Math.max(0, Math.min(100, Math.round((curP / maxP) * 100)));
+      fillEl.style.width = `${pct}%`;
+      fillEl.classList.toggle('warn', pct <= 50 && pct > 25);
+      fillEl.classList.toggle('danger', pct <= 25);
+    });
   }
 
   _stopTimerLoop() {
@@ -95,501 +133,292 @@ class TycoonView {
     if (!container) return;
 
     const s = this.engine.session;
-    const profile = this.engine.getDifficultyProfile();
+    const isPlaying = s.status === 'PLAYING';
+    this._syncGlobalTabBarVisibility(isPlaying);
 
-    // 상단 상태바 & 모드 선택 헤더
-    const topHudHtml = this._renderTopHud(s, profile);
-
-    // 게임 시작 전(LOBBY) 또는 게임오버(GAMEOVER) 오버레이 카드 vs 플레이 화면
-    let mainBodyHtml = '';
     if (s.status === 'LOBBY') {
-      mainBodyHtml = this._renderLobbyScreen(s);
-    } else if (s.status === 'GAMEOVER') {
-      mainBodyHtml = this._renderGameOverScreen(s);
-    } else {
-      mainBodyHtml = `
-        <!-- 1. 주막 홀 (대기열 + 4인 좌석 테이블 + 선택된 손님 주문서) -->
-        ${this._renderTavernHall(s)}
-
-        <!-- 2. 내 주막 재고 선반 (조합해서 쌓아둔 술/재료 판매대) -->
-        ${this._renderStockpileShelf(s)}
-
-        <!-- 3. 주막 즉석 가마솥 (➖빼기 태그 지원 & 즉시 조합) -->
-        ${this._renderTycoonBrewery(s)}
+      container.innerHTML = `
+        <div class="tycoon-shell lobby-mode">
+          ${this._renderTopHud(s)}
+          <div class="tycoon-lobby-body">
+            ${this._renderLobbyScreen(s)}
+          </div>
+          ${this.activeSubModal ? this._renderSubModal(s) : ''}
+        </div>
       `;
+      this._bindEvents(container);
+      return;
     }
 
-    // 서브 모달 (Top 100 랭킹 보드 / 단골 손님 인상착의 수첩)
-    const subModalHtml = this.activeSubModal ? this._renderSubModal(s) : '';
-
-    container.innerHTML = `
-      <div class="tycoon-shell">
-        ${topHudHtml}
-        <div class="tycoon-Notice-bar" id="tycoon-log-bar">${s.lastLogMessage}</div>
-        <div class="tycoon-scroll-body">
-          ${mainBodyHtml}
+    if (s.status === 'GAMEOVER') {
+      container.innerHTML = `
+        <div class="tycoon-shell gameover-mode">
+          ${this._renderTopHud(s)}
+          <div class="tycoon-lobby-body">
+            ${this._renderGameOverScreen(s)}
+          </div>
+          ${this.activeSubModal ? this._renderSubModal(s) : ''}
         </div>
-        ${subModalHtml}
+      `;
+      this._bindEvents(container);
+      return;
+    }
+
+    // [인게임 PLAYING 모드: 100vh 노스크롤 고정 · 상단 45% 주막 홀 / 하단 55% 주조대]
+    container.innerHTML = `
+      <div class="tycoon-shell playing-100vh">
+        <!-- [상단 45%] 주막 홀 (컴팩트 HUD + 테이블 4개 + 개별 대기시간 게이지) -->
+        <section class="tycoon-top-45">
+          ${this._renderTopHud(s)}
+          ${this._renderTavernHallCompact(s)}
+        </section>
+
+        <!-- [하단 55%] 주조대 (완성 선반 + 가마솥 슬롯 + 재료 선택 그리드) -->
+        <section class="tycoon-bottom-55">
+          ${this._renderStockpileStrip(s)}
+          ${this._renderCompactPotRow(s)}
+          ${this._renderCompactIngredientsArea(s)}
+        </section>
+
+        ${this.activeSubModal ? this._renderSubModal(s) : ''}
       </div>
     `;
 
     this._bindEvents(container);
   }
 
-  _renderTopHud(s, profile) {
+  _renderTopHud(s) {
     const isPlaying = s.status === 'PLAYING';
-    const modeBadge = s.mode === 'TIME_ATTACK'
-      ? `<span class="tycoon-mode-pill mode-ta">⏱️ 타임어택</span>`
-      : `<span class="tycoon-mode-pill mode-inf">♾️ 무한모드</span>`;
-
     const statusRightHtml = s.mode === 'TIME_ATTACK'
-      ? `<div class="tycoon-stat-chip timer-chip">
-           <span class="stat-label">남은시간</span>
-           <span class="stat-val" id="tycoon-live-timer">${this._formatSeconds(s.timeLeftSec)}</span>
-         </div>`
-      : `<div class="tycoon-stat-chip lives-chip" title="틀린 술을 서빙하면 목숨이 1개씩 줄어듭니다">
-           <span class="stat-label">목숨</span>
-           <span class="stat-val">${'❤️'.repeat(Math.max(0, s.lives))}${'🖤'.repeat(Math.max(0, s.maxLives - s.lives))}</span>
-         </div>`;
+      ? `<span class="hud-pill timer-pill" id="tycoon-live-timer">${this._formatSeconds(s.timeLeftSec)}</span>`
+      : `<span class="hud-pill lives-pill">${'❤️'.repeat(Math.max(0, s.lives))}${'🖤'.repeat(Math.max(0, s.maxLives - s.lives))}</span>`;
 
     return `
-      <div class="tycoon-hud-header">
-        <div class="tycoon-hud-top-row">
-          <div class="tycoon-title-wrap">
-            <span class="tycoon-lantern-icon">🏮</span>
-            <div>
-              <div class="tycoon-main-title">조선 주막 타이쿤 ${modeBadge}</div>
-              <div class="tycoon-wave-sub">${profile.title}</div>
-            </div>
-          </div>
-          <div class="tycoon-hud-actions">
-            <button type="button" class="tycoon-util-btn" id="tycoon-open-notebook-btn" title="손님들의 외형 특징과 단골 메뉴 수첩">
-              📖 단골수첩 <span class="util-count">${this.engine.knownRegularIds.size}/${this.engine.customerPool.getAllCustomers().length}</span>
-            </button>
-            <button type="button" class="tycoon-util-btn rank-btn" id="tycoon-open-rank-btn" title="글로벌 Top 100 랭킹 보드">
-              🏆 Top 100
-            </button>
-            ${isPlaying ? `<button type="button" class="tycoon-util-btn Lobby-btn" id="tycoon-back-lobby-btn" title="모드 선택 화면으로">⚙️ 모드변경</button>` : ''}
-          </div>
-        </div>
-
-        <div class="tycoon-stats-strip">
-          <div class="tycoon-stat-chip">
-            <span class="stat-label">서빙완료</span>
-            <span class="stat-val highlight-sky">${s.servedCount}명</span>
-          </div>
-          <div class="tycoon-stat-chip">
-            <span class="stat-label">현재매출</span>
-            <span class="stat-val highlight-gold">${s.totalEarnings.toLocaleString()}원</span>
-          </div>
-          <div class="tycoon-stat-chip">
-            <span class="stat-label">연속콤보</span>
-            <span class="stat-val highlight-amber">${s.combo}🔥</span>
-          </div>
+      <header class="tycoon-compact-hud">
+        <div class="hud-left">
+          <span class="hud-wave-badge">W${s.wave}</span>
+          <span class="hud-stat">🍶<b>${s.servedCount}</b></span>
+          <span class="hud-stat gold">💰<b>${s.totalEarnings.toLocaleString()}</b>원</span>
+          ${s.combo > 1 ? `<span class="hud-combo">${s.combo}🔥</span>` : ''}
           ${statusRightHtml}
         </div>
-      </div>
-    `;
-  }
-
-  _renderLobbyScreen(s) {
-    const bestTA = this.engine.persistentBestTimeAttack;
-    const bestInf = this.engine.persistentBestInfinite;
-    const stashCount = Array.from(s.stockMap.values()).reduce((a, b) => a + b, 0);
-
-    return `
-      <div class="tycoon-lobby-container">
-        <div class="tycoon-hero-banner">
-          <div class="hero-badge">👑 도감 100% 마스터 전용 본게임</div>
-          <h2>"사장님! 늘 먹던 걸로 한 잔 주세요!"</h2>
-          <p>
-            직접 빚은 조합(재료·완성품)을 선반에 하나씩 쌓아두고 찾아오는 손님에게 판매하세요!<br/>
-            난이도와 투입 개수에 비례해 <b>1원 단위</b>로 정산되며, 갈수록 <b>다중 조합 · 재료 빼기(➖) · 단골 기억 주문</b>이 몰려옵니다!
-          </p>
-          <div class="tycoon-wallet-pill">
-            💰 누적 주막 자산: <b>${this.engine.persistentWallet.toLocaleString()}원</b>
-            <span style="margin:0 6px; opacity:0.4;">|</span>
-            📦 현재 선반 초기 재고: <b>${stashCount}개</b>
-          </div>
-        </div>
-
-        <div class="tycoon-mode-cards-grid">
-          <!-- 모드 1: 무한 서바이벌 모드 -->
-          <div class="tycoon-mode-card mode-infinite-card">
-            <div class="mode-card-header">
-              <span class="mode-icon">♾️</span>
-              <div>
-                <div class="mode-name">무한 서바이벌 모드</div>
-                <div class="mode-tag">목숨 ❤️❤️❤️ 3개 · 극한의 단골 기억 & 빼기 도전</div>
-              </div>
-            </div>
-            <ul class="mode-feature-list">
-              <li><b>Wave 1:</b> 2재료 기초 주문 + 단골 손님들의 첫인사 & 최애 술 소개</li>
-              <li><b>Wave 2:</b> 3~4재료 다중 조합 + <b>"특정 재료는 빼고(➖) 주세요!"</b> 등장</li>
-              <li><b>Wave 3+:</b> 비슷한 모자·수염·안경의 단골들이 재방문해 <b>"늘 먹던 걸로 주세요!"</b> 주문!</li>
-              <li>실수 없이 정확히 서빙하면 목숨이 유지되어 무한히 웨이브와 단가를 높일 수 있습니다.</li>
-            </ul>
-            <div class="mode-best-record">
-              🏅 내 최고 기록: <b>${bestInf.servedCount}명 서빙</b> (${bestInf.totalEarnings.toLocaleString()}원 · Wave ${bestInf.maxWave || 1})
-            </div>
-            <button type="button" class="tycoon-start-btn start-infinite" data-start-mode="INFINITE">
-              ♾️ 무한모드 영업 시작하기
-            </button>
-          </div>
-
-          <!-- 모드 2: 타임어택 랭킹전 -->
-          <div class="tycoon-mode-card mode-timeattack-card">
-            <div class="mode-card-header">
-              <span class="mode-icon">⏱️</span>
-              <div>
-                <div class="mode-name">타임어택 Top 100 랭킹전</div>
-                <div class="mode-tag">제한시간 180초 · 전 세계 주모들과 스피드 경쟁</div>
-              </div>
-            </div>
-            <ul class="mode-feature-list">
-              <li><b>180초(3분)</b> 안에 찾아오는 손님들에게 원하는 술을 최대한 많이 전달하세요!</li>
-              <li>미리 자주 쓰이는 술(소주, 맥주, 얼음, 탄산수 등)을 만들어 선반에 쌓아두면 즉시 서빙 가능!</li>
-              <li>서빙 성공 횟수와 총 매출액(1원 단위)을 기준으로 <b>전체 공개 Top 100 순위표</b>에 등재됩니다.</li>
-            </ul>
-            <div class="mode-best-record">
-              🏅 내 최고 기록: <b>${bestTA.servedCount}명 서빙</b> (${bestTA.totalEarnings.toLocaleString()}원 · 최대 ${bestTA.maxCombo}콤보)
-            </div>
-            <button type="button" class="tycoon-start-btn start-timeattack" data-start-mode="TIME_ATTACK">
-              ⏱️ 타임어택(180초) 도전하기
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  _renderGameOverScreen(s) {
-    const savedName = this.engine.leaderboard.getSavedPlayerName() || '';
-    const modeLabel = s.mode === 'TIME_ATTACK' ? '⏱️ 타임어택 (180초)' : '♾️ 무한 서바이벌 모드';
-
-    return `
-      <div class="tycoon-gameover-card">
-        <div class="gameover-badge">${modeLabel} 영업 종료</div>
-        <h2 class="gameover-title">🏮 오늘의 주막 정산서</h2>
-        <p class="gameover-desc">${s.lastLogMessage}</p>
-
-        <div class="gameover-stats-grid">
-          <div class="go-stat-box">
-            <span class="go-label">총 서빙 손님</span>
-            <span class="go-val sky">${s.servedCount}명</span>
-          </div>
-          <div class="go-stat-box">
-            <span class="go-label">총 판매 수익</span>
-            <span class="go-val gold">${s.totalEarnings.toLocaleString()}원</span>
-          </div>
-          <div class="go-stat-box">
-            <span class="go-label">최대 콤보 / 도달 Wave</span>
-            <span class="go-val amber">${s.maxCombo}콤보 / Wave ${s.wave}</span>
-          </div>
-        </div>
-
-        <div class="gameover-rank-submit-box">
-          <div class="rank-submit-title">🏆 글로벌 Top 100 랭킹 등록</div>
-          ${this.hasSubmittedCurrentGame
-            ? `<div class="rank-submitted-done">✅ 랭킹 등록이 완료되었습니다! [🏆 Top 100]에서 순위를 확인하세요.</div>`
-            : `<div class="rank-submit-form">
-                 <input type="text" id="tycoon-rank-nickname" class="rank-nick-input" maxlength="12" placeholder="주막 닉네임 (최대 12자)" value="${savedName}" />
-                 <button type="button" class="rank-submit-btn" id="tycoon-submit-rank-btn" ${this.isSubmittingRank ? 'disabled' : ''}>
-                   ${this.isSubmittingRank ? '등록 중...' : '🏆 랭킹 등록'}
-                 </button>
-               </div>`
+        <div class="hud-right">
+          <button type="button" class="hud-icon-btn" id="tycoon-open-notebook-btn" title="단골 수첩">📖</button>
+          <button type="button" class="hud-icon-btn" id="tycoon-open-rank-btn" title="Top 100 랭킹">🏆</button>
+          ${isPlaying
+            ? `<button type="button" class="hud-icon-btn exit-btn" id="tycoon-back-lobby-btn" title="로비로 나가기">✕</button>`
+            : ''
           }
         </div>
-
-        <div class="gameover-actions">
-          <button type="button" class="tycoon-start-btn start-infinite" id="tycoon-retry-btn">
-            🔄 같은 모드로 다시 영업하기
-          </button>
-          <button type="button" class="tycoon-secondary-btn" id="tycoon-go-lobby-btn">
-            🏠 모드 선택 로비로
-          </button>
-        </div>
-      </div>
+      </header>
     `;
   }
 
-  _renderTavernHall(s) {
-    // 입구 대기 손님 표시
-    const queueHtml = s.waitingQueue.map((entry, idx) => {
-      const avatar = this.engine.customerPool.renderCustomerAvatarSvg(entry.customer, 34);
-      return `
-        <div class="waiting-guest-pill" title="${entry.customer.name} (${entry.customer.traitHint})">
-          <span class="wg-avatar">${avatar}</span>
-          <span class="wg-name">${entry.customer.name}</span>
-          ${idx === 0 ? `<span class="wg-next-tag">입장대기</span>` : ''}
-        </div>
-      `;
-    }).join('');
-
-    // 4개 좌석 렌더링
+  /**
+   * [상단 45% 내 테이블 4개 영역]
+   * - 긴 텍스트 설명 완전 숨김!
+   * - 각 좌석 카드에는 [손님 아바타] + [요구 주류 아이콘(빼기 뱃지) + 주문 아이콘 옆 심플한 `[서빙]` 버튼] + [남은 시간 게이지 바]만 노출!
+   */
+  _renderTavernHallCompact(s) {
     const tablesHtml = s.tables.map((t, idx) => {
       const isSelected = s.selectedTableIdx === idx;
+
       if (!t.customer || !t.order) {
         return `
-          <div class="tavern-seat-card empty ${isSelected ? 'selected' : ''}" data-seat-idx="${idx}">
-            <div class="seat-top-bar">
-              <span class="seat-num">${t.label}</span>
-              <span class="seat-empty-tag">빈 좌석</span>
-            </div>
-            <div class="seat-empty-body">
-              <span class="seat-plus-icon">🪑</span>
-              <span class="seat-guide-txt">터치하여 대기 손님 착석 안내</span>
-            </div>
+          <div class="t-seat-box empty ${isSelected ? 'selected' : ''}" data-seat-idx="${idx}">
+            <span class="seat-empty-icon">🪑</span>
+            <span class="seat-empty-txt">${idx + 1}번석 · 입장</span>
           </div>
         `;
       }
 
       const cust = t.customer;
       const ord = t.order;
-      const avatar = this.engine.customerPool.renderCustomerAvatarSvg(cust, 46);
+      const avatarSvg = this.engine.customerPool.renderCustomerAvatarSvg(cust, 42);
+      const rec = this.recipeBook.getRecipe(ord.recipeId);
       const hasStockReady = (s.stockMap.get(ord.requiredStockKey) || 0) > 0;
 
-      // 주문 요약 라벨 (MEMORY 주문일 때는 메뉴명 대신 ❓ 늘 먹던 단골 술로 표시!)
-      let orderSummaryTitle = '';
-      if (ord.orderType === 'MEMORY') {
-        orderSummaryTitle = `❓ 늘 먹던 단골 술!`;
-      } else if (ord.orderType === 'MEMORY_OMIT') {
-        orderSummaryTitle = `❓ 단골 술 (🚫${ord.omittedIngName} 빼기)`;
-      } else if (ord.orderType === 'OMIT') {
-        orderSummaryTitle = `${ord.recipeName} (🚫${ord.omittedIngName} 빼기)`;
+      // 요구 주류 아이콘 시각화:
+      // - 일반/빼기 주문: 실제 요구 주류의 픽셀/고급 아이콘 노출
+      // - 단골 기억 주문(MEMORY): ❓단골술 아이콘 (터치 시 기억 힌트 토글 가능)
+      const isMemory = (ord.orderType === 'MEMORY' || ord.orderType === 'MEMORY_OMIT');
+      const isRevealed = Boolean(this._memoryHintRevealedForOrderId?.[ord.orderId]);
+
+      let drinkIconHtml = '';
+      let drinkShortName = '';
+      if (isMemory && !isRevealed) {
+        drinkIconHtml = `<span class="order-mystery-icon" data-reveal-memory="${ord.orderId}" title="터치하면 단골 주류 확인">❓</span>`;
+        drinkShortName = '단골술';
       } else {
-        orderSummaryTitle = ord.recipeName;
+        drinkIconHtml = rec
+          ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(rec, 30) : `<span style="font-size:1.4rem;">${rec.emoji || '🍶'}</span>`)
+          : '🍶';
+        drinkShortName = ord.recipeName;
       }
 
+      // 빼기 재료가 있는 경우 심플 아이콘 배지 (🚫재료아이콘)
+      let omitBadgeHtml = '';
+      if (ord.omittedBaseId) {
+        const omitIng = this.recipeBook.getBaseIngredient(ord.omittedBaseId);
+        const omitIcon = omitIng
+          ? (window.KSool?.pixelIcon ? window.KSool.pixelIcon(omitIng, 14) : omitIng.emoji)
+          : '➖';
+        omitBadgeHtml = `<span class="order-omit-mini-badge" title="${ord.omittedIngName} 빼기">🚫${omitIcon}</span>`;
+      }
+
+      // 남은 대기시간 게이지 퍼센트
+      const maxP = ord.maxPatienceSec || 40;
+      const curP = Math.max(0, ord.patienceSec ?? maxP);
+      const pct = Math.max(0, Math.min(100, Math.round((curP / maxP) * 100)));
+      const gaugeStateCls = pct <= 25 ? 'danger' : (pct <= 50 ? 'warn' : '');
+
       return `
-        <div class="tavern-seat-card occupied ${isSelected ? 'selected' : ''} ${hasStockReady ? 'ready-to-serve' : ''}" data-seat-idx="${idx}">
-          <div class="seat-top-bar">
-            <span class="seat-num">${t.label}</span>
-            <span class="seat-price-tag">💰 ${ord.price.toLocaleString()}원</span>
-          </div>
-          <div class="seat-cust-row">
-            <div class="seat-avatar-wrap">${avatar}</div>
-            <div class="seat-cust-info">
-              <div class="seat-cust-name-row">
-                <span class="seat-cust-name">${cust.name}</span>
-                <span class="seat-group-badge">${cust.group}</span>
+        <div class="t-seat-box occupied ${isSelected ? 'selected' : ''} ${hasStockReady ? 'ready-glow' : ''}" data-seat-idx="${idx}">
+          <div class="t-seat-main">
+            <!-- 좌측: 손님 아바타 + 가격 -->
+            <div class="t-cust-col">
+              <div class="t-avatar">${avatarSvg}</div>
+              <span class="t-price-badge">${ord.price}원</span>
+            </div>
+
+            <!-- 우측: 요구 주류 아이콘 + 옆 심플한 [서빙] 원터치 버튼 -->
+            <div class="t-order-col">
+              <div class="t-drink-bubble" data-autofill-seat="${idx}" title="터치 시 가마솥에 레시피 자동 세팅 (${drinkShortName})">
+                <div class="t-drink-icon-wrap">
+                  ${drinkIconHtml}
+                  ${omitBadgeHtml}
+                </div>
+                <span class="t-drink-mini-name">${drinkShortName}</span>
               </div>
-              <div class="seat-order-type-badge type-${ord.orderType}">${ord.orderBadge}</div>
-              <div class="seat-order-target">${orderSummaryTitle}</div>
+
+              <button type="button"
+                      class="t-serve-badge-btn ${hasStockReady ? 'active' : 'disabled'}"
+                      data-quick-serve-seat="${idx}"
+                      data-stock-key="${ord.requiredStockKey}"
+                      ${hasStockReady ? '' : 'disabled'}>
+                서빙
+              </button>
             </div>
           </div>
-          ${hasStockReady
-            ? `<button type="button" class="seat-quick-serve-btn" data-quick-serve-seat="${idx}" data-stock-key="${ord.requiredStockKey}">
-                 🍶 선반 재고로 즉시 서빙! (+${ord.price.toLocaleString()}원)
-               </button>`
-            : `<div class="seat-status-hint">${isSelected ? '👇 아래 가마솥에서 제조해 선반에 쌓으세요' : '터치하여 주문 상세 보기'}</div>`
-          }
+
+          <!-- 하단: 개별 대기시간 게이지 바 -->
+          <div class="t-patience-track">
+            <div class="t-patience-fill ${gaugeStateCls}" data-seat-gauge-fill="${idx}" style="width:${pct}%;"></div>
+          </div>
         </div>
       `;
     }).join('');
 
-    // 현재 선택된 좌석의 상세 주문서 & 단골 인상착의 클로즈업 패널
-    const activeTable = s.tables[s.selectedTableIdx];
-    let activeOrderDetailHtml = '';
-
-    if (activeTable && activeTable.customer && activeTable.order) {
-      const cust = activeTable.customer;
-      const ord = activeTable.order;
-      const bigAvatar = this.engine.customerPool.renderCustomerAvatarSvg(cust, 62);
-      const rec = this.recipeBook.getRecipe(ord.recipeId);
-      const reqItems = this.recipeBook.getRecipeItems(ord.recipeId);
-
-      // 레시피 공식 표시: 일반/빼기 주문은 제조법을 친절히 보여주고,
-      // '늘 먹던 걸로(MEMORY)' 주문은 손님 인상착의를 보고 맞춰야 하므로 [📖단골수첩] 또는 [💡기억 떠올리기] 버튼 제공!
-      const isMemoryOrder = (ord.orderType === 'MEMORY' || ord.orderType === 'MEMORY_OMIT');
-      const formulaHtml = reqItems.map(it => {
-        const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
-        const base = this.recipeBook.getBaseIngredient(it.ingredient_id);
-        const target = det || base;
-        const name = this.brandResolver.resolveName(target);
-        const isOmittedThis = ord.omittedBaseId && Number(it.ingredient_id) === Number(ord.omittedBaseId);
-        return `<span class="order-ing-chip ${isOmittedThis ? 'is-omit-target' : ''}">
-          ${name}(${it.ratio})${isOmittedThis ? ' <b>[➖빼기]</b>' : ''}
-        </span>`;
-      }).join(' + ');
-
-      activeOrderDetailHtml = `
-        <div class="active-order-spotlight">
-          <div class="spotlight-left">
-            <div class="spotlight-avatar">${bigAvatar}</div>
-            <div class="spotlight-cust-meta">
-              <span class="sp-cust-name">${cust.name}</span>
-              <span class="sp-cust-trait">${cust.traitHint}</span>
-            </div>
-          </div>
-          <div class="spotlight-right">
-            <div class="sp-dialogue-bubble">
-              ${ord.dialogue}
-            </div>
-            <div class="sp-formula-row">
-              ${isMemoryOrder && !this._memoryHintRevealedForOrderId?.[ord.orderId]
-                ? `<div class="sp-memory-mystery-bar">
-                     <span>🕵️ <b>[${cust.traitHint}]</b> 단골 손님의 최애 메뉴를 기억하시나요?</span>
-                     <button type="button" class="sp-peek-memory-btn" data-reveal-memory="${ord.orderId}">💡 단골 수첩 컨닝하기</button>
-                   </div>`
-                : `<div class="sp-recipe-guide">
-                     <span class="sp-guide-title">🎯 목표 주조법 (${this.brandResolver.resolveName(rec)}):</span>
-                     <div class="sp-guide-chips">${formulaHtml}</div>
-                     <button type="button" class="sp-autofill-pot-btn" id="tycoon-autofill-order-btn" title="이 손님의 주문 재료를 가마솥에 즉시 세팅합니다">
-                       ⚡ 가마솥에 재료 자동 세팅
-                     </button>
-                   </div>`
-              }
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
     return `
-      <section class="tycoon-section tavern-hall-section">
-        <div class="section-hdr-row">
-          <div class="section-hdr-left">
-            <span class="sec-title">🏮 주막 홀 & 손님 좌석 (4석)</span>
-            <div class="waiting-queue-bar">
-              <span class="wq-label">입구 대기:</span>
-              ${queueHtml || '<span class="wq-empty">대기 없음</span>'}
-            </div>
-          </div>
-          <label class="auto-seat-toggle" title="빈 좌석이 생기면 대기 중인 손님을 자동으로 안내합니다">
-            <input type="checkbox" id="tycoon-auto-seat-chk" ${s.autoSeatEnabled ? 'checked' : ''} />
-            <span>자동 착석 안내</span>
-          </label>
-        </div>
-
-        <div class="tavern-seats-grid">
-          ${tablesHtml}
-        </div>
-
-        ${activeOrderDetailHtml}
-      </section>
+      <div class="tycoon-seats-2x2">
+        ${tablesHtml}
+      </div>
     `;
   }
 
-  _renderStockpileShelf(s) {
+  /**
+   * [하단 55% - 파트 1] 완성 선반 (Stockpile Strip)
+   */
+  _renderStockpileStrip(s) {
     const entries = Array.from(s.stockMap.entries()).filter(([, cnt]) => cnt > 0);
     const activeTable = s.tables[s.selectedTableIdx];
     const targetOrderKey = activeTable?.order?.requiredStockKey || null;
 
-    const itemsHtml = entries.map(([stockKey, count]) => {
+    const chipsHtml = entries.map(([stockKey, count]) => {
       const meta = this.engine.getStockItemDisplayMeta(stockKey);
       if (!meta) return '';
-      const isMatchingActiveOrder = targetOrderKey && targetOrderKey === stockKey;
+      const isMatch = targetOrderKey && targetOrderKey === stockKey;
+      const icon = window.KSool?.pixelIcon ? window.KSool.pixelIcon(meta.recipe, 22) : (meta.recipe.emoji || '🍶');
 
       return `
-        <div class="stock-shelf-card ${meta.omittedName ? 'is-omitted-stock' : ''} ${isMatchingActiveOrder ? 'matches-active-order' : ''}"
-             data-serve-stock-key="${stockKey}"
-             title="클릭하면 현재 선택된 ${s.selectedTableIdx + 1}번석 손님에게 즉시 서빙합니다!">
-          <div class="stock-card-top">
-            <span class="stock-qty-badge">x${count}</span>
-            <span class="stock-price-est">~${meta.estPrice}원</span>
-          </div>
-          <div class="stock-icon">${meta.iconHtml}</div>
-          <div class="stock-name">${meta.recipeName}</div>
-          ${meta.omittedName
-            ? `<div class="stock-omit-tag">🚫 ${meta.omittedName} 빼기</div>`
-            : `<div class="stock-normal-tag">정석 제조</div>`
-          }
-          <button type="button" class="stock-serve-action-btn">
-            ${isMatchingActiveOrder ? '🎯 주문 일치! 서빙' : `${s.selectedTableIdx + 1}번석에 서빙`}
-          </button>
-        </div>
+        <button type="button"
+                class="shelf-mini-chip ${meta.omittedName ? 'is-omit' : ''} ${isMatch ? 'is-match' : ''}"
+                data-serve-stock-key="${stockKey}"
+                title="${meta.fullLabel} · 터치 시 선택 좌석에 서빙">
+          <span class="sm-icon">${icon}</span>
+          <span class="sm-name">${meta.recipeName}${meta.omittedName ? `<small>(🚫${meta.omittedName})</small>` : ''}</span>
+          <span class="sm-qty">x${count}</span>
+          ${isMatch ? `<span class="sm-serve-tag">서빙</span>` : ''}
+        </button>
       `;
     }).join('');
 
     return `
-      <section class="tycoon-section stockpile-shelf-section">
-        <div class="section-hdr-row">
-          <span class="sec-title">📦 내 주막 재고 선반 <small>(만든 조합이 1개씩 쌓입니다 · 터치 시 선택 좌석에 서빙)</small></span>
-          <span class="stock-total-pill">보유 재고 총 <b>${entries.reduce((a, [, c]) => a + c, 0)}</b>잔</span>
+      <div class="tycoon-shelf-bar">
+        <span class="shelf-bar-label">📦선반</span>
+        <div class="shelf-chips-scroll stockpile-shelf-grid">
+          ${chipsHtml || `<span class="shelf-empty-hint">조합한 주류가 이곳에 쌓입니다</span>`}
         </div>
-        <div class="stockpile-shelf-grid">
-          ${itemsHtml || `
-            <div class="stockpile-empty-notice">
-              선반에 쌓인 술이 없습니다! 아래 가마솥에서 재료를 조합해 선반에 쌓아주세요.
-            </div>
-          `}
-        </div>
-      </section>
+      </div>
     `;
   }
 
-  _renderTycoonBrewery(s) {
+  /**
+   * [하단 55% - 파트 2] 가마솥 슬롯 + 조합/비우기 버튼 한 줄 배치
+   */
+  _renderCompactPotRow(s) {
     const potSlots = s.potSlots;
     const preview = this.engine.previewTycoonPotMatch();
 
-    // 가마솥 슬롯 4~6칸 렌더링 (각 슬롯마다 [➖빼기] 토글 버튼 탑재!)
-    const displayLen = Math.max(4, potSlots.length);
     const slotsHtml = [];
-    for (let i = 0; i < displayLen; i++) {
+    for (let i = 0; i < 4; i++) {
       const slot = potSlots[i];
       if (slot) {
         const det = slot.detailId ? this.recipeBook.getDetailIngredient(slot.detailId) : null;
         const base = this.recipeBook.getBaseIngredient(slot.baseId);
         const target = det || base;
         const name = this.brandResolver.resolveName(target);
-        const icon = window.KSool?.pixelIcon ? window.KSool.pixelIcon(target, 26) : (target?.emoji || '🍶');
+        const icon = window.KSool?.pixelIcon ? window.KSool.pixelIcon(target, 20) : (target?.emoji || '🍶');
 
         slotsHtml.push(`
-          <div class="tycoon-pot-slot filled ${slot.isOmitted ? 'slot-omitted' : ''}" data-tycoon-slot-idx="${i}">
-            <button type="button"
-                    class="tycoon-slot-omit-btn ${slot.isOmitted ? 'active' : ''}"
-                    data-toggle-omit-idx="${i}"
-                    title="손님이 이 재료를 빼달라고 했을 때 누르세요! (조합은 유지하되 빼기 표시를 남겨 다른 레시피와 겹치지 않게 합니다)">
-              ${slot.isOmitted ? '🚫빼기됨' : '➖빼기'}
+          <div class="cp-slot filled ${slot.isOmitted ? 'omitted' : ''}">
+            <button type="button" class="cp-omit-toggle ${slot.isOmitted ? 'active' : ''}" data-toggle-omit-idx="${i}">
+              ${slot.isOmitted ? '🚫빼기' : '➖빼기'}
             </button>
-            <div class="tycoon-slot-body" data-dec-slot-idx="${i}" title="터치하면 개수가 1 줄어듭니다">
-              <span class="t-slot-icon">${icon}</span>
-              <span class="t-slot-name">${name}</span>
-              <span class="t-slot-count">x${slot.count}</span>
+            <div class="cp-slot-main" data-dec-slot-idx="${i}">
+              <span class="cp-icon">${icon}</span>
+              <span class="cp-name">${name}</span>
+              <span class="cp-cnt">x${slot.count}</span>
             </div>
           </div>
         `);
       } else {
         slotsHtml.push(`
-          <div class="tycoon-pot-slot empty">
-            <span class="t-empty-plus">➕</span>
-            <span class="t-empty-txt">재료 ${i + 1}</span>
+          <div class="cp-slot empty">
+            <span>➕</span>
           </div>
         `);
       }
     }
 
-    // 실시간 조합 미리보기 배너
-    let matchBannerHtml = '';
-    if (preview) {
-      const label = preview.omittedIngName
-        ? `${preview.recipeName} <span class="preview-omit-pill">🚫${preview.omittedIngName} 빼기 적용</span>`
-        : preview.recipeName;
-      matchBannerHtml = `
-        <div class="tycoon-pot-preview matched">
-          <span>✨ 예상 완성품: <b>${label}</b></span>
-          <span class="preview-sub">조합 시 선반에 +1개 쌓입니다!</span>
-        </div>
-      `;
-    } else if (potSlots.length >= 2) {
-      matchBannerHtml = `
-        <div class="tycoon-pot-preview unmatched">
-          <span>❓ 아직 일치하는 조합법이 없습니다. 재료와 비율을 확인하세요!</span>
-        </div>
-      `;
-    } else {
-      matchBannerHtml = `
-        <div class="tycoon-pot-preview idle">
-          <span>💡 팁: 손님이 <b>"특정 재료를 빼고 달라고"</b> 하면, 원래 레시피 재료를 모두 올린 뒤 해당 슬롯 위의 <b>[➖빼기]</b> 버튼을 켜고 조합하세요!</span>
-        </div>
-      `;
-    }
+    const previewLabel = preview
+      ? `${preview.recipeName}${preview.omittedIngName ? `(🚫)` : ''}`
+      : '조합대기';
 
-    // 카테고리 탭 및 전체 재료 그리드 (100% 해금 유저이므로 모든 재료와 특산 선택기 오픈!)
+    return `
+      <div class="tycoon-compact-pot-row">
+        <div class="cp-slots-wrap">
+          ${slotsHtml.join('')}
+        </div>
+        <div class="cp-actions-col">
+          <button type="button" class="cp-craft-btn ${preview ? 'ready' : ''}" id="tycoon-craft-stock-btn" ${potSlots.length < 2 ? 'disabled' : ''}>
+            <span>⚗️조합</span>
+            <small>${previewLabel}</small>
+          </button>
+          <button type="button" class="cp-clear-btn" id="tycoon-clear-pot-btn">비우기</button>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * [하단 55% - 파트 3] 카테고리 탭 + 재료 그리드
+   */
+  _renderCompactIngredientsArea(s) {
+    const potSlots = s.potSlots;
     const categories = this.recipeBook.categories;
     const catChipsHtml = categories.map(c => `
-      <button type="button" class="cat-chip ${this.selectedIngCat === c.category_id ? 'active' : ''}" data-tycoon-ing-cat="${c.category_id}">
+      <button type="button" class="cat-chip tycoon-cat-chip ${this.selectedIngCat === c.category_id ? 'active' : ''}" data-tycoon-ing-cat="${c.category_id}">
         ${c.name}
       </button>
     `).join('');
@@ -605,11 +434,11 @@ class TycoonView {
       const details = this.recipeBook.getDetailsForBase(ing.ingredient_id);
       const hasPicker = details.length > 0 && ing.picker_component && ing.picker_component !== 'NONE';
       const name = this.brandResolver.resolveName(ing);
-      const icon = window.KSool?.pixelIcon ? window.KSool.pixelIcon(ing, 28) : ing.emoji;
+      const icon = window.KSool?.pixelIcon ? window.KSool.pixelIcon(ing, 24) : ing.emoji;
 
       return `
-        <div class="ing-card tycoon-ing-card ${inPotCount > 0 ? 'in-pot' : ''}" data-tycoon-base-ing="${ing.ingredient_id}">
-          ${hasPicker ? `<button type="button" class="ing-picker-btn" data-tycoon-detail-picker="${ing.ingredient_id}">✨상세▾</button>` : ''}
+        <div class="ing-card tycoon-compact-ing ${inPotCount > 0 ? 'in-pot' : ''}" data-tycoon-base-ing="${ing.ingredient_id}">
+          ${hasPicker ? `<button type="button" class="ing-picker-btn" data-tycoon-detail-picker="${ing.ingredient_id}">상세▾</button>` : ''}
           <span class="ing-emoji">${icon}</span>
           <span class="ing-name">${name}</span>
           ${inPotCount > 0 ? `<span class="slot-count-badge">${inPotCount}</span>` : ''}
@@ -618,30 +447,113 @@ class TycoonView {
     }).join('');
 
     return `
-      <section class="tycoon-section tycoon-brewery-section">
-        <div class="section-hdr-row">
-          <span class="sec-title">⚗️ 주막 주조 가마솥 <small>(조합하면 선반에 1개씩 쌓입니다)</small></span>
-          <div class="tycoon-pot-btns">
-            <button type="button" class="tycoon-craft-btn" id="tycoon-craft-stock-btn" ${potSlots.length < 2 ? 'disabled' : ''}>
-              🍶 조합하여 선반에 쌓기 (+1)
-            </button>
-            <button type="button" class="tycoon-clear-btn" id="tycoon-clear-pot-btn">비우기</button>
+      <div class="tycoon-compact-ings-area">
+        <div class="tycoon-cat-strip cat-filter-bar">
+          ${catChipsHtml}
+        </div>
+        <div class="tycoon-ings-scroll-grid">
+          ${ingsHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  _renderLobbyScreen(s) {
+    const bestTA = this.engine.persistentBestTimeAttack;
+    const bestInf = this.engine.persistentBestInfinite;
+    const stashCount = Array.from(s.stockMap.values()).reduce((a, b) => a + b, 0);
+
+    return `
+      <div class="tycoon-lobby-container">
+        <div class="tycoon-hero-banner">
+          <div class="hero-badge">👑 도감 100% 마스터 전용 본게임</div>
+          <h2>🏮 조선 주막 타이쿤</h2>
+          <p>조합을 만들어 선반에 쌓고, 대기시간 내에 원터치 <b>[서빙]</b>하세요!</p>
+          <div class="tycoon-wallet-pill">
+            💰 자산: <b>${this.engine.persistentWallet.toLocaleString()}원</b>
+            <span style="margin:0 6px; opacity:0.4;">|</span>
+            📦 선반 재고: <b>${stashCount}개</b>
           </div>
         </div>
 
-        <div class="tycoon-pot-slots-row">
-          ${slotsHtml.join('')}
+        <div class="tycoon-mode-cards-grid">
+          <div class="tycoon-mode-card mode-infinite-card">
+            <div class="mode-card-header">
+              <span class="mode-icon">♾️</span>
+              <div>
+                <div class="mode-name">무한 서바이벌 모드</div>
+                <div class="mode-tag">목숨 ❤️❤️❤️ · 다중조합 · 빼기(➖) · 단골 기억</div>
+              </div>
+            </div>
+            <div class="mode-best-record">
+              🏅 최고 기록: <b>${bestInf.servedCount}명 서빙</b> (${bestInf.totalEarnings.toLocaleString()}원 · Wave ${bestInf.maxWave || 1})
+            </div>
+            <button type="button" class="tycoon-start-btn start-infinite" data-start-mode="INFINITE">
+              ♾️ 무한모드 시작
+            </button>
+          </div>
+
+          <div class="tycoon-mode-card mode-timeattack-card">
+            <div class="mode-card-header">
+              <span class="mode-icon">⏱️</span>
+              <div>
+                <div class="mode-name">타임어택 Top 100 랭킹전</div>
+                <div class="mode-tag">제한시간 180초 · 글로벌 Top 100 순위 경쟁</div>
+              </div>
+            </div>
+            <div class="mode-best-record">
+              🏅 최고 기록: <b>${bestTA.servedCount}명 서빙</b> (${bestTA.totalEarnings.toLocaleString()}원 · ${bestTA.maxCombo}콤보)
+            </div>
+            <button type="button" class="tycoon-start-btn start-timeattack" data-start-mode="TIME_ATTACK">
+              ⏱️ 타임어택(180초) 시작
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  _renderGameOverScreen(s) {
+    const savedName = this.engine.leaderboard.getSavedPlayerName() || '';
+    const modeLabel = s.mode === 'TIME_ATTACK' ? '⏱️ 타임어택 (180초)' : '♾️ 무한 서바이벌 모드';
+
+    return `
+      <div class="tycoon-gameover-card">
+        <div class="gameover-badge">${modeLabel} 종료</div>
+        <h2 class="gameover-title">🏮 오늘의 주막 정산서</h2>
+        <div class="gameover-stats-grid">
+          <div class="go-stat-box">
+            <span class="go-label">서빙 손님</span>
+            <span class="go-val sky">${s.servedCount}명</span>
+          </div>
+          <div class="go-stat-box">
+            <span class="go-label">판매 수익</span>
+            <span class="go-val gold">${s.totalEarnings.toLocaleString()}원</span>
+          </div>
+          <div class="go-stat-box">
+            <span class="go-label">최대 콤보</span>
+            <span class="go-val amber">${s.maxCombo}콤보</span>
+          </div>
         </div>
 
-        ${matchBannerHtml}
+        <div class="gameover-rank-submit-box">
+          <div class="rank-submit-title">🏆 글로벌 Top 100 랭킹 등록</div>
+          ${this.hasSubmittedCurrentGame
+            ? `<div class="rank-submitted-done">✅ 등록 완료! 상단 [🏆] 버튼에서 순위를 확인하세요.</div>`
+            : `<div class="rank-submit-form">
+                 <input type="text" id="tycoon-rank-nickname" class="rank-nick-input" maxlength="12" placeholder="닉네임 (최대 12자)" value="${savedName}" />
+                 <button type="button" class="rank-submit-btn" id="tycoon-submit-rank-btn" ${this.isSubmittingRank ? 'disabled' : ''}>
+                   ${this.isSubmittingRank ? '등록 중...' : '🏆 등록'}
+                 </button>
+               </div>`
+          }
+        </div>
 
-        <div class="tycoon-ing-cat-bar cat-filter-bar">
-          ${catChipsHtml}
+        <div class="gameover-actions">
+          <button type="button" class="tycoon-start-btn start-infinite" id="tycoon-retry-btn">🔄 다시 도전</button>
+          <button type="button" class="tycoon-secondary-btn" id="tycoon-go-lobby-btn">🏠 로비로</button>
         </div>
-        <div class="tycoon-ings-grid ingredients-grid">
-          ${ingsHtml}
-        </div>
-      </section>
+      </div>
     `;
   }
 
@@ -655,7 +567,7 @@ class TycoonView {
           <div class="tycoon-rank-row ${rank <= 3 ? 'top-rank' : ''}">
             <span class="r-pos">${medal}</span>
             <span class="r-user">${r.badge_emoji || '🍶'} ${r.player_name}</span>
-            <span class="r-served"><b>${r.served_count}</b>명 서빙</span>
+            <span class="r-served"><b>${r.served_count}</b>명</span>
             <span class="r-earn">${Number(r.total_earnings || 0).toLocaleString()}원</span>
           </div>
         `;
@@ -665,19 +577,15 @@ class TycoonView {
         <div class="tycoon-submodal-overlay" id="tycoon-submodal-overlay">
           <div class="tycoon-submodal-card">
             <div class="submodal-hdr">
-              <h3>🏆 주막 타이쿤 글로벌 Top 100 순위</h3>
+              <h3>🏆 글로벌 Top 100 순위</h3>
               <button type="button" class="submodal-close-btn" id="tycoon-close-submodal">✕</button>
             </div>
             <div class="submodal-tabs">
-              <button type="button" class="submodal-tab ${this.leaderboardTab === 'TIME_ATTACK' ? 'active' : ''}" data-lb-tab="TIME_ATTACK">
-                ⏱️ 타임어택 Top 100
-              </button>
-              <button type="button" class="submodal-tab ${this.leaderboardTab === 'INFINITE' ? 'active' : ''}" data-lb-tab="INFINITE">
-                ♾️ 무한모드 Top 100
-              </button>
+              <button type="button" class="submodal-tab ${this.leaderboardTab === 'TIME_ATTACK' ? 'active' : ''}" data-lb-tab="TIME_ATTACK">⏱️ 타임어택</button>
+              <button type="button" class="submodal-tab ${this.leaderboardTab === 'INFINITE' ? 'active' : ''}" data-lb-tab="INFINITE">♾️ 무한모드</button>
             </div>
             <div class="tycoon-rank-list">
-              ${rowsHtml || '<div style="padding:20px; text-align:center; color:#94a3b8;">아직 등록된 랭킹이 없습니다.</div>'}
+              ${rowsHtml || '<div style="padding:20px; text-align:center; color:#94a3b8;">등록된 랭킹이 없습니다.</div>'}
             </div>
           </div>
         </div>
@@ -689,16 +597,8 @@ class TycoonView {
       const cardsHtml = allCustomers.map(c => {
         const rec = this.recipeBook.getRecipe(c.preferredRecipeId);
         const recName = rec ? this.brandResolver.resolveName(rec) : '비전주';
-        const items = this.recipeBook.getRecipeItems(c.preferredRecipeId);
-        const formulaStr = items.map(it => {
-          const det = this.recipeBook.getDetailIngredient(it.detail_ingredient_id);
-          const base = this.recipeBook.getBaseIngredient(it.ingredient_id);
-          return `${this.brandResolver.resolveName(det || base)}(${it.ratio})`;
-        }).join(' + ');
-
-        const omitBase = this.recipeBook.getBaseIngredient(c.preferredOmitIngId);
-        const omitName = omitBase ? this.brandResolver.resolveName(omitBase) : '';
-        const avatar = this.engine.customerPool.renderCustomerAvatarSvg(c, 48);
+        const recIcon = rec && window.KSool?.pixelIcon ? window.KSool.pixelIcon(rec, 22) : (rec?.emoji || '🍶');
+        const avatar = this.engine.customerPool.renderCustomerAvatarSvg(c, 42);
 
         return `
           <div class="notebook-cust-card">
@@ -706,11 +606,9 @@ class TycoonView {
             <div class="nb-info">
               <div class="nb-top">
                 <span class="nb-name">${c.name}</span>
-                <span class="nb-group">${c.group} · ${c.title}</span>
+                <span class="nb-group">${c.group}</span>
               </div>
-              <div class="nb-trait">👀 외형 특징: <b>${c.traitHint}</b></div>
-              <div class="nb-fav">🍶 늘 먹던 술: <b style="color:#fde047;">${recName}</b> <small>(${formulaStr})</small></div>
-              ${omitName ? `<div class="nb-omit">➖ 단골 빼기 취향: <span>${omitName} 빼기</span></div>` : ''}
+              <div class="nb-fav">${recIcon} <b>${recName}</b></div>
             </div>
           </div>
         `;
@@ -720,11 +618,8 @@ class TycoonView {
         <div class="tycoon-submodal-overlay" id="tycoon-submodal-overlay">
           <div class="tycoon-submodal-card notebook-modal-card">
             <div class="submodal-hdr">
-              <h3>📖 주막 단골 손님 인상착의 & 최애 술 수첩</h3>
+              <h3>📖 단골 손님 주류 도감</h3>
               <button type="button" class="submodal-close-btn" id="tycoon-close-submodal">✕</button>
-            </div>
-            <div class="notebook-guide-banner">
-              💡 <b>모자 · 안경 · 수염 · 복장</b>이 미묘하게 닮은 단골 손님들입니다! 손님이 <b>"늘 먹던 걸로 주세요!"</b>라고 할 때 인상착의를 보고 단골 술을 찾아내세요.
             </div>
             <div class="notebook-cust-list">
               ${cardsHtml}
@@ -738,7 +633,7 @@ class TycoonView {
   }
 
   _bindEvents(container) {
-    // 1. 로비에서 모드 시작
+    // 1. 모드 시작
     container.querySelectorAll('[data-start-mode]').forEach(btn => {
       btn.onclick = () => {
         const mode = btn.getAttribute('data-start-mode');
@@ -746,12 +641,14 @@ class TycoonView {
         this.hasSubmittedCurrentGame = false;
         this._memoryHintRevealedForOrderId = {};
         this.engine.startGame(mode);
+        // 4개 테이블 모두 시작부터 손님 자동 착석 활성화
+        this.engine.autoSeatAvailableTables();
         this._startTimerLoop();
         this.render();
       };
     });
 
-    // 2. 상단 유틸 버튼 (단골수첩 / Top 100 / 모드변경)
+    // 2. 상단 HUD 아이콘 버튼
     const nbBtn = container.querySelector('#tycoon-open-notebook-btn');
     if (nbBtn) {
       nbBtn.onclick = () => {
@@ -778,6 +675,7 @@ class TycoonView {
         this.audio?.playTap?.();
         this._stopTimerLoop();
         this.engine.session.status = 'LOBBY';
+        this._syncGlobalTabBarVisibility(false);
         this.render();
       };
     }
@@ -801,34 +699,24 @@ class TycoonView {
       };
     });
 
-    // 3. 자동 착석 체크박스
-    const autoSeatChk = container.querySelector('#tycoon-auto-seat-chk');
-    if (autoSeatChk) {
-      autoSeatChk.onchange = () => {
-        this.engine.session.autoSeatEnabled = autoSeatChk.checked;
-        if (autoSeatChk.checked) {
-          this.engine.autoSeatAvailableTables();
-        }
-        this.render();
-      };
-    }
-
-    // 4. 좌석 카드 클릭 (빈 좌석이면 손님 착석 안내, 손님이 있으면 해당 좌석 주문 포커스)
+    // 3. 테이블 좌석 터치 (포커스 및 빈 좌석 손님 입장)
     container.querySelectorAll('[data-seat-idx]').forEach(seatEl => {
       seatEl.onclick = (e) => {
-        if (e.target.closest('[data-quick-serve-seat]')) return;
+        if (e.target.closest('[data-quick-serve-seat]') || e.target.closest('[data-reveal-memory]')) return;
         const idx = Number(seatEl.getAttribute('data-seat-idx'));
         this.audio?.playTap?.();
         this.engine.session.selectedTableIdx = idx;
         const table = this.engine.session.tables[idx];
         if (!table.customer) {
           this.engine.seatNextCustomerToTable(idx);
+        } else if (e.target.closest('[data-autofill-seat]')) {
+          this._autoFillOrderToPot(table.order);
         }
         this.render();
       };
     });
 
-    // 5. 좌석 카드 내 [즉시 서빙] 버튼
+    // 4. 주문 아이콘 옆 심플 `[서빙]` 원터치 버튼
     container.querySelectorAll('[data-quick-serve-seat]').forEach(qBtn => {
       qBtn.onclick = (e) => {
         e.stopPropagation();
@@ -838,10 +726,11 @@ class TycoonView {
       };
     });
 
-    // 6. 단골 기억 주문 컨닝하기 & 가마솥 재료 자동 세팅 버튼
-    container.querySelectorAll('[data-reveal-memory]').forEach(peekBtn => {
-      peekBtn.onclick = () => {
-        const ordId = peekBtn.getAttribute('data-reveal-memory');
+    // 5. 단골 기억 물음표 아이콘 터치 시 주류 아이콘 공개
+    container.querySelectorAll('[data-reveal-memory]').forEach(peekEl => {
+      peekEl.onclick = (e) => {
+        e.stopPropagation();
+        const ordId = peekEl.getAttribute('data-reveal-memory');
         if (!this._memoryHintRevealedForOrderId) this._memoryHintRevealedForOrderId = {};
         this._memoryHintRevealedForOrderId[ordId] = true;
         this.audio?.playTap?.();
@@ -849,44 +738,15 @@ class TycoonView {
       };
     });
 
-    const autoFillBtn = container.querySelector('#tycoon-autofill-order-btn');
-    if (autoFillBtn) {
-      autoFillBtn.onclick = () => {
-        const activeTable = this.engine.session.tables[this.engine.session.selectedTableIdx];
-        if (!activeTable || !activeTable.order) return;
-        const ord = activeTable.order;
-        const reqItems = this.recipeBook.getRecipeItems(ord.recipeId);
-        this.engine.clearTycoonPot();
-        reqItems.forEach(it => {
-          const ratio = Math.max(1, Number(it.ratio) || 1);
-          const detId = it.detail_ingredient_id ? Number(it.detail_ingredient_id) : null;
-          for (let i = 0; i < ratio; i++) {
-            this.engine.tapIngredientInTycoonPot(it.ingredient_id, detId);
-          }
-        });
-        // 만약 빼기 주문이면 해당 슬롯의 빼기(isOmitted) 태그까지 자동으로 켜줌!
-        if (ord.omittedBaseId) {
-          const slotIdx = this.engine.session.potSlots.findIndex(
-            s => Number(s.baseId) === Number(ord.omittedBaseId)
-          );
-          if (slotIdx >= 0) {
-            this.engine.toggleOmitOnTycoonPotSlot(slotIdx);
-          }
-        }
-        this.audio?.playTap?.();
-        this.render();
-      };
-    }
-
-    // 7. 선반 재고 카드 클릭 시 현재 선택된 테이블에 서빙
-    container.querySelectorAll('[data-serve-stock-key]').forEach(card => {
-      card.onclick = () => {
-        const stockKey = card.getAttribute('data-serve-stock-key');
+    // 6. 선반 재고 칩 터치 시 선택된 좌석에 서빙
+    container.querySelectorAll('[data-serve-stock-key]').forEach(chip => {
+      chip.onclick = () => {
+        const stockKey = chip.getAttribute('data-serve-stock-key');
         this._handleServeAction(stockKey, this.engine.session.selectedTableIdx);
       };
     });
 
-    // 8. 타이쿤 가마솥 슬롯 조작 ([➖빼기] 토글 및 개수 차감)
+    // 7. 가마솥 슬롯 조작 ([➖빼기] 토글 및 차감)
     container.querySelectorAll('[data-toggle-omit-idx]').forEach(omitBtn => {
       omitBtn.onclick = (e) => {
         e.stopPropagation();
@@ -906,15 +766,13 @@ class TycoonView {
       };
     });
 
-    // 9. 조합하여 선반에 쌓기 & 비우기
+    // 8. 조합 & 비우기
     const craftBtn = container.querySelector('#tycoon-craft-stock-btn');
     if (craftBtn) {
       craftBtn.onclick = () => {
         const res = this.engine.craftToStockpile();
         if (!res.ok) {
           this.app?.showToast?.(`⚠️ ${res.message}`);
-        } else {
-          this.app?.showToast?.(`🍶 [${res.label}] 선반 적재 완료! (보유: ${res.newCount}잔)`);
         }
         this.render();
       };
@@ -929,7 +787,7 @@ class TycoonView {
       };
     }
 
-    // 10. 카테고리 필터 & 재료 카드 투입
+    // 9. 카테고리 & 재료 그리드
     container.querySelectorAll('[data-tycoon-ing-cat]').forEach(catBtn => {
       catBtn.onclick = () => {
         this.selectedIngCat = catBtn.getAttribute('data-tycoon-ing-cat');
@@ -954,7 +812,7 @@ class TycoonView {
       };
     });
 
-    // 11. 게임오버 랭킹 등록 & 재도전
+    // 10. 게임오버 랭킹 등록 & 재시작
     const submitRankBtn = container.querySelector('#tycoon-submit-rank-btn');
     if (submitRankBtn) {
       submitRankBtn.onclick = async () => {
@@ -978,11 +836,7 @@ class TycoonView {
         this.isSubmittingRank = false;
         this.hasSubmittedCurrentGame = true;
         this.leaderboardTab = s.mode;
-        this.app?.showToast?.(
-          res.rank
-            ? `🎉 글로벌 Top 100 랭킹 [${res.rank}위]에 등재되었습니다!`
-            : `🎉 랭킹 기록이 등록되었습니다!`
-        );
+        this.app?.showToast?.(res.rank ? `🎉 Top 100 [${res.rank}위] 등재!` : `🎉 랭킹 등록 완료!`);
         this.render();
       };
     }
@@ -994,6 +848,7 @@ class TycoonView {
         this.hasSubmittedCurrentGame = false;
         this._memoryHintRevealedForOrderId = {};
         this.engine.startGame(this.engine.session.mode);
+        this.engine.autoSeatAvailableTables();
         this._startTimerLoop();
         this.render();
       };
@@ -1005,8 +860,30 @@ class TycoonView {
         this.audio?.playTap?.();
         this._stopTimerLoop();
         this.engine.session.status = 'LOBBY';
+        this._syncGlobalTabBarVisibility(false);
         this.render();
       };
+    }
+  }
+
+  _autoFillOrderToPot(ord) {
+    if (!ord) return;
+    const reqItems = this.recipeBook.getRecipeItems(ord.recipeId);
+    this.engine.clearTycoonPot();
+    reqItems.forEach(it => {
+      const ratio = Math.max(1, Number(it.ratio) || 1);
+      const detId = it.detail_ingredient_id ? Number(it.detail_ingredient_id) : null;
+      for (let i = 0; i < ratio; i++) {
+        this.engine.tapIngredientInTycoonPot(it.ingredient_id, detId);
+      }
+    });
+    if (ord.omittedBaseId) {
+      const slotIdx = this.engine.session.potSlots.findIndex(
+        s => Number(s.baseId) === Number(ord.omittedBaseId)
+      );
+      if (slotIdx >= 0) {
+        this.engine.toggleOmitOnTycoonPotSlot(slotIdx);
+      }
     }
   }
 
@@ -1019,9 +896,11 @@ class TycoonView {
     }
 
     if (res.isCorrect) {
-      this.app?.showToast?.(`💰 서빙 성공! +${res.earned.toLocaleString()}원 (${this.engine.session.combo}콤보🔥)`);
+      this.engine.autoSeatAvailableTables();
+      this.app?.showToast?.(`💰 +${res.earned.toLocaleString()}원 (${this.engine.session.combo}🔥)`);
     } else {
-      this.app?.showToast?.(`💔 서빙 실수! 손님이 원한 메뉴: [${res.expectedLabel}]`);
+      this.engine.autoSeatAvailableTables();
+      this.app?.showToast?.(`💔 주문 불일치!`);
       if (res.isGameOver) {
         this._stopTimerLoop();
       }
