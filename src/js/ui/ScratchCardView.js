@@ -143,8 +143,11 @@
         this.lastPoint = pt;
 
         this.moveCount++;
-        if (this.moveCount % 6 === 0) {
-          this.audio?.playTap?.();
+        const nowTs = performance.now();
+        if (!this._lastScratchSound || nowTs - this._lastScratchSound > 60) {
+          this._lastScratchSound = nowTs;
+          if (this.audio?.playScratch) this.audio.playScratch(1);
+          else this.audio?.playTap?.();
         }
         if (this.moveCount % 10 === 0) {
           this._checkProgress();
@@ -225,7 +228,8 @@
         }, 680);
       }
 
-      this.audio?.playTap?.();
+      if (this.audio?.playScratch) this.audio.playScratch(1.6);
+      else this.audio?.playTap?.();
       if (typeof this.onComplete === 'function') {
         this.onComplete();
       }
