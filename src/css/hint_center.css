@@ -407,12 +407,20 @@
   background: rgba(30, 41, 59, 0.45);
   border: 1px solid #334155;
   border-radius: 10px;
+  max-height: 230px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 /* 모든 탭 중 가장 높이가 높은 탭의 높이에 자동 고정시키는 CSS Grid 오버레이 컨테이너 */
 .bb-options-pool.bb-stacked-pool {
   display: grid;
   grid-template-columns: 1fr;
+  max-height: 230px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .bb-cat-pane {
