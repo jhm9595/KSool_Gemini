@@ -37,6 +37,14 @@ class ImageMinigameSuite {
     this._renderHiddenArtwork();
 
     this._cleanupInputHandlers = null;
+
+    // 모바일 롱프레스/빠른 다중 탭 시 브라우저 복사하기/오려두기/돋보기/컨텍스트 메뉴 원천 차단
+    this._preventCanvasCallouts = (e) => {
+      if (e.cancelable) e.preventDefault();
+      return false;
+    };
+    this.canvas.addEventListener('contextmenu', this._preventCanvasCallouts, { passive: false });
+    this.canvas.addEventListener('selectstart', this._preventCanvasCallouts, { passive: false });
   }
 
   /**
@@ -422,6 +430,14 @@ class ImageMinigameSuite {
     if (this._cleanupJoystick) {
       this._cleanupJoystick();
       this._cleanupJoystick = null;
+    }
+  }
+
+  destroy() {
+    this.stop();
+    if (this._preventCanvasCallouts && this.canvas) {
+      this.canvas.removeEventListener('contextmenu', this._preventCanvasCallouts);
+      this.canvas.removeEventListener('selectstart', this._preventCanvasCallouts);
     }
   }
 
@@ -1102,6 +1118,12 @@ class ImageMinigameSuite {
       }
     };
 
+    // 모바일 돋보기(루페) 및 롱프레스 텍스트 선택/복사 팝업 원천 차단
+    const onPreventCallout = (e) => {
+      if (e.cancelable) e.preventDefault();
+      return false;
+    };
+
     const onPointerMove = (e) => {
       if (!isPointerDragging && e.buttons === 0) return;
       movePaddle(e.clientX);
@@ -1133,6 +1155,10 @@ class ImageMinigameSuite {
     };
 
     this.canvas.addEventListener('pointerdown', onPointerDown, { passive: false });
+    this.canvas.addEventListener('touchstart', onPreventCallout, { passive: false });
+    this.canvas.addEventListener('touchend', onPreventCallout, { passive: false });
+    this.canvas.addEventListener('contextmenu', onPreventCallout, { passive: false });
+    this.canvas.addEventListener('selectstart', onPreventCallout, { passive: false });
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     window.addEventListener('pointerup', onPointerUp, { passive: true });
     window.addEventListener('keydown', onKeyDown);
@@ -1140,6 +1166,10 @@ class ImageMinigameSuite {
 
     this._cleanupInputHandlers = () => {
       this.canvas.removeEventListener('pointerdown', onPointerDown);
+      this.canvas.removeEventListener('touchstart', onPreventCallout);
+      this.canvas.removeEventListener('touchend', onPreventCallout);
+      this.canvas.removeEventListener('contextmenu', onPreventCallout);
+      this.canvas.removeEventListener('selectstart', onPreventCallout);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
       window.removeEventListener('keydown', onKeyDown);
