@@ -419,11 +419,7 @@ class HintModalView {
 
       let consoleControlsHtml = '';
       if (this.selectedMinigameType === 'BRICK_BREAKER') {
-        consoleControlsHtml = `
-          <div class="brick-console-box" style="display:flex; justify-content:center; gap:10px;">
-            <button class="arcade-action-btn turbo-action-btn" id="mg-turbo-btn">⚡ 2X 터보</button>
-          </div>
-        `;
+        consoleControlsHtml = '';
       } else if (this.selectedMinigameType === 'TERRITORY_QIX') {
         consoleControlsHtml = `
           <div class="qix-console-box">
@@ -458,9 +454,9 @@ class HintModalView {
           <!-- 상단 네비게이션 헤더 바 -->
           <header class="arcade-spa-header">
             <div class="arcade-hdr-left">
-              <button class="arcade-hdr-btn back-btn" id="mg-back-select-top-btn" title="게임 선택으로">
+              <button class="arcade-hdr-btn back-btn" id="mg-back-select-top-btn" title="뒤로">
                 <span class="hdr-icon">←</span>
-                <span class="hdr-label">선택</span>
+                <span class="hdr-label">뒤로</span>
               </button>
               <div class="arcade-recipe-badge">
                 <span class="badge-emblem">${recipeIconHtml}</span>
@@ -470,10 +466,7 @@ class HintModalView {
             <div class="arcade-hdr-center">
               <span class="arcade-title-pill">${gameTitles[this.selectedMinigameType] || '🕹️ 미니게임'}</span>
             </div>
-            <div class="arcade-hdr-right">
-              <button class="arcade-hdr-btn restart-btn" id="mg-restart-btn" title="다시 시작">🔄</button>
-              <button class="arcade-hdr-btn close-btn" id="hint-close-btn" title="닫기">✕</button>
-            </div>
+
           </header>
 
           <!-- 중앙 게임 캔버스 스테이지 -->
@@ -482,9 +475,7 @@ class HintModalView {
           </main>
 
           <!-- 하단 아케이드 컨트롤 콘솔 -->
-          <footer class="arcade-spa-console" id="arcade-spa-controls">
-            ${consoleControlsHtml}
-          </footer>
+          ${consoleControlsHtml ? `<footer class="arcade-spa-console" id="arcade-spa-controls">${consoleControlsHtml}</footer>` : ''}
         </div>
       `;
 
@@ -854,6 +845,22 @@ class HintModalView {
     if (!canvas) return;
 
     this.minigameStatus = 'PLAYING';
+
+    // 벽돌깨기/네모네모는 스테이지 영역 비율에 맞춰 캔버스를 키워 화면을 꽉 채움
+    const fitWrapper = document.getElementById('arcade-canvas-wrapper');
+    if (fitWrapper && (this.selectedMinigameType === 'BRICK_BREAKER' || this.selectedMinigameType === 'NONOGRAM')) {
+      const cs = window.getComputedStyle ? window.getComputedStyle(fitWrapper) : null;
+      const padX = cs ? (parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)) : 0;
+      const padY = cs ? (parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)) : 0;
+      const availW = fitWrapper.clientWidth - padX;
+      const availH = fitWrapper.clientHeight - padY;
+      if (availW > 100 && availH > 100) {
+        canvas.width = 420;
+        canvas.height = Math.max(520, Math.min(900, Math.round(420 * availH / availW)));
+        canvas.classList.add('fit-stage');
+      }
+    }
+
     this.minigameInstance = new window.KSool.ImageMinigameSuite(
       canvas,
       recipe,

@@ -504,14 +504,26 @@ class ImageMinigameSuite {
         const b = st.balls ? st.balls[0] : null;
         if (b) {
           const baseSpeed = 8.2;
-          const angle = st.aimAngle || (-Math.PI / 2 + (Math.random() - 0.5) * 0.3);
+          const angle = this._getLaunchAngle();
           b.vx = Math.cos(angle) * baseSpeed;
           b.vy = Math.sin(angle) * baseSpeed;
-          if (b.vy > -4) b.vy = -baseSpeed;
         }
         this.audio?.playTap?.();
       }
     }
+  }
+
+  /**
+   * 발사 각도: 패들 위치 기반 조준각에 약간의 랜덤 편차를 더해
+   * 정면 일직선 왕복(지루한 패턴)이 되지 않도록 보정
+   */
+  _getLaunchAngle() {
+    const st = this.bbState;
+    let angle = (st && typeof st.aimAngle === 'number') ? st.aimAngle : -Math.PI / 2;
+    angle += (Math.random() - 0.5) * 0.7;
+    const minA = -Math.PI + 0.38;
+    const maxA = -0.38;
+    return Math.max(minA, Math.min(maxA, angle));
   }
 
   toggleTurbo() {
@@ -1037,8 +1049,9 @@ class ImageMinigameSuite {
         const b = this.bbState.balls[0];
         if (b) {
           const baseSpeed = 7.6; // 상쾌하고 빠른 시작 속도!
-          b.vx = Math.cos(this.bbState.aimAngle) * baseSpeed;
-          b.vy = Math.sin(this.bbState.aimAngle) * baseSpeed;
+          const la = this._getLaunchAngle();
+          b.vx = Math.cos(la) * baseSpeed;
+          b.vy = Math.sin(la) * baseSpeed;
         }
         this.audio?.playTap?.();
       } else if (this.gameState === 'OVER') {
@@ -1050,8 +1063,9 @@ class ImageMinigameSuite {
         const b = this.bbState.balls[0];
         if (b) {
           const baseSpeed = 7.6;
-          b.vx = Math.cos(this.bbState.aimAngle) * baseSpeed;
-          b.vy = Math.sin(this.bbState.aimAngle) * baseSpeed;
+          const la2 = this._getLaunchAngle();
+          b.vx = Math.cos(la2) * baseSpeed;
+          b.vy = Math.sin(la2) * baseSpeed;
         }
       } else if (this.bbState.activePowerups?.laserTimer > 0) {
         this.fireLaser();
@@ -1082,9 +1096,8 @@ class ImageMinigameSuite {
       if (handleWinClose()) return;
       isPointerDragging = true;
       movePaddle(e.clientX);
-      if (!this.bbState.isLaunched) {
-        this.launchBall();
-      } else if (this.bbState.activePowerups?.laserTimer > 0) {
+      // 발사 전에는 공이 패들에 붙은 채로 위치만 조정, 손을 떼는 순간 발사
+      if (this.bbState.isLaunched && this.bbState.activePowerups?.laserTimer > 0) {
         this.fireLaser();
       }
     };
@@ -1095,7 +1108,11 @@ class ImageMinigameSuite {
     };
 
     const onPointerUp = (e) => {
+      const wasDragging = isPointerDragging;
       isPointerDragging = false;
+      if (wasDragging && !this.bbState.isLaunched && this.gameState !== 'WIN') {
+        this.launchBall();
+      }
     };
 
     const onKeyDown = (e) => {
@@ -1106,8 +1123,6 @@ class ImageMinigameSuite {
         this.bbState.paddle.keyDir = 1;
       } else if (e.key === ' ' || e.key === 'Enter') {
         doLaunchBall();
-      } else if (e.key === 't' || e.key === 'T') {
-        this.toggleTurbo();
       }
     };
 
@@ -1139,7 +1154,7 @@ class ImageMinigameSuite {
     st.lastTime = now;
     st.elapsed += dt;
 
-    const timeScale = st.isTurbo ? 1.7 : 1.0;
+    const timeScale = 1.0;
     const p = st.paddle;
 
     // 파워업 타이머 갱신
@@ -1407,7 +1422,7 @@ class ImageMinigameSuite {
     }
 
     // 알카노이드 정통 파워업 캡슐 드롭 (26% 확률)
-    if (Math.random() < 0.26) {
+    if (Math.random() < 0.13) {
       const types = ['MULTI', 'WIDE', 'LASER', 'FIRE', 'BARRIER'];
       const randType = types[Math.floor(Math.random() * types.length)];
       const icons = {
@@ -2402,9 +2417,10 @@ class ImageMinigameSuite {
   // =========================================================================
   _initNonogram() {
     const dotInfo = this._parseDotSprite(this.recipe);
-    // 모든 재료 16x16 동일한 그리드로 통일
-    const rows = 16;
-    const cols = 16;
+    // 모든 재료 15x15 동일한 그리드로 통일 (16x16 도트에서 비어있는/중복 줄 1행·1열 제거)
+    const rows = 15;
+    const cols = 15;
+    const grid15 = this._reduceGridTo15(dotInfo.grid);
 
     const target = Array.from({ length: rows }, () => Array(cols).fill(false));
     const targetColor = Array.from({ length: rows }, () => Array(cols).fill(null));
@@ -2412,7 +2428,7 @@ class ImageMinigameSuite {
 
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        const color = dotInfo.grid[r][c];
+        const color = grid15[r][c];
         if (color) {
           target[r][c] = true;
           targetColor[r][c] = color;
@@ -2461,22 +2477,25 @@ class ImageMinigameSuite {
     const board = Array.from({ length: rows }, () => Array(cols).fill(0));
 
     // 고정 16x16 정밀 레이아웃 & 비율 계산
-    const cellSize = 19;
-    const gridW = cols * cellSize; // 304px
-    const gridH = rows * cellSize; // 304px
-
     const maxRowNums = Math.max(1, ...rowClues.map(c => c.length));
     const maxColNums = Math.max(1, ...colClues.map(c => c.length));
 
-    const leftClueW = Math.max(56, Math.min(76, maxRowNums * 13 + 12));
-    const topClueH = Math.max(52, Math.min(76, maxColNums * 13 + 10));
+    const leftClueW = Math.max(52, Math.min(72, maxRowNums * 13 + 12));
+    const topClueH = Math.max(48, Math.min(72, maxColNums * 13 + 10));
+
+    // 캔버스 가용 영역에 맞춰 칸 크기를 최대한 크게 (정사각 칸 유지)
+    const availW = this.width - leftClueW - 12;
+    const availH = this.height - topClueH - 52;
+    const cellSize = Math.max(16, Math.floor(Math.min(availW / cols, availH / rows)));
+    const gridW = cols * cellSize;
+    const gridH = rows * cellSize;
 
     const totalPuzzleW = leftClueW + gridW;
     const leftX = Math.floor((this.width - totalPuzzleW) / 2);
     const gridX = leftX + leftClueW;
 
     const totalPuzzleH = topClueH + gridH;
-    const clueTopY = Math.max(46, Math.floor((this.height - totalPuzzleH) / 2) - 8);
+    const clueTopY = Math.max(40, Math.floor((this.height - totalPuzzleH) / 2) - 6);
     const gridY = clueTopY + topClueH;
 
     this.nonogramState = {
@@ -2538,6 +2557,11 @@ class ImageMinigameSuite {
         st.board[r][c] = nextVal;
         st.dragVal = nextVal;
       } else if (tool === 'X') {
+        // 이미 칠해진 칸(1)은 X표시 도구로 누르더라도 X가 되지 않도록 방어
+        if (st.board[r][c] === 1) {
+          st.dragVal = null;
+          return;
+        }
         const nextVal = st.board[r][c] === 2 ? 0 : 2;
         st.board[r][c] = nextVal;
         st.dragVal = nextVal;
@@ -2561,6 +2585,7 @@ class ImageMinigameSuite {
       if (col >= 0 && col < st.cols && row >= 0 && row < st.rows) {
         st.isDragging = true;
         const tool = isRightClick ? 'X' : st.toolMode;
+        st.currentDragTool = tool;
         applyCellAction(row, col, tool);
       }
     };
@@ -2568,12 +2593,16 @@ class ImageMinigameSuite {
     const handlePointerMove = (clientX, clientY) => {
       const st = this.nonogramState;
       if (!st || !st.isDragging || this.gameState !== 'PLAYING') return;
+      if (st.dragVal === null || st.dragVal === undefined) return;
 
       const pos = getCanvasPos(clientX, clientY);
       const col = Math.floor((pos.x - st.gridX) / st.cellSize);
       const row = Math.floor((pos.y - st.gridY) / st.cellSize);
 
       if (col >= 0 && col < st.cols && row >= 0 && row < st.rows) {
+        // X표시 도구 드래그 조작 시 이미 칠해진 칸(1)은 X나 빈칸으로 절대 덮어쓰지 않음
+        if (st.currentDragTool === 'X' && st.board[row][col] === 1) return;
+
         if (st.board[row][col] !== st.dragVal) {
           st.board[row][col] = st.dragVal;
           this.audio?.playTap?.();
@@ -2585,6 +2614,8 @@ class ImageMinigameSuite {
     const handlePointerUp = () => {
       if (this.nonogramState) {
         this.nonogramState.isDragging = false;
+        this.nonogramState.dragVal = null;
+        this.nonogramState.currentDragTool = null;
       }
     };
 
@@ -2638,6 +2669,46 @@ class ImageMinigameSuite {
       this.canvas.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
     };
+  }
+
+  /**
+   * 16x16 도트 그리드를 15x15로 축소: 완전히 빈 가장자리 줄을 우선 제거하고,
+   * 양끝이 모두 차 있으면 이웃 줄과 가장 비슷한(중복) 내부 줄을 제거해 형태를 유지
+   */
+  _reduceGridTo15(grid) {
+    const pickDrop = (lines) => {
+      const n = lines.length;
+      const cnt = lines.map(l => l.filter(Boolean).length);
+      if (cnt[n - 1] === 0) return n - 1;
+      if (cnt[0] === 0) return 0;
+      const emptyInner = cnt.findIndex((v, i) => i > 0 && i < n - 1 && v === 0);
+      if (emptyInner !== -1) return emptyInner;
+      let best = 1;
+      let bestDiff = Infinity;
+      for (let i = 1; i < n - 1; i++) {
+        for (const j of [i - 1, i + 1]) {
+          let diff = 0;
+          for (let k = 0; k < lines[i].length; k++) {
+            if (Boolean(lines[i][k]) !== Boolean(lines[j][k])) diff++;
+          }
+          if (diff < bestDiff) { bestDiff = diff; best = i; }
+        }
+      }
+      return best;
+    };
+
+    let g = grid.map(row => row.slice());
+    if (g.length > 15) {
+      const dr = pickDrop(g);
+      g.splice(dr, 1);
+    }
+    if (g[0] && g[0].length > 15) {
+      const cols = g[0].length;
+      const colLines = Array.from({ length: cols }, (_, c) => g.map(row => row[c]));
+      const dc = pickDrop(colLines);
+      g = g.map(row => { const nr = row.slice(); nr.splice(dc, 1); return nr; });
+    }
+    return g;
   }
 
   _checkNonogramWin() {
