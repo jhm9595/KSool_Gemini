@@ -114,6 +114,18 @@ class KSoolApp {
       audio: this.audio
     });
 
+    if (window.KSool?.TycoonView) {
+      this.tycoonView = new window.KSool.TycoonView('view-tycoon', {
+        app: this,
+        config: this.config,
+        recipeBook: this.recipeBook,
+        inventory: this.inventory,
+        brandResolver: this.brandResolver,
+        pickerRegistry: this.pickerRegistry,
+        audio: this.audio
+      });
+    }
+
     if (window.KSool?.SettingsModalView) {
       this.settingsModalView = new window.KSool.SettingsModalView('settings-modal', 'settings-modal-content', this);
     }
@@ -149,7 +161,7 @@ class KSoolApp {
 
     // iOS 사파리 고무줄 바운스(Overscroll Rubber-banding) 원천 차단
     document.addEventListener('touchmove', (e) => {
-      const scrollable = e.target.closest('.view, .recipe-list, .pot-scroll-inner, .inventory-scroll, .modal-body, .minigame-canvas, .party-view-body, .lobby-grid, .settings-modal-body, .settings-modal-card, input[type="range"]');
+      const scrollable = e.target.closest('.view, .recipe-list, .pot-scroll-inner, .inventory-scroll, .modal-body, .minigame-canvas, .party-view-body, .lobby-grid, .settings-modal-body, .settings-modal-card, .tycoon-scroll-body, .tycoon-rank-list, .notebook-cust-list, .stockpile-shelf-grid, input[type="range"]');
       if (!scrollable) {
         e.preventDefault();
       }
@@ -197,6 +209,9 @@ class KSoolApp {
     if (this.currentTab === 'party') {
       this.partyGameHubView.render();
     }
+    if (this.currentTab === 'tycoon' && this.tycoonView) {
+      this.tycoonView.render();
+    }
   }
 
   switchTab(target) {
@@ -209,6 +224,9 @@ class KSoolApp {
     if (!this.inventory.isTabUnlocked(target)) return;
     if (this.currentTab === 'party' && target !== 'party') {
       this.partyGameHubView.onLeavePartyTab();
+    }
+    if (this.currentTab === 'tycoon' && target !== 'tycoon' && this.tycoonView) {
+      this.tycoonView.onLeaveTab();
     }
     this.currentTab = target;
     document.querySelectorAll('[data-tab-target]').forEach(b => {
@@ -267,6 +285,16 @@ class KSoolApp {
       this.inventory.shownTabIntros.suggestions = true;
       this.inventory.save();
       if (shouldQueue) this.pendingTabIntroQueue.push('suggestions');
+    }
+
+    if (
+      !this.inventory.shownTabIntros.tycoon &&
+      totalRecipes > 0 &&
+      this.inventory.unlockedRecipeIds.size >= totalRecipes
+    ) {
+      this.inventory.shownTabIntros.tycoon = true;
+      this.inventory.save();
+      if (shouldQueue) this.pendingTabIntroQueue.push('tycoon');
     }
 
     // [튜토리얼 혜택 종료 안내 1] No.03 완료 시 외형 그림 무료 제공 종료 안내
@@ -343,6 +371,13 @@ class KSoolApp {
         title: '[조합추천] 탭이 열렸습니다!',
         desc: '모든 공식 레시피(100%)를 마스터하셨습니다! 이제 이 게임에 아직 없는 나만의 비법 레시피를 <b>[👍 조합추천]</b> 탭에 등록해 투표를 나누고, <b>[🧊 냉장고를 부탁해]</b>에서도 유저들의 조합추천 레시피를 함께 만나보세요!',
         btnLabel: '👍 조합추천 보러가기'
+      },
+      tycoon: {
+        emoji: '🏮',
+        badge: '본게임 해금 (도감 100% 마스터)',
+        title: '[주막 타이쿤] 본게임 탭이 열렸습니다!',
+        desc: '축하합니다! 도감 100%를 달성한 전설의 주모에게만 허락된 새로운 본게임 <b>[🏮 타이쿤]</b>이 해금되었습니다!<br/><br/>이제 조합을 만들면 선반에 하나씩 쌓이며, 찾아오는 단골 손님들의 <b>다중 조합 · 재료 빼기(➖) · "늘 먹던 걸로 주세요!"</b> 주문을 맞춰 판매하세요! (<b>⏱️ 타임어택 Top 100 랭킹전</b> & <b>♾️ 무한모드</b> 지원)',
+        btnLabel: '🏮 주막 타이쿤 영업하러 가기'
       },
       noticeNo3: {
         emoji: '🎨',
@@ -1403,13 +1438,24 @@ class KSoolApp {
         const preferredId = this.brewMode === 'QUIZ' ? this.quizTargetRecipeId : null;
         const matched = this.recipeBook.matchRecipe(slots, this.inventory.unlockedRecipeIds, preferredId);
 
-        // [이미 제조했던 조합을 다시 조합하려 한 경우 -> 팝업 없이 버튼에 3초간 안내 후 복귀]
+        // [이미 제조했던 조합을 다시 조합하려 한 경우 -> 타이쿤 선반에 재고 +1 적재 및 버튼 안내]
         if (matched && this.inventory.isRecipeUnlocked(matched.recipe_id)) {
+          if (this.tycoonView && this.tycoonView.engine) {
+            this.tycoonView.engine.addCraftedFromMainBrewery(matched.recipe_id, null);
+          }
           this.audio.playTap();
           if (this._mixBtnAlertTimer) {
             clearTimeout(this._mixBtnAlertTimer);
           }
-          mixBtn.textContent = '이미 제조했던 조합입니다.';
+          if (this.inventory.isTabUnlocked('tycoon')) {
+            const recName = this.brandResolver.resolveName(matched);
+            const curStash = this.tycoonView?.engine?.savedBrewStash?.[`rec_${matched.recipe_id}`] || 1;
+            mixBtn.textContent = `🏮 [${recName}] 타이쿤 선반 +1 적재! (보유 ${curStash}개)`;
+            this.craftingPot.clear();
+            this.renderBrewView();
+          } else {
+            mixBtn.textContent = '이미 제조했던 조합입니다.';
+          }
           mixBtn.classList.add('already-crafted-alert');
 
           this._mixBtnAlertTimer = setTimeout(() => {
@@ -1427,6 +1473,9 @@ class KSoolApp {
           return;
         }
         if (res.isSuccess && res.recipe) {
+          if (this.tycoonView && this.tycoonView.engine) {
+            this.tycoonView.engine.addCraftedFromMainBrewery(res.recipe.recipe_id, null);
+          }
           if (
             res.isNewDiscovery &&
             this.brewMode === 'QUIZ' &&

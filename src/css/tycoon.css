@@ -1,0 +1,1245 @@
+/* =========================================================================
+   🏮 조선 주막 타이쿤 (Tycoon Main Game) 전용 스타일시트
+   ========================================================================= */
+
+#view-tycoon {
+  padding: 0;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  height: 100%;
+}
+
+#view-tycoon.active {
+  display: flex;
+}
+
+.tycoon-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top, #171226 0%, #090d16 100%);
+  color: #f8fafc;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 상단 대시보드 헤더 */
+.tycoon-hud-header {
+  flex-shrink: 0;
+  background: rgba(15, 23, 42, 0.94);
+  border-bottom: 1px solid rgba(251, 191, 36, 0.28);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  z-index: 15;
+}
+
+.tycoon-hud-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tycoon-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tycoon-lantern-icon {
+  font-size: 1.45rem;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
+}
+
+.tycoon-main-title {
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: #fde68a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tycoon-mode-pill {
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.tycoon-mode-pill.mode-inf {
+  background: rgba(168, 85, 247, 0.25);
+  border: 1px solid #c084fc;
+  color: #e9d5ff;
+}
+
+.tycoon-mode-pill.mode-ta {
+  background: rgba(56, 189, 248, 0.25);
+  border: 1px solid #38bdf8;
+  color: #bae6fd;
+}
+
+.tycoon-wave-sub {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.tycoon-hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tycoon-util-btn {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.12s, border-color 0.15s;
+}
+
+.tycoon-util-btn:active {
+  transform: scale(0.96);
+}
+
+.tycoon-util-btn.rank-btn {
+  border-color: #f59e0b;
+  color: #fde047;
+  background: rgba(245, 158, 11, 0.14);
+}
+
+.tycoon-util-btn .util-count {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  padding: 1px 5px;
+  border-radius: 6px;
+  font-size: 0.62rem;
+}
+
+/* 스탯 바 */
+.tycoon-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.tycoon-stat-chip {
+  background: rgba(9, 13, 22, 0.8);
+  border: 1px solid rgba(71, 85, 105, 0.55);
+  border-radius: 8px;
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tycoon-stat-chip .stat-label {
+  font-size: 0.6rem;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.tycoon-stat-chip .stat-val {
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: #f8fafc;
+}
+
+.tycoon-stat-chip .stat-val.highlight-sky { color: #38bdf8; }
+.tycoon-stat-chip .stat-val.highlight-gold { color: #fde047; }
+.tycoon-stat-chip .stat-val.highlight-amber { color: #fb923c; }
+.tycoon-stat-chip .stat-val.urgent {
+  color: #f43f5e;
+  animation: tycoonPulse 0.65s infinite alternate;
+}
+
+@keyframes tycoonPulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+
+/* 실시간 알림 로그 바 */
+.tycoon-Notice-bar {
+  flex-shrink: 0;
+  background: rgba(30, 41, 59, 0.88);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 5px 12px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fef08a;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 메인 스크롤 바디 */
+.tycoon-scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 로비 화면 */
+.tycoon-lobby-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tycoon-hero-banner {
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.45), rgba(15, 23, 42, 0.92));
+  border: 1.5px solid rgba(251, 191, 36, 0.45);
+  border-radius: 14px;
+  padding: 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.tycoon-hero-banner .hero-badge {
+  background: rgba(245, 158, 11, 0.22);
+  border: 1px solid #f59e0b;
+  color: #fde047;
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.tycoon-hero-banner h2 {
+  margin: 2px 0;
+  font-size: 1.08rem;
+  color: #fef3c7;
+  font-weight: 900;
+}
+
+.tycoon-hero-banner p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.tycoon-wallet-pill {
+  margin-top: 4px;
+  background: rgba(9, 13, 22, 0.85);
+  border: 1px solid #334155;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: #e2e8f0;
+}
+
+.tycoon-wallet-pill b {
+  color: #fde047;
+}
+
+.tycoon-mode-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.tycoon-mode-card {
+  background: rgba(15, 23, 42, 0.92);
+  border: 1.5px solid #334155;
+  border-radius: 14px;
+  padding: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.tycoon-mode-card.mode-infinite-card {
+  border-color: rgba(192, 132, 252, 0.5);
+}
+
+.tycoon-mode-card.mode-timeattack-card {
+  border-color: rgba(56, 189, 248, 0.5);
+}
+
+.mode-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mode-card-header .mode-icon {
+  font-size: 1.75rem;
+}
+
+.mode-card-header .mode-name {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #f8fafc;
+}
+
+.mode-card-header .mode-tag {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.mode-feature-list {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  line-height: 1.55;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mode-best-record {
+  background: rgba(9, 13, 22, 0.75);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+  color: #fde047;
+  text-align: center;
+}
+
+.tycoon-start-btn {
+  width: 100%;
+  padding: 11px;
+  border-radius: 10px;
+  border: none;
+  font-size: 0.86rem;
+  font-weight: 900;
+  color: #090d16;
+  cursor: pointer;
+  transition: transform 0.12s, filter 0.15s;
+}
+
+.tycoon-start-btn.start-infinite {
+  background: linear-gradient(135deg, #c084fc, #f472b6);
+}
+
+.tycoon-start-btn.start-timeattack {
+  background: linear-gradient(135deg, #38bdf8, #34d399);
+}
+
+.tycoon-start-btn:active {
+  transform: scale(0.98);
+}
+
+/* 섹션 공통 */
+.tycoon-section {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(71, 85, 105, 0.55);
+  border-radius: 13px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-hdr-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.section-hdr-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sec-title {
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: #fde68a;
+}
+
+.sec-title small {
+  font-size: 0.66rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* 입구 대기열 */
+.waiting-queue-bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.wq-label {
+  font-size: 0.66rem;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.waiting-guest-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid #475569;
+  border-radius: 999px;
+  padding: 2px 7px 2px 3px;
+  font-size: 0.65rem;
+}
+
+.wg-name {
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.wg-next-tag {
+  background: #f59e0b;
+  color: #090d16;
+  font-size: 0.58rem;
+  font-weight: 900;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.auto-seat-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  color: #cbd5e1;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 4개 좌석 테이블 그리드 */
+.tavern-seats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 720px) {
+  .tavern-seats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.tavern-seat-card {
+  background: rgba(9, 13, 22, 0.82);
+  border: 1.5px solid #334155;
+  border-radius: 11px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.tavern-seat-card.selected {
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+  background: rgba(15, 23, 42, 0.96);
+}
+
+.tavern-seat-card.ready-to-serve {
+  border-color: #22c55e;
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.35);
+}
+
+.seat-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.65rem;
+}
+
+.seat-num {
+  color: #94a3b8;
+  font-weight: 800;
+}
+
+.seat-price-tag {
+  color: #fde047;
+  font-weight: 900;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+
+.seat-empty-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 4px;
+  gap: 4px;
+  color: #64748b;
+  font-size: 0.68rem;
+}
+
+.seat-cust-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.seat-cust-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.seat-cust-name-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.seat-cust-name {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #f8fafc;
+}
+
+.seat-group-badge {
+  font-size: 0.58rem;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+.seat-order-type-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  display: inline-block;
+  width: fit-content;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.seat-order-type-badge.type-NORMAL { background: rgba(56, 189, 248, 0.16); color: #7dd3fc; }
+.seat-order-type-badge.type-OMIT { background: rgba(244, 63, 94, 0.2); color: #fda4af; }
+.seat-order-type-badge.type-MEMORY { background: rgba(168, 85, 247, 0.22); color: #e9d5ff; }
+.seat-order-type-badge.type-MEMORY_OMIT { background: rgba(245, 158, 11, 0.25); color: #fde047; }
+
+.seat-order-target {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #fef08a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.seat-quick-serve-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #22c55e, #10b981);
+  color: #052e16;
+  border: none;
+  border-radius: 7px;
+  padding: 5px 6px;
+  font-size: 0.68rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.seat-status-hint {
+  font-size: 0.62rem;
+  color: #64748b;
+  text-align: center;
+}
+
+/* 선택된 좌석 주문 상세 스포트라이트 */
+.active-order-spotlight {
+  background: rgba(9, 13, 22, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 10px;
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.spotlight-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spotlight-cust-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sp-cust-name {
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #fde047;
+}
+
+.sp-cust-trait {
+  font-size: 0.65rem;
+  color: #93c5fd;
+  font-weight: 700;
+}
+
+.spotlight-right {
+  flex: 1;
+  min-width: 210px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sp-dialogue-bubble {
+  background: #1e293b;
+  border-left: 3px solid #f59e0b;
+  padding: 6px 9px;
+  border-radius: 6px;
+  font-size: 0.73rem;
+  color: #f8fafc;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.sp-recipe-guide {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sp-guide-title {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 800;
+}
+
+.sp-guide-chips {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 0.7rem;
+  color: #e2e8f0;
+}
+
+.order-ing-chip {
+  background: #0f172a;
+  border: 1px solid #334155;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 800;
+}
+
+.order-ing-chip.is-omit-target {
+  border-color: #f43f5e;
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.15);
+}
+
+.sp-autofill-pot-btn,
+.sp-peek-memory-btn {
+  background: rgba(56, 189, 248, 0.18);
+  border: 1px solid #38bdf8;
+  color: #bae6fd;
+  border-radius: 7px;
+  padding: 4px 8px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sp-memory-mystery-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.7rem;
+  color: #e9d5ff;
+}
+
+/* 재고 선반 (Stockpile Shelf) */
+.stock-total-pill {
+  font-size: 0.7rem;
+  color: #cbd5e1;
+}
+
+.stock-total-pill b {
+  color: #38bdf8;
+}
+
+.stockpile-shelf-grid {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.stock-shelf-card {
+  min-width: 108px;
+  max-width: 125px;
+  flex-shrink: 0;
+  background: rgba(9, 13, 22, 0.9);
+  border: 1.5px solid #334155;
+  border-radius: 10px;
+  padding: 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.15s;
+}
+
+.stock-shelf-card:active {
+  transform: scale(0.96);
+}
+
+.stock-shelf-card.is-omitted-stock {
+  border-color: rgba(244, 63, 94, 0.55);
+}
+
+.stock-shelf-card.matches-active-order {
+  border-color: #22c55e;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.35);
+  background: rgba(20, 83, 45, 0.25);
+}
+
+.stock-card-top {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.62rem;
+}
+
+.stock-qty-badge {
+  background: #38bdf8;
+  color: #090d16;
+  font-weight: 900;
+  padding: 0 5px;
+  border-radius: 5px;
+}
+
+.stock-price-est {
+  color: #fde047;
+  font-weight: 800;
+}
+
+.stock-name {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #f8fafc;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.stock-omit-tag {
+  font-size: 0.58rem;
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.18);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 800;
+}
+
+.stock-normal-tag {
+  font-size: 0.58rem;
+  color: #94a3b8;
+}
+
+.stock-serve-action-btn {
+  width: 100%;
+  margin-top: 2px;
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #e2e8f0;
+  border-radius: 6px;
+  padding: 3px 4px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.stock-shelf-card.matches-active-order .stock-serve-action-btn {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #052e16;
+}
+
+.stockpile-empty-notice {
+  width: 100%;
+  text-align: center;
+  padding: 12px;
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+/* 타이쿤 전용 가마솥 슬롯 (➖빼기 태그 지원) */
+.tycoon-pot-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tycoon-craft-btn {
+  background: linear-gradient(135deg, #f59e0b, #eab308);
+  color: #090d16;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.tycoon-craft-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tycoon-clear-btn {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tycoon-pot-slots-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.tycoon-pot-slot {
+  background: rgba(9, 13, 22, 0.85);
+  border: 1.5px dashed #334155;
+  border-radius: 10px;
+  min-height: 68px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.tycoon-pot-slot.filled {
+  border-style: solid;
+  border-color: #38bdf8;
+}
+
+.tycoon-pot-slot.filled.slot-omitted {
+  border-color: #f43f5e;
+  background: rgba(136, 19, 55, 0.25);
+}
+
+.tycoon-slot-omit-btn {
+  width: 100%;
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #cbd5e1;
+  border-radius: 5px;
+  padding: 2px 4px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tycoon-slot-omit-btn.active {
+  background: #e11d48;
+  border-color: #fda4af;
+  color: #fff;
+}
+
+.tycoon-slot-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  cursor: pointer;
+  width: 100%;
+  padding: 2px 0;
+}
+
+.t-slot-name {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.tycoon-pot-slot.slot-omitted .t-slot-name {
+  text-decoration: line-through;
+  color: #fda4af;
+}
+
+.t-slot-count {
+  font-size: 0.62rem;
+  font-weight: 900;
+  color: #fde047;
+}
+
+.t-empty-plus {
+  font-size: 0.95rem;
+  opacity: 0.3;
+  margin-top: 10px;
+}
+
+.t-empty-txt {
+  font-size: 0.6rem;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.tycoon-pot-preview {
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tycoon-pot-preview.matched {
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid #10b981;
+  color: #a7f3d0;
+}
+
+.tycoon-pot-preview.unmatched {
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid #f43f5e;
+  color: #fecdd3;
+}
+
+.tycoon-pot-preview.idle {
+  background: rgba(30, 41, 59, 0.65);
+  border: 1px solid #334155;
+  color: #94a3b8;
+}
+
+.preview-omit-pill {
+  background: #e11d48;
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.62rem;
+  margin-left: 4px;
+}
+
+/* 서브 모달 (Top 100 랭킹 & 단골 수첩) */
+.tycoon-submodal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(6px);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.tycoon-submodal-card {
+  width: 100%;
+  max-width: 460px;
+  max-height: 86%;
+  background: #0f172a;
+  border: 1.5px solid #38bdf8;
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.submodal-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.submodal-hdr h3 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #fde047;
+}
+
+.submodal-close-btn {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #f8fafc;
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+}
+
+.submodal-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.submodal-tab {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  padding: 7px;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.submodal-tab.active {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
+  color: #f8fafc;
+}
+
+.tycoon-rank-list,
+.notebook-cust-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tycoon-rank-row {
+  background: rgba(9, 13, 22, 0.75);
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 7px 10px;
+  display: grid;
+  grid-template-columns: 48px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.74rem;
+}
+
+.tycoon-rank-row.top-rank {
+  border-color: rgba(251, 191, 36, 0.45);
+  background: rgba(120, 53, 15, 0.2);
+}
+
+.r-pos { font-weight: 900; color: #fde047; }
+.r-user { font-weight: 800; color: #f8fafc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.r-served { color: #38bdf8; }
+.r-earn { color: #fcd34d; font-weight: 800; }
+
+.notebook-guide-banner {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.7rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.notebook-cust-card {
+  background: rgba(9, 13, 22, 0.82);
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nb-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.7rem;
+}
+
+.nb-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nb-name {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: #f8fafc;
+}
+
+.nb-group {
+  font-size: 0.64rem;
+  color: #94a3b8;
+}
+
+.nb-trait { color: #93c5fd; }
+.nb-fav { color: #e2e8f0; }
+.nb-omit { color: #fda4af; font-size: 0.65rem; }
+
+/* 게임 오버 정산 카드 */
+.tycoon-gameover-card {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1.5px solid #f59e0b;
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gameover-badge {
+  align-self: center;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid #f59e0b;
+  color: #fde047;
+  font-size: 0.7rem;
+  font-weight: 900;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.gameover-title {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #fef3c7;
+}
+
+.gameover-desc {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #cbd5e1;
+}
+
+.gameover-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.go-stat-box {
+  background: #090d16;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.go-label { font-size: 0.64rem; color: #94a3b8; }
+.go-val { font-size: 0.9rem; font-weight: 900; }
+.go-val.sky { color: #38bdf8; }
+.go-val.gold { color: #fde047; }
+.go-val.amber { color: #fb923c; }
+
+.gameover-rank-submit-box {
+  background: rgba(9, 13, 22, 0.85);
+  border: 1px solid #38bdf8;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rank-submit-title {
+  font-size: 0.76rem;
+  font-weight: 900;
+  color: #bae6fd;
+}
+
+.rank-submit-form {
+  display: flex;
+  gap: 6px;
+}
+
+.rank-nick-input {
+  flex: 1;
+  background: #0f172a;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: #f8fafc;
+  font-size: 0.78rem;
+}
+
+.rank-submit-btn {
+  background: #38bdf8;
+  color: #090d16;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 0.76rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.rank-submitted-done {
+  font-size: 0.74rem;
+  color: #34d399;
+  font-weight: 800;
+}
+
+.gameover-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tycoon-secondary-btn {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
