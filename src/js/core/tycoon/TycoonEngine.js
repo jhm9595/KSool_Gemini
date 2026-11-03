@@ -422,6 +422,9 @@ class TycoonEngine {
       dialogue = `"사장님! 제가 늘 먹던 단골 술 아시죠? 오늘은 거기서 [${omittedIngName}]만 빼고(➖) 주세요!"`;
     }
 
+    // 개별 손님 대기시간(Patience) 산출 (웨이브가 높아질수록 긴장감 있게 단축, 최소 24초 ~ 기본 45초)
+    const maxPatienceSec = Math.max(24, 48 - (wave - 1) * 3);
+
     return {
       orderId: 'ord_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
       orderType,
@@ -433,7 +436,9 @@ class TycoonEngine {
       omittedIngName,
       requiredStockKey,
       price,
-      dialogue
+      dialogue,
+      maxPatienceSec,
+      patienceSec: maxPatienceSec
     };
   }
 
@@ -487,6 +492,54 @@ class TycoonEngine {
         }
       }
     }
+  }
+
+  /**
+   * 각 좌석 손님의 개별 대기시간 게이지 차감 및 타임아웃 처리
+   */
+  tickPatience(dtSec = 1) {
+    if (!this.session || this.session.status !== 'PLAYING') return { expiredCount: 0, isGameOver: false };
+    let expiredCount = 0;
+
+    for (let i = 0; i < this.session.tables.length; i++) {
+      const t = this.session.tables[i];
+      if (!t.customer || !t.order) continue;
+      t.order.patienceSec = Math.max(0, (t.order.patienceSec || 0) - dtSec);
+
+      if (t.order.patienceSec <= 0) {
+        expiredCount++;
+        const custName = t.customer.name;
+        this.session.combo = 0;
+        this.audio?.playFail?.();
+
+        t.customer = null;
+        t.order = null;
+
+        if (this.session.mode === 'INFINITE') {
+          this.session.lives -= 1;
+          this.session.lastLogMessage = `⏰ [${custName}] 대기시간 초과! (남은 목숨: ${'❤️'.repeat(Math.max(0, this.session.lives))})`;
+          if (this.session.lives <= 0) {
+            this.session.status = 'GAMEOVER';
+            this.session.lastLogMessage = `🏁 대기시간 초과로 목숨 3개를 모두 소진했습니다! (${this.session.servedCount}잔 · ${this.session.totalEarnings.toLocaleString()}원)`;
+            return { expiredCount, isGameOver: true };
+          }
+        } else {
+          this.session.timeLeftSec = Math.max(0, this.session.timeLeftSec - 5);
+          this.session.lastLogMessage = `⏰ [${custName}] 대기시간 초과! (-5초 페널티)`;
+          if (this.session.timeLeftSec <= 0) {
+            this.session.status = 'GAMEOVER';
+            return { expiredCount, isGameOver: true };
+          }
+        }
+
+        this._spawnWaitingCustomer();
+        if (this.session.autoSeatEnabled) {
+          this.seatNextCustomerToTable(i);
+        }
+      }
+    }
+
+    return { expiredCount, isGameOver: false };
   }
 
   // =========================================================================
