@@ -322,11 +322,15 @@ class TycoonView {
       `;
     }
 
-    // 2) 카운터 중앙 접시(Center Serving Plate) 렌더링
+    // 2) 카운터 중앙 접시(Center Serving Plate) 렌더링 (배경 접시 타원 좌표·크기와 1:1 매칭)
     let plateContentHtml = '';
     const platedKey = s.platedStockKey;
     const isOrderMatchOnPlate = Boolean(platedKey && ord && platedKey === ord.requiredStockKey);
+    const plateLeftPct = stage.plateLeftPct || 50.1;
     const plateBottomPct = stage.plateBottomPct || 11.5;
+    const plateWidthPct = stage.plateWidthPct || 21.5;
+    const plateHeightPct = stage.plateHeightPct || 12.5;
+    const plateStyleStr = `left:${plateLeftPct}%; bottom:${plateBottomPct}%; width:${plateWidthPct}%; height:${plateHeightPct}%;`;
 
     if (platedKey) {
       const meta = this.engine.getStockItemDisplayMeta(platedKey);
@@ -338,7 +342,7 @@ class TycoonView {
       plateContentHtml = `
         <div class="counter-plate-zone has-item ${isOrderMatchOnPlate ? 'match-glow' : ''}"
              id="tycoon-center-plate-btn"
-             style="bottom:${plateBottomPct}%;"
+             style="${plateStyleStr}"
              title="터치하면 [📦] 탭으로 보관합니다">
           <div class="plated-drink-visual">
             ${platedIcon}
@@ -351,9 +355,8 @@ class TycoonView {
       plateContentHtml = `
         <div class="counter-plate-zone empty-plate"
              id="tycoon-center-plate-empty"
-             style="bottom:${plateBottomPct}%;"
+             style="${plateStyleStr}"
              title="조합을 완성하거나 [📦] 탭에서 누르면 이 접시 위에 올라옵니다">
-          <span class="empty-plate-hint">접시 위 대기</span>
         </div>
       `;
     }
