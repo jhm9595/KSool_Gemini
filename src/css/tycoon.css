@@ -178,7 +178,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 /* =========================================================================
-   3. 상단 45% 내 주막 홀 (2x2 테이블 4개 + 요구 주류 아이콘 + 대기시간 게이지 + [서빙] 버튼)
+   3. 상단 45% 내 주막 홀 (2x2 테이블 4개 + 캐릭터/주문메뉴 하단 [서빙] 버튼 + 대기시간 게이지)
    ========================================================================= */
 .tycoon-seats-2x2 {
   flex: 1;
@@ -195,7 +195,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   background: rgba(9, 13, 22, 0.86);
   border: 1.5px solid #334155;
   border-radius: 12px;
-  padding: 5px 7px;
+  padding: 4px 6px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -233,7 +233,8 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   font-weight: 700;
 }
 
-.t-seat-main {
+/* 상단: 손님 캐릭터 + 주문한 메뉴 나란히 */
+.t-seat-top-row {
   flex: 1;
   min-height: 0;
   display: flex;
@@ -242,13 +243,12 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   gap: 6px;
 }
 
-/* 좌측: 손님 아바타 + 가격 뱃지 */
 .t-cust-col {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 1px;
   flex-shrink: 0;
 }
 
@@ -260,7 +260,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 .t-price-badge {
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 900;
   color: #fde047;
   background: rgba(245, 158, 11, 0.16);
@@ -270,28 +270,18 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   white-space: nowrap;
 }
 
-/* 우측: 요구 주류 아이콘 말풍선 + 옆 심플 [서빙] 버튼 */
-.t-order-col {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 5px;
-}
-
 .t-drink-bubble {
   flex: 1;
   min-width: 0;
   background: rgba(30, 41, 59, 0.85);
   border: 1px solid rgba(148, 163, 184, 0.35);
-  border-radius: 10px;
-  padding: 4px 5px;
+  border-radius: 9px;
+  padding: 3px 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 1px;
   position: relative;
 }
 
@@ -300,42 +290,25 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 30px;
+  min-height: 26px;
 }
 
 .order-mystery-icon {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: rgba(168, 85, 247, 0.25);
   border: 1.5px dashed #c084fc;
   color: #e9d5ff;
-  font-size: 1rem;
+  font-size: 0.92rem;
   font-weight: 900;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.order-omit-mini-badge {
-  position: absolute;
-  right: -10px;
-  bottom: -3px;
-  background: #e11d48;
-  border: 1px solid #fda4af;
-  color: #fff;
-  font-size: 0.54rem;
-  font-weight: 900;
-  padding: 0 3px;
-  border-radius: 5px;
-  display: inline-flex;
-  align-items: center;
-  gap: 1px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
 .t-drink-mini-name {
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 800;
   color: #e2e8f0;
   max-width: 100%;
@@ -344,37 +317,42 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   text-overflow: ellipsis;
 }
 
-/* 주문 아이콘 옆 심플한 원터치 [서빙] 버튼 */
-.t-serve-badge-btn {
-  flex-shrink: 0;
-  height: 38px;
-  padding: 0 9px;
-  border-radius: 9px;
-  font-size: 0.72rem;
+/* 캐릭터와 주문한 메뉴 바로 밑 공간: 와이드 [서빙] 버튼 */
+.t-serve-bottom-btn {
+  width: 100%;
+  height: 22px;
+  margin-top: 2px;
+  border-radius: 6px;
+  font-size: 0.66rem;
   font-weight: 900;
-  border: 1px solid #475569;
+  border: 1px solid #334155;
   background: #1e293b;
   color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
   cursor: not-allowed;
+  flex-shrink: 0;
   transition: transform 0.1s, background 0.15s;
 }
 
-.t-serve-badge-btn.active {
+.t-serve-bottom-btn.active {
   background: linear-gradient(135deg, #22c55e, #10b981);
   border-color: #4ade80;
   color: #052e16;
   cursor: pointer;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.45);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.45);
 }
 
-.t-serve-badge-btn.active:active {
-  transform: scale(0.94);
+.t-serve-bottom-btn.active:active {
+  transform: scale(0.96);
 }
 
 /* 남은 대기시간 게이지 바 */
 .t-patience-track {
   width: 100%;
-  height: 5px;
+  height: 4px;
   background: rgba(30, 41, 59, 0.9);
   border-radius: 999px;
   overflow: hidden;
@@ -398,97 +376,13 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 /* =========================================================================
-   4. 하단 55% 주조대 (완성 선반 + 가마솥 슬롯 + 재료 선택 그리드)
+   4. 하단 55% 주조대 (가마솥 슬롯 + [재고/재료 카테고리 탭] + 그리드)
    ========================================================================= */
 
-/* (1) 완성 선반 스트립 */
-.tycoon-shelf-bar {
-  flex-shrink: 0;
-  height: 38px;
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(71, 85, 105, 0.5);
-  border-radius: 9px;
-  padding: 0 7px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.shelf-bar-label {
-  font-size: 0.66rem;
-  font-weight: 900;
-  color: #fde68a;
-  flex-shrink: 0;
-}
-
-.shelf-chips-scroll {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-}
-
-.shelf-chips-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.shelf-empty-hint {
-  font-size: 0.64rem;
-  color: #64748b;
-}
-
-.shelf-mini-chip {
-  flex-shrink: 0;
-  height: 28px;
-  padding: 0 7px;
-  border-radius: 7px;
-  border: 1px solid #334155;
-  background: #090d16;
-  color: #e2e8f0;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.65rem;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.shelf-mini-chip.is-omit {
-  border-color: rgba(244, 63, 94, 0.55);
-}
-
-.shelf-mini-chip.is-match {
-  border-color: #22c55e;
-  background: rgba(20, 83, 45, 0.45);
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.35);
-}
-
-.shelf-mini-chip .sm-name small {
-  color: #fda4af;
-  margin-left: 2px;
-}
-
-.shelf-mini-chip .sm-qty {
-  color: #38bdf8;
-  font-weight: 900;
-}
-
-.shelf-mini-chip .sm-serve-tag {
-  background: #22c55e;
-  color: #052e16;
-  font-size: 0.58rem;
-  font-weight: 900;
-  padding: 1px 4px;
-  border-radius: 4px;
-}
-
-/* (2) 가마솥 슬롯 + 조합 버튼 한 줄 */
+/* (1) 가마솥 슬롯 + 조합 버튼 한 줄 */
 .tycoon-compact-pot-row {
   flex-shrink: 0;
-  height: 60px;
+  height: 58px;
   display: flex;
   align-items: stretch;
   gap: 5px;
@@ -498,78 +392,42 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
+  gap: 5px;
 }
 
 .cp-slot {
   background: rgba(9, 13, 22, 0.85);
   border: 1px dashed #334155;
-  border-radius: 8px;
-  padding: 2px 3px;
+  border-radius: 9px;
+  padding: 3px 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-width: 0;
+  position: relative;
 }
 
 .cp-slot.filled {
   border-style: solid;
   border-color: #38bdf8;
-  justify-content: space-between;
-}
-
-.cp-slot.filled.omitted {
-  border-color: #f43f5e;
-  background: rgba(136, 19, 55, 0.28);
-}
-
-.cp-omit-toggle {
-  width: 100%;
-  border: none;
-  border-radius: 4px;
-  background: #1e293b;
-  color: #94a3b8;
-  font-size: 0.54rem;
-  font-weight: 800;
-  padding: 1px 0;
+  background: linear-gradient(145deg, #1e293b, #172554);
   cursor: pointer;
 }
 
-.cp-omit-toggle.active {
-  background: #e11d48;
-  color: #fff;
-}
-
-.cp-slot-main {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  cursor: pointer;
-  min-width: 0;
+.cp-slot.filled:active {
+  transform: scale(0.95);
 }
 
 .cp-name {
-  font-size: 0.58rem;
+  font-size: 0.6rem;
   font-weight: 800;
   color: #e2e8f0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.cp-slot.omitted .cp-name {
-  text-decoration: line-through;
-  color: #fda4af;
-}
-
-.cp-cnt {
-  font-size: 0.58rem;
-  font-weight: 900;
-  color: #fde047;
-  flex-shrink: 0;
+  max-width: 100%;
+  margin-top: 2px;
 }
 
 .cp-actions-col {
@@ -621,31 +479,62 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   cursor: pointer;
 }
 
-/* (3) 카테고리 탭 + 재료 선택 그리드 */
+/* (2) 카테고리 탭 ([📦재고] 탭 포함) + 재료/재고 그리드 */
 .tycoon-compact-ings-area {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   background: rgba(15, 23, 42, 0.85);
   border: 1px solid rgba(71, 85, 105, 0.45);
   border-radius: 10px;
-  padding: 5px 6px;
+  padding: 6px;
   overflow: hidden;
 }
 
 .tycoon-cat-strip {
   flex-shrink: 0;
   display: flex;
-  gap: 4px;
+  flex-wrap: nowrap !important;
+  gap: 5px;
   overflow-x: auto;
   padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.tycoon-cat-strip::-webkit-scrollbar {
+  display: none;
 }
 
 .tycoon-cat-chip {
-  padding: 3px 8px !important;
-  font-size: 0.64rem !important;
+  padding: 4px 9px !important;
+  font-size: 0.66rem !important;
+  flex-shrink: 0;
+}
+
+/* [📦 재고] 전용 탭 칩 강조 */
+.tycoon-cat-chip.stock-tab-chip {
+  border-color: rgba(16, 185, 129, 0.55);
+  color: #6ee7b7;
+  background: rgba(6, 78, 59, 0.45);
+}
+
+.tycoon-cat-chip.stock-tab-chip.active {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-color: #34d399;
+  color: #052e16;
+}
+
+.stock-tab-cnt {
+  display: inline-block;
+  margin-left: 3px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(9, 13, 22, 0.55);
+  color: #ecfdf5;
+  font-size: 0.62rem;
+  font-weight: 900;
 }
 
 .tycoon-ings-scroll-grid {
@@ -657,17 +546,78 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-auto-rows: max-content;
-  gap: 5px;
-  padding-right: 2px;
+  gap: 6px;
+  padding: 5px 3px 8px 5px;
 }
 
 .tycoon-compact-ing {
-  min-height: 54px !important;
-  padding: 4px 3px !important;
+  min-height: 56px !important;
+  padding: 5px 4px !important;
 }
 
 .tycoon-compact-ing .ing-name {
   font-size: 0.62rem !important;
+  min-height: 22px !important;
+}
+
+/*
+ * [핵심] 재고 수량 배지 (.stock-count-badge)
+ * - 비율 표시 배지(.slot-count-badge: 좌측 상단 호박색 #f59e0b)와 동일한 스타일/크기이되,
+ *   에메랄드 민트(#10b981) 색상으로 우측 상단에 구분 표시!
+ * - 만약 '상세▾' 버튼이 있는 재료(소주, 맥주 등)라면 겹치지 않게 하단 우측에 깔끔하게 배치!
+ */
+.stock-count-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 3;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 5px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 900;
+  border-radius: 999px;
+  border: 2px solid #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+.stock-count-badge.shifted-left {
+  top: auto;
+  bottom: -5px;
+  right: -5px;
+}
+
+.ing-card.has-stock {
+  border-color: rgba(16, 185, 129, 0.55);
+}
+
+.stock-item-card.is-order-match {
+  border-color: #22c55e !important;
+  background: rgba(20, 83, 45, 0.4) !important;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.35);
+}
+
+.stock-match-tag {
+  font-size: 0.54rem;
+  font-weight: 900;
+  background: #22c55e;
+  color: #052e16;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.tycoon-stock-empty-msg {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 24px 10px;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  line-height: 1.5;
 }
 
 /* =========================================================================
