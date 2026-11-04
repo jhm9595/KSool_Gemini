@@ -4,15 +4,11 @@ window.KSool = window.KSool || {};
  * 🏮 주막 타이쿤 (Tycoon Main Game) - 손님 도감 & 단골 아바타/성격 생성기
  *
  * [핵심 기획]
- * - 매번 찾아오는 손님은 유니크한 캐릭터(외형 + 이름 + 칭호 + 고정 최애 조합 + 고정 빼기 취향)를 가집니다.
+ * - 매번 찾아오는 손님은 유니크한 캐릭터(외형 + 이름 + 칭호 + 고정 최애 조합)를 가집니다.
  * - 헷갈리는 요소(Confusable visual traits):
  *   쌍둥이/형제/라이벌처럼 비슷한 모자(갓, 중절모, 비니, 왕관, 머리띠), 비슷한 수염(구레나룻, 콧수염, 산적수염, 염소수염),
  *   비슷한 안경(외알안경, 뿔테, 선글라스), 비슷한 복장(한복, 정장, 가죽자켓, 앞치마)을 조합해
- *   자세히 보지 않으면 헷갈리는 32명의 고유 단골 손님 풀을 생성합니다.
- * - 각 손님은 항상 '자신만의 고정 레시피(signatureRecipeId)'를 주문합니다.
- * - 첫 방문(또는 일반 주문)에서는 "저는 항상 [술이름]만 마셔요! 잘 기억해두세요~"라며 메뉴를 알려주지만,
- *   단골 재방문 + 높은 난이도에서는 "사장님! 늘 먹던 걸로 주세요!" (메모리 주문) 또는
- *   "늘 먹던 거에서 [특정 재료]는 빼고 주세요!" (메모리 + 빼기 복합 주문)를 시킵니다!
+ *   자세히 보지 않으면 헷갈리는 24명의 고유 단골 손님 풀을 생성합니다.
  */
 class TycoonCustomerPool {
   constructor(recipeBook, brandResolver) {
@@ -23,16 +19,6 @@ class TycoonCustomerPool {
   }
 
   _initCustomerRoster() {
-    // 헷갈리기 쉬운 외형 파츠 정의 (SVG 레이어 조합용)
-    // Group A: 전통 갓/한복 패밀리 (4명 - 수염/안경/띠 색깔만 다름)
-    // Group B: 모던 중절모/정장 신사 패밀리 (4명 - 안경/수염/넥타이만 다름)
-    // Group C: 힙스터 비니/후드 패밀리 (4명 - 비니 줄무늬/선글라스/수염만 다름)
-    // Group D: 동네 포차 아재/캡모자 패밀리 (4명 - 모자 방향/수염/조끼만 다름)
-    // Group E: 귀족/왕관/마님 패밀리 (4명 - 머리장식/안경/부채만 다름)
-    // Group F: 요리사/장인/머리띠 패밀리 (4명 - 두건/수염/복장만 다름)
-    // Group G: 학자/박사/뿔테 패밀리 (4명 - 헤어/안경테/수염만 다름)
-    // Group H: 야간 라이더/선글라스 패밀리 (4명 - 헬멧/고글/수염만 다름)
-
     const archetypes = [
       // === Group A: 조선 선비 (갓 + 한복, 수염과 안경이 미묘하게 다름!) ===
       {
@@ -48,9 +34,8 @@ class TycoonCustomerPool {
         beard: 'LONG_WHITE',
         outfit: 'HANBOK_BLUE',
         accent: '#38bdf8',
-        preferredRecipeId: 5, // 소주 (Step 1)
-        preferredOmitIngId: 203, // 불 빼기
-        greeting: '에헴, 내 푸른 도포와 외알안경을 기억해주게! 난 언제나 깔끔한 기본이 좋네.'
+        preferredRecipeId: 5, // 소주 (Stage 1)
+        greeting: '에헴, 내 푸른 도포와 외알안경을 기억해주게! 난 언제나 깔끔한 소주가 좋네.'
       },
       {
         id: 'cust_02',
@@ -65,8 +50,7 @@ class TycoonCustomerPool {
         beard: 'LONG_WHITE',
         outfit: 'HANBOK_BLUE',
         accent: '#60a5fa',
-        preferredRecipeId: 26, // 막걸리
-        preferredOmitIngId: 702, // 누룩 빼기
+        preferredRecipeId: 26, // 막걸리 (Stage 3)
         greeting: '김진사와 도포도 수염도 같지만 난 양쪽 둥근안경을 썼다네! 내 술은 막걸리뿐이야.'
       },
       {
@@ -82,8 +66,7 @@ class TycoonCustomerPool {
         beard: 'GOATEE_BLACK',
         outfit: 'HANBOK_RED',
         accent: '#f87171',
-        preferredRecipeId: 20, // 매실주
-        preferredOmitIngId: 701, // 설탕 빼기
+        preferredRecipeId: 20, // 매실주 (Stage 1)
         greeting: '붉은 갓끈에 검은 턱수염! 김진사 영감과 외알안경은 같아도 난 매실주만 마신다오.'
       },
       {
@@ -99,8 +82,7 @@ class TycoonCustomerPool {
         beard: 'LONG_GRAY',
         outfit: 'HANBOK_GREEN',
         accent: '#34d399',
-        preferredRecipeId: 57, // 복분자주
-        preferredOmitIngId: 701, // 설탕 빼기
+        preferredRecipeId: 57, // 복분자주 (Stage 3)
         greeting: '안경 쓴 선비들과 헷갈리지 말게! 초록 도포의 최훈장은 복분자주 한 잔이면 족하네.'
       },
 
@@ -118,9 +100,8 @@ class TycoonCustomerPool {
         beard: 'MUSTACHE_CURL',
         outfit: 'SUIT_BOWTIE_RED',
         accent: '#fb923c',
-        preferredRecipeId: 1, // 소맥
-        preferredOmitIngId: 102, // 맥주 빼기
-        greeting: '빨간 나비넥타이에 말아올린 콧수염! 퇴근길엔 역시 황금 소맥 아니겠소?'
+        preferredRecipeId: 1, // 소맥 (Stage 1)
+        greeting: '빨간 나비넥타이에 말아올린 콧수염! 퇴근길엔 역시 시원한 소맥 아니겠소?'
       },
       {
         id: 'cust_06',
@@ -135,9 +116,8 @@ class TycoonCustomerPool {
         beard: 'GOATEE_BLACK',
         outfit: 'SUIT_TIE_BLUE',
         accent: '#38bdf8',
-        preferredRecipeId: 65, // 아이스 아메리카노
-        preferredOmitIngId: 201, // 얼음 빼기
-        greeting: '구보씨와 모자·안경은 같지만 난 파란 넥타이에 턱수염이라오. 차가운 커피 한 잔 주시오.'
+        preferredRecipeId: 65, // 아이스 아메리카노 (Stage 1)
+        greeting: '구보씨와 모자·안경은 같지만 난 파란 넥타이에 턱수염이라오. 차가운 아이스 아메리카노 주시오.'
       },
       {
         id: 'cust_07',
@@ -152,8 +132,7 @@ class TycoonCustomerPool {
         beard: 'MUSTACHE_CURL',
         outfit: 'SUIT_BOWTIE_RED',
         accent: '#facc15',
-        preferredRecipeId: 27, // 고진감래주
-        preferredOmitIngId: 607, // 콜라 빼기
+        preferredRecipeId: 74, // 고진감래주 (Stage 5)
         greeting: '검은 중절모에 금테 선글라스! 내 인생처럼 쓴맛 끝에 단맛이 오는 고진감래주가 내 단골이지.'
       },
       {
@@ -169,8 +148,7 @@ class TycoonCustomerPool {
         beard: 'NONE',
         outfit: 'SUIT_TIE_BLUE',
         accent: '#818cf8',
-        preferredRecipeId: 83, // 조선 깔루아 밀크
-        preferredOmitIngId: 401, // 우유 빼기
+        preferredRecipeId: 83, // 조선 깔루아 밀크 (Stage 2)
         greeting: '수염 없이 깔끔한 외알안경에 검은 중절모! 달콤쌉싸름한 조선 깔루아 밀크 부탁하오.'
       },
 
@@ -188,9 +166,8 @@ class TycoonCustomerPool {
         beard: 'GOATEE_BLACK',
         outfit: 'HOODIE_PURPLE',
         accent: '#f43f5e',
-        preferredRecipeId: 10, // 에너자이저주
-        preferredOmitIngId: 603, // 이온음료 빼기
-        greeting: 'Yo! 빨간 비니에 보라 후드 제이든이야! 밤새 디제잉하려면 에너자이저주가 필수지!'
+        preferredRecipeId: 14, // 레몬에이드 (Stage 1)
+        greeting: 'Yo! 빨간 비니에 보라 후드 제이든이야! 길거리 노점에선 역시 상큼한 레몬에이드지!'
       },
       {
         id: 'cust_10',
@@ -205,8 +182,7 @@ class TycoonCustomerPool {
         beard: 'GOATEE_BLACK',
         outfit: 'HOODIE_BLACK',
         accent: '#e11d48',
-        preferredRecipeId: 18, // 소콜
-        preferredOmitIngId: 607, // 콜라 빼기
+        preferredRecipeId: 18, // 소콜 (Stage 1)
         greeting: '제이든이랑 빨간 비니는 같아도 난 선글라스에 검정 후드야! 달달한 소콜 한 잔 부탁해!'
       },
       {
@@ -222,8 +198,7 @@ class TycoonCustomerPool {
         beard: 'NONE',
         outfit: 'HOODIE_PURPLE',
         accent: '#2dd4bf',
-        preferredRecipeId: 16, // 망고비어
-        preferredOmitIngId: 303, // 망고 빼기
+        preferredRecipeId: 16, // 망고비어 (Stage 1)
         greeting: '민트색 비니에 수염 없는 뿔테! 전 트로피컬한 망고비어만 마시는 거 아시죠?'
       },
       {
@@ -239,8 +214,7 @@ class TycoonCustomerPool {
         beard: 'MUSTACHE_THIN',
         outfit: 'HOODIE_BLACK',
         accent: '#14b8a6',
-        preferredRecipeId: 9, // 레몬소주
-        preferredOmitIngId: 201, // 얼음 빼기
+        preferredRecipeId: 9, // 레몬소주 (Stage 2)
         greeting: '민트 비니에 얇은 콧수염과 선글라스! 상큼하게 톡 쏘는 레몬소주가 내 시그니처야.'
       },
 
@@ -258,9 +232,8 @@ class TycoonCustomerPool {
         beard: 'FULL_BUSHY',
         outfit: 'VEST_KHAKI',
         accent: '#3b82f6',
-        preferredRecipeId: 6, // 황금 소맥
-        preferredOmitIngId: 101, // 소주 빼기
-        greeting: '허허! 파란 모자에 산적수염 황반장이야! 난 그냥 소맥 말고 무조건 황금비율 소맥이여!'
+        preferredRecipeId: 4, // 맥주 (Stage 1)
+        greeting: '허허! 파란 모자에 산적수염 황반장이야! 더울 땐 시원한 생맥주 한 잔이 최고지!'
       },
       {
         id: 'cust_14',
@@ -275,8 +248,7 @@ class TycoonCustomerPool {
         beard: 'MUSTACHE_FLAT',
         outfit: 'VEST_KHAKI',
         accent: '#2563eb',
-        preferredRecipeId: 19, // 링겔주
-        preferredOmitIngId: 104, // 매실주 빼기
+        preferredRecipeId: 19, // 링겔주 (Stage 2)
         greeting: '황반장이랑 모자·조끼는 똑같아도 내 수염은 깔끔한 일자 콧수염이지! 난 링겔주만 마셔!'
       },
       {
@@ -292,9 +264,8 @@ class TycoonCustomerPool {
         beard: 'FULL_BUSHY',
         outfit: 'JACKET_ORANGE',
         accent: '#eab308',
-        preferredRecipeId: 44, // 유자막걸리
-        preferredOmitIngId: 703, // 유자청 빼기
-        greeting: '노란 모자에 주황 등산복 입은 오기사요! 산행 끝엔 달콤향긋한 유자막걸리가 최고지!'
+        preferredRecipeId: 58, // 사이다 (Stage 1)
+        greeting: '노란 모자에 주황 등산복 입은 오기사요! 운전 중엔 청량한 사이다 한 잔이 최고지!'
       },
       {
         id: 'cust_16',
@@ -309,8 +280,7 @@ class TycoonCustomerPool {
         beard: 'MUSTACHE_FLAT',
         outfit: 'VEST_KHAKI',
         accent: '#ca8a04',
-        preferredRecipeId: 73, // 밀키스주
-        preferredOmitIngId: 102, // 맥주 빼기
+        preferredRecipeId: 73, // 밀키스주 (Stage 2)
         greeting: '노란 모자에 뿔테안경 변사장입니다. 부드럽게 톡 쏘는 밀키스주 한 잔 말아주소!'
       },
 
@@ -328,8 +298,7 @@ class TycoonCustomerPool {
         beard: 'GOATEE_BLACK',
         outfit: 'ROYAL_PURPLE',
         accent: '#f59e0b',
-        preferredRecipeId: 38, // 태극주
-        preferredOmitIngId: 103, // 복분자주 빼기
+        preferredRecipeId: 77, // 태극주 (Stage 3)
         greeting: '금관에 보라색 예복을 입은 강화도령이다! 붉고 푸른 조화의 태극주를 올리거라!'
       },
       {
@@ -345,9 +314,8 @@ class TycoonCustomerPool {
         beard: 'LONG_WHITE',
         outfit: 'ROYAL_PURPLE',
         accent: '#d97706',
-        preferredRecipeId: 40, // 꿀막걸리
-        preferredOmitIngId: 705, // 꿀 빼기
-        greeting: '강화도령과 옷차림은 같으나 난 긴 백수염이 있지! 달콤한 꿀막걸리 한 사발 가져오너라.'
+        preferredRecipeId: 39, // 꿀 막걸리 (Stage 6)
+        greeting: '강화도령과 옷차림은 같으나 난 긴 백수염이 있지! 달콤한 꿀 막걸리 한 사발 가져오너라.'
       },
       {
         id: 'cust_19',
@@ -362,9 +330,8 @@ class TycoonCustomerPool {
         beard: 'NONE',
         outfit: 'SILK_RED',
         accent: '#ec4899',
-        preferredRecipeId: 80, // 올때메론주
-        preferredOmitIngId: 606, // 사이다 빼기
-        greeting: '은빛 티아라에 빨간 안경 명동마님이에요~ 달콤시원한 올때메론주 한 잔 부탁해요!'
+        preferredRecipeId: 34, // 딸기우유 (Stage 1)
+        greeting: '은빛 티아라에 빨간 안경 명동마님이에요~ 달콤부드러운 딸기우유 한 잔 부탁해요!'
       },
       {
         id: 'cust_20',
@@ -379,9 +346,8 @@ class TycoonCustomerPool {
         beard: 'NONE',
         outfit: 'SILK_RED',
         accent: '#db2777',
-        preferredRecipeId: 81, // 상어바주
-        preferredOmitIngId: 618, // 토닉워터 빼기
-        greeting: '명동마님과 티아라는 같지만 전 금테 선글라스랍니다! 죠스처럼 짜릿한 상어바주 주세요~'
+        preferredRecipeId: 15, // 밀크소다 (Stage 1)
+        greeting: '명동마님과 티아라는 같지만 전 금테 선글라스랍니다! 톡 쏘는 밀크소다 주세요~'
       },
 
       // === Group F: 장인/셰프 패밀리 (머리띠/두건 + 앞치마) ===
@@ -398,9 +364,8 @@ class TycoonCustomerPool {
         beard: 'FULL_BUSHY',
         outfit: 'CHEF_WHITE',
         accent: '#ef4444',
-        preferredRecipeId: 24, // 죠스주
-        preferredOmitIngId: 606, // 사이다 빼기
-        greeting: '붉은 머리띠에 덥수룩한 수염! 불주먹 최씨에겐 상큼청량한 죠스주가 딱이지!'
+        preferredRecipeId: 27, // 막사 (Stage 4)
+        greeting: '붉은 머리띠에 덥수룩한 수염! 불주먹 최씨에겐 시원청량한 막사가 딱이지!'
       },
       {
         id: 'cust_22',
@@ -415,9 +380,8 @@ class TycoonCustomerPool {
         beard: 'MUSTACHE_THIN',
         outfit: 'CHEF_WHITE',
         accent: '#dc2626',
-        preferredRecipeId: 51, // 하이볼
-        preferredOmitIngId: 301, // 레몬 빼기
-        greeting: '불주먹 최씨와 머리띠는 같지만 난 날렵한 콧수염이야! 깔끔한 하이볼 한 잔 부탁하네.'
+        preferredRecipeId: 51, // 소토닉 (Stage 5)
+        greeting: '불주먹 최씨와 머리띠는 같지만 난 날렵한 콧수염이야! 깔끔한 소토닉 한 잔 부탁하네.'
       },
       {
         id: 'cust_23',
@@ -432,9 +396,8 @@ class TycoonCustomerPool {
         beard: 'NONE',
         outfit: 'APRON_BROWN',
         accent: '#a855f7',
-        preferredRecipeId: 85, // 단팥죽
-        preferredOmitIngId: 701, // 설탕 빼기
-        greeting: '하얀 두건에 둥근안경 쓴 단팥할멈이여~ 따끈하고 구수한 단팥죽 한 그릇 주구려.'
+        preferredRecipeId: 35, // 바나나우유 (Stage 1)
+        greeting: '하얀 두건에 둥근안경 쓴 할멈이여~ 달콤하고 든든한 바나나우유 한 잔 주구려.'
       },
       {
         id: 'cust_24',
@@ -449,13 +412,11 @@ class TycoonCustomerPool {
         beard: 'LONG_GRAY',
         outfit: 'APRON_BROWN',
         accent: '#9333ea',
-        preferredRecipeId: 74, // 홍초소주
-        preferredOmitIngId: 204, // 탄산수 빼기
-        greeting: '할멈이랑 두건·안경은 같아도 난 긴 회색 수염이 있다네! 새콤한 홍초소주 한 잔 주게!'
+        preferredRecipeId: 36, // 유자청 (Stage 1)
+        greeting: '할멈이랑 두건·안경은 같아도 난 긴 회색 수염이 있다네! 향긋한 유자청 한 잔 주게!'
       }
     ];
 
-    // 실제 RecipeBook에 존재하는 레시피인지 검증하고, 없으면 기본 레시피로 안전 매핑
     const allRecipes = this.recipeBook.getAllRecipes();
     const fallbackIds = allRecipes.map(r => r.recipe_id);
 
@@ -466,17 +427,10 @@ class TycoonCustomerPool {
       }
       if (allRecipes.length > 0) this._rosterSynced = true;
       const rId = rec ? rec.recipe_id : (arch.preferredRecipeId || fallbackIds[0] || 5);
-      const items = this.recipeBook.getRecipeItems(rId);
-      // preferredOmitIngId가 실제 해당 레시피 재료에 포함되어 있는지 확인, 없으면 마지막 재료로 자동 보정
-      let omitIngId = arch.preferredOmitIngId;
-      if (items.length > 0 && !items.some(it => Number(it.ingredient_id) === Number(omitIngId))) {
-        omitIngId = Number(items[items.length - 1].ingredient_id);
-      }
 
       return {
         ...arch,
-        preferredRecipeId: rId,
-        preferredOmitIngId: omitIngId
+        preferredRecipeId: rId
       };
     });
   }
@@ -496,9 +450,12 @@ class TycoonCustomerPool {
   }
 
   /**
-   * 고유 손님의 SVG 아바타 렌더링 (모자, 안경, 수염, 복장이 뚜렷하게 구분되면서도 패밀리끼리 헷갈리는 디자인)
+   * 고유 손님의 SVG 아바타 렌더링
+   * @param {object} customer
+   * @param {number} size
+   * @param {'NORMAL' | 'WARN' | 'ANGRY'} mood - 대기시간에 따른 붕어빵 타이쿤 스타일 표정/빠직(💢) 연출
    */
-  renderCustomerAvatarSvg(customer, size = 56) {
+  renderCustomerAvatarSvg(customer, size = 56, mood = 'NORMAL') {
     if (!customer) return '🧑';
     const c = customer;
 
@@ -532,8 +489,9 @@ class TycoonCustomerPool {
       outfitSvg = `<path d="M10 58 Q32 45 54 58 L58 64 L6 64 Z" fill="#78350f" stroke="#d97706" stroke-width="1.5"/>`;
     }
 
-    // 2. 얼굴 베이스
-    const headSvg = `<circle cx="32" cy="34" r="14" fill="${c.skin || '#fde68a'}" stroke="#1e293b" stroke-width="1.8"/>`;
+    // 2. 얼굴 베이스 (화났을 때 살짝 붉어짐)
+    const faceFill = mood === 'ANGRY' ? '#fca5a5' : (c.skin || '#fde68a');
+    const headSvg = `<circle cx="32" cy="34" r="14" fill="${faceFill}" stroke="#1e293b" stroke-width="1.8"/>`;
 
     // 3. 눈 & 안경 레이어
     let eyesSvg = '';
@@ -585,7 +543,6 @@ class TycoonCustomerPool {
         <path d="M35 32 Q38 28 41 32" fill="none" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round"/>
       `;
     } else {
-      // SHARP_EYES
       eyesSvg = `
         <line x1="22" y1="29" x2="29" y2="31" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
         <line x1="42" y1="29" x2="35" y2="31" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
@@ -630,8 +587,9 @@ class TycoonCustomerPool {
         <ellipse cx="32" cy="42" rx="3.5" ry="1.8" fill="#fca5a5"/>
       `;
     } else {
-      // NONE -> 미소 입모양
-      beardSvg = `<path d="M28 40 Q32 43.5 36 40" fill="none" stroke="#be123c" stroke-width="2" stroke-linecap="round"/>`;
+      beardSvg = mood === 'ANGRY'
+        ? `<path d="M27 42 Q32 38.5 37 42" fill="none" stroke="#991b1b" stroke-width="2.2" stroke-linecap="round"/>`
+        : `<path d="M28 40 Q32 43.5 36 40" fill="none" stroke="#be123c" stroke-width="2" stroke-linecap="round"/>`;
     }
 
     // 5. 모자 레이어
@@ -699,14 +657,22 @@ class TycoonCustomerPool {
       `;
     }
 
+    // 붕어빵 타이쿤 특유의 화난 빠직(💢) 심볼
+    const angerMarkSvg = mood === 'ANGRY'
+      ? `<g transform="translate(42, 16)">
+           <path d="M2 6 Q6 6 6 2 M10 2 Q10 6 14 6 M14 10 Q10 10 10 14 M6 14 Q6 10 2 10" fill="none" stroke="#ef4444" stroke-width="2.4" stroke-linecap="round"/>
+         </g>`
+      : '';
+
     return `
-      <svg width="${size}" height="${size}" viewBox="0 0 64 64" class="tycoon-cust-avatar-svg" style="overflow:visible; filter:drop-shadow(0 3px 6px rgba(0,0,0,0.45));">
-        <circle cx="32" cy="34" r="29" fill="rgba(15, 23, 42, 0.85)" stroke="${c.accent || '#38bdf8'}" stroke-width="2"/>
+      <svg width="${size}" height="${size}" viewBox="0 0 64 64" class="tycoon-cust-avatar-svg ${mood === 'ANGRY' ? 'cust-angry-shake' : ''}" style="overflow:visible; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.55));">
+        <circle cx="32" cy="34" r="29" fill="rgba(15, 23, 42, 0.85)" stroke="${mood === 'ANGRY' ? '#ef4444' : (c.accent || '#38bdf8')}" stroke-width="2.2"/>
         ${outfitSvg}
         ${headSvg}
         ${eyesSvg}
         ${beardSvg}
         ${hatSvg}
+        ${angerMarkSvg}
       </svg>
     `;
   }

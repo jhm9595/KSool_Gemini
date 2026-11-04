@@ -445,6 +445,54 @@ class AudioService {
   }
 
   /**
+   * 🛎️ 카운터 서비스 벨("땡~!") 사운드 합성:
+   * 황동 데스크 벨 특유의 맑고 영롱한 배음(Inharmonic bell partials) + 짧은 타격 클릭음
+   */
+  playServiceBell() {
+    const effVol = this.getEffectiveVolume();
+    if (effVol <= 0) return;
+    this.vibrate([20, 30, 40]);
+    const ctx = this._getContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    // 1) 금속 핀 타격(Clapper strike) 어택 노이즈
+    const strikeOsc = ctx.createOscillator();
+    const strikeGain = ctx.createGain();
+    strikeOsc.type = 'triangle';
+    strikeOsc.frequency.setValueAtTime(3400, now);
+    strikeOsc.frequency.exponentialRampToValueAtTime(980, now + 0.025);
+    strikeGain.gain.setValueAtTime(0.28 * effVol, now);
+    strikeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+    strikeOsc.connect(strikeGain);
+    strikeGain.connect(ctx.destination);
+    strikeOsc.start(now);
+    strikeOsc.stop(now + 0.035);
+
+    // 2) 데스크 벨 공명 배음 (맑은 F#6/C#7 계열 황동 벨 배음)
+    const partials = [
+      { freq: 1480.0, amp: 0.34, dur: 0.95 },
+      { freq: 2959.9, amp: 0.22, dur: 0.72 },
+      { freq: 4186.0, amp: 0.14, dur: 0.48 },
+      { freq: 5873.3, amp: 0.08, dur: 0.30 }
+    ];
+
+    partials.forEach(p => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(p.freq, now);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.linearRampToValueAtTime(p.amp * effVol, now + 0.006);
+      gain.gain.exponentialRampToValueAtTime(0.0005, now + p.dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + p.dur + 0.03);
+    });
+  }
+
+  /**
    * 은박지(복권) 긁는 소리: 짧은 고주파 노이즈 + 불규칙한 바스락 스파이크
    */
   playScratch(intensity = 1) {
