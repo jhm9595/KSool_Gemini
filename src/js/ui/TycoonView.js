@@ -222,47 +222,45 @@ class TycoonView {
   _renderTopHud(s) {
     const isPlaying = s.status === 'PLAYING';
     const stage = this.engine.getCurrentMapStage();
-    const isBgmOn = this.audio ? (this.audio.isBgmEnabled && !this.audio.isMutedState()) : true;
     const statusRightHtml = s.mode === 'TIME_ATTACK'
       ? `<span class="hud-pill timer-pill" id="tycoon-live-timer">${this._formatSeconds(s.timeLeftSec)}</span>`
-      : `<span class="hud-pill lives-pill">${'❤️'.repeat(Math.max(0, s.lives))}${'🖤'.repeat(Math.max(0, s.maxLives - s.lives))}</span>`;
+      : `<span class="hud-pill lives-pill" title="남은 목숨">${'❤️'.repeat(Math.max(0, s.lives))}${'🖤'.repeat(Math.max(0, s.maxLives - s.lives))}</span>`;
 
     return `
-      <header class="tycoon-compact-hud">
+      <div class="tycoon-compact-hud">
         <div class="hud-left">
           <span class="hud-stage-pill" title="${stage.name} (단가 x${stage.priceMultiplier})">${stage.icon} ${stage.name}</span>
           <span class="hud-stat">🍶<b>${s.servedCount}</b></span>
           <span class="hud-stat gold">💰<b>${(isPlaying ? s.totalEarnings : this.engine.persistentWallet).toLocaleString()}</b>원</span>
           ${isPlaying && s.combo > 1 ? `<span class="hud-combo">${s.combo}🔥</span>` : ''}
-          ${isPlaying ? statusRightHtml : ''}
         </div>
         <div class="hud-right">
-          <button type="button" class="hud-icon-btn ${isBgmOn ? 'bgm-on' : 'bgm-off'}" id="tycoon-toggle-bgm-btn" title="주막 배경음악 켜기/끄기">${isBgmOn ? '🎵' : '🔇'}</button>
-          <button type="button" class="hud-icon-btn" id="tycoon-open-notebook-btn" title="메뉴판 & 단골 수첩">📖</button>
+          ${isPlaying ? statusRightHtml : ''}
           <button type="button" class="hud-icon-btn" id="tycoon-open-rank-btn" title="Top 100 랭킹">🏆</button>
           ${isPlaying
-            ? `<button type="button" class="hud-icon-btn exit-btn" id="tycoon-back-lobby-btn" title="로비로 나가기">✕</button>`
+            ? `<button type="button" class="hud-icon-btn" id="tycoon-open-global-settings-btn" title="게임 설정 (음량 조절)">⚙️</button>
+               <button type="button" class="hud-icon-btn exit-btn" id="tycoon-back-lobby-btn" title="로비로 나가기">✕</button>`
             : ''
           }
         </div>
-      </header>
+      </div>
     `;
   }
 
   /**
    * [상단 45% 카운터 씬]
-   * - 배경: 현재 선택된 점포 이미지 (`./assets/tycoon/bg_stage_1.jpg` ~ `bg_stage_6.jpg`)
-   * - 중앙 뒤편: 찾아온 손님 1명 아바타 + 붕어빵 타이쿤 스타일 말풍선 (요구 주류 아이콘 x1 + 가격 + 대기시간 게이지)
+   * - 배경: 현재 선택된 점포 이미지 (`./assets/tycoon/bg_stage_1.jpg` ~ `bg_stage_6.jpg`, 오른쪽 카운터 위에 각 배경 풍의 종이 그려져 있음)
+   * - 중앙 뒤편: 카운터 바 앞으로 찾아온 상반신 일러스트 손님 1명 + 말풍선 (요구 주류 아이콘 x1 + 가격 + 대기시간 게이지)
    * - 카운터 왼쪽: 메뉴판 핫스팟 (터치 시 점포 메뉴판/단골 수첩 오픈)
-   * - 카운터 정중앙: 접시(Center Serving Plate) 오버레이 (조합 완성품이 올라오며, 터치 시 [📦재고]로 이동)
-   * - 카운터 오른쪽: 데스크 서비스 벨(🛎️ 종 모양 이미지, 터치 시 "땡~!" 소리와 함께 손님에게 서빙)
+   * - 카운터 정중앙: 접시(Center Serving Plate) 오버레이 (조합 완성품이 올라오며, 터치 시 [📦] 탭으로 이동)
+   * - 카운터 오른쪽: 배경 이미지에 그려진 종 위치의 투명 핫스팟 (터치 시 "땡~!" 소리와 함께 손님에게 서빙)
    */
   _renderCounterScene(s) {
     const stage = this.engine.getCurrentMapStage();
     const cust = s.activeCustomer;
     const ord = s.activeOrder;
 
-    // 1) 손님 & 주문 말풍선 렌더링
+    // 1) 손님(상반신 일러스트) & 주문 말풍선 렌더링
     let customerZoneHtml = '';
     if (cust && ord) {
       const maxP = ord.maxPatienceSec || 40;
@@ -271,7 +269,7 @@ class TycoonView {
       const mood = pct <= 30 ? 'ANGRY' : (pct <= 55 ? 'WARN' : 'NORMAL');
       const gaugeStateCls = pct <= 30 ? 'danger' : (pct <= 55 ? 'warn' : '');
 
-      const avatarSvg = this.engine.customerPool.renderCustomerAvatarSvg(cust, 76, mood);
+      const avatarSvg = this.engine.customerPool.renderCustomerAvatarSvg(cust, 108, mood);
       const rec = this.recipeBook.getRecipe(ord.recipeId);
 
       const isMemory = (ord.orderType === 'MEMORY');
@@ -291,7 +289,7 @@ class TycoonView {
 
       customerZoneHtml = `
         <div class="counter-customer-stage">
-          <!-- 손님 캐릭터 (카운터 너머 중앙) -->
+          <!-- 손님 캐릭터 (카운터 바 바로 뒤 상반신 일러스트) -->
           <div class="counter-cust-figure" id="tycoon-counter-customer" title="${cust.name} (${cust.title})">
             <div class="counter-cust-avatar-wrap">
               ${avatarSvg}
@@ -328,6 +326,7 @@ class TycoonView {
     let plateContentHtml = '';
     const platedKey = s.platedStockKey;
     const isOrderMatchOnPlate = Boolean(platedKey && ord && platedKey === ord.requiredStockKey);
+    const plateBottomPct = stage.plateBottomPct || 11.5;
 
     if (platedKey) {
       const meta = this.engine.getStockItemDisplayMeta(platedKey);
@@ -339,73 +338,44 @@ class TycoonView {
       plateContentHtml = `
         <div class="counter-plate-zone has-item ${isOrderMatchOnPlate ? 'match-glow' : ''}"
              id="tycoon-center-plate-btn"
-             title="터치하면 [📦재고] 탭으로 보관합니다">
+             style="bottom:${plateBottomPct}%;"
+             title="터치하면 [📦] 탭으로 보관합니다">
           <div class="plated-drink-visual">
             ${platedIcon}
           </div>
           <span class="plated-drink-label">${platedName}</span>
-          <span class="plate-store-hint">📦재고보관</span>
+          <span class="plate-store-hint">📦보관</span>
         </div>
       `;
     } else {
       plateContentHtml = `
-        <div class="counter-plate-zone empty-plate" id="tycoon-center-plate-empty" title="조합을 완성하거나 [📦재고]에서 누르면 이 접시 위에 올라옵니다">
+        <div class="counter-plate-zone empty-plate"
+             id="tycoon-center-plate-empty"
+             style="bottom:${plateBottomPct}%;"
+             title="조합을 완성하거나 [📦] 탭에서 누르면 이 접시 위에 올라옵니다">
           <span class="empty-plate-hint">접시 위 대기</span>
         </div>
       `;
     }
 
-    // 3) 카운터 오른쪽 데스크 서비스 벨 (버튼이 아닌 리얼한 황동 데스크 벨 SVG 이미지)
+    // 3) 배경 이미지에 그려진 오른쪽 종 위치의 투명 터치 핫스팟
     const bellReadyCls = platedKey ? (isOrderMatchOnPlate ? 'bell-ready-match' : 'bell-ready-any') : '';
     const bellRingCls = this._bellRingAnimActive ? 'bell-ringing' : '';
+    const bellLeftPct = stage.bellLeftPct || 70;
+    const bellBottomPct = stage.bellBottomPct || 11;
 
-    const serviceBellSvgHtml = `
+    const serviceBellHotspotHtml = `
       <div class="counter-service-bell-spot ${bellReadyCls} ${bellRingCls}"
            id="tycoon-service-bell-img"
-           role="img"
-           aria-label="서비스 종 (터치하면 땡 소리와 함께 손님에게 서빙)"
-           title="종을 터치하면 '땡~!' 소리와 함께 접시 위의 음료를 손님에게 드립니다!">
+           style="left:${bellLeftPct}%; bottom:${bellBottomPct}%;"
+           role="button"
+           tabindex="0"
+           aria-label="카운터 종 (터치하면 땡 소리와 함께 손님에게 서빙)"
+           title="배경의 종을 터치하면 '땡~!' 소리와 함께 접시 위의 음료를 손님에게 드립니다!">
         <div class="bell-sound-waves">
           <span class="bell-wave w1"></span>
           <span class="bell-wave w2"></span>
         </div>
-        <svg class="service-bell-svg" width="66" height="58" viewBox="0 0 80 70" style="overflow:visible;">
-          <defs>
-            <radialGradient id="bellGoldGrad" cx="35%" cy="30%" r="70%">
-              <stop offset="0%" stop-color="#fef08a"/>
-              <stop offset="45%" stop-color="#f59e0b"/>
-              <stop offset="85%" stop-color="#b45309"/>
-              <stop offset="100%" stop-color="#78350f"/>
-            </radialGradient>
-            <linearGradient id="bellBaseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#1e293b"/>
-              <stop offset="50%" stop-color="#475569"/>
-              <stop offset="100%" stop-color="#0f172a"/>
-            </linearGradient>
-            <linearGradient id="bellSilverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#f8fafc"/>
-              <stop offset="60%" stop-color="#94a3b8"/>
-              <stop offset="100%" stop-color="#475569"/>
-            </linearGradient>
-          </defs>
-          <!-- 바닥 그림자 -->
-          <ellipse cx="40" cy="61" rx="34" ry="7" fill="rgba(0,0,0,0.55)"/>
-          <!-- 받침대(검은 금속 베이스) -->
-          <path d="M10 55 Q40 50 70 55 L73 60 Q40 65 7 60 Z" fill="url(#bellBaseGrad)" stroke="#0f172a" stroke-width="1.8"/>
-          <ellipse cx="40" cy="55" rx="30" ry="4.5" fill="#334155" stroke="#1e293b" stroke-width="1.2"/>
-          <!-- 황동 종 돔(Dome) -->
-          <path d="M14 54 C14 26, 66 26, 66 54 Z" fill="url(#bellGoldGrad)" stroke="#78350f" stroke-width="2"/>
-          <!-- 종 하단 테두리 림 -->
-          <ellipse cx="40" cy="54" rx="27" ry="4" fill="#d97706" stroke="#78350f" stroke-width="1.5"/>
-          <!-- 종 표면 하이라이트 광택 -->
-          <path d="M23 48 C23 33, 33 29, 37 28" fill="none" stroke="rgba(255,255,255,0.68)" stroke-width="3" stroke-linecap="round"/>
-          <!-- 상단 타격 핀(Clapper Button) -->
-          <g class="bell-top-pin">
-            <rect x="37.5" y="18" width="5" height="8" rx="1.5" fill="url(#bellSilverGrad)" stroke="#1e293b" stroke-width="1.2"/>
-            <ellipse cx="40" cy="17.5" rx="9" ry="3.6" fill="url(#bellSilverGrad)" stroke="#1e293b" stroke-width="1.5"/>
-          </g>
-        </svg>
-        ${platedKey ? `<span class="bell-ting-badge">🛎️ 땡!</span>` : ''}
       </div>
     `;
 
@@ -413,10 +383,10 @@ class TycoonView {
       <div class="tycoon-counter-scene" style="background-image: url('${stage.bgImage}');">
         <div class="counter-scene-vignette"></div>
 
-        <!-- 손님 & 주문 말풍선 (상단 중앙) -->
+        <!-- 손님 & 주문 말풍선 (카운터 바 바로 너머) -->
         ${customerZoneHtml}
 
-        <!-- 카운터 테이블 위 인터랙션 레이어 (왼쪽 메뉴판 / 중앙 접시 / 오른쪽 서비스 종) -->
+        <!-- 카운터 테이블 위 인터랙션 레이어 (왼쪽 메뉴판 / 중앙 접시 / 오른쪽 배경 종 핫스팟) -->
         <div class="counter-bar-interactive-layer">
           <!-- 왼쪽 메뉴판 핫스팟 -->
           <button type="button" class="counter-menu-hotspot" id="tycoon-counter-menu-hotspot" title="터치하면 현재 점포 메뉴판 & 단골 수첩을 엽니다">
@@ -426,8 +396,8 @@ class TycoonView {
           <!-- 정중앙 서빙 접시 (완성품 안착 위치) -->
           ${plateContentHtml}
 
-          <!-- 오른쪽 서비스 종 이미지 (터치 시 땡~! 서빙) -->
-          ${serviceBellSvgHtml}
+          <!-- 오른쪽 배경 종 투명 핫스팟 (터치 시 땡~! 서빙) -->
+          ${serviceBellHotspotHtml}
         </div>
       </div>
     `;
@@ -490,11 +460,10 @@ class TycoonView {
   _renderCompactIngredientsArea(s) {
     const potSlots = s.potSlots;
     const categories = this.recipeBook.categories;
-    const totalStockCount = Array.from(s.stockMap.values()).reduce((a, b) => a + b, 0);
 
     const stockTabHtml = `
-      <button type="button" class="cat-chip tycoon-cat-chip stock-tab-chip ${this.selectedIngCat === 'STOCK' ? 'active' : ''}" data-tycoon-ing-cat="STOCK">
-        📦 재고 <b class="stock-tab-cnt">${totalStockCount}</b>
+      <button type="button" class="cat-chip tycoon-cat-chip stock-tab-chip ${this.selectedIngCat === 'STOCK' ? 'active' : ''}" data-tycoon-ing-cat="STOCK" title="보관함">
+        📦
       </button>
     `;
 
@@ -513,8 +482,8 @@ class TycoonView {
       if (entries.length === 0) {
         gridContentHtml = `
           <div class="tycoon-stock-empty-msg">
-            📦 보관 중인 재고가 없습니다.<br/>
-            <b>[⚗️조합]</b>하면 카운터 중앙 접시에 올라가며, 접시 위 음료를 터치하면 이곳 <b>[📦재고]</b>에 보관됩니다!
+            📦 보관 중인 주류/음료가 없습니다.<br/>
+            <b>[⚗️조합]</b>하면 카운터 중앙 접시에 올라가며, 접시 위 음료를 터치하면 이곳 <b>[📦]</b> 탭에 보관됩니다!
           </div>
         `;
       } else {
@@ -568,8 +537,8 @@ class TycoonView {
     return `
       <div class="tycoon-compact-ings-area">
         <div class="tycoon-cat-strip cat-filter-bar">
-          ${stockTabHtml}
           ${catChipsHtml}
+          ${stockTabHtml}
         </div>
         <div class="tycoon-ings-scroll-grid">
           ${gridContentHtml}
@@ -873,26 +842,15 @@ class TycoonView {
       };
     });
 
-    // 2. 상단 HUD 아이콘 버튼 (BGM 토글 포함)
-    const bgmBtn = container.querySelector('#tycoon-toggle-bgm-btn');
-    if (bgmBtn) {
-      bgmBtn.onclick = () => {
-        if (!this.audio) return;
-        const enabled = this.audio.toggleTycoonBgm();
-        if (enabled && this.engine.session.status === 'PLAYING') {
-          this.audio.startTycoonBgm(this.engine.session.wave || 1);
-        }
-        this.audio.playTap();
-        this.render();
-      };
-    }
-
-    const nbBtn = container.querySelector('#tycoon-open-notebook-btn');
-    if (nbBtn) {
-      nbBtn.onclick = () => {
+    // 2. 상단 HUD 아이콘 버튼 (우측 상단 전역 설정 모달 음량 연동 포함)
+    const globalSettingsBtn = container.querySelector('#tycoon-open-global-settings-btn');
+    if (globalSettingsBtn) {
+      globalSettingsBtn.onclick = () => {
         this.audio?.playTap?.();
-        this.activeSubModal = 'NOTEBOOK';
-        this.render();
+        const headerSettingsBtn = document.getElementById('open-settings-btn');
+        if (headerSettingsBtn) {
+          headerSettingsBtn.click();
+        }
       };
     }
 

@@ -74,23 +74,28 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
    ========================================================================= */
 .tycoon-compact-hud {
   flex-shrink: 0;
-  height: 34px;
+  height: 36px;
+  min-height: 36px;
   padding: 0 8px;
   background: rgba(9, 13, 22, 0.94);
   border-bottom: 1px solid rgba(71, 85, 105, 0.45);
   display: flex;
+  flex-direction: row !important;
   align-items: center;
   justify-content: space-between;
   gap: 6px;
   z-index: 10;
+  box-sizing: border-box;
 }
 
 .hud-left {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
-  font-size: 0.73rem;
+  gap: 5px;
+  font-size: 0.72rem;
   min-width: 0;
+  flex: 1;
   overflow: hidden;
 }
 
@@ -98,12 +103,12 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(180, 83, 9, 0.35));
   border: 1px solid rgba(251, 191, 36, 0.55);
   color: #fde047;
-  font-size: 0.64rem;
+  font-size: 0.63rem;
   font-weight: 900;
   padding: 2px 6px;
   border-radius: 6px;
   white-space: nowrap;
-  max-width: 118px;
+  max-width: 106px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -128,19 +133,29 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   background: rgba(249, 115, 22, 0.2);
   border: 1px solid #fb923c;
   color: #fdba74;
-  font-size: 0.63rem;
+  font-size: 0.62rem;
   font-weight: 900;
   padding: 1px 5px;
   border-radius: 999px;
+  flex-shrink: 0;
 }
 
 .hud-pill {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
+  line-height: 1;
   font-weight: 900;
-  padding: 2px 6px;
+  padding: 3px 6px;
   border-radius: 6px;
-  background: rgba(30, 41, 59, 0.85);
+  background: rgba(30, 41, 59, 0.9);
   white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.hud-pill.lives-pill {
+  border: 1px solid rgba(244, 63, 94, 0.45);
+  letter-spacing: 1px;
 }
 
 .hud-pill.timer-pill {
@@ -161,24 +176,26 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 
 .hud-right {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
 }
 
 .hud-icon-btn {
-  width: 27px;
+  width: 26px;
   height: 25px;
   border-radius: 7px;
   border: 1px solid #475569;
   background: #1e293b;
   color: #f8fafc;
-  font-size: 0.76rem;
+  font-size: 0.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .hud-icon-btn.exit-btn {
@@ -201,7 +218,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 
 .counter-scene-vignette {
@@ -209,25 +226,25 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(9, 13, 22, 0.25) 0%,
-    rgba(9, 13, 22, 0.05) 55%,
-    rgba(9, 13, 22, 0.22) 100%
+    rgba(9, 13, 22, 0.18) 0%,
+    rgba(9, 13, 22, 0.02) 55%,
+    rgba(9, 13, 22, 0.14) 100%
   );
   pointer-events: none;
   z-index: 1;
 }
 
-/* (A) 카운터 뒤 손님 1명 & 말풍선 영역 (상단 ~ 중단 60%) */
+/* (A) 카운터 바 바로 너머로 찾아온 상반신 일러스트 손님 1명 & 말풍선 영역 */
 .counter-customer-stage {
   position: relative;
   z-index: 3;
-  height: 62%;
+  height: 70%;
   width: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  gap: 10px;
-  padding: 6px 12px 0;
+  gap: 8px;
+  padding: 4px 10px 0;
   box-sizing: border-box;
 }
 
@@ -237,13 +254,21 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   align-items: center;
   justify-content: flex-end;
   position: relative;
-  animation: custArrivePop 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  margin-bottom: -4px;
+  animation: custArrivePop 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.counter-cust-avatar-wrap {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  line-height: 0;
 }
 
 @keyframes custArrivePop {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.92);
+    transform: translateY(14px) scale(0.94);
   }
   to {
     opacity: 1;
@@ -261,21 +286,25 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 .counter-cust-name-tag {
-  margin-top: -4px;
-  background: rgba(9, 13, 22, 0.88);
-  border: 1px solid rgba(251, 191, 36, 0.6);
+  margin-top: -10px;
+  position: relative;
+  z-index: 2;
+  background: rgba(9, 13, 22, 0.9);
+  border: 1px solid rgba(251, 191, 36, 0.65);
   color: #fef3c7;
-  font-size: 0.64rem;
+  font-size: 0.63rem;
   font-weight: 900;
   padding: 1px 8px;
   border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
   white-space: nowrap;
 }
 
 /* 붕어빵 타이쿤 스타일 주문 말풍선 */
 .counter-order-bubble {
   position: relative;
+  align-self: center;
+  margin-bottom: 10px;
   background: rgba(255, 255, 255, 0.96);
   color: #0f172a;
   border: 2.5px solid #1e293b;
@@ -439,43 +468,44 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   background: linear-gradient(90deg, #ef4444, #dc2626);
 }
 
-/* (B) 카운터 바 하단 영역: 왼쪽 메뉴판 / 정중앙 서빙 접시 / 오른쪽 서비스 종 이미지 */
+/* (B) 카운터 바 인터랙션 오버레이 (배경 560x440 좌표계와 1:1 매핑) */
 .counter-bar-interactive-layer {
-  position: relative;
+  position: absolute;
+  inset: 0;
   z-index: 4;
-  height: 38%;
-  width: 100%;
+  pointer-events: none;
 }
 
 /* 왼쪽 메뉴판 핫스팟 */
 .counter-menu-hotspot {
   position: absolute;
-  left: 16%;
-  bottom: 16%;
-  transform: translateX(-50%);
-  background: rgba(9, 13, 22, 0.76);
+  left: 28%;
+  bottom: 12%;
+  transform: translate(-50%, 50%);
+  pointer-events: auto;
+  background: rgba(9, 13, 22, 0.78);
   border: 1px solid rgba(251, 191, 36, 0.65);
   color: #fef3c7;
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 900;
-  padding: 3px 7px;
+  padding: 2px 7px;
   border-radius: 7px;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
 }
 
 .counter-menu-hotspot:active {
-  transform: translateX(-50%) scale(0.94);
+  transform: translate(-50%, 50%) scale(0.94);
 }
 
 /* 정중앙 서빙 접시 (배경 이미지의 중앙 접시 위치와 정확히 일치) */
 .counter-plate-zone {
   position: absolute;
   left: 50%;
-  bottom: 8%;
-  transform: translateX(-50%);
-  width: 112px;
-  height: 64px;
+  bottom: 11.5%;
+  transform: translate(-50%, 50%);
+  width: 116px;
+  height: 62px;
   border-radius: 50%;
   display: flex;
   flex-direction: column;
@@ -486,21 +516,22 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 .counter-plate-zone.empty-plate {
-  border: 1.5px dashed rgba(255, 255, 255, 0.32);
-  background: rgba(9, 13, 22, 0.22);
+  border: 1.5px dashed rgba(255, 255, 255, 0.28);
+  background: rgba(9, 13, 22, 0.16);
   pointer-events: none;
 }
 
 .empty-plate-hint {
-  font-size: 0.58rem;
+  font-size: 0.56rem;
   font-weight: 800;
   color: rgba(248, 250, 252, 0.78);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .counter-plate-zone.has-item {
+  pointer-events: auto;
   cursor: pointer;
-  background: radial-gradient(ellipse at center, rgba(254, 240, 138, 0.32) 0%, rgba(15, 23, 42, 0.45) 75%);
+  background: radial-gradient(ellipse at center, rgba(254, 240, 138, 0.32) 0%, rgba(15, 23, 42, 0.42) 75%);
   border: 2px solid rgba(251, 191, 36, 0.85);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65);
   animation: plateItemDrop 0.22s cubic-bezier(0.22, 1, 0.36, 1);
@@ -512,16 +543,16 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 .counter-plate-zone.has-item:active {
-  transform: translateX(-50%) scale(0.93);
+  transform: translate(-50%, 50%) scale(0.93);
 }
 
 @keyframes plateItemDrop {
   from {
-    transform: translateX(-50%) translateY(-16px) scale(0.8);
+    transform: translate(-50%, calc(50% - 14px)) scale(0.8);
     opacity: 0;
   }
   to {
-    transform: translateX(-50%) translateY(0) scale(1);
+    transform: translate(-50%, 50%) scale(1);
     opacity: 1;
   }
 }
@@ -538,7 +569,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   background: rgba(9, 13, 22, 0.92);
   border: 1px solid #fbbf24;
   color: #fde047;
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 900;
   padding: 1px 7px;
   border-radius: 999px;
@@ -550,7 +581,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 .plate-store-hint {
-  font-size: 0.52rem;
+  font-size: 0.5rem;
   font-weight: 900;
   color: #6ee7b7;
   background: rgba(6, 78, 59, 0.9);
@@ -560,58 +591,46 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   margin-top: 1px;
 }
 
-/* 오른쪽 데스크 서비스 벨 (종 이미지 - 버튼 테두리 없이 실제 오브젝트처럼 배치) */
+/* 배경 이미지에 직접 그려진 오른쪽 종 위치의 투명 터치 핫스팟 */
 .counter-service-bell-spot {
   position: absolute;
-  right: 8%;
-  bottom: 6%;
-  width: 72px;
-  height: 64px;
+  left: 70%;
+  bottom: 11%;
+  transform: translate(-50%, 50%);
+  width: 68px;
+  height: 54px;
+  border-radius: 50%;
+  pointer-events: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   cursor: pointer;
+  background: transparent;
+  border: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.1s ease, filter 0.2s ease;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
 }
 
 .counter-service-bell-spot:active {
-  transform: scale(0.92) translateY(2px);
+  transform: translate(-50%, 50%) scale(0.92);
 }
 
 .counter-service-bell-spot.bell-ready-match {
-  filter: drop-shadow(0 0 10px rgba(74, 222, 128, 0.85));
+  box-shadow: 0 0 18px 4px rgba(74, 222, 128, 0.55);
 }
 
 .counter-service-bell-spot.bell-ready-any {
-  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.75));
-}
-
-.counter-service-bell-spot.bell-ringing .service-bell-svg {
-  animation: bellRingShake 0.36s ease-in-out;
-}
-
-.counter-service-bell-spot.bell-ringing .bell-top-pin {
-  transform: translateY(3px);
-}
-
-@keyframes bellRingShake {
-  0% { transform: rotate(0deg); }
-  20% { transform: rotate(-12deg) scale(1.06); }
-  40% { transform: rotate(12deg) scale(1.06); }
-  60% { transform: rotate(-8deg); }
-  80% { transform: rotate(8deg); }
-  100% { transform: rotate(0deg); }
+  box-shadow: 0 0 14px 3px rgba(251, 191, 36, 0.45);
 }
 
 .bell-sound-waves {
   position: absolute;
-  top: -6px;
+  top: -10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
-  height: 24px;
+  width: 64px;
+  height: 28px;
   pointer-events: none;
   opacity: 0;
 }
@@ -623,7 +642,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 .bell-wave {
   position: absolute;
   inset: 0;
-  border-top: 2.5px solid #fde047;
+  border-top: 2.8px solid #fde047;
   border-radius: 50%;
   animation: bellWaveSpread 0.42s ease-out infinite;
 }
@@ -638,25 +657,9 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
     opacity: 1;
   }
   to {
-    transform: scale(1.35);
+    transform: scale(1.4);
     opacity: 0;
   }
-}
-
-.bell-ting-badge {
-  position: absolute;
-  top: -4px;
-  right: -2px;
-  background: linear-gradient(135deg, #22c55e, #10b981);
-  color: #052e16;
-  border: 1.5px solid #fef08a;
-  font-size: 0.58rem;
-  font-weight: 900;
-  padding: 1px 6px;
-  border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
-  animation: tycoonPulse 0.55s infinite alternate;
-  pointer-events: none;
 }
 
 /* =========================================================================
@@ -798,11 +801,14 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   flex-shrink: 0;
 }
 
-/* [📦 재고] 전용 탭 칩 강조 */
+/* [📦] 전용 아이콘 탭 칩 (가장 오른쪽 배치) */
 .tycoon-cat-chip.stock-tab-chip {
+  margin-left: auto;
   border-color: rgba(16, 185, 129, 0.55);
   color: #6ee7b7;
   background: rgba(6, 78, 59, 0.45);
+  padding: 4px 10px !important;
+  font-size: 0.78rem !important;
 }
 
 .tycoon-cat-chip.stock-tab-chip.active {
