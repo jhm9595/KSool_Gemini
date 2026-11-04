@@ -1,26 +1,21 @@
 window.KSool = window.KSool || {};
 
 /**
- * 🏮 주막 타이쿤 (Tycoon Main Game) - 핵심 경영·재고·난이도·가격 산정 엔진
+ * 🏮 주막 타이쿤 (Tycoon Main Game) - 붕어빵 타이쿤 스타일 카운터·접시·종 서빙 & 6단계 점포 해금 엔진
  *
  * [핵심 메커니즘]
- * 1. 조합물 재고 축적 (Stockpile) & 재료 재고 실시간 연동:
- *    - 조합한 결과물(중간 재료 or 최종 완성품)이 [📦재고] 탭에 1개씩 쌓입니다.
- *    - 재고에 있는 제품이 재료에도 존재하는 경우(예: 소주, 맥주, 막걸리, 아이스크림 등),
- *      재료 탭에서도 재고 수량이 배지로 함께 표시되며 서빙 시 두 군데 수량이 동시에 차감됩니다!
- * 2. 1원 단위 정밀 가격 산정 (1-Won Precision Pricing):
- *    - 기본 단가 + 총 투입 개수(sumRatio) 비례 단가 + 재료 가짓수(slotCount) 보너스
- *      + 연쇄 합성 깊이(chainDepth) 보너스 + 난이도(EASY/NORMAL/MASTER) 배율
- *      + 단골 기억 주문('늘 먹던 걸로') 프리미엄 보너스
- *      + 연속 서빙 콤보 보너스를 합산하여 1원 단위(예: 29원, 68원, 143원)로 정확히 계산합니다.
- * 3. 주막 공간 & 좌석 안내 시스템 (Tavern Seating + Queue):
- *    - 입구 대기열에 손님이 찾아오면 빈 좌석(1~4번 테이블)을 눌러 안내(또는 자동 안내)하여 앉히고 주문을 받습니다.
- * 4. 난이도 상승 알고리즘 (Infinite Progressive Scaling):
- *    - [난이도 축 1: 다중/연쇄 조합] 2재료 기초 조합 -> 3~4재료 다중 혼합 & 중간 조합 재료 필수 레시피 -> 황금비율 & 특산 명주
- *    - [난이도 축 2: 고유 단골 손님의 "늘 먹던 걸로 주세요!" (Memory Order)]
- *      유니크하지만 헷갈리는 외형(모자/안경/수염/의상)을 가진 단골 손님이
- *      초반에는 자기 시그니처 메뉴를 말해주지만, 재방문 및 고난이도 웨이브에서는
- *      "늘 먹던 걸로 주세요!"(❓단골술)라고 주문합니다.
+ * 1. 1인 카운터 대면 & 말풍선 주문 (x1 고정):
+ *    - 상단 45% 카운터 배경 앞에 손님 1명이 찾아와 말풍선으로 원하는 주류/음료 1개(x1)를 주문합니다.
+ * 2. 중앙 접시(Center Serving Plate) & [📦재고] 양방향 연동:
+ *    - 하단 주조대에서 [⚗️조합]을 누르면 완성품이 카운터 중앙 접시(platedStockKey) 위로 바로 올라갑니다.
+ *      (만약 접시에 이미 다른 완성품이 올려져 있었다면 기존 접시 아이템은 자동으로 [📦재고]로 이동하여 유실되지 않습니다.)
+ *    - 접시 위의 아이템을 터치하면 [📦재고] 탭으로 보관되며, 반대로 [📦재고] 탭의 아이템을 터치하면 접시 위로 올라옵니다.
+ * 3. 오른쪽 서비스 벨(🛎️ 종 이미지) 터치 서빙:
+ *    - 카운터 오른쪽의 종 이미지를 터치하면 "땡~!" 종소리가 울리며 접시 위의 음료를 손님에게 전달합니다.
+ * 4. 6단계 점포 배경 해금 & 판매 가능 메뉴 확장:
+ *    - 1단계 [길거리 노점](무료)에서는 미국 아이들이 길거리에서 레모네이드를 팔듯 초보 음료/기초 조합만 주문받으며,
+ *      장사로 번 자금(💰자산)으로 2단계 포장마차 ~ 6단계 사이버펑크 미래도시 바를 해금할수록
+ *      배경이 바뀌고 판매 가능한 주류/음료 종류와 판매 단가 배율이 함께 상승합니다!
  */
 class TycoonEngine {
   constructor({ config, recipeBook, brandResolver, audio }) {
@@ -34,12 +29,96 @@ class TycoonEngine {
 
     this.PERSIST_KEY = 'ksool_tycoon_persistent_v1';
 
-    // 상시 누적 통계 및 주조실에서 미리 만들어 쌓아둔 선반 재고
+    // 6단계 점포(배경) 정의: 길거리 노점 -> 포장마차 -> 목조 주막 -> 크래프트 비어 펍 -> 스카이라인 라운지 -> 미래도시 바
+    this.MAP_STAGES = [
+      {
+        id: 'stage_1',
+        stageNum: 1,
+        icon: '🍋',
+        name: '길거리 노점',
+        subtitle: '미국 골목길 레모네이드 & 기초 음료 노점',
+        bgImage: './assets/tycoon/bg_stage_1.jpg',
+        unlockCost: 0,
+        priceMultiplier: 1.0,
+        maxRecipeStep: 1,
+        extraRecipeIds: [14, 15, 58, 34, 35, 36, 37, 53, 59, 65, 3, 23, 32, 66, 16, 20],
+        menuSummary: '레몬에이드·사이다·우유·아메리카노·소맥 등 초보 조합 (22종)'
+      },
+      {
+        id: 'stage_2',
+        stageNum: 2,
+        icon: '⛺',
+        name: '이모네 포장마차',
+        subtitle: '정겨운 밤거리 주황 천막 포차',
+        bgImage: './assets/tycoon/bg_stage_2.jpg',
+        unlockCost: 300,
+        priceMultiplier: 1.15,
+        maxRecipeStep: 3,
+        extraRecipeIds: [],
+        menuSummary: '밀키스주·레몬소주·링겔주·아이스바 칵테일 해금 (35종)'
+      },
+      {
+        id: 'stage_3',
+        stageNum: 3,
+        icon: '🏮',
+        name: '동네 목조 주막',
+        subtitle: '따뜻한 조명과 나무 향기가 가득한 전통 주막',
+        bgImage: './assets/tycoon/bg_stage_3.jpg',
+        unlockCost: 800,
+        priceMultiplier: 1.30,
+        maxRecipeStep: 4,
+        extraRecipeIds: [],
+        menuSummary: '막걸리·과일막걸리·복분자주·태극주·초코주 해금 (54종)'
+      },
+      {
+        id: 'stage_4',
+        stageNum: 4,
+        icon: '🍺',
+        name: '크래프트 비어 펍',
+        subtitle: '네온사인과 브루어리 탱크가 빛나는 수제맥주 펍',
+        bgImage: './assets/tycoon/bg_stage_4.jpg',
+        unlockCost: 1800,
+        priceMultiplier: 1.50,
+        maxRecipeStep: 5,
+        extraRecipeIds: [],
+        menuSummary: '더치 라거·막사·복소사·에너자이저주·홍차주 해금 (62종)'
+      },
+      {
+        id: 'stage_5',
+        stageNum: 5,
+        icon: '🥂',
+        name: '스카이라인 라운지 바',
+        subtitle: '도심 야경이 내려다보이는 럭셔리 호텔 라운지',
+        bgImage: './assets/tycoon/bg_stage_5.jpg',
+        unlockCost: 3500,
+        priceMultiplier: 1.75,
+        maxRecipeStep: 6,
+        extraRecipeIds: [],
+        menuSummary: '소토닉·고진감래주·만능열쇠 홍차주 등 고급 연쇄 칵테일 해금 (68종)'
+      },
+      {
+        id: 'stage_6',
+        stageNum: 6,
+        icon: '🚀',
+        name: '사이버펑크 미래도시 바',
+        subtitle: '홀로그램 메뉴와 비행선이 오가는 미래도시 주막',
+        bgImage: './assets/tycoon/bg_stage_6.jpg',
+        unlockCost: 6500,
+        priceMultiplier: 2.10,
+        maxRecipeStep: 7,
+        extraRecipeIds: [],
+        menuSummary: '황금비율 명주 & 전국 특산주 포함 도감 100% 전 메뉴 해금 (80종)'
+      }
+    ];
+
+    // 상시 누적 통계 및 해금 상태
     this.persistentWallet = 0; // 누적 보유 자금 (원)
+    this.unlockedMapStageIds = new Set(['stage_1']);
+    this.selectedMapStageId = 'stage_1';
     this.persistentBestTimeAttack = { servedCount: 0, totalEarnings: 0, maxCombo: 0 };
     this.persistentBestInfinite = { servedCount: 0, totalEarnings: 0, maxCombo: 0, maxWave: 1 };
     this.savedBrewStash = {}; // stockKey -> count
-    this.knownRegularIds = new Set(); // 한 번 이상 대면하여 도감에 기록된 단골 손님 ID
+    this.knownRegularIds = new Set();
 
     this._loadPersistentData();
 
@@ -68,6 +147,13 @@ class TycoonEngine {
       if (Array.isArray(parsed.knownRegularIds)) {
         parsed.knownRegularIds.forEach(id => this.knownRegularIds.add(id));
       }
+      if (Array.isArray(parsed.unlockedMapStageIds)) {
+        parsed.unlockedMapStageIds.forEach(id => this.unlockedMapStageIds.add(id));
+      }
+      this.unlockedMapStageIds.add('stage_1');
+      if (parsed.selectedMapStageId && this.unlockedMapStageIds.has(parsed.selectedMapStageId)) {
+        this.selectedMapStageId = parsed.selectedMapStageId;
+      }
     } catch (_) {}
   }
 
@@ -75,12 +161,86 @@ class TycoonEngine {
     try {
       localStorage.setItem(this.PERSIST_KEY, JSON.stringify({
         persistentWallet: this.persistentWallet,
+        unlockedMapStageIds: Array.from(this.unlockedMapStageIds),
+        selectedMapStageId: this.selectedMapStageId,
         persistentBestTimeAttack: this.persistentBestTimeAttack,
         persistentBestInfinite: this.persistentBestInfinite,
         savedBrewStash: this.savedBrewStash,
         knownRegularIds: Array.from(this.knownRegularIds)
       }));
     } catch (_) {}
+  }
+
+  // =========================================================================
+  // 6단계 점포 배경(맵) 조회 · 해금 · 선택
+  // =========================================================================
+
+  getCurrentMapStage() {
+    return this.MAP_STAGES.find(m => m.id === this.selectedMapStageId) || this.MAP_STAGES[0];
+  }
+
+  getStageAllowedRecipes(stageId = this.selectedMapStageId) {
+    const stage = this.MAP_STAGES.find(m => m.id === stageId) || this.MAP_STAGES[0];
+    const allRecipes = this.recipeBook ? this.recipeBook.getAllRecipes() : [];
+    const extraSet = new Set(stage.extraRecipeIds || []);
+    return allRecipes.filter(r => {
+      const step = Number(r.step_id) || 1;
+      return step <= stage.maxRecipeStep || extraSet.has(Number(r.recipe_id));
+    });
+  }
+
+  getMapStagesWithStatus() {
+    return this.MAP_STAGES.map(stage => {
+      const unlocked = this.unlockedMapStageIds.has(stage.id);
+      const selected = this.selectedMapStageId === stage.id;
+      const allowedRecipes = this.getStageAllowedRecipes(stage.id);
+      return {
+        ...stage,
+        unlocked,
+        selected,
+        allowedRecipeCount: allowedRecipes.length
+      };
+    });
+  }
+
+  unlockMapStage(stageId) {
+    const stage = this.MAP_STAGES.find(m => m.id === stageId);
+    if (!stage) return { ok: false, message: '존재하지 않는 점포입니다.' };
+    if (this.unlockedMapStageIds.has(stageId)) {
+      this.selectedMapStageId = stageId;
+      this.savePersistentData();
+      return { ok: true, alreadyUnlocked: true, stage };
+    }
+    if (this.persistentWallet < stage.unlockCost) {
+      this.audio?.playFail?.();
+      return {
+        ok: false,
+        message: `자금이 부족합니다! (필요: ${stage.unlockCost.toLocaleString()}원 / 보유: ${this.persistentWallet.toLocaleString()}원)`
+      };
+    }
+
+    this.persistentWallet -= stage.unlockCost;
+    this.unlockedMapStageIds.add(stageId);
+    this.selectedMapStageId = stageId;
+    this.savePersistentData();
+    this.audio?.playSuccess?.();
+
+    return {
+      ok: true,
+      stage,
+      remainingWallet: this.persistentWallet
+    };
+  }
+
+  selectMapStage(stageId) {
+    const stage = this.MAP_STAGES.find(m => m.id === stageId);
+    if (!stage) return { ok: false, message: '존재하지 않는 점포입니다.' };
+    if (!this.unlockedMapStageIds.has(stageId)) {
+      return { ok: false, message: '아직 해금되지 않은 점포입니다.' };
+    }
+    this.selectedMapStageId = stageId;
+    this.savePersistentData();
+    return { ok: true, stage };
   }
 
   /**
@@ -96,9 +256,6 @@ class TycoonEngine {
     this.savePersistentData();
   }
 
-  /**
-   * 스톡 키 생성: `rec_{recipeId}`
-   */
   buildStockKey(recipeId) {
     const rId = Number(recipeId);
     return `rec_${rId}`;
@@ -131,9 +288,7 @@ class TycoonEngine {
   }
 
   /**
-   * 1원 단위 정교한 가격 계산 공식
-   * - 난이도(EASY/NORMAL/MASTER), 총 재료 개수(sumRatio), 슬롯 종류 수(itemCount),
-   *   하위 조합 재료(중간재) 포함 개수, 단골 기억 주문(MEMORY) 여부에 따라 1원 단위 산출
+   * 1원 단위 정교한 가격 계산 공식 (점포 단계별 배율 priceMultiplier 반영)
    */
   calculateOrderPrice(recipeId, orderType = 'NORMAL', combo = 0, wave = 1) {
     const rec = this.recipeBook.getRecipe(recipeId);
@@ -143,7 +298,6 @@ class TycoonEngine {
     const sumRatio = items.reduce((acc, it) => acc + (Number(it.ratio) || 1), 0);
     const slotCount = items.length;
 
-    // 중간 조합 재료(Non-leaf)가 몇 개 들어가는지 계산 (연쇄 조합 가중치)
     let craftedSubIngCount = 0;
     for (const it of items) {
       if (!this.recipeBook.isLeafIngredient(it.ingredient_id)) {
@@ -151,7 +305,7 @@ class TycoonEngine {
       }
     }
 
-    // 1) 기본 원가 (총 재료 개수 * 7원 + 슬롯 종류 수 * 5원 + 연쇄 중간재료 수 * 9원)
+    // 1) 기본 원가
     const baseMaterialValue = (sumRatio * 7) + (slotCount * 5) + (craftedSubIngCount * 9);
 
     // 2) 레시피 난이도 배율
@@ -160,7 +314,7 @@ class TycoonEngine {
     else if (rec.difficulty === 'MASTER') diffMultiplier = 1.85;
     else if (slotCount >= 3) diffMultiplier = 1.22;
 
-    // 3) 주문 특수 난이도 배율 (늘 먹던 걸로 기억 주문)
+    // 3) 단골 기억 주문 배율
     let orderTypeMultiplier = 1.0;
     let specialFlatBonus = 0;
     if (orderType === 'MEMORY') {
@@ -168,11 +322,15 @@ class TycoonEngine {
       specialFlatBonus = 23;
     }
 
-    // 4) 웨이브 & 콤보 프리미엄 (1원 단위 정밀도 부여)
+    // 4) 현재 선택된 점포(배경) 프리미엄 배율
+    const stage = this.getCurrentMapStage();
+    const stageMultiplier = stage ? (stage.priceMultiplier || 1.0) : 1.0;
+
+    // 5) 웨이브 & 콤보 프리미엄
     const waveBonus = Math.max(0, (wave - 1) * 4);
     const comboTip = Math.min(50, combo * 3);
 
-    const rawPrice = (baseMaterialValue * diffMultiplier * orderTypeMultiplier) + specialFlatBonus + waveBonus + comboTip;
+    const rawPrice = ((baseMaterialValue * diffMultiplier * orderTypeMultiplier) + specialFlatBonus + waveBonus + comboTip) * stageMultiplier;
     return Math.max(12, Math.round(rawPrice));
   }
 
@@ -183,7 +341,6 @@ class TycoonEngine {
   resetSession(mode = 'INFINITE') {
     const stockMap = new Map();
 
-    // 주조실이나 사전 준비로 만들어둔 보관함 재고가 있으면 세션 시작 재고로 로드
     for (const [k, cnt] of Object.entries(this.savedBrewStash)) {
       const cleanKey = k.split('_omit_')[0];
       if (cnt > 0 && cleanKey.startsWith('rec_')) {
@@ -191,7 +348,6 @@ class TycoonEngine {
       }
     }
 
-    // 기본 기초 재료 중 아직 재고에 하나도 없으면 초보 배려용 소주 1개, 맥주 1개, 얼음 1개 기본 비치
     if (stockMap.size === 0) {
       stockMap.set('rec_5', 1);  // 소주 1개
       stockMap.set('rec_4', 1);  // 맥주 1개
@@ -201,31 +357,29 @@ class TycoonEngine {
     this.session = {
       mode, // 'TIME_ATTACK' | 'INFINITE'
       status: 'LOBBY', // 'LOBBY' | 'PLAYING' | 'GAMEOVER'
+      mapStageId: this.selectedMapStageId,
       lives: 3,
       maxLives: 3,
-      timeLeftSec: mode === 'TIME_ATTACK' ? 180 : 0, // 타임어택 180초(3분)
+      timeLeftSec: mode === 'TIME_ATTACK' ? 180 : 0,
       elapsedSec: 0,
       servedCount: 0,
       totalEarnings: 0,
       combo: 0,
       maxCombo: 0,
       wave: 1,
-      selectedTableIdx: 0, // 현재 주조/서빙 타겟으로 선택된 테이블 (0 ~ 3)
-      autoSeatEnabled: true,
-      waitingQueue: [],
-      tables: [
-        { tableIdx: 0, label: '1번석 (창가)', customer: null, order: null },
-        { tableIdx: 1, label: '2번석 (중앙)', customer: null, order: null },
-        { tableIdx: 2, label: '3번석 (바테이블)', customer: null, order: null },
-        { tableIdx: 3, label: '4번석 (안쪽방)', customer: null, order: null }
-      ],
+      // 1인 카운터 손님 & 주문 (붕어빵 타이쿤 방식, 주문 수량 x1 고정)
+      activeCustomer: null,
+      activeOrder: null,
+      // 카운터 중앙 접시 위에 현재 올려진 완성품 스톡 키 (없으면 null)
+      platedStockKey: null,
       // 타이쿤 전용 미니 주조 가마솥 슬롯: [{ baseId, detailId, count }]
       potSlots: [],
-      // 조합으로 만들어 쌓인 재고: Map<stockKey, count>
+      // [📦 재고] 탭에 보관된 완성품 재고: Map<stockKey, count>
       stockMap,
-      // 이번 세션에서 이미 방문해 얼굴과 주문을 익힌 손님 ID -> 방문 횟수
+      // 이번 세션에서 방문한 손님 ID -> 방문 횟수 & 해당 손님이 이번 점포에서 시킨 고정 메뉴 ID
       sessionCustomerVisits: new Map(),
-      lastLogMessage: '🏮 주막 문을 열 준비가 되었습니다! 손님을 자리에 안내하고 주문을 맞춰 서빙하세요.'
+      customerSessionRecipeMap: new Map(),
+      lastLogMessage: '🏮 카운터 영업 준비가 완료되었습니다! 조합해서 접시에 올리고 종을 울려 서빙하세요!'
     };
     return this.session;
   }
@@ -233,21 +387,15 @@ class TycoonEngine {
   startGame(mode) {
     this.resetSession(mode);
     this.session.status = 'PLAYING';
-    this.session.lastLogMessage = mode === 'TIME_ATTACK'
-      ? '⏱️ [타임어택 시작!] 180초 동안 최대한 많은 손님에게 정확한 조합을 만들어 판매하세요!'
-      : '♾️ [무한모드 시작!] 목숨은 3개! 뒤로 갈수록 다중 조합과 단골 기억 주문이 등장합니다!';
+    this.session.mapStageId = this.selectedMapStageId;
+    const stage = this.getCurrentMapStage();
+    this.session.lastLogMessage = `${stage.icon} [${stage.name}] 영업 시작! 조합을 완성해 접시에 올리고 오른쪽 종(🛎️)을 치세요!`;
 
-    this._spawnWaitingCustomer();
-    this._spawnWaitingCustomer();
-    if (this.session.autoSeatEnabled) {
-      this.seatNextCustomerToTable(0);
-      this.seatNextCustomerToTable(1);
-    }
-    this.session.selectedTableIdx = 0;
+    this._spawnCounterCustomer();
   }
 
   /**
-   * 현재 서빙 횟수(servedCount)에 따른 무한 난이도 웨이브(Wave) 및 출제 확률 파라미터 계산
+   * 현재 서빙 횟수(servedCount)에 따른 무한 난이도 웨이브(Wave) 계산
    */
   getDifficultyProfile() {
     const sc = this.session ? this.session.servedCount : 0;
@@ -256,239 +404,186 @@ class TycoonEngine {
       this.session.wave = Math.max(this.session.wave, wave);
     }
 
+    const stage = this.getCurrentMapStage();
+    const stageCeiling = stage ? stage.maxRecipeStep : 2;
+
     if (wave === 1) {
       return {
         wave: 1,
-        title: 'Wave 1 · 초보 주막 (기본 주문 & 단골 얼굴 익히기)',
-        maxRecipeStep: 2,
+        maxRecipeStep: Math.min(stageCeiling, 2),
         probMemory: 0.0
       };
     } else if (wave === 2) {
       return {
         wave: 2,
-        title: 'Wave 2 · 3재료 다중 조합 등장!',
-        maxRecipeStep: 4,
-        probMemory: 0.25
+        maxRecipeStep: Math.min(stageCeiling, 4),
+        probMemory: 0.22
       };
     } else if (wave === 3) {
       return {
         wave: 3,
-        title: 'Wave 3 · 단골 손님 ["늘 먹던 걸로!"] 기억 테스트 본격화!',
-        maxRecipeStep: 5,
-        probMemory: 0.45
+        maxRecipeStep: Math.min(stageCeiling, 5),
+        probMemory: 0.35
       };
     } else if (wave === 4) {
       return {
         wave: 4,
-        title: 'Wave 4 · 황금비율 & 단골 기억 주문',
-        maxRecipeStep: 6,
-        probMemory: 0.60
+        maxRecipeStep: Math.min(stageCeiling, 6),
+        probMemory: 0.45
       };
     } else {
       const extra = Math.min(0.20, (wave - 5) * 0.05);
       return {
         wave,
-        title: `Wave ${wave} · 전설의 대주막 (고난도 비율·특산·단골 기억 극한 도전)`,
-        maxRecipeStep: 7,
-        probMemory: Math.min(0.80, 0.60 + extra)
+        maxRecipeStep: stageCeiling,
+        probMemory: Math.min(0.65, 0.45 + extra)
       };
     }
   }
 
   /**
-   * 손님 1명과 그 손님의 주문을 생성하여 대기열(waitingQueue)에 추가
+   * 카운터에 찾아올 손님 1명과 주문(x1) 생성
    */
-  _spawnWaitingCustomer() {
-    if (!this.session || this.session.waitingQueue.length >= 3) return null;
+  _spawnCounterCustomer() {
+    if (!this.session) return null;
 
     const profile = this.getDifficultyProfile();
-    const allCustomers = this.customerPool.getAllCustomers();
+    const stage = this.getCurrentMapStage();
+    const stageAllowedRecipes = this.getStageAllowedRecipes(stage.id);
+    const stageAllowedIds = new Set(stageAllowedRecipes.map(r => Number(r.recipe_id)));
+    const extraIds = new Set(stage.extraRecipeIds || []);
 
-    // 현재 테이블이나 대기열에 이미 있는 손님은 중복 등장하지 않도록 필터링
-    const activeCustIds = new Set();
-    this.session.waitingQueue.forEach(w => activeCustIds.add(w.customer.id));
-    this.session.tables.forEach(t => {
-      if (t.customer) activeCustIds.add(t.customer.id);
+    // 현재 웨이브 단계에 맞는 레시피 후보군 (해당 점포 허용 범위 내)
+    const waveAllowedRecipes = stageAllowedRecipes.filter(r => {
+      const step = Number(r.step_id) || 1;
+      return step <= profile.maxRecipeStep || extraIds.has(Number(r.recipe_id));
     });
+    const recipePool = waveAllowedRecipes.length > 0 ? waveAllowedRecipes : stageAllowedRecipes;
 
-    const availableCustomers = allCustomers.filter(c => !activeCustIds.has(c.id));
-    if (availableCustomers.length === 0) return null;
+    const allCustomers = this.customerPool.getAllCustomers();
+    const prevCustId = this.session.activeCustomer?.id || null;
+    const candidates = allCustomers.filter(c => c.id !== prevCustId);
+    const availableCustomers = candidates.length > 0 ? candidates : allCustomers;
 
-    // 이미 방문했던 단골 손님 목록 (메모리 주문 후보)
+    // 이미 이번 세션에 방문해 시그니처 주문을 남긴 손님 중 기억 주문 후보
     const visitedCandidates = availableCustomers.filter(
-      c => (this.session.sessionCustomerVisits.get(c.id) || 0) >= 1
+      c => (this.session.sessionCustomerVisits.get(c.id) || 0) >= 1 &&
+           this.session.customerSessionRecipeMap.has(c.id)
     );
 
-    // 현재 웨이브 난이도에 맞는 손님 필터링
-    const stepMatchedCustomers = availableCustomers.filter(c => {
-      const rec = this.recipeBook.getRecipe(c.preferredRecipeId);
-      return rec && (rec.step_id || 1) <= profile.maxRecipeStep;
-    });
-
     let chosenCustomer = null;
-    let orderType = 'NORMAL'; // 'NORMAL' | 'MEMORY'
+    let chosenRecipeId = null;
+    let orderType = 'NORMAL';
 
     const roll = Math.random();
     if (visitedCandidates.length > 0 && roll < profile.probMemory) {
-      // 이미 최소 1번 이상 와서 얼굴과 메뉴를 알렸던 단골 손님이 재방문!
       chosenCustomer = visitedCandidates[Math.floor(Math.random() * visitedCandidates.length)];
+      chosenRecipeId = this.session.customerSessionRecipeMap.get(chosenCustomer.id);
       orderType = 'MEMORY';
     } else {
-      const pool = stepMatchedCustomers.length > 0 ? stepMatchedCustomers : availableCustomers;
-      const unvisitedPool = pool.filter(c => !(this.session.sessionCustomerVisits.get(c.id) > 0));
-      const finalPool = (unvisitedPool.length > 0 && Math.random() < 0.75) ? unvisitedPool : pool;
-      chosenCustomer = finalPool[Math.floor(Math.random() * finalPool.length)];
+      // 현재 점포 허용 레시피가 기본 선호 레시피인 손님 우선, 혹은 점포 메뉴 풀에서 배정
+      const stageMatchedCusts = availableCustomers.filter(c => stageAllowedIds.has(Number(c.preferredRecipeId)));
+      const custPool = (stageMatchedCusts.length > 0 && Math.random() < 0.7) ? stageMatchedCusts : availableCustomers;
+      chosenCustomer = custPool[Math.floor(Math.random() * custPool.length)];
+
+      if (this.session.customerSessionRecipeMap.has(chosenCustomer.id)) {
+        chosenRecipeId = this.session.customerSessionRecipeMap.get(chosenCustomer.id);
+      } else if (stageAllowedIds.has(Number(chosenCustomer.preferredRecipeId)) && Math.random() < 0.65) {
+        chosenRecipeId = Number(chosenCustomer.preferredRecipeId);
+      } else if (recipePool.length > 0) {
+        const pickedRec = recipePool[Math.floor(Math.random() * recipePool.length)];
+        chosenRecipeId = Number(pickedRec.recipe_id);
+      } else {
+        chosenRecipeId = Number(chosenCustomer.preferredRecipeId) || 5;
+      }
+
+      this.session.customerSessionRecipeMap.set(chosenCustomer.id, chosenRecipeId);
       orderType = 'NORMAL';
     }
 
-    const order = this._createOrderForCustomer(chosenCustomer, orderType, profile.wave);
-    const entry = {
-      customer: chosenCustomer,
-      order,
-      arrivedAt: Date.now()
-    };
+    const order = this._createOrderForCustomer(chosenCustomer, chosenRecipeId, orderType, profile.wave);
+    this.session.activeCustomer = chosenCustomer;
+    this.session.activeOrder = order;
 
-    this.session.waitingQueue.push(entry);
-    return entry;
+    this.knownRegularIds.add(chosenCustomer.id);
+    this.savePersistentData();
+
+    return { customer: chosenCustomer, order };
   }
 
-  _createOrderForCustomer(customer, orderType, wave) {
-    const recipeId = customer.preferredRecipeId;
-    const rec = this.recipeBook.getRecipe(recipeId);
-    const recipeName = this.brandResolver.resolveName(rec);
+  _createOrderForCustomer(customer, recipeId, orderType, wave) {
+    const rId = Number(recipeId) || Number(customer.preferredRecipeId) || 5;
+    const rec = this.recipeBook.getRecipe(rId);
+    const recipeName = rec ? this.brandResolver.resolveName(rec) : '소주';
+    const requiredStockKey = this.buildStockKey(rId);
+    const price = this.calculateOrderPrice(rId, orderType, this.session.combo, wave);
 
-    const requiredStockKey = this.buildStockKey(recipeId);
-    const price = this.calculateOrderPrice(recipeId, orderType, this.session.combo, wave);
-
-    let dialogue = '';
-    let orderBadge = '';
-    if (orderType === 'MEMORY') {
-      orderBadge = '🧠 단골 기억 주문';
-      dialogue = `"사장님, 저 또 왔어요! 늘 먹던 걸로 한 잔 주세요!"`;
-    } else {
-      orderBadge = '📋 일반 주문';
-      dialogue = `"사장님! 제 단골 메뉴인 [${recipeName}] 1잔 주세요!"`;
-    }
-
-    // 개별 손님 대기시간(Patience) 산출 (웨이브가 높아질수록 긴장감 있게 단축, 최소 24초 ~ 기본 48초)
-    const maxPatienceSec = Math.max(24, 48 - (wave - 1) * 3);
+    const maxPatienceSec = Math.max(22, 42 - (wave - 1) * 2);
 
     return {
       orderId: 'ord_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
       orderType,
-      orderBadge,
-      recipeId,
+      quantity: 1, // 손님 1명당 주문 개수 무조건 1개 (x1)
+      recipeId: rId,
       recipeName,
       requiredStockKey,
       price,
-      dialogue,
       maxPatienceSec,
       patienceSec: maxPatienceSec
     };
   }
 
   /**
-   * 대기열의 첫 번째 손님을 지정된 빈 좌석(tableIdx)으로 안내하여 착석시킵니다.
-   */
-  seatNextCustomerToTable(tableIdx) {
-    if (!this.session || this.session.status !== 'PLAYING') return { ok: false, message: '영업 중이 아닙니다.' };
-    const table = this.session.tables[tableIdx];
-    if (!table) return { ok: false, message: '유효하지 않은 좌석입니다.' };
-    if (table.customer) {
-      this.session.selectedTableIdx = tableIdx;
-      return { ok: true, action: 'SELECTED_EXISTING', table };
-    }
-
-    if (this.session.waitingQueue.length === 0) {
-      this._spawnWaitingCustomer();
-    }
-    const nextGuest = this.session.waitingQueue.shift();
-    if (!nextGuest) {
-      return { ok: false, message: '대기 중인 손님이 없습니다.' };
-    }
-
-    table.customer = nextGuest.customer;
-    table.order = nextGuest.order;
-
-    // 단골 도감에 자동 등록
-    this.knownRegularIds.add(nextGuest.customer.id);
-    this.savePersistentData();
-
-    // 대기열 보충
-    if (this.session.waitingQueue.length < 2) {
-      this._spawnWaitingCustomer();
-    }
-
-    return { ok: true, action: 'SEATED', table };
-  }
-
-  /**
-   * 빈 좌석이 있으면 대기 손님을 자동으로 안내
+   * 이전 버전 호환용 메서드 (자동 착석 호출 시 카운터 손님이 없으면 생성)
    */
   autoSeatAvailableTables() {
-    if (!this.session || !this.session.autoSeatEnabled) return;
-    for (let i = 0; i < this.session.tables.length; i++) {
-      if (!this.session.tables[i].customer) {
-        if (this.session.waitingQueue.length === 0) {
-          this._spawnWaitingCustomer();
-        }
-        if (this.session.waitingQueue.length > 0) {
-          this.seatNextCustomerToTable(i);
-        }
-      }
+    if (!this.session || this.session.status !== 'PLAYING') return;
+    if (!this.session.activeCustomer || !this.session.activeOrder) {
+      this._spawnCounterCustomer();
     }
   }
 
   /**
-   * 각 좌석 손님의 개별 대기시간 게이지 차감 및 타임아웃 처리
+   * 카운터 손님의 대기시간(Patience) 실시간 감소 및 타임아웃 처리
    */
   tickPatience(dtSec = 1) {
     if (!this.session || this.session.status !== 'PLAYING') return { expiredCount: 0, isGameOver: false };
-    let expiredCount = 0;
+    const cust = this.session.activeCustomer;
+    const ord = this.session.activeOrder;
+    if (!cust || !ord) return { expiredCount: 0, isGameOver: false };
 
-    for (let i = 0; i < this.session.tables.length; i++) {
-      const t = this.session.tables[i];
-      if (!t.customer || !t.order) continue;
-      t.order.patienceSec = Math.max(0, (t.order.patienceSec || 0) - dtSec);
+    ord.patienceSec = Math.max(0, (ord.patienceSec || 0) - dtSec);
+    if (ord.patienceSec > 0) {
+      return { expiredCount: 0, isGameOver: false };
+    }
 
-      if (t.order.patienceSec <= 0) {
-        expiredCount++;
-        const custName = t.customer.name;
-        this.session.combo = 0;
-        this.audio?.playFail?.();
+    // 대기시간 초과!
+    const custName = cust.name;
+    this.session.combo = 0;
+    this.audio?.playFail?.();
 
-        t.customer = null;
-        t.order = null;
-
-        if (this.session.mode === 'INFINITE') {
-          this.session.lives -= 1;
-          this.session.lastLogMessage = `⏰ [${custName}] 대기시간 초과! (남은 목숨: ${'❤️'.repeat(Math.max(0, this.session.lives))})`;
-          if (this.session.lives <= 0) {
-            this.session.status = 'GAMEOVER';
-            this.session.lastLogMessage = `🏁 대기시간 초과로 목숨 3개를 모두 소진했습니다! (${this.session.servedCount}잔 · ${this.session.totalEarnings.toLocaleString()}원)`;
-            return { expiredCount, isGameOver: true };
-          }
-        } else {
-          this.session.timeLeftSec = Math.max(0, this.session.timeLeftSec - 5);
-          this.session.lastLogMessage = `⏰ [${custName}] 대기시간 초과! (-5초 페널티)`;
-          if (this.session.timeLeftSec <= 0) {
-            this.session.status = 'GAMEOVER';
-            return { expiredCount, isGameOver: true };
-          }
-        }
-
-        this._spawnWaitingCustomer();
-        if (this.session.autoSeatEnabled) {
-          this.seatNextCustomerToTable(i);
-        }
+    if (this.session.mode === 'INFINITE') {
+      this.session.lives -= 1;
+      this.session.lastLogMessage = `⏰ [${custName}] 손님이 기다리다 화가 나서 돌아갔습니다! (남은 목숨: ${'❤️'.repeat(Math.max(0, this.session.lives))})`;
+      if (this.session.lives <= 0) {
+        this.session.status = 'GAMEOVER';
+        return { expiredCount: 1, isGameOver: true };
+      }
+    } else {
+      this.session.timeLeftSec = Math.max(0, this.session.timeLeftSec - 5);
+      this.session.lastLogMessage = `⏰ [${custName}] 대기시간 초과! (-5초 페널티)`;
+      if (this.session.timeLeftSec <= 0) {
+        this.session.status = 'GAMEOVER';
+        return { expiredCount: 1, isGameOver: true };
       }
     }
 
-    return { expiredCount, isGameOver: false };
+    this._spawnCounterCustomer();
+    return { expiredCount: 1, isGameOver: false };
   }
 
   // =========================================================================
-  // 타이쿤 전용 미니 주조 가마솥 (배율 투입 + 조합 시 재고 축적)
+  // 타이쿤 전용 주조 가마솥 & 중앙 접시(Plate) <-> [📦 재고] 연동
   // =========================================================================
 
   tapIngredientInTycoonPot(baseId, detailId = null) {
@@ -536,16 +631,11 @@ class TycoonEngine {
     this.session.potSlots = [];
   }
 
-  /**
-   * 현재 가마솥 슬롯으로 어떤 레시피가 만들어지는지 실시간 미리보기 판별
-   */
   previewTycoonPotMatch() {
     if (!this.session || this.session.potSlots.length < 2) return null;
     const slots = this.session.potSlots;
 
-    // 현재 선택된 테이블의 주문 레시피가 후보군에 있으면 우선 매칭되도록 지원
-    const activeTable = this.session.tables[this.session.selectedTableIdx];
-    const preferredRecipeId = activeTable?.order?.recipeId || null;
+    const preferredRecipeId = this.session.activeOrder?.recipeId || null;
 
     const matchedRecipe = this.recipeBook.matchRecipe(
       slots,
@@ -565,61 +655,91 @@ class TycoonEngine {
   }
 
   /**
-   * 타이쿤 가마솥에서 [⚗️ 조합] 실행
-   * - 성공 시 해당 조합이 재고(stockMap)에 +1 쌓이며,
-   *   만약 이 조합이 재료에도 존재하는 제품(예: 소주, 맥주 등)이면 재료 탭의 재고 배지 수량도 함께 올라갑니다!
+   * [핵심 1] [⚗️조합] 버튼 클릭 시:
+   * - 완성된 조합템이 카운터 중앙 접시(platedStockKey) 위로 바로 올라갑니다!
+   * - 만약 접시 위에 이미 다른 아이템이 올려져 있었다면, 기존 아이템은 자동으로 [📦재고](stockMap)로 들어갑니다.
    */
-  craftToStockpile() {
+  craftToPlate() {
     const preview = this.previewTycoonPotMatch();
     if (!preview) {
       this.audio?.playFail?.();
       return {
         ok: false,
-        message: '일치하는 레시피가 없습니다! 재료와 황금비율을 다시 확인해주세요.'
+        message: '일치하는 레시피가 없습니다! 재료와 비율을 확인해주세요.'
       };
     }
 
-    const currentCount = this.session.stockMap.get(preview.stockKey) || 0;
-    this.session.stockMap.set(preview.stockKey, currentCount + 1);
+    let movedPrevToStock = null;
+    if (this.session.platedStockKey) {
+      const prevKey = this.session.platedStockKey;
+      const prevCnt = this.session.stockMap.get(prevKey) || 0;
+      this.session.stockMap.set(prevKey, prevCnt + 1);
+      this.savedBrewStash[prevKey] = Math.min(99, (this.savedBrewStash[prevKey] || 0) + 1);
+      movedPrevToStock = prevKey;
+    }
 
-    // 상시 보관함에도 함께 동기화
-    this.savedBrewStash[preview.stockKey] = Math.min(99, (this.savedBrewStash[preview.stockKey] || 0) + 1);
+    this.session.platedStockKey = preview.stockKey;
     this.savePersistentData();
-
     this.clearTycoonPot();
     this.audio?.playSuccess?.();
 
     const label = preview.recipeName;
-    this.session.lastLogMessage = `✨ [${label}] 1잔 완성! 재고에 쌓였습니다 (보유: ${currentCount + 1}개)`;
+    this.session.lastLogMessage = `🍽️ [${label}] 완성! 중앙 접시 위에 올려졌습니다. 오른쪽 종(🛎️)을 눌러 서빙하세요!`;
 
     return {
       ok: true,
       crafted: preview,
-      newCount: currentCount + 1,
+      platedStockKey: preview.stockKey,
+      movedPrevToStock,
       label
     };
   }
 
+  // 기존 호출부 호환용 별칭
+  craftToStockpile() {
+    return this.craftToPlate();
+  }
+
   /**
-   * 재고에 쌓인 특정 술/조합(stockKey)을 지정 테이블 손님에게 서빙!
-   * - 서빙 시 재고 탭과 재료 탭(동일 제품이 있는 경우) 양쪽의 표시 수량이 함께 1개 차감됩니다.
+   * [핵심 2] 접시 위의 아이템을 터치하여 [📦 재고] 탭으로 보관하기
    */
-  serveStockToTable(stockKey, tableIdx = this.session.selectedTableIdx) {
-    if (!this.session || this.session.status !== 'PLAYING') {
-      return { ok: false, message: '현재 영업 중이 아닙니다.' };
+  storePlateToStock() {
+    if (!this.session || !this.session.platedStockKey) {
+      return { ok: false, message: '현재 접시 위에 올려진 음료/술이 없습니다.' };
     }
 
+    const stockKey = this.session.platedStockKey;
+    const cur = this.session.stockMap.get(stockKey) || 0;
+    const newCount = cur + 1;
+    this.session.stockMap.set(stockKey, newCount);
+    this.savedBrewStash[stockKey] = Math.min(99, (this.savedBrewStash[stockKey] || 0) + 1);
+    this.session.platedStockKey = null;
+    this.savePersistentData();
+
+    const meta = this.getStockItemDisplayMeta(stockKey);
+    const label = meta ? meta.recipeName : '완성품';
+    this.session.lastLogMessage = `📦 접시 위의 [${label}]을(를) [📦재고]에 보관했습니다! (보유: ${newCount}개)`;
+
+    return {
+      ok: true,
+      storedStockKey: stockKey,
+      label,
+      newCount
+    };
+  }
+
+  /**
+   * [핵심 3] [📦 재고] 탭의 아이템을 터치하여 카운터 중앙 접시 위로 올리기
+   * - 만약 접시 위에 이미 다른 아이템이 있으면 서로 맞교환(기존 접시 아이템은 [📦재고]로 복귀)합니다.
+   */
+  moveStockToPlate(stockKey) {
+    if (!this.session) return { ok: false, message: '세션이 없습니다.' };
     const availableCount = this.session.stockMap.get(stockKey) || 0;
     if (availableCount <= 0) {
-      return { ok: false, message: '해당 주류의 재고가 없습니다! 먼저 조합하여 재고를 만들어주세요.' };
+      return { ok: false, message: '해당 아이템의 재고가 없습니다.' };
     }
 
-    const table = this.session.tables[tableIdx];
-    if (!table || !table.customer || !table.order) {
-      return { ok: false, message: '선택한 좌석에 주문 대기 중인 손님이 없습니다!' };
-    }
-
-    // 재고 1개 차감
+    // 선택한 재고 1개 차감
     if (availableCount <= 1) {
       this.session.stockMap.delete(stockKey);
     } else {
@@ -630,12 +750,59 @@ class TycoonEngine {
       if (this.savedBrewStash[stockKey] <= 0) delete this.savedBrewStash[stockKey];
     }
 
-    const cust = table.customer;
-    const order = table.order;
-    const isCorrect = (stockKey === order.requiredStockKey);
+    // 기존에 접시에 있던 아이템이 있으면 재고로 복귀
+    let swappedBackKey = null;
+    if (this.session.platedStockKey) {
+      swappedBackKey = this.session.platedStockKey;
+      const prevCnt = this.session.stockMap.get(swappedBackKey) || 0;
+      this.session.stockMap.set(swappedBackKey, prevCnt + 1);
+      this.savedBrewStash[swappedBackKey] = Math.min(99, (this.savedBrewStash[swappedBackKey] || 0) + 1);
+    }
+
+    this.session.platedStockKey = stockKey;
+    this.savePersistentData();
+
+    const meta = this.getStockItemDisplayMeta(stockKey);
+    const label = meta ? meta.recipeName : '완성품';
+    this.session.lastLogMessage = `🍽️ [📦재고]에서 [${label}]을(를) 꺼내 중앙 접시 위에 올렸습니다!`;
+
+    return {
+      ok: true,
+      platedStockKey: stockKey,
+      swappedBackKey,
+      label
+    };
+  }
+
+  /**
+   * [핵심 4] 오른쪽 종(🛎️) 이미지를 터치했을 때:
+   * - 접시(platedStockKey) 위에 올려진 조합템을 현재 카운터 손님에게 서빙합니다!
+   */
+  ringBellToServe() {
+    if (!this.session || this.session.status !== 'PLAYING') {
+      return { ok: false, message: '현재 영업 중이 아닙니다.' };
+    }
+
+    if (!this.session.platedStockKey) {
+      return {
+        ok: false,
+        emptyPlate: true,
+        message: '접시가 비어 있습니다! 조합하거나 [📦재고]에서 꺼내 접시 위에 먼저 올려주세요.'
+      };
+    }
+
+    const cust = this.session.activeCustomer;
+    const order = this.session.activeOrder;
+    if (!cust || !order) {
+      return { ok: false, message: '현재 주문 대기 중인 손님이 없습니다!' };
+    }
+
+    const servedStockKey = this.session.platedStockKey;
+    this.session.platedStockKey = null;
+
+    const isCorrect = (servedStockKey === order.requiredStockKey);
 
     if (isCorrect) {
-      // 정답 서빙!
       this.session.servedCount += 1;
       this.session.combo += 1;
       if (this.session.combo > this.session.maxCombo) {
@@ -646,12 +813,10 @@ class TycoonEngine {
       this.session.totalEarnings += earned;
       this.persistentWallet += earned;
 
-      // 해당 단골 손님의 세션 방문 횟수 +1 기록
       const prevVisits = this.session.sessionCustomerVisits.get(cust.id) || 0;
       this.session.sessionCustomerVisits.set(cust.id, prevVisits + 1);
       this.knownRegularIds.add(cust.id);
 
-      // 최고 기록 갱신 체크
       if (this.session.mode === 'TIME_ATTACK') {
         if (
           this.session.servedCount > this.persistentBestTimeAttack.servedCount ||
@@ -680,66 +845,48 @@ class TycoonEngine {
       }
 
       this.savePersistentData();
-      this.audio?.playSuccess?.();
 
       const servedLabel = order.recipeName;
-      this.session.lastLogMessage = `💰 [${cust.name}] 손님에게 [${servedLabel}] 서빙 대성공! +${earned.toLocaleString()}원 (${this.session.combo}연속 콤보🔥)`;
+      this.session.lastLogMessage = `🛎️ 땡~! [${cust.name}] 손님에게 [${servedLabel}] 서빙 성공! +${earned.toLocaleString()}원 (${this.session.combo}🔥)`;
 
-      // 손님 퇴장 및 다음 손님 대기열 생성
-      table.customer = null;
-      table.order = null;
-      this._spawnWaitingCustomer();
-      if (this.session.autoSeatEnabled) {
-        this.seatNextCustomerToTable(tableIdx);
-      }
+      this._spawnCounterCustomer();
 
       return {
         ok: true,
         isCorrect: true,
         earned,
         customer: cust,
-        order
+        order,
+        servedStockKey
       };
     } else {
       // 오답 서빙!
       this.session.combo = 0;
-      this.audio?.playFail?.();
-
       const expectedLabel = order.recipeName;
 
       if (this.session.mode === 'INFINITE') {
         this.session.lives -= 1;
         this.session.lastLogMessage = `💔 [주문 실수!] ${cust.name} 손님이 원한 건 [${expectedLabel}]였습니다! (남은 목숨: ${'❤️'.repeat(Math.max(0, this.session.lives))})`;
 
-        table.customer = null;
-        table.order = null;
-
         if (this.session.lives <= 0) {
           this.session.status = 'GAMEOVER';
-          this.session.lastLogMessage = `🏁 목숨 3개를 모두 소진하여 영업이 종료되었습니다! (총 ${this.session.servedCount}잔 서빙 · ${this.session.totalEarnings.toLocaleString()}원 달성)`;
           return {
             ok: true,
             isCorrect: false,
             isGameOver: true,
-            expectedLabel
+            expectedLabel,
+            customer: cust,
+            order
           };
         }
-
-        this._spawnWaitingCustomer();
-        if (this.session.autoSeatEnabled) {
-          this.seatNextCustomerToTable(tableIdx);
-        }
+        this._spawnCounterCustomer();
       } else {
         this.session.timeLeftSec = Math.max(0, this.session.timeLeftSec - 5);
         this.session.lastLogMessage = `⚠️ [서빙 실수! -5초] ${cust.name} 손님이 원한 건 [${expectedLabel}]였습니다!`;
-        table.customer = null;
-        table.order = null;
-        this._spawnWaitingCustomer();
-        if (this.session.autoSeatEnabled) {
-          this.seatNextCustomerToTable(tableIdx);
-        }
         if (this.session.timeLeftSec <= 0) {
           this.session.status = 'GAMEOVER';
+        } else {
+          this._spawnCounterCustomer();
         }
       }
 
@@ -747,7 +894,9 @@ class TycoonEngine {
         ok: true,
         isCorrect: false,
         isGameOver: this.session.status === 'GAMEOVER',
-        expectedLabel
+        expectedLabel,
+        customer: cust,
+        order
       };
     }
   }

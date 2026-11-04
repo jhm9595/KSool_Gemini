@@ -1,5 +1,5 @@
 /* =========================================================================
-   🏮 조선 주막 타이쿤 (Tycoon Main Game) - 100vh 노스크롤 분할 & 비주얼 아이콘 중심 스타일
+   🏮 조선 주막 타이쿤 (Tycoon Main Game) - 붕어빵 타이쿤 카운터·접시·서비스 벨 & 6단계 점포 스타일
    ========================================================================= */
 
 /* 인게임 진행 중 글로벌 상단 헤더 및 하단 탭바 완전 숨김으로 100vh 작업 영역 확보 */
@@ -37,7 +37,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 /* =========================================================================
-   1. 인게임 100vh 고정 분할 구조 (상단 45% 주막 홀 / 하단 55% 주조대)
+   1. 인게임 100vh 고정 분할 구조 (상단 45% 카운터 씬 / 하단 55% 주조대)
    ========================================================================= */
 .tycoon-shell.playing-100vh {
   height: 100%;
@@ -51,8 +51,8 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: rgba(15, 23, 42, 0.72);
-  border-bottom: 1.5px solid rgba(251, 191, 36, 0.35);
+  background: #090d16;
+  border-bottom: 2px solid rgba(251, 191, 36, 0.55);
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -74,31 +74,38 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
    ========================================================================= */
 .tycoon-compact-hud {
   flex-shrink: 0;
-  height: 36px;
+  height: 34px;
   padding: 0 8px;
-  background: rgba(9, 13, 22, 0.92);
+  background: rgba(9, 13, 22, 0.94);
   border-bottom: 1px solid rgba(71, 85, 105, 0.45);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 6px;
+  z-index: 10;
 }
 
 .hud-left {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 0.75rem;
+  gap: 6px;
+  font-size: 0.73rem;
   min-width: 0;
+  overflow: hidden;
 }
 
-.hud-wave-badge {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: #090d16;
-  font-size: 0.66rem;
+.hud-stage-pill {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(180, 83, 9, 0.35));
+  border: 1px solid rgba(251, 191, 36, 0.55);
+  color: #fde047;
+  font-size: 0.64rem;
   font-weight: 900;
   padding: 2px 6px;
   border-radius: 6px;
+  white-space: nowrap;
+  max-width: 118px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hud-stat {
@@ -121,18 +128,19 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   background: rgba(249, 115, 22, 0.2);
   border: 1px solid #fb923c;
   color: #fdba74;
-  font-size: 0.65rem;
+  font-size: 0.63rem;
   font-weight: 900;
   padding: 1px 5px;
   border-radius: 999px;
 }
 
 .hud-pill {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 900;
   padding: 2px 6px;
   border-radius: 6px;
   background: rgba(30, 41, 59, 0.85);
+  white-space: nowrap;
 }
 
 .hud-pill.timer-pill {
@@ -155,16 +163,17 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .hud-icon-btn {
-  width: 28px;
-  height: 26px;
+  width: 27px;
+  height: 25px;
   border-radius: 7px;
   border: 1px solid #475569;
   background: #1e293b;
   color: #f8fafc;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -178,201 +187,476 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 /* =========================================================================
-   3. 상단 45% 내 주막 홀 (2x2 테이블 4개 + 캐릭터/주문메뉴 하단 [서빙] 버튼 + 대기시간 게이지)
+   3. 상단 45% 내 붕어빵 타이쿤 스타일 카운터 씬 (배경 + 1인 손님/말풍선 + 중앙 접시 + 오른쪽 서비스 종)
    ========================================================================= */
-.tycoon-seats-2x2 {
+.tycoon-counter-scene {
   flex: 1;
   min-height: 0;
-  padding: 6px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 6px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-size: 100% 100%;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.counter-scene-vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(9, 13, 22, 0.25) 0%,
+    rgba(9, 13, 22, 0.05) 55%,
+    rgba(9, 13, 22, 0.22) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* (A) 카운터 뒤 손님 1명 & 말풍선 영역 (상단 ~ 중단 60%) */
+.counter-customer-stage {
+  position: relative;
+  z-index: 3;
+  height: 62%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 6px 12px 0;
   box-sizing: border-box;
 }
 
-.t-seat-box {
-  background: rgba(9, 13, 22, 0.86);
-  border: 1.5px solid #334155;
-  border-radius: 12px;
-  padding: 4px 6px;
+.counter-cust-figure {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: flex-end;
   position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  animation: custArrivePop 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.t-seat-box.selected {
-  border-color: #38bdf8;
-  box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.22);
-  background: rgba(15, 23, 42, 0.95);
+@keyframes custArrivePop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.t-seat-box.ready-glow {
-  border-color: #22c55e;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.32);
+.cust-angry-shake {
+  animation: angryCustShake 0.45s infinite alternate;
 }
 
-.t-seat-box.empty {
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  color: #64748b;
+@keyframes angryCustShake {
+  from { transform: translateX(-1.5px) rotate(-1deg); }
+  to { transform: translateX(1.5px) rotate(1deg); }
 }
 
-.seat-empty-icon {
-  font-size: 1.2rem;
-  opacity: 0.5;
-}
-
-.seat-empty-txt {
-  font-size: 0.66rem;
-  font-weight: 700;
-}
-
-/* 상단: 손님 캐릭터 + 주문한 메뉴 나란히 */
-.t-seat-top-row {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-.t-cust-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-  flex-shrink: 0;
-}
-
-.t-avatar {
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.t-price-badge {
-  font-size: 0.58rem;
+.counter-cust-name-tag {
+  margin-top: -4px;
+  background: rgba(9, 13, 22, 0.88);
+  border: 1px solid rgba(251, 191, 36, 0.6);
+  color: #fef3c7;
+  font-size: 0.64rem;
   font-weight: 900;
-  color: #fde047;
-  background: rgba(245, 158, 11, 0.16);
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  padding: 0 5px;
+  padding: 1px 8px;
   border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
   white-space: nowrap;
 }
 
-.t-drink-bubble {
-  flex: 1;
-  min-width: 0;
-  background: rgba(30, 41, 59, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  border-radius: 9px;
-  padding: 3px 5px;
+/* 붕어빵 타이쿤 스타일 주문 말풍선 */
+.counter-order-bubble {
+  position: relative;
+  background: rgba(255, 255, 255, 0.96);
+  color: #0f172a;
+  border: 2.5px solid #1e293b;
+  border-radius: 16px;
+  padding: 7px 10px 6px;
+  min-width: 142px;
+  max-width: 190px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-  position: relative;
+  gap: 5px;
+  animation: bubblePopIn 0.22s ease-out;
 }
 
-.t-drink-icon-wrap {
-  position: relative;
-  display: inline-flex;
+/* 말풍선 왼쪽 꼬리 */
+.counter-order-bubble::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 7px 10px 7px 0;
+  border-style: solid;
+  border-color: transparent #1e293b transparent transparent;
+}
+
+.counter-order-bubble::after {
+  content: '';
+  position: absolute;
+  left: -6.5px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px 8px 5px 0;
+  border-style: solid;
+  border-color: transparent rgba(255, 255, 255, 0.96) transparent transparent;
+}
+
+.counter-order-bubble.urgent-bubble {
+  background: #fef2f2;
+  border-color: #dc2626;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.65);
+  animation: tycoonPulse 0.45s infinite alternate;
+}
+
+.counter-order-bubble.urgent-bubble::after {
+  border-color: transparent #fef2f2 transparent transparent;
+}
+
+@keyframes bubblePopIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.bubble-top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bubble-drink-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 26px;
+  flex-shrink: 0;
 }
 
 .order-mystery-icon {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: rgba(168, 85, 247, 0.25);
-  border: 1.5px dashed #c084fc;
-  color: #e9d5ff;
-  font-size: 0.92rem;
+  background: #f3e8ff;
+  border: 2px dashed #9333ea;
+  color: #6b21a8;
+  font-size: 1.05rem;
   font-weight: 900;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.t-drink-mini-name {
-  font-size: 0.58rem;
-  font-weight: 800;
-  color: #e2e8f0;
-  max-width: 100%;
+.bubble-drink-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bubble-qty-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.bubble-drink-name {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #0f172a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* 캐릭터와 주문한 메뉴 바로 밑 공간: 와이드 [서빙] 버튼 */
-.t-serve-bottom-btn {
-  width: 100%;
-  height: 22px;
-  margin-top: 2px;
-  border-radius: 6px;
-  font-size: 0.66rem;
+.bubble-qty-badge {
+  background: #0f172a;
+  color: #fde047;
+  font-size: 0.68rem;
   font-weight: 900;
-  border: 1px solid #334155;
-  background: #1e293b;
-  color: #64748b;
+  padding: 1px 6px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.bubble-price-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 3px;
-  cursor: not-allowed;
-  flex-shrink: 0;
-  transition: transform 0.1s, background 0.15s;
+  justify-content: space-between;
+  gap: 4px;
 }
 
-.t-serve-bottom-btn.active {
-  background: linear-gradient(135deg, #22c55e, #10b981);
-  border-color: #4ade80;
-  color: #052e16;
-  cursor: pointer;
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.45);
+.bubble-price-tag {
+  font-size: 0.66rem;
+  font-weight: 900;
+  color: #b45309;
 }
 
-.t-serve-bottom-btn.active:active {
-  transform: scale(0.96);
+.bubble-sec-tag {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #475569;
 }
 
-/* 남은 대기시간 게이지 바 */
-.t-patience-track {
+.bubble-patience-track {
   width: 100%;
-  height: 4px;
-  background: rgba(30, 41, 59, 0.9);
+  height: 6px;
+  background: #e2e8f0;
   border-radius: 999px;
   overflow: hidden;
-  margin-top: 3px;
-  flex-shrink: 0;
+  border: 1px solid #cbd5e1;
 }
 
-.t-patience-fill {
+.bubble-patience-fill {
   height: 100%;
-  background: linear-gradient(90deg, #34d399, #38bdf8);
+  background: linear-gradient(90deg, #10b981, #38bdf8);
   border-radius: 999px;
   transition: width 0.35s linear, background 0.25s ease;
 }
 
-.t-patience-fill.warn {
+.bubble-patience-fill.warn {
   background: linear-gradient(90deg, #f59e0b, #fbbf24);
 }
 
-.t-patience-fill.danger {
-  background: linear-gradient(90deg, #ef4444, #f43f5e);
+.bubble-patience-fill.danger {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+/* (B) 카운터 바 하단 영역: 왼쪽 메뉴판 / 정중앙 서빙 접시 / 오른쪽 서비스 종 이미지 */
+.counter-bar-interactive-layer {
+  position: relative;
+  z-index: 4;
+  height: 38%;
+  width: 100%;
+}
+
+/* 왼쪽 메뉴판 핫스팟 */
+.counter-menu-hotspot {
+  position: absolute;
+  left: 16%;
+  bottom: 16%;
+  transform: translateX(-50%);
+  background: rgba(9, 13, 22, 0.76);
+  border: 1px solid rgba(251, 191, 36, 0.65);
+  color: #fef3c7;
+  font-size: 0.6rem;
+  font-weight: 900;
+  padding: 3px 7px;
+  border-radius: 7px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.counter-menu-hotspot:active {
+  transform: translateX(-50%) scale(0.94);
+}
+
+/* 정중앙 서빙 접시 (배경 이미지의 중앙 접시 위치와 정확히 일치) */
+.counter-plate-zone {
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  transform: translateX(-50%);
+  width: 112px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.counter-plate-zone.empty-plate {
+  border: 1.5px dashed rgba(255, 255, 255, 0.32);
+  background: rgba(9, 13, 22, 0.22);
+  pointer-events: none;
+}
+
+.empty-plate-hint {
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: rgba(248, 250, 252, 0.78);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.counter-plate-zone.has-item {
+  cursor: pointer;
+  background: radial-gradient(ellipse at center, rgba(254, 240, 138, 0.32) 0%, rgba(15, 23, 42, 0.45) 75%);
+  border: 2px solid rgba(251, 191, 36, 0.85);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65);
+  animation: plateItemDrop 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.counter-plate-zone.has-item.match-glow {
+  border-color: #4ade80;
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.75);
+}
+
+.counter-plate-zone.has-item:active {
+  transform: translateX(-50%) scale(0.93);
+}
+
+@keyframes plateItemDrop {
+  from {
+    transform: translateX(-50%) translateY(-16px) scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.plated-drink-visual {
+  margin-top: -14px;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.65));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plated-drink-label {
+  background: rgba(9, 13, 22, 0.92);
+  border: 1px solid #fbbf24;
+  color: #fde047;
+  font-size: 0.62rem;
+  font-weight: 900;
+  padding: 1px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+  max-width: 118px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.plate-store-hint {
+  font-size: 0.52rem;
+  font-weight: 900;
+  color: #6ee7b7;
+  background: rgba(6, 78, 59, 0.9);
+  border: 1px solid #34d399;
+  padding: 0 5px;
+  border-radius: 4px;
+  margin-top: 1px;
+}
+
+/* 오른쪽 데스크 서비스 벨 (종 이미지 - 버튼 테두리 없이 실제 오브젝트처럼 배치) */
+.counter-service-bell-spot {
+  position: absolute;
+  right: 8%;
+  bottom: 6%;
+  width: 72px;
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease, filter 0.2s ease;
+}
+
+.counter-service-bell-spot:active {
+  transform: scale(0.92) translateY(2px);
+}
+
+.counter-service-bell-spot.bell-ready-match {
+  filter: drop-shadow(0 0 10px rgba(74, 222, 128, 0.85));
+}
+
+.counter-service-bell-spot.bell-ready-any {
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.75));
+}
+
+.counter-service-bell-spot.bell-ringing .service-bell-svg {
+  animation: bellRingShake 0.36s ease-in-out;
+}
+
+.counter-service-bell-spot.bell-ringing .bell-top-pin {
+  transform: translateY(3px);
+}
+
+@keyframes bellRingShake {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(-12deg) scale(1.06); }
+  40% { transform: rotate(12deg) scale(1.06); }
+  60% { transform: rotate(-8deg); }
+  80% { transform: rotate(8deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.bell-sound-waves {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 24px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.counter-service-bell-spot.bell-ringing .bell-sound-waves {
+  opacity: 1;
+}
+
+.bell-wave {
+  position: absolute;
+  inset: 0;
+  border-top: 2.5px solid #fde047;
+  border-radius: 50%;
+  animation: bellWaveSpread 0.42s ease-out infinite;
+}
+
+.bell-wave.w2 {
+  animation-delay: 0.12s;
+}
+
+@keyframes bellWaveSpread {
+  from {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+.bell-ting-badge {
+  position: absolute;
+  top: -4px;
+  right: -2px;
+  background: linear-gradient(135deg, #22c55e, #10b981);
+  color: #052e16;
+  border: 1.5px solid #fef08a;
+  font-size: 0.58rem;
+  font-weight: 900;
+  padding: 1px 6px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
+  animation: tycoonPulse 0.55s infinite alternate;
+  pointer-events: none;
 }
 
 /* =========================================================================
@@ -431,7 +715,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 .cp-actions-col {
-  width: 84px;
+  width: 86px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -458,6 +742,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   background: linear-gradient(135deg, #f59e0b, #eab308);
   color: #090d16;
   cursor: pointer;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
 }
 
 .cp-craft-btn small {
@@ -560,12 +845,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   min-height: 22px !important;
 }
 
-/*
- * [핵심] 재고 수량 배지 (.stock-count-badge)
- * - 비율 표시 배지(.slot-count-badge: 좌측 상단 호박색 #f59e0b)와 동일한 스타일/크기이되,
- *   에메랄드 민트(#10b981) 색상으로 우측 상단에 구분 표시!
- * - 만약 '상세▾' 버튼이 있는 재료(소주, 맥주 등)라면 겹치지 않게 하단 우측에 깔끔하게 배치!
- */
+/* 재고 수량 배지 (.stock-count-badge) */
 .stock-count-badge {
   position: absolute;
   top: -6px;
@@ -603,7 +883,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 .stock-match-tag {
-  font-size: 0.54rem;
+  font-size: 0.52rem;
   font-weight: 900;
   background: #22c55e;
   color: #052e16;
@@ -621,7 +901,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 /* =========================================================================
-   5. 로비 & 게임오버 & 서브모달
+   5. 로비 (6단계 점포 배경 해금 상점 포함) & 게임오버 & 서브모달
    ========================================================================= */
 .tycoon-lobby-body {
   flex: 1;
@@ -630,18 +910,18 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   padding: 10px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
 }
 
 .tycoon-lobby-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding-bottom: 14px;
 }
 
 .tycoon-hero-banner {
   background: linear-gradient(135deg, rgba(120, 53, 15, 0.45), rgba(15, 23, 42, 0.92));
-  border: 1.5px solid rgba(251, 191, 36, 0.45);
+  border: 1.5px solid rgba(251, 191, 36, 0.55);
   border-radius: 12px;
   padding: 10px 12px;
   text-align: center;
@@ -652,31 +932,31 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 .tycoon-hero-banner .hero-badge {
-  background: rgba(245, 158, 11, 0.22);
+  background: rgba(9, 13, 22, 0.85);
   border: 1px solid #f59e0b;
   color: #fde047;
   font-size: 0.64rem;
   font-weight: 900;
-  padding: 2px 8px;
+  padding: 2px 9px;
   border-radius: 999px;
 }
 
 .tycoon-hero-banner h2 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: #fef3c7;
   font-weight: 900;
 }
 
 .tycoon-hero-banner p {
   margin: 0;
-  font-size: 0.72rem;
-  color: #cbd5e1;
+  font-size: 0.68rem;
+  color: #e2e8f0;
 }
 
 .tycoon-wallet-pill {
-  background: rgba(9, 13, 22, 0.85);
-  border: 1px solid #334155;
+  background: rgba(9, 13, 22, 0.9);
+  border: 1px solid #475569;
   padding: 4px 12px;
   border-radius: 999px;
   font-size: 0.7rem;
@@ -693,45 +973,40 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   gap: 8px;
 }
 
+.tycoon-mode-cards-grid.two-cols {
+  grid-template-columns: 1fr 1fr;
+}
+
 .tycoon-mode-card {
   background: rgba(15, 23, 42, 0.92);
   border: 1.5px solid #334155;
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 9px 10px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 7px;
 }
 
-.tycoon-mode-card.mode-infinite-card { border-color: rgba(192, 132, 252, 0.5); }
-.tycoon-mode-card.mode-timeattack-card { border-color: rgba(56, 189, 248, 0.5); }
+.tycoon-mode-card.mode-infinite-card { border-color: rgba(192, 132, 252, 0.55); }
+.tycoon-mode-card.mode-timeattack-card { border-color: rgba(56, 189, 248, 0.55); }
 
 .mode-card-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
-.mode-card-header .mode-icon { font-size: 1.5rem; }
-.mode-card-header .mode-name { font-size: 0.88rem; font-weight: 900; color: #f8fafc; }
-.mode-card-header .mode-tag { font-size: 0.65rem; color: #94a3b8; font-weight: 700; }
-
-.mode-best-record {
-  background: rgba(9, 13, 22, 0.75);
-  border: 1px solid #334155;
-  border-radius: 7px;
-  padding: 5px 8px;
-  font-size: 0.68rem;
-  color: #fde047;
-  text-align: center;
-}
+.mode-card-header .mode-icon { font-size: 1.3rem; }
+.mode-card-header .mode-name { font-size: 0.78rem; font-weight: 900; color: #f8fafc; }
+.mode-card-header .mode-tag { font-size: 0.6rem; color: #94a3b8; font-weight: 700; }
 
 .tycoon-start-btn {
   width: 100%;
-  padding: 9px;
-  border-radius: 9px;
+  padding: 8px 6px;
+  border-radius: 8px;
   border: none;
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   font-weight: 900;
   color: #090d16;
   cursor: pointer;
@@ -739,6 +1014,172 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 
 .tycoon-start-btn.start-infinite { background: linear-gradient(135deg, #c084fc, #f472b6); }
 .tycoon-start-btn.start-timeattack { background: linear-gradient(135deg, #38bdf8, #34d399); }
+
+/* 6단계 점포 배경 해금 & 선택 섹션 */
+.tycoon-stage-shop-section {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 9px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stage-shop-hdr {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stage-shop-hdr span {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: #fde047;
+}
+
+.stage-shop-hdr small {
+  font-size: 0.64rem;
+  color: #94a3b8;
+}
+
+.tycoon-stages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.tycoon-stage-card {
+  background: rgba(9, 13, 22, 0.9);
+  border: 1.5px solid #334155;
+  border-radius: 10px;
+  padding: 7px;
+  display: flex;
+  align-items: stretch;
+  gap: 9px;
+}
+
+.tycoon-stage-card.is-selected {
+  border-color: #fbbf24;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.25);
+  background: rgba(30, 41, 59, 0.92);
+}
+
+.tycoon-stage-card.is-locked .stage-thumb {
+  filter: grayscale(0.45) brightness(0.8);
+}
+
+.stage-thumb {
+  width: 92px;
+  min-height: 68px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center bottom;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.stage-num-badge {
+  align-self: flex-start;
+  background: rgba(9, 13, 22, 0.85);
+  color: #38bdf8;
+  font-size: 0.54rem;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.stage-mult-badge {
+  align-self: flex-end;
+  background: rgba(245, 158, 11, 0.92);
+  color: #090d16;
+  font-size: 0.54rem;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.stage-info-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.stage-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.stage-name {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #f8fafc;
+}
+
+.stage-recipe-cnt {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.stage-desc {
+  font-size: 0.63rem;
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
+.stage-action-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.stage-card-btn {
+  padding: 5px 10px;
+  border-radius: 7px;
+  font-size: 0.66rem;
+  font-weight: 900;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.stage-card-btn.selected {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: #4ade80;
+  color: #4ade80;
+  cursor: default;
+}
+
+.stage-card-btn.select {
+  background: #38bdf8;
+  color: #090d16;
+}
+
+.stage-card-btn.unlock.can-buy {
+  background: linear-gradient(135deg, #f59e0b, #eab308);
+  color: #090d16;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
+.stage-card-btn.unlock.locked {
+  background: #1e293b;
+  border-color: #475569;
+  color: #94a3b8;
+}
 
 /* 서브 모달 */
 .tycoon-submodal-overlay {
@@ -773,7 +1214,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   justify-content: space-between;
 }
 
-.submodal-hdr h3 { margin: 0; font-size: 0.88rem; color: #fde047; }
+.submodal-hdr h3 { margin: 0; font-size: 0.86rem; color: #fde047; }
 
 .submodal-close-btn {
   background: #1e293b;
