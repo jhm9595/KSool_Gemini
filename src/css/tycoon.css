@@ -37,7 +37,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 /* =========================================================================
-   1. 인게임 100vh 고정 분할 구조 (상단 45% 카운터 씬 / 하단 55% 주조대)
+   1. 인게임 100vh 고정 분할 구조 (상단 50% 카운터 씬 / 하단 50% 주조대)
    ========================================================================= */
 .tycoon-shell.playing-100vh {
   height: 100%;
@@ -46,8 +46,8 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 .tycoon-top-45 {
-  height: 45%;
-  flex: 0 0 45%;
+  height: 50%;
+  flex: 0 0 50%;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -58,8 +58,8 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 }
 
 .tycoon-bottom-55 {
-  height: 55%;
-  flex: 0 0 55%;
+  height: 50%;
+  flex: 0 0 50%;
   min-height: 0;
   display: flex;
   flex-direction: column;
