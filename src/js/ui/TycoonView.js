@@ -16,6 +16,8 @@ window.KSool = window.KSool || {};
  *    - 재고에 있는 완성품이 재료에도 존재하는 경우(예: 소주, 맥주, 막걸리 등),
  *      재료 카드에도 비율 배지(`slot-count-badge`)와 다른 색상의 재고 배지(`stock-count-badge`)로 수량을 함께 표시하며,
  *      서빙 시 재고 탭과 재료 탭의 수량이 동시에 차감됩니다.
+ * 4. 주막 재즈 & 가야금 퓨전 BGM:
+ *    - 타이쿤 게임 시작 시 술집 분위기에 어울리는 멀티트랙 주막 재즈 BGM이 자동 재생되며, 상단 HUD의 🎵 버튼으로 언제든 켜고 끌 수 있습니다.
  */
 class TycoonView {
   constructor(containerId, { app, config, recipeBook, inventory, brandResolver, pickerRegistry, audio }) {
@@ -45,6 +47,7 @@ class TycoonView {
 
   onLeaveTab() {
     this._stopTimerLoop();
+    this.audio?.stopTycoonBgm?.();
     this._syncGlobalTabBarVisibility(false);
   }
 
@@ -81,6 +84,7 @@ class TycoonView {
         }
         if (s.timeLeftSec <= 0) {
           s.status = 'GAMEOVER';
+          this.audio?.stopTycoonBgm?.();
           this.audio?.playSuccess?.();
           this._stopTimerLoop();
           this.render();
@@ -92,6 +96,7 @@ class TycoonView {
       const tickRes = this.engine.tickPatience(1);
       if (tickRes.isGameOver || tickRes.expiredCount > 0) {
         if (tickRes.isGameOver) {
+          this.audio?.stopTycoonBgm?.();
           this._stopTimerLoop();
         }
         this.render();
@@ -193,6 +198,7 @@ class TycoonView {
 
   _renderTopHud(s) {
     const isPlaying = s.status === 'PLAYING';
+    const isBgmOn = this.audio ? (this.audio.isBgmEnabled && !this.audio.isMutedState()) : true;
     const statusRightHtml = s.mode === 'TIME_ATTACK'
       ? `<span class="hud-pill timer-pill" id="tycoon-live-timer">${this._formatSeconds(s.timeLeftSec)}</span>`
       : `<span class="hud-pill lives-pill">${'❤️'.repeat(Math.max(0, s.lives))}${'🖤'.repeat(Math.max(0, s.maxLives - s.lives))}</span>`;
@@ -207,6 +213,7 @@ class TycoonView {
           ${statusRightHtml}
         </div>
         <div class="hud-right">
+          <button type="button" class="hud-icon-btn ${isBgmOn ? 'bgm-on' : 'bgm-off'}" id="tycoon-toggle-bgm-btn" title="주막 배경음악 켜기/끄기">${isBgmOn ? '🎵' : '🔇'}</button>
           <button type="button" class="hud-icon-btn" id="tycoon-open-notebook-btn" title="단골 수첩">📖</button>
           <button type="button" class="hud-icon-btn" id="tycoon-open-rank-btn" title="Top 100 랭킹">🏆</button>
           ${isPlaying
@@ -648,12 +655,26 @@ class TycoonView {
         this.engine.startGame(mode);
         // 4개 테이블 모두 시작부터 손님 자동 착석 활성화
         this.engine.autoSeatAvailableTables();
+        this.audio?.startTycoonBgm?.(1);
         this._startTimerLoop();
         this.render();
       };
     });
 
-    // 2. 상단 HUD 아이콘 버튼
+    // 2. 상단 HUD 아이콘 버튼 (BGM 토글 포함)
+    const bgmBtn = container.querySelector('#tycoon-toggle-bgm-btn');
+    if (bgmBtn) {
+      bgmBtn.onclick = () => {
+        if (!this.audio) return;
+        const enabled = this.audio.toggleTycoonBgm();
+        if (enabled && this.engine.session.status === 'PLAYING') {
+          this.audio.startTycoonBgm(this.engine.session.wave || 1);
+        }
+        this.audio.playTap();
+        this.render();
+      };
+    }
+
     const nbBtn = container.querySelector('#tycoon-open-notebook-btn');
     if (nbBtn) {
       nbBtn.onclick = () => {
@@ -679,6 +700,7 @@ class TycoonView {
       lobbyBtn.onclick = () => {
         this.audio?.playTap?.();
         this._stopTimerLoop();
+        this.audio?.stopTycoonBgm?.();
         this.engine.session.status = 'LOBBY';
         this._syncGlobalTabBarVisibility(false);
         this.render();
@@ -858,6 +880,7 @@ class TycoonView {
         this._memoryHintRevealedForOrderId = {};
         this.engine.startGame(this.engine.session.mode);
         this.engine.autoSeatAvailableTables();
+        this.audio?.startTycoonBgm?.(1);
         this._startTimerLoop();
         this.render();
       };
@@ -868,6 +891,7 @@ class TycoonView {
       goLobbyBtn.onclick = () => {
         this.audio?.playTap?.();
         this._stopTimerLoop();
+        this.audio?.stopTycoonBgm?.();
         this.engine.session.status = 'LOBBY';
         this._syncGlobalTabBarVisibility(false);
         this.render();
@@ -898,11 +922,13 @@ class TycoonView {
 
     if (res.isCorrect) {
       this.engine.autoSeatAvailableTables();
+      this.audio?.setTycoonBgmWave?.(this.engine.session.wave || 1);
       this.app?.showToast?.(`💰 +${res.earned.toLocaleString()}원 (${this.engine.session.combo}🔥)`);
     } else {
       this.engine.autoSeatAvailableTables();
       this.app?.showToast?.(`💔 주문 불일치!`);
       if (res.isGameOver) {
+        this.audio?.stopTycoonBgm?.();
         this._stopTimerLoop();
       }
     }
