@@ -464,7 +464,8 @@ class TycoonCustomerPool {
       if (!rec && allRecipes.length > 0) {
         rec = allRecipes[idx % allRecipes.length];
       }
-      const rId = rec ? rec.recipe_id : (fallbackIds[0] || 5);
+      if (allRecipes.length > 0) this._rosterSynced = true;
+      const rId = rec ? rec.recipe_id : (arch.preferredRecipeId || fallbackIds[0] || 5);
       const items = this.recipeBook.getRecipeItems(rId);
       // preferredOmitIngId가 실제 해당 레시피 재료에 포함되어 있는지 확인, 없으면 마지막 재료로 자동 보정
       let omitIngId = arch.preferredOmitIngId;
@@ -481,10 +482,16 @@ class TycoonCustomerPool {
   }
 
   getAllCustomers() {
+    if (!this._rosterSynced && this.recipeBook && this.recipeBook.getAllRecipes().length > 0) {
+      this._initCustomerRoster();
+    }
     return this.customers;
   }
 
   getCustomerById(id) {
+    if (!this._rosterSynced && this.recipeBook && this.recipeBook.getAllRecipes().length > 0) {
+      this._initCustomerRoster();
+    }
     return this.customers.find(c => c.id === id) || this.customers[0];
   }
 
