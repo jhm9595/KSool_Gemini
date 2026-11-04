@@ -37,7 +37,10 @@ class TycoonEngine {
         icon: '🍋',
         name: '길거리 노점',
         subtitle: '미국 골목길 레모네이드 & 기초 음료 노점',
-        bgImage: './assets/tycoon/bg_stage_1.jpg',
+        bgImage: './assets/tycoon/bg_stage_1.jpg?v=2',
+        bellLeftPct: 66.8,
+        bellBottomPct: 16.4,
+        plateBottomPct: 15.5,
         unlockCost: 0,
         priceMultiplier: 1.0,
         maxRecipeStep: 1,
@@ -50,7 +53,10 @@ class TycoonEngine {
         icon: '⛺',
         name: '이모네 포장마차',
         subtitle: '정겨운 밤거리 주황 천막 포차',
-        bgImage: './assets/tycoon/bg_stage_2.jpg',
+        bgImage: './assets/tycoon/bg_stage_2.jpg?v=2',
+        bellLeftPct: 72.9,
+        bellBottomPct: 9.5,
+        plateBottomPct: 10.5,
         unlockCost: 300,
         priceMultiplier: 1.15,
         maxRecipeStep: 3,
@@ -63,7 +69,10 @@ class TycoonEngine {
         icon: '🏮',
         name: '동네 목조 주막',
         subtitle: '따뜻한 조명과 나무 향기가 가득한 전통 주막',
-        bgImage: './assets/tycoon/bg_stage_3.jpg',
+        bgImage: './assets/tycoon/bg_stage_3.jpg?v=2',
+        bellLeftPct: 72.9,
+        bellBottomPct: 9.5,
+        plateBottomPct: 10.5,
         unlockCost: 800,
         priceMultiplier: 1.30,
         maxRecipeStep: 4,
@@ -76,7 +85,10 @@ class TycoonEngine {
         icon: '🍺',
         name: '크래프트 비어 펍',
         subtitle: '네온사인과 브루어리 탱크가 빛나는 수제맥주 펍',
-        bgImage: './assets/tycoon/bg_stage_4.jpg',
+        bgImage: './assets/tycoon/bg_stage_4.jpg?v=2',
+        bellLeftPct: 72.9,
+        bellBottomPct: 9.5,
+        plateBottomPct: 10.5,
         unlockCost: 1800,
         priceMultiplier: 1.50,
         maxRecipeStep: 5,
@@ -89,7 +101,10 @@ class TycoonEngine {
         icon: '🥂',
         name: '스카이라인 라운지 바',
         subtitle: '도심 야경이 내려다보이는 럭셔리 호텔 라운지',
-        bgImage: './assets/tycoon/bg_stage_5.jpg',
+        bgImage: './assets/tycoon/bg_stage_5.jpg?v=2',
+        bellLeftPct: 68.2,
+        bellBottomPct: 10.5,
+        plateBottomPct: 11.0,
         unlockCost: 3500,
         priceMultiplier: 1.75,
         maxRecipeStep: 6,
@@ -102,7 +117,10 @@ class TycoonEngine {
         icon: '🚀',
         name: '사이버펑크 미래도시 바',
         subtitle: '홀로그램 메뉴와 비행선이 오가는 미래도시 주막',
-        bgImage: './assets/tycoon/bg_stage_6.jpg',
+        bgImage: './assets/tycoon/bg_stage_6.jpg?v=2',
+        bellLeftPct: 68.2,
+        bellBottomPct: 10.5,
+        plateBottomPct: 11.0,
         unlockCost: 6500,
         priceMultiplier: 2.10,
         maxRecipeStep: 7,
@@ -246,14 +264,8 @@ class TycoonEngine {
   /**
    * 일반 주조실(탭 1)에서 조합을 완성했을 때도 타이쿤 재고에 +1개씩 쌓이도록 연동!
    */
-  addCraftedFromMainBrewery(recipeId) {
-    const key = this.buildStockKey(recipeId);
-    this.savedBrewStash[key] = Math.min(99, (this.savedBrewStash[key] || 0) + 1);
-    if (this.session && this.session.stockMap) {
-      const cur = this.session.stockMap.get(key) || 0;
-      this.session.stockMap.set(key, cur + 1);
-    }
-    this.savePersistentData();
+  addCraftedFromMainBrewery() {
+    // 무한모드 및 타임어택은 항상 초기 재고 0개에서 시작합니다.
   }
 
   buildStockKey(recipeId) {
@@ -340,19 +352,7 @@ class TycoonEngine {
    */
   resetSession(mode = 'INFINITE') {
     const stockMap = new Map();
-
-    for (const [k, cnt] of Object.entries(this.savedBrewStash)) {
-      const cleanKey = k.split('_omit_')[0];
-      if (cnt > 0 && cleanKey.startsWith('rec_')) {
-        stockMap.set(cleanKey, (stockMap.get(cleanKey) || 0) + cnt);
-      }
-    }
-
-    if (stockMap.size === 0) {
-      stockMap.set('rec_5', 1);  // 소주 1개
-      stockMap.set('rec_4', 1);  // 맥주 1개
-      stockMap.set('rec_11', 1); // 얼음 1개
-    }
+    this.savedBrewStash = {};
 
     this.session = {
       mode, // 'TIME_ATTACK' | 'INFINITE'
