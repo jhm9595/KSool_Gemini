@@ -48,8 +48,8 @@ class TycoonEngine {
         unlockCost: 0,
         priceMultiplier: 1.0,
         maxRecipeStep: 1,
-        extraRecipeIds: [14, 15, 58, 34, 35, 36, 37, 53, 59, 65, 3, 23, 32, 66, 16, 20],
-        menuSummary: '레몬에이드·사이다·우유·아메리카노·소맥 등 초보 조합 (22종)'
+        extraRecipeIds: [14, 15, 58, 34, 35, 53, 59, 65, 16, 20],
+        menuSummary: '레몬에이드·사이다·우유·아메리카노·소맥 등 초보 주류·음료 (15종)'
       },
       {
         id: 'stage_2',
@@ -69,7 +69,7 @@ class TycoonEngine {
         priceMultiplier: 1.15,
         maxRecipeStep: 3,
         extraRecipeIds: [],
-        menuSummary: '밀키스주·레몬소주·링겔주·아이스바 칵테일 해금 (35종)'
+        menuSummary: '밀키스주·레몬소주·링겔주·아이스바 칵테일 해금 (24종)'
       },
       {
         id: 'stage_3',
@@ -89,7 +89,7 @@ class TycoonEngine {
         priceMultiplier: 1.30,
         maxRecipeStep: 4,
         extraRecipeIds: [],
-        menuSummary: '막걸리·과일막걸리·복분자주·태극주·초코주 해금 (54종)'
+        menuSummary: '막걸리·과일막걸리·복분자주·태극주·초코주 해금 (40종)'
       },
       {
         id: 'stage_4',
@@ -109,7 +109,7 @@ class TycoonEngine {
         priceMultiplier: 1.50,
         maxRecipeStep: 5,
         extraRecipeIds: [],
-        menuSummary: '더치 라거·막사·복소사·에너자이저주·홍차주 해금 (62종)'
+        menuSummary: '더치 라거·막사·복소사·에너자이저주·홍차주 해금 (48종)'
       },
       {
         id: 'stage_5',
@@ -129,7 +129,7 @@ class TycoonEngine {
         priceMultiplier: 1.75,
         maxRecipeStep: 6,
         extraRecipeIds: [],
-        menuSummary: '소토닉·고진감래주·만능열쇠 홍차주 등 고급 연쇄 칵테일 해금 (68종)'
+        menuSummary: '소토닉·고진감래주·만능열쇠 홍차주 등 고급 연쇄 칵테일 해금 (54종)'
       },
       {
         id: 'stage_6',
@@ -149,7 +149,7 @@ class TycoonEngine {
         priceMultiplier: 2.10,
         maxRecipeStep: 7,
         extraRecipeIds: [],
-        menuSummary: '황금비율 명주 & 전국 특산주 포함 도감 100% 전 메뉴 해금 (80종)'
+        menuSummary: '주류·음료·최종조합 전 메뉴 100% 해금 (69종)'
       }
     ];
 
@@ -221,11 +221,26 @@ class TycoonEngine {
     return this.MAP_STAGES.find(m => m.id === this.selectedMapStageId) || this.MAP_STAGES[0];
   }
 
+  /**
+   * 손님이 주문 가능한 품목인지 판별합니다.
+   * - 기준: [주류(ALCOHOL)], [음료(DRINK)], [최종조합(!unlocks_ingredient_id)] 3가지에 해당하는 레시피만 주문 가능
+   * - 얼음(NATURE), 청/농축액/누룩/식초(ETC), 원두/미숫가루(GRAIN), 아이스크림/초콜릿/단팥죽(DESSERT) 등
+   *   중간 부재료는 조합은 가능하되 손님이 직접 주문하지 않습니다.
+   */
+  isOrderableRecipe(rec) {
+    if (!rec) return false;
+    if (!rec.unlocks_ingredient_id) return true;
+    const unlockedIng = this.recipeBook?.getBaseIngredient?.(rec.unlocks_ingredient_id);
+    if (!unlockedIng) return false;
+    return unlockedIng.category_id === 'ALCOHOL' || unlockedIng.category_id === 'DRINK';
+  }
+
   getStageAllowedRecipes(stageId = this.selectedMapStageId) {
     const stage = this.MAP_STAGES.find(m => m.id === stageId) || this.MAP_STAGES[0];
     const allRecipes = this.recipeBook ? this.recipeBook.getAllRecipes() : [];
     const extraSet = new Set(stage.extraRecipeIds || []);
     return allRecipes.filter(r => {
+      if (!this.isOrderableRecipe(r)) return false;
       const step = Number(r.step_id) || 1;
       return step <= stage.maxRecipeStep || extraSet.has(Number(r.recipe_id));
     });
@@ -536,8 +551,12 @@ class TycoonEngine {
   }
 
   _createOrderForCustomer(customer, recipeId, orderType, wave) {
-    const rId = Number(recipeId) || Number(customer.preferredRecipeId) || 5;
-    const rec = this.recipeBook.getRecipe(rId);
+    let rId = Number(recipeId) || Number(customer.preferredRecipeId) || 5;
+    let rec = this.recipeBook.getRecipe(rId);
+    if (!this.isOrderableRecipe(rec)) {
+      rId = 5;
+      rec = this.recipeBook.getRecipe(5);
+    }
     const recipeName = rec ? this.brandResolver.resolveName(rec) : '소주';
     const requiredStockKey = this.buildStockKey(rId);
     const price = this.calculateOrderPrice(rId, orderType, this.session.combo, wave);

@@ -411,16 +411,24 @@ class TycoonCustomerPool {
         beard: 'LONG_GRAY',
         outfit: 'APRON_BROWN',
         accent: '#9333ea',
-        preferredRecipeId: 36, // 유자청 (Stage 1)
-        greeting: '할멈이랑 두건·안경은 같아도 난 긴 회색 수염이 있다네! 향긋한 유자청 한 잔 주게!'
+        preferredRecipeId: 60, // 비락식혜 (음료)
+        greeting: '할멈이랑 두건·안경은 같아도 난 긴 회색 수염이 있다네! 달콤시원한 식혜 한 잔 주게!'
       }
     ];
 
-    const allRecipes = this.recipeBook.getAllRecipes();
+    const isOrderable = (r) => {
+      if (!r) return false;
+      if (!r.unlocks_ingredient_id) return true;
+      const ing = this.recipeBook?.getBaseIngredient?.(r.unlocks_ingredient_id);
+      return Boolean(ing && (ing.category_id === 'ALCOHOL' || ing.category_id === 'DRINK'));
+    };
+
+    const allRecipes = this.recipeBook.getAllRecipes().filter(isOrderable);
     const fallbackIds = allRecipes.map(r => r.recipe_id);
 
     this.customers = archetypes.map((arch, idx) => {
       let rec = this.recipeBook.getRecipe(arch.preferredRecipeId);
+      if (rec && !isOrderable(rec)) rec = null;
       if (!rec && allRecipes.length > 0) {
         rec = allRecipes[idx % allRecipes.length];
       }
