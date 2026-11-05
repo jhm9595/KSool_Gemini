@@ -163,7 +163,6 @@ class TycoonView {
     if (!s || s.status !== 'PLAYING' || !s.activeOrder) return;
 
     const fillEl = document.querySelector('[data-counter-gauge-fill="1"]');
-    const secEl = document.querySelector('[data-counter-gauge-sec="1"]');
     const bubbleEl = document.querySelector('.counter-order-bubble');
     if (!fillEl) return;
 
@@ -175,9 +174,6 @@ class TycoonView {
     fillEl.classList.toggle('warn', pct <= 55 && pct > 30);
     fillEl.classList.toggle('danger', pct <= 30);
 
-    if (secEl) {
-      secEl.textContent = `${Math.ceil(curP)}s`;
-    }
     if (bubbleEl) {
       bubbleEl.classList.toggle('urgent-bubble', pct <= 30);
     }
@@ -330,25 +326,16 @@ class TycoonView {
             </div>
           </div>
 
-          <!-- 붕어빵 타이쿤 스타일 주문 말풍선 (손님 오른쪽 위 배치로 캐릭터 중앙 정렬 유지) -->
+          <!-- 붕어빵 타이쿤 스타일 주문 말풍선 (아이콘 + 주류/음료명 + 대기시간 게이지만 간결하게 표시) -->
           <div class="counter-order-bubble ${pct <= 30 ? 'urgent-bubble' : ''}"
                id="tycoon-order-bubble"
-               style="bottom:calc(${barTopBottomPct}% + 42px);"
+               style="bottom:calc(${barTopBottomPct}% + 44px);"
                title="터치하면 가마솥에 레시피 재료가 자동 세팅됩니다!">
             <div class="bubble-top-row">
               <div class="bubble-drink-icon">
                 ${drinkIconHtml}
               </div>
-              <div class="bubble-drink-meta">
-                <div class="bubble-qty-row">
-                  <span class="bubble-drink-name">${drinkShortName}</span>
-                  <span class="bubble-qty-badge">x1</span>
-                </div>
-                <div class="bubble-price-row">
-                  <span class="bubble-price-tag">💰 ${ord.price.toLocaleString()}원</span>
-                  <span class="bubble-sec-tag" data-counter-gauge-sec="1">${Math.ceil(curP)}s</span>
-                </div>
-              </div>
+              <span class="bubble-drink-name">${drinkShortName}</span>
             </div>
             <div class="bubble-patience-track">
               <div class="bubble-patience-fill ${gaugeStateCls}" data-counter-gauge-fill="1" style="width:${pct}%;"></div>
@@ -774,6 +761,7 @@ class TycoonView {
         bodyHtml = allowedRecipes.map(rec => {
           const recName = this.brandResolver.resolveName(rec);
           const recIcon = window.KSool?.pixelIcon ? window.KSool.pixelIcon(rec, 24) : (rec.emoji || '🍶');
+          const menuPrice = this.engine.calculateOrderPrice(rec.recipe_id, 'NORMAL', 0, 1);
           const items = this.recipeBook.getRecipeItems(rec.recipe_id) || [];
           const formulaStr = items.map(it => {
             const det = it.detail_ingredient_id ? this.recipeBook.getDetailIngredient(it.detail_ingredient_id) : null;
@@ -785,10 +773,10 @@ class TycoonView {
           return `
             <div class="notebook-cust-card">
               <div class="nb-avatar">${recIcon}</div>
-              <div class="nb-info" style="flex-direction:column; align-items:flex-start; gap:2px;">
-                <div class="nb-top" style="width:100%; justify-content:space-between;">
+              <div class="nb-info" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                <div class="nb-top" style="width:100%; justify-content:space-between; align-items:center;">
                   <span class="nb-name">${recName}</span>
-                  <span class="nb-group">Step ${rec.step_id || 1}</span>
+                  <span class="nb-price-badge">💰 ${menuPrice.toLocaleString()}원</span>
                 </div>
                 <div style="font-size:0.64rem; color:#cbd5e1;">레시피: <b style="color:#fde047;">${formulaStr}</b></div>
               </div>
@@ -802,6 +790,7 @@ class TycoonView {
           const rec = this.recipeBook.getRecipe(sessionRecId);
           const recName = rec ? this.brandResolver.resolveName(rec) : '비전주';
           const recIcon = rec && window.KSool?.pixelIcon ? window.KSool.pixelIcon(rec, 22) : (rec?.emoji || '🍶');
+          const favPrice = rec ? this.engine.calculateOrderPrice(rec.recipe_id, 'NORMAL', 0, 1) : 15;
           const avatar = this.engine.customerPool.renderCustomerAvatarSvg(c, 42);
 
           return `
@@ -810,7 +799,7 @@ class TycoonView {
               <div class="nb-info">
                 <div class="nb-top">
                   <span class="nb-name">${c.name}</span>
-                  <span class="nb-group">${c.group}</span>
+                  <span class="nb-price-badge">💰 ${favPrice.toLocaleString()}원</span>
                 </div>
                 <div class="nb-fav">${recIcon} <b>${recName}</b></div>
               </div>

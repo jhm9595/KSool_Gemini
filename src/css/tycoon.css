@@ -284,25 +284,25 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   to { transform: translateX(1.5px) rotate(1deg); }
 }
 
-/* 붕어빵 타이쿤 스타일 주문 말풍선 (손님 오른쪽 어깨 위 배치로 캐릭터는 항상 접시 정중앙 유지) */
+/* 붕어빵 타이쿤 스타일 주문 말풍선 (아이콘 + 주류/음료명 + 대기시간 게이지만 담는 컴팩트 말풍선) */
 .counter-order-bubble {
   position: absolute;
   left: calc(50% + 36px);
-  right: 6px;
   bottom: 34%;
+  width: fit-content;
+  min-width: 96px;
+  max-width: 154px;
   pointer-events: auto;
   background: rgba(255, 255, 255, 0.96);
   color: #0f172a;
   border: 2.5px solid #1e293b;
-  border-radius: 15px;
-  padding: 6px 9px 5px;
-  min-width: 128px;
-  max-width: 176px;
+  border-radius: 14px;
+  padding: 6px 9px 6px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55);
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   animation: bubblePopIn 0.22s ease-out;
 }
 
@@ -377,21 +377,6 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   justify-content: center;
 }
 
-.bubble-drink-meta {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.bubble-qty-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-}
-
 .bubble-drink-name {
   font-size: 0.78rem;
   font-weight: 900;
@@ -399,35 +384,7 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.bubble-qty-badge {
-  background: #0f172a;
-  color: #fde047;
-  font-size: 0.68rem;
-  font-weight: 900;
-  padding: 1px 6px;
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-
-.bubble-price-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-}
-
-.bubble-price-tag {
-  font-size: 0.66rem;
-  font-weight: 900;
-  color: #b45309;
-}
-
-.bubble-sec-tag {
-  font-size: 0.62rem;
-  font-weight: 800;
-  color: #475569;
+  line-height: 1.2;
 }
 
 .bubble-patience-track {
@@ -1414,6 +1371,16 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
 .nb-top { display: flex; align-items: center; gap: 5px; }
 .nb-name { font-weight: 900; color: #f8fafc; }
 .nb-group { font-size: 0.62rem; color: #94a3b8; }
+.nb-price-badge {
+  font-size: 0.66rem;
+  font-weight: 900;
+  color: #fde047;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  border-radius: 999px;
+  padding: 1px 7px;
+  flex-shrink: 0;
+}
 .nb-fav { display: inline-flex; align-items: center; gap: 4px; color: #fde047; }
 
 /* 게임 오버 */
