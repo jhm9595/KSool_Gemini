@@ -1594,10 +1594,53 @@ class KSoolApp {
       };
     }
   }
+
+  /**
+   * iOS WKWebView / Android WebView / 앱인토스(Toss WebView) 및 모바일 브라우저 전역에서
+   * 더블탭·더블클릭 확대, 핀치 줌, 롱프레스 메뉴, 텍스트 선택·복사·오려두기·드래그를 원천 차단합니다.
+   */
+  _installGlobalWebViewGuards() {
+    if (this._webViewGuardsInstalled) return;
+    this._webViewGuardsInstalled = true;
+
+    // 1. 더블클릭 / 더블탭 확대 방지
+    document.addEventListener('dblclick', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    // 2. iOS WKWebView / Safari 핀치·제스처 확대 방지
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach((evtName) => {
+      document.addEventListener(evtName, (e) => {
+        e.preventDefault();
+      }, { passive: false });
+    });
+
+    // 3. 멀티터치(2손가락 이상) 핀치 줌 방지
+    document.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches.length > 1) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    // 4. PC/트랙패드 Ctrl + 휠 확대 방지
+    document.addEventListener('wheel', (e) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    // 5. 롱프레스 컨텍스트 메뉴(우클릭/길게 누르기 팝업), 복사(copy), 오려두기(cut), 선택(selectstart), 이미지 드래그(dragstart) 전면 차단
+    ['contextmenu', 'copy', 'cut', 'selectstart', 'dragstart'].forEach((evtName) => {
+      document.addEventListener(evtName, (e) => {
+        e.preventDefault();
+      }, { passive: false });
+    });
+  }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
   const app = new KSoolApp();
+  app._installGlobalWebViewGuards();
   window.ksoolApp = app;
   window.app = app;
   app.init();
