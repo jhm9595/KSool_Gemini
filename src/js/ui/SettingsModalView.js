@@ -14,14 +14,29 @@
       this.contentId = contentId;
       this.app = app;
       this.isOpen = false;
+      this._lastActiveElement = null;
+      this._boundKeyHandler = this._handleKeyDown.bind(this);
     }
 
     open() {
       const modal = document.getElementById(this.modalId);
       if (!modal) return;
+      this._lastActiveElement = document.activeElement;
       this.isOpen = true;
       modal.classList.add('active');
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
       this.render();
+
+      window.addEventListener('keydown', this._boundKeyHandler);
+
+      // 모달 내부의 첫 번째 포커스 가능한 요소로 이동
+      requestAnimationFrame(() => {
+        const focusable = this._getFocusableElements();
+        if (focusable.length > 0) {
+          focusable[0].focus();
+        }
+      });
     }
 
     close() {
@@ -29,6 +44,64 @@
       if (!modal) return;
       this.isOpen = false;
       modal.classList.remove('active');
+      window.removeEventListener('keydown', this._boundKeyHandler);
+
+      // 모달 열기 전 포커스되어 있던 위치로 복귀
+      if (this._lastActiveElement && typeof this._lastActiveElement.focus === 'function') {
+        try {
+          this._lastActiveElement.focus();
+        } catch (_) {}
+      }
+      this._lastActiveElement = null;
+    }
+
+    _getFocusableElements() {
+      const modal = document.getElementById(this.modalId);
+      if (!modal) return [];
+      const selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      return Array.from(modal.querySelectorAll(selector)).filter(el => {
+        return el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement;
+      });
+    }
+
+    _handleKeyDown(e) {
+      if (!this.isOpen) return;
+
+      // 1. ESC 누르면 모달 닫기
+      if (e.key === 'Escape' || e.keyCode === 27) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.app?.audio?.playTap?.();
+        this.close();
+        return;
+      }
+
+      // 2. Tab 누를 때 모달 내부에서만 포커스 순환 (Focus Trap)
+      if (e.key === 'Tab' || e.keyCode === 9) {
+        const focusables = this._getFocusableElements();
+        if (focusables.length === 0) {
+          e.preventDefault();
+          return;
+        }
+
+        const firstEl = focusables[0];
+        const lastEl = focusables[focusables.length - 1];
+        const activeEl = document.activeElement;
+
+        if (e.shiftKey) {
+          // Shift + Tab: 첫 요소에서 역방향으로 나가려 할 때 마지막 요소로 순환
+          if (activeEl === firstEl || !focusables.includes(activeEl)) {
+            e.preventDefault();
+            lastEl.focus();
+          }
+        } else {
+          // Tab: 마지막 요소에서 나가려 할 때 첫 요소로 순환
+          if (activeEl === lastEl || !focusables.includes(activeEl)) {
+            e.preventDefault();
+            firstEl.focus();
+          }
+        }
+      }
     }
 
     _getSoundIcon(isMuted, volPercent) {

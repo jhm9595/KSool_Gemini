@@ -173,6 +173,41 @@ class KSoolApp {
     // 초기 로딩/새로고침 시에는 해금 탭 상태만 동기화하고, 팝업 큐는 실행하지 않습니다.
     // (안내 모달 팝업은 새로고침이 아니라 실제 플레이 진행 중에만 발생해야 함)
     this._checkProgressiveTabUnlocks(false);
+
+    // URL 해시(#party/updown, #tycoon 등) 딥링크 처리
+    this._handleHashRouting();
+    window.addEventListener('hashchange', () => this._handleHashRouting());
+  }
+
+  /**
+   * URL 해시 라우팅 지원 (예: #party/updown, #party, #tycoon, #collection 등)
+   */
+  _handleHashRouting() {
+    const hash = window.location.hash || '';
+    if (!hash || hash === '#' || hash === '#/') return;
+
+    if (hash.startsWith('#party')) {
+      const parts = hash.split('/');
+      const gameKey = parts[1];
+      this.switchTab('party');
+      if (gameKey && this.partyGameHubView && this.partyGameHubView.games?.[gameKey]) {
+        // 이미 해당 게임이 실행 중이 아니라면 실행
+        if (this.partyGameHubView.activeGameKey !== gameKey || this.partyGameHubView.mode !== 'game') {
+          this.partyGameHubView.playGame(gameKey);
+        }
+      }
+    } else if (hash.startsWith('#tycoon')) {
+      this.switchTab('tycoon');
+    } else if (hash.startsWith('#collection')) {
+      this.switchTab('collection');
+    } else if (hash.startsWith('#suggestions')) {
+      this.switchTab('suggestions');
+    } else if (hash.startsWith('#fridge')) {
+      this.switchTab('party');
+      this.partyGameHubView?.playGame?.('fridge');
+    } else if (hash.startsWith('#brew')) {
+      this.switchTab('brew');
+    }
   }
 
   /**
