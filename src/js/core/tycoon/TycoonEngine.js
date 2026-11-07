@@ -523,6 +523,16 @@ class TycoonEngine {
     const stage = this.getCurrentMapStage();
     const stageCeiling = stage ? stage.maxRecipeStep : 1;
 
+    // 단골주문(MEMORY)은 오직 무한모드('INFINITE')에서만 발생하도록 제한
+    const isInfiniteMode = Boolean(this.session && this.session.mode === 'INFINITE');
+    if (!isInfiniteMode) {
+      return {
+        wave,
+        maxRecipeStep: stageCeiling,
+        probMemory: 0.0
+      };
+    }
+
     if (wave === 1) {
       return {
         wave: 1,
@@ -581,8 +591,9 @@ class TycoonEngine {
     let chosenRecipeId = null;
     let orderType = 'NORMAL';
 
+    const isInfiniteMode = Boolean(this.session && this.session.mode === 'INFINITE');
     const roll = Math.random();
-    if (visitedCandidates.length > 0 && roll < profile.probMemory) {
+    if (isInfiniteMode && visitedCandidates.length > 0 && roll < profile.probMemory) {
       chosenCustomer = visitedCandidates[Math.floor(Math.random() * visitedCandidates.length)];
       chosenRecipeId = this.session.customerSessionRecipeMap.get(chosenCustomer.id);
       orderType = 'MEMORY';
