@@ -290,31 +290,12 @@
       const resetAllBtn = container.querySelector('#settings-reset-all-btn');
       if (resetAllBtn) {
         resetAllBtn.onclick = () => {
-          if (confirm('정말로 모든 해금 기록을 초기 상태로 리셋하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.')) {
+          if (confirm('정말로 모든 해금 기록과 점포 자금을 초기 상태로 리셋하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.')) {
             if (app) {
-              app.storage?.clearState();
-              app.craftingPot?.clear();
-              app.inventory.unlockAllSandboxMode = false;
-              app.inventory.userLevel = 1;
-              app.inventory.craftFailCount = 0;
-              app.inventory.shownTabIntros = { collection: false, fridge: false, suggestions: false, detailPicker: false };
-              app.pendingTabIntroQueue = [];
-              app.inventory.unlockedImageRecipeIds.clear();
-              app.inventory.unlockedDescRecipeIds?.clear();
-              app.inventory.hintProgressByRecipe = {};
-              app.inventory.promotedCustomRecipes = [];
-              app.inventory.init();
-              app.inventory.save();
-              const nextQuiz = app.inventory.getNextQuizRecipe();
-              app.quizTargetRecipeId = nextQuiz ? nextQuiz.recipe_id : 5;
-              app.quizHintRevealed = false;
-              app.brewMode = 'QUIZ';
-              app.fridgeEngine?.clearAll();
-              app.selectedIngCategory = 'NATURE';
-              app.audio?.playTap();
               this.close();
-              app.renderAll();
-              alert('모든 진행도가 처음 상태로 초기화되었습니다.');
+              if (typeof app.resetAllGameProgress === 'function') {
+                app.resetAllGameProgress();
+              }
             }
           }
         };

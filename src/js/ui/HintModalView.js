@@ -744,13 +744,13 @@ class HintModalView {
       const allSolvedBannerHtml = isAllRatiosSolved ? `
         <div class="bb-all-solved-card animate-pop">
           <div class="bb-all-solved-title">🎉 모든 재료의 황금비율 완성!</div>
-          <div class="bb-all-solved-desc">모든 재료와 비율을 완벽히 알아냈습니다. 아래 버튼을 눌러 주조실에 자동 세팅해보세요!</div>
+          <div class="bb-all-solved-desc">모든 재료와 비율을 완벽히 알아냈습니다. 아래 버튼을 눌러 연구실에 자동 세팅해보세요!</div>
         </div>
       ` : '';
 
       const goToBrewBtnHtml = isAllRatiosSolved ? `
         <button class="mix-btn bb-go-brew-btn" id="bb-go-brew-btn">
-          ⚗️ 주조실로 가기 (자동 세팅)
+          🔬 연구실로 가기 (자동 세팅)
         </button>
       ` : '';
 
