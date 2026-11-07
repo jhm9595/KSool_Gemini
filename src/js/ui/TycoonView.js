@@ -723,7 +723,7 @@ class TycoonView {
                 <div class="mode-name">무한모드 서바이벌</div>
                 <div class="mode-tag">
                   ${isInfiniteUnlocked
-                    ? `목숨 ❤️❤️❤️ · 최고 ${bestInf.servedCount}명`
+                    ? `목숨 ❤️❤️❤️ · 단골 주문 등장 · 최고 ${bestInf.servedCount}명`
                     : `전 레시피 해금 시 오픈 (${totalUnlockedRecipes}/${totalRecipesCount})`
                   }
                 </div>
