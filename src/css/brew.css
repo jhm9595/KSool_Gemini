@@ -647,15 +647,22 @@
 }
 
 .cat-chip {
-  padding: 6px 11px;
+  min-height: 40px;
+  padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid #334155;
   background: #1e293b;
   color: #cbd5e1;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  touch-action: manipulation;
+  transition: all 0.15s ease;
 }
 
 .cat-chip.active {
