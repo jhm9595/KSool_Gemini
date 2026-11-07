@@ -1473,3 +1473,511 @@ body.tycoon-playing-fullscreen > #app-container > nav.tab-bar {
   font-weight: 800;
   cursor: pointer;
 }
+
+/* =========================================================================
+   6. 점포 마스터 현황 박스 · 재료 상점 모달 · 해금 조건 배지
+   ========================================================================= */
+.hud-pill.growth-pill {
+  background: rgba(16, 185, 129, 0.22);
+  border: 1px solid #34d399;
+  color: #6ee7b7;
+  font-weight: 900;
+}
+
+.hero-top-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.hero-story-replay-btn {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid #38bdf8;
+  color: #7dd3fc;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.stage-mastery-box {
+  width: 100%;
+  margin-top: 4px;
+  background: rgba(9, 13, 22, 0.86);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.mastery-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  font-size: 0.66rem;
+  color: #cbd5e1;
+}
+
+.mastery-stat-row .m-label {
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.mastery-stat-row .m-val {
+  color: #fde047;
+  font-weight: 900;
+}
+
+.mastery-stat-row .m-val.is-clear {
+  color: #34d399;
+}
+
+.mastery-stat-row .m-divider {
+  opacity: 0.35;
+}
+
+.mastery-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.lobby-prep-btn {
+  padding: 7px 6px;
+  border-radius: 8px;
+  font-size: 0.68rem;
+  font-weight: 900;
+  cursor: pointer;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lobby-prep-btn.prep-lab-btn {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: #ffffff;
+  border-color: #38bdf8;
+}
+
+.lobby-prep-btn.prep-shop-btn {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  color: #090d16;
+  border-color: #fde047;
+}
+
+.tycoon-mode-card.mode-growth-card {
+  border-color: rgba(16, 185, 129, 0.65);
+  background: linear-gradient(145deg, rgba(6, 78, 59, 0.32), rgba(15, 23, 42, 0.94));
+}
+
+.tycoon-mode-card.needs-research-pulse {
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+}
+
+.tycoon-mode-card.is-locked-mode {
+  opacity: 0.72;
+  border-color: #334155;
+}
+
+.tycoon-start-btn.start-growth {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  color: #052e16;
+}
+
+.tycoon-mode-card.is-locked-mode .tycoon-start-btn {
+  background: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #475569;
+}
+
+.stage-unlock-reqs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.req-pill {
+  font-size: 0.56rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid #334155;
+  color: #94a3b8;
+}
+
+.req-pill.done {
+  border-color: rgba(52, 211, 153, 0.5);
+  color: #6ee7b7;
+  background: rgba(6, 78, 59, 0.35);
+}
+
+.req-pill.active-prog {
+  border-color: rgba(251, 191, 36, 0.45);
+  color: #fde047;
+}
+
+/* 상점 서브모달 */
+.shop-modal-card {
+  border-color: #f59e0b;
+}
+
+.shop-wallet-bar {
+  background: rgba(9, 13, 22, 0.9);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 6px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.72rem;
+  color: #f8fafc;
+}
+
+.shop-wallet-bar b {
+  color: #fde047;
+}
+
+.shop-wallet-bar small {
+  font-size: 0.6rem;
+  color: #94a3b8;
+}
+
+.shop-free-starter-notice {
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: #a7f3d0;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.64rem;
+  margin-bottom: 4px;
+}
+
+.shop-stage-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.shop-stage-title {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #38bdf8;
+  padding: 2px 4px;
+}
+
+.shop-stage-items {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.shop-ing-row {
+  background: rgba(9, 13, 22, 0.85);
+  border: 1px solid #334155;
+  border-radius: 9px;
+  padding: 7px 9px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shop-ing-row.is-owned {
+  border-color: rgba(52, 211, 153, 0.35);
+  opacity: 0.82;
+}
+
+.shop-ing-icon {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.shop-ing-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.shop-ing-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.shop-ing-name {
+  font-size: 0.74rem;
+  font-weight: 900;
+  color: #f8fafc;
+}
+
+.shop-ing-price {
+  font-size: 0.66rem;
+  font-weight: 900;
+  color: #fde047;
+}
+
+.shop-ing-hint {
+  font-size: 0.62rem;
+  color: #94a3b8;
+}
+
+.shop-owned-badge {
+  font-size: 0.64rem;
+  font-weight: 900;
+  color: #34d399;
+  padding: 4px 8px;
+}
+
+.shop-buy-btn {
+  padding: 6px 11px;
+  border-radius: 7px;
+  border: none;
+  font-size: 0.68rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.shop-buy-btn.can-afford {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #090d16;
+}
+
+.shop-buy-btn.no-funds {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #64748b;
+}
+
+.notebook-cust-card.is-locked-menu {
+  opacity: 0.65;
+  border-style: dashed;
+}
+
+/* =========================================================================
+   7. 애니메이션 컷신 스토리 & 가이드 튜토리얼 플레이어 (#story-tutorial-modal)
+   ========================================================================= */
+.story-cutscene-overlay {
+  z-index: 9500 !important;
+  background: rgba(2, 6, 23, 0.94) !important;
+  backdrop-filter: blur(10px);
+  padding: 12px;
+}
+
+.story-cutscene-modal-card {
+  width: 100%;
+  max-width: 460px;
+  background: #070b14;
+  border: 2px solid rgba(251, 191, 36, 0.65);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.85), 0 0 28px rgba(245, 158, 11, 0.25);
+}
+
+.cutscene-player-stage {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.cutscene-player-stage.is-tutorial-mode {
+  border-color: rgba(56, 189, 248, 0.65);
+}
+
+.cutscene-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #090e1a;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.cutscene-step-pill {
+  font-size: 0.66rem;
+  font-weight: 900;
+  padding: 3px 9px;
+  border-radius: 999px;
+  letter-spacing: 0.4px;
+}
+
+.cutscene-step-pill.story-pill {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid #f59e0b;
+  color: #fde047;
+}
+
+.cutscene-step-pill.tutorial-pill {
+  background: rgba(56, 189, 248, 0.2);
+  border: 1px solid #38bdf8;
+  color: #7dd3fc;
+}
+
+.cutscene-dots-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cutscene-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #334155;
+  transition: all 0.2s ease;
+}
+
+.cutscene-dot.done {
+  background: #64748b;
+}
+
+.cutscene-dot.active {
+  width: 18px;
+  background: #fbbf24;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.7);
+}
+
+.cutscene-skip-btn {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid #475569;
+  color: #cbd5e1;
+  font-size: 0.64rem;
+  font-weight: 800;
+  padding: 4px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cutscene-artwork-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #020617;
+  overflow: hidden;
+}
+
+.cutscene-artwork-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  animation: cutsceneSlowZoom 6s ease-out forwards;
+}
+
+@keyframes cutsceneSlowZoom {
+  0% { transform: scale(1.04); filter: brightness(0.9); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+.cutscene-vignette-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(7,11,20,0.12) 0%, rgba(7,11,20,0) 55%, rgba(7,11,20,0.85) 100%);
+  pointer-events: none;
+}
+
+.cutscene-subtitle-box {
+  background: linear-gradient(180deg, #0b1120 0%, #070b14 100%);
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid rgba(251, 191, 36, 0.25);
+}
+
+.cutscene-speaker-tag {
+  align-self: flex-start;
+  font-size: 0.64rem;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+
+.cutscene-speaker-tag.tag-monologue {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fde047;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
+.cutscene-speaker-tag.tag-guide {
+  background: rgba(56, 189, 248, 0.22);
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+}
+
+.cutscene-dialogue-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 54px;
+}
+
+.cutscene-line-primary {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 900;
+  color: #fef3c7;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.cutscene-line-secondary {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+.cutscene-Prompt-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(148, 163, 184, 0.2);
+}
+
+.cutscene-prev-mini {
+  background: transparent;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  font-size: 0.66rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cutscene-tap-prompt {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #fbbf24;
+  animation: cutsceneBlinkPrompt 1.2s ease-in-out infinite;
+}
+
+@keyframes cutsceneBlinkPrompt {
+  0%, 100% { opacity: 1; transform: translateX(0); }
+  50% { opacity: 0.45; transform: translateX(3px); }
+}
